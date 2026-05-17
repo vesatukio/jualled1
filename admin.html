@@ -45,7 +45,6 @@
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         
-        /* Session & Admin Info */
         .admin-badge {
             background: #e2e8f0;
             padding: 6px 12px;
@@ -55,6 +54,27 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* Ringkasan Jumlah Produk */
+        .summary-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            flex: 1;
+            font-size: 14px;
+        }
+        .stat-card span {
+            display: block;
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--primary);
         }
         
         /* Form Styling */
@@ -75,6 +95,7 @@
         .form-group {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         .form-group label {
             font-size: 14px;
@@ -86,6 +107,8 @@
             border: 1px solid #cbd5e1;
             border-radius: 4px;
             font-size: 14px;
+            height: 38px;
+            box-sizing: border-box;
         }
         
         /* Table Styling */
@@ -128,6 +151,17 @@
         </div>
     </header>
 
+    <div class="summary-box">
+        <div class="stat-card">
+            Total Jenis Produk
+            <span id="statTotalJenis">0</span>
+        </div>
+        <div class="stat-card">
+            Total Stok Barang
+            <span id="statTotalStok">0</span>
+        </div>
+    </div>
+
     <div id="formCard" class="form-card">
         <h3 id="formTitle">Tambah Produk Baru</h3>
         <form id="prodForm" onsubmit="simpanProduk(event)">
@@ -137,10 +171,18 @@
                     <label>Nama Produk</label>
                     <input type="text" id="prod_nama" required placeholder="Contoh: Modul LED 12W">
                 </div>
+                
                 <div class="form-group">
-                    <label>Kategori</label>
-                    <input type="text" id="prod_kategori" required placeholder="Contoh: LED, Audio, Sparepart">
+                    <label style="display:flex; justify-content:space-between;">
+                        <span>Kategori</span>
+                        <a href="#" id="btnTambahKatBaru" onclick="aktifkanInputKategoriBaru(event)" style="font-size:11px; color:var(--primary); text-decoration:none;">+ Kategori Baru</a>
+                    </label>
+                    <select id="prod_kategori_select" onchange="handleKategoriSelect(this)">
+                        <option value="">-- Pilih Kategori --</option>
+                    </select>
+                    <input type="text" id="prod_kategori_manual" placeholder="Ketik kategori baru..." style="display:none; margin-top:5px;">
                 </div>
+
                 <div class="form-group">
                     <label>Harga (Rp)</label>
                     <input type="number" id="prod_harga" required placeholder="0">
@@ -204,6 +246,7 @@
     
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let daftarProduk = [];
+    let daftarKategoriSedia = new Set();
     let namaAdmin = "";
 
     window.onload = () => { 
@@ -213,7 +256,6 @@
     function cekIdentitasAdmin() {
         namaAdmin = localStorage.getItem('duta_admin_name');
         if (!namaAdmin) {
-            // Jika nama admin belum ada di HP ini, minta input nama
             namaAdmin = prompt("Masukkan Nama Anda untuk Mengakses Panel (Contoh: Admin1 atau Admin2):");
             if (!namaAdmin || namaAdmin.trim() === "") {
                 alert("Nama admin wajib diisi!");
@@ -234,18 +276,63 @@
 
     async function muatDataAdmin() {
         try {
-            // MENGAMBIL DATA & LANGSUNG FILTER BERDASARKAN KOLOM 'pemilik'
             const { data, error } = await _supabase
                 .from('produk')
                 .select('*')
-                .eq('pemilik', namaAdmin) // Hanya mengambil produk milik admin aktif
+                .eq('pemilik', namaAdmin)
                 .order('id', { ascending: false });
 
             if (error) throw error;
             daftarProduk = data || [];
+            
+            // Ekstrak kategori unik untuk dropdown pilihan
+            daftarKategoriSedia.clear();
+            daftarProduk.forEach(p => { if(p.kategori) daftarKategoriSedia.add(p.kategori); });
+            
+            updateDropdownKategori();
+            hitungDanRenderSummary();
             renderTabel();
         } catch (e) {
             alert("Gagal memuat data: " + e.message);
+        }
+    }
+
+    // UPDATE ANGKA JUMLAH PRODUK DI ATAS
+    function hitungDanRenderSummary() {
+        let totalJenis = daftarProduk.length;
+        let totalStok = 0;
+        daftarProduk.forEach(p => {
+            totalStok += (Number(p.stok) || 0);
+        });
+        document.getElementById("statTotalJenis").innerText = totalJenis + " Item";
+        document.getElementById("statTotalStok").innerText = totalStok + " Pcs";
+    }
+
+    // PERBARUI PILIHAN DI DROPDOWN KATEGORI
+    function updateDropdownKategori() {
+        const select = document.getElementById("prod_kategori_select");
+        select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+        daftarKategoriSedia.forEach(kat => {
+            select.innerHTML += `<option value="${kat}">${kat}</option>`;
+        });
+    }
+
+    function aktifkanInputKategoriBaru(e) {
+        e.preventDefault();
+        const inputManual = document.getElementById("prod_kategori_manual");
+        const select = document.getElementById("prod_kategori_select");
+        
+        inputManual.style.display = "block";
+        inputManual.value = "";
+        select.value = "";
+        inputManual.focus();
+    }
+
+    function handleKategoriSelect(selectEl) {
+        const inputManual = document.getElementById("prod_kategori_manual");
+        if(selectEl.value !== "") {
+            inputManual.style.display = "none";
+            inputManual.value = selectEl.value;
         }
     }
 
@@ -276,6 +363,7 @@
     function bukaFormTambah() {
         document.getElementById("prodForm").reset();
         document.getElementById("prod_id").value = "";
+        document.getElementById("prod_kategori_manual").style.display = "none";
         document.getElementById("formTitle").innerText = "Tambah Produk Baru";
         document.getElementById("formCard").style.display = "block";
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -286,7 +374,20 @@
         if(!p) return;
         document.getElementById("prod_id").value = p.id;
         document.getElementById("prod_nama").value = p.nama || "";
-        document.getElementById("prod_kategori").value = p.kategori || "";
+        
+        // Atur Kategori saat edit
+        const select = document.getElementById("prod_kategori_select");
+        const inputManual = document.getElementById("prod_kategori_manual");
+        if(p.kategori && daftarKategoriSedia.has(p.kategori)) {
+            select.value = p.kategori;
+            inputManual.style.display = "none";
+            inputManual.value = p.kategori;
+        } else {
+            select.value = "";
+            inputManual.style.display = "block";
+            inputManual.value = p.kategori || "";
+        }
+
         document.getElementById("prod_harga").value = p.harga || 0;
         document.getElementById("prod_diskon").value = p.diskon || 0;
         document.getElementById("prod_stok").value = p.stok || 0;
@@ -307,9 +408,14 @@
     async function simpanProduk(e) {
         e.preventDefault();
         const id = document.getElementById("prod_id").value;
+        
+        // Ambil nilai kategori dari input manual/select
+        let kategoriFinal = document.getElementById("prod_kategori_manual").value || document.getElementById("prod_kategori_select").value;
+        kategoriFinal = kategoriFinal ? kategoriFinal.trim() : "Lainnya";
+
         const payload = {
             nama: document.getElementById("prod_nama").value,
-            kategori: document.getElementById("prod_kategori").value,
+            kategori: kategoriFinal,
             harga: Number(document.getElementById("prod_harga").value),
             diskon: Number(document.getElementById("prod_diskon").value),
             stok: Number(document.getElementById("prod_stok").value),
@@ -317,7 +423,7 @@
             gambar2: document.getElementById("prod_gambar2").value,
             gambar3: document.getElementById("prod_gambar3").value,
             info: document.getElementById("prod_info").value,
-            pemilik: namaAdmin // OTOMATIS MENGIKUTI SIAPA YANG SEDANG LOGIN
+            pemilik: namaAdmin
         };
 
         try {
