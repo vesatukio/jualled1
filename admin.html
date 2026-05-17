@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Duta Terang LED</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --text: #1e293b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        button {
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        
+        /* Form Styling */
+        .form-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        /* Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        th { background: #f1f5f9; }
+        tr:hover { background: #f8fafc; }
+        .prod-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>🛠️ Kontrol Katalog Duta Terang</h2>
+        <button class="btn-primary" onclick="bukaFormTambah()">+ Tambah Produk</button>
+    </header>
+
+    <div id="formCard" class="form-card">
+        <h3 id="formTitle">Tambah Produk Baru</h3>
+        <form id="prodForm" onsubmit="simpanProduk(event)">
+            <input type="hidden" id="prod_id">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nama Produk</label>
+                    <input type="text" id="prod_nama" required placeholder="Contoh: Modul LED 12W">
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <input type="text" id="prod_kategori" required placeholder="Contoh: LED, Audio, Sparepart">
+                </div>
+                <div class="form-group">
+                    <label>Harga (Rp)</label>
+                    <input type="number" id="prod_harga" required placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Diskon (%)</label>
+                    <input type="number" id="prod_diskon" value="0" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Stok</label>
+                    <input type="number" id="prod_stok" value="10" min="0">
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Link Gambar 1 (Utama)</label>
+                    <input type="url" id="prod_gambar1" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>Link Gambar 2</label>
+                    <input type="url" id="prod_gambar2" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>Link Gambar 3</label>
+                    <input type="url" id="prod_gambar3" placeholder="https://...">
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>Info Tambahan / Pesan Promo</label>
+                <input type="text" id="prod_info" placeholder="Contoh: Cek video panduan rakit di YouTube!">
+            </div>
+            <button type="submit" class="btn-success">Simpan Data</button>
+            <button type="button" onclick="tutupForm()" style="background:#94a3b8; color:white;">Batal</button>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Gambar</th>
+                    <th>Nama Produk</th>
+                    <th>Kategori</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tabelProduk">
+                <tr>
+                    <td colspan="6" style="text-align:center;">Memuat data dari database...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Konfigurasi Supabase Anda (Sudah otomatis terisi)
+    const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8";
+    
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let daftarProduk = [];
+
+    window.onload = () => { muatDataAdmin(); };
+
+    async function muatDataAdmin() {
+        try {
+            const { data, error } = await _supabase.from('produk').select('*').order('id', { ascending: false });
+            if (error) throw error;
+            daftarProduk = data || [];
+            renderTabel();
+        } catch (e) {
+            alert("Gagal memuat data: " + e.message);
+        }
+    }
+
+    function renderTabel() {
+        let html = "";
+        if (daftarProduk.length === 0) {
+            html = `<tr><td colspan="6" style="text-align:center;">Belum ada produk di database.</td></tr>`;
+        }
+        daftarProduk.forEach(p => {
+            const imgUrl = p.gambar1 || 'https://via.placeholder.com/150';
+            html += `
+                <tr>
+                    <td><img src="${imgUrl}" class="prod-img"></td>
+                    <td><strong>${p.nama}</strong>${p.diskon > 0 ? ' <span style="color:red;font-size:11px;">(-'+p.diskon+'%)</span>' : ''}</td>
+                    <td>${p.kategori || '-'}</td>
+                    <td>Rp ${(Number(p.harga)||0).toLocaleString('id-ID')}</td>
+                    <td>${p.stok || '0'}</td>
+                    <td>
+                        <button class="btn-primary" style="padding:4px 8px; font-size:12px;" onclick="editForm(${p.id})">Edit</button>
+                        <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="hapusProduk(${p.id}, '${p.nama}')">Hapus</button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById("tabelProduk").innerHTML = html;
+    }
+
+    function bukaFormTambah() {
+        document.getElementById("prodForm").reset();
+        document.getElementById("prod_id").value = "";
+        document.getElementById("formTitle").innerText = "Tambah Produk Baru";
+        document.getElementById("formCard").style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function editForm(id) {
+        const p = daftarProduk.find(item => item.id === id);
+        if(!p) return;
+        document.getElementById("prod_id").value = p.id;
+        document.getElementById("prod_nama").value = p.nama || "";
+        document.getElementById("prod_kategori").value = p.kategori || "";
+        document.getElementById("prod_harga").value = p.harga || 0;
+        document.getElementById("prod_diskon").value = p.diskon || 0;
+        document.getElementById("prod_stok").value = p.stok || 0;
+        document.getElementById("prod_gambar1").value = p.gambar1 || "";
+        document.getElementById("prod_gambar2").value = p.gambar2 || "";
+        document.getElementById("prod_gambar3").value = p.gambar3 || "";
+        document.getElementById("prod_info").value = p.info || "";
+        
+        document.getElementById("formTitle").innerText = "Edit Produk: " + p.nama;
+        document.getElementById("formCard").style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function tutupForm() {
+        document.getElementById("formCard").style.display = "none";
+    }
+
+    async function simpanProduk(e) {
+        e.preventDefault();
+        const id = document.getElementById("prod_id").value;
+        const payload = {
+            nama: document.getElementById("prod_nama").value,
+            kategori: document.getElementById("prod_kategori").value,
+            harga: Number(document.getElementById("prod_harga").value),
+            diskon: Number(document.getElementById("prod_diskon").value),
+            stok: Number(document.getElementById("prod_stok").value),
+            gambar1: document.getElementById("prod_gambar1").value,
+            gambar2: document.getElementById("prod_gambar2").value,
+            gambar3: document.getElementById("prod_gambar3").value,
+            info: document.getElementById("prod_info").value
+        };
+
+        try {
+            if (id) {
+                // Mode Edit Data
+                const { error } = await _supabase.from('produk').update(payload).eq('id', id);
+                if (error) throw error;
+                alert("Produk berhasil diperbarui!");
+            } else {
+                // Mode Tambah Data Baru
+                const { error } = await _supabase.from('produk').insert([payload]);
+                if (error) throw error;
+                alert("Produk baru berhasil ditambahkan!");
+            }
+            tutupForm();
+            muatDataAdmin();
+        } catch (err) {
+            alert("Gagal menyimpan: " + err.message);
+        }
+    }
+
+    async function hapusProduk(id, nama) {
+        if (confirm(`Apakah Anda yakin ingin menghapus produk "${nama}"?`)) {
+            try {
+                const { error } = await _supabase.from('produk').delete().eq('id', id);
+                if (error) throw error;
+                alert("Produk berhasil dihapus!");
+                muatDataAdmin();
+            } catch (err) {
+                alert("Gagal menghapus: " + err.message);
+            }
+        }
+    }
+</script>
+</body>
+</html>
