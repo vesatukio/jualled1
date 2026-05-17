@@ -31,6 +31,8 @@
             margin-bottom: 20px;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         button {
             cursor: pointer;
@@ -42,6 +44,18 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        
+        /* Session & Admin Info */
+        .admin-badge {
+            background: #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
         
         /* Form Styling */
         .form-card {
@@ -101,7 +115,13 @@
 
 <div class="container">
     <header>
-        <h2>🛠️ Kontrol Katalog Duta Terang</h2>
+        <div>
+            <h2>🛠️ Kontrol Katalog</h2>
+            <div class="admin-badge">
+                👤 Admin: <span id="namaAdminAktif">-</span>
+                <a href="#" onclick="gantiAdmin()" style="color:var(--primary); font-size:11px; text-decoration:none;">(Ganti)</a>
+            </div>
+        </div>
         <div>
             <button id="btnInstalAdmin" class="btn-success" style="display:none; margin-right: 5px;">📲 Instal Aplikasi</button>
             <button class="btn-primary" onclick="bukaFormTambah()">+ Tambah Produk</button>
@@ -179,18 +199,48 @@
 </div>
 
 <script>
-    // Konfigurasi Supabase Anda (Sudah otomatis terisi)
     const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8";
     
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let daftarProduk = [];
+    let namaAdmin = "";
 
-    window.onload = () => { muatDataAdmin(); };
+    window.onload = () => { 
+        cekIdentitasAdmin();
+    };
+
+    function cekIdentitasAdmin() {
+        namaAdmin = localStorage.getItem('duta_admin_name');
+        if (!namaAdmin) {
+            // Jika nama admin belum ada di HP ini, minta input nama
+            namaAdmin = prompt("Masukkan Nama Anda untuk Mengakses Panel (Contoh: Admin1 atau Admin2):");
+            if (!namaAdmin || namaAdmin.trim() === "") {
+                alert("Nama admin wajib diisi!");
+                cekIdentitasAdmin();
+                return;
+            }
+            namaAdmin = namaAdmin.trim().toLowerCase();
+            localStorage.setItem('duta_admin_name', namaAdmin);
+        }
+        document.getElementById('namaAdminAktif').innerText = namaAdmin.toUpperCase();
+        muatDataAdmin();
+    }
+
+    function gantiAdmin() {
+        localStorage.removeItem('duta_admin_name');
+        location.reload();
+    }
 
     async function muatDataAdmin() {
         try {
-            const { data, error } = await _supabase.from('produk').select('*').order('id', { ascending: false });
+            // MENGAMBIL DATA & LANGSUNG FILTER BERDASARKAN KOLOM 'pemilik'
+            const { data, error } = await _supabase
+                .from('produk')
+                .select('*')
+                .eq('pemilik', namaAdmin) // Hanya mengambil produk milik admin aktif
+                .order('id', { ascending: false });
+
             if (error) throw error;
             daftarProduk = data || [];
             renderTabel();
@@ -202,7 +252,7 @@
     function renderTabel() {
         let html = "";
         if (daftarProduk.length === 0) {
-            html = `<tr><td colspan="6" style="text-align:center;">Belum ada produk di database.</td></tr>`;
+            html = `<tr><td colspan="6" style="text-align:center;">Anda belum menambahkan produk apapun ke database.</td></tr>`;
         }
         daftarProduk.forEach(p => {
             const imgUrl = p.gambar1 || 'https://via.placeholder.com/150';
@@ -266,17 +316,16 @@
             gambar1: document.getElementById("prod_gambar1").value,
             gambar2: document.getElementById("prod_gambar2").value,
             gambar3: document.getElementById("prod_gambar3").value,
-            info: document.getElementById("prod_info").value
+            info: document.getElementById("prod_info").value,
+            pemilik: namaAdmin // OTOMATIS MENGIKUTI SIAPA YANG SEDANG LOGIN
         };
 
         try {
             if (id) {
-                // Mode Edit Data
                 const { error } = await _supabase.from('produk').update(payload).eq('id', id);
                 if (error) throw error;
                 alert("Produk berhasil diperbarui!");
             } else {
-                // Mode Tambah Data Baru
                 const { error } = await _supabase.from('produk').insert([payload]);
                 if (error) throw error;
                 alert("Produk baru berhasil ditambahkan!");
@@ -300,6 +349,7 @@
             }
         }
     }
+
     // LOGIKA PEMASANGAN APLIKASI (PWA)
     let promptInstalasi;
     const tombolInstal = document.getElementById('btnInstalAdmin');
