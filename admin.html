@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Duta Terang LED</title>
+    <link rel="manifest" href="manifest-admin.json">
     <style>
         :root {
             --primary: #2563eb;
@@ -101,7 +102,10 @@
 <div class="container">
     <header>
         <h2>🛠️ Kontrol Katalog Duta Terang</h2>
-        <button class="btn-primary" onclick="bukaFormTambah()">+ Tambah Produk</button>
+        <div>
+            <button id="btnInstalAdmin" class="btn-success" style="display:none; margin-right: 5px;">📲 Instal Aplikasi</button>
+            <button class="btn-primary" onclick="bukaFormTambah()">+ Tambah Produk</button>
+        </div>
     </header>
 
     <div id="formCard" class="form-card">
@@ -295,6 +299,28 @@
                 alert("Gagal menghapus: " + err.message);
             }
         }
+    }
+    // LOGIKA PEMASANGAN APLIKASI (PWA)
+    let promptInstalasi;
+    const tombolInstal = document.getElementById('btnInstalAdmin');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        promptInstalasi = e;
+        if (tombolInstal) tombolInstal.style.display = 'inline-block';
+    });
+
+    if (tombolInstal) {
+        tombolInstal.addEventListener('click', async () => {
+            if (promptInstalasi) {
+                promptInstalasi.prompt();
+                const { outcome } = await promptInstalasi.userChoice;
+                if (outcome === 'accepted') {
+                    tombolInstal.style.display = 'none';
+                }
+                promptInstalasi = null;
+            }
+        });
     }
 </script>
 </body>
