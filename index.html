@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duta Terang LED</title>
+    
+    <!-- Meta Tags Utama -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Duta Terang LED | Solusi Sparepart & Audio">
+<meta property="og:description" content="Hemat biaya servis lampu! Sedia LED AC, Driver, & Sparepart Audio kualitas teknisi.">
+<meta property="og:image" content="https://vesatukio.github.io/jualled/icon.png"> <!-- PASTIKAN LINK INI VALID -->
+<meta property="og:url" content="https://vesatukio.github.io/jualled/">
+
+<!-- Tambahan untuk WhatsApp/Twitter agar gambar besar -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://vesatukio.github.io/jualled/icon.png">
+
+    <!-- HUBUNGKAN KE CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://i.imghippo.com">
+    <link rel="preconnect" href="https://script.googleusercontent.com">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7H75Z5DYFZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-7H75Z5DYFZ');
+    </script>
+</head>
+<body>
+
+<div class="top-nav">
+    <header>
+        <div style="font-weight: 900; font-size: 18px; letter-spacing: 1px;">DUTA TERANG LED</div>
+        <div style="font-size: 11px; background: rgba(0,0,0,0.15); padding: 5px 12px; border-radius: 20px;">📲 1.284 Terpasang</div>
+    </header>
+    
+    <div class="promo-running">
+        <marquee scrollamount="5" style="font-family: Arial, sans-serif; font-weight: bold;">
+            📢 INFO: Sparepart LED Berkualitas | Ready Stok LED AC 5W-50W | Bisa COD (Bayar di Tempat) | Garansi Terjamin
+        </marquee>
+    </div>
+
+    <div id="cat-bar"></div>
+</div>
+
+<div id="list" class="container">
+    <p style="grid-column: span 2; text-align: center; padding: 50px; color: #888;">Menghubungkan ke server...</p>
+</div>
+
+<button id="btn-install-float" onclick="actionInstall()">
+    <span>📲</span><span style="writing-mode: vertical-rl; margin-top:5px; font-weight: bold;">INSTALL</span>
+</button>
+
+<div id="zoomModal" class="modal" onclick="this.style.display='none'">
+    <img id="imgZoom" src="" style="max-width:90%; max-height:80%; border-radius:10px; border: 5px solid white;">
+</div>
+
+<div id="installModal" class="modal">
+    <div class="promo-box">
+        <div style="font-size: 60px; margin-bottom: 10px;">🔥</div>
+        <h3 style="margin:0; font-weight:900; color:#222;">PROMO KHUSUS!</h3>
+        <div style="background: #fff0f4; border: 2px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0;">
+            <p style="color: var(--pink); font-weight: 800; margin: 0; font-size: 16px;">DISKON & FREE ONGKIR</p>
+            <p style="color: #333; font-size: 12px; margin: 8px 0 0;">Minimal order <b>100 biji</b><br>(Bisa Campur Semua Produk)</p>
+        </div>
+        <button style="background: var(--pink); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer;" onclick="actionInstall()">📲 INSTALL SEKARANG</button>
+        <button style="background: none; border: none; color: #999; margin-top: 15px; cursor: pointer; font-size: 13px;" onclick="closeModal()">Nanti Saja</button>
+    </div>
+</div>
+
+<div id="cart" class="hide">
+    <div class="cart-left">
+        <div style="display: flex; gap: 5px;">
+            <button onclick="resetCart()" style="flex:1; font-size:10px; padding:4px;">🗑️ Reset</button>
+            <button onclick="hapusIdentitas()" style="flex:1; font-size:10px; padding:4px;">❌ Hapus</button>
+        </div>
+        <input type="text" id="f_nama" placeholder="Nama Penerima">
+        <textarea id="f_alamat" style="height:45px; resize:none;" placeholder="Alamat Lengkap"></textarea>
+        <select id="f_bayar">
+            <option value="COD">Bayar COD (Ditempat)</option>
+            <option value="Transfer">Transfer Bank</option>
+        </select>
+    </div>
+    <div class="cart-right">
+        <div id="cart-list-render"></div>
+        <div style="font-size: 10px; color: #999;">TOTAL:</div>
+        <div id="total">Rp 0</div>
+        <button id="btn-wa" onclick="prosesPemesanan()">ORDER WA</button>
+    </div>
+</div>
+
+<div id="camera-modal">
+    <video id="video-preview" autoplay playsinline></video>
+    <div class="scan-box"></div>
+    <button onclick="stopScanner()" style="position: absolute; top: 25px; right: 25px; background: rgba(255,255,255,0.3); border:none; color:white; width:40px; height:40px; border-radius:50%; font-size:20px;">✕</button>
+</div>
+
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-item active">
+        <span>🏠</span><span>Home</span>
+    </a>
+    <div class="qris-wrapper">
+        <button class="btn-qris" onclick="startScanner()">📷</button>
+        <div style="text-align: center; font-size: 10px; font-weight: bold; margin-top: 4px; color: var(--primary);">SCAN</div>
+    </div>
+    <a href="javascript:void(0)" onclick="bukaPromo()" class="nav-item">
+        <span id="badge-promo" class="badge-notif">0</span>
+        <span>🎥</span><span>Panduan</span>
+    </a>
+</nav>
+
+<!-- HUBUNGKAN KE JAVASCRIPT -->
+<script src="script.js"></script>
+
+</body>
+</html>
