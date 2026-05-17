@@ -1,100 +1,67 @@
-/* script.js */
-// URL Google Sheets CSV Baru Anda
-const URL_PRODUK1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAd4pEtxlxD_EaVYx4L_vhhz0U3WmPYNxOXENt1NiTEGRZjpoIECzIRQSQDYhmjGQQYGN6VaMUuQ-C/pub?gid=0&single=true&output=csv";
-const URL_PRODUK2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAd4pEtxlxD_EaVYx4L_vhhz0U3WmPYNxOXENt1NiTEGRZjpoIECzIRQSQDYhmjGQQYGN6VaMUuQ-C/pub?gid=971357804&single=true&output=csv";
+/* script.js - Supabase Version */
+
+// 1. KONFIGURASI SUPABASE (GANTI ANON KEY DI BAWAH INI)
+const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8"; 
 
 const WA_NUMBER = "6288224166270";
 let produk = [], order = {}, deferredPrompt, streamPointer = null;
 let pesanPromoTerbaru = "Cek video panduan kami di YouTube!";
+let _supabase;
 
 window.onload = () => { 
-    load(); 
+    initSupabase(); 
     if(!sessionStorage.getItem('promo_per_sesi')) {
         setTimeout(() => { document.getElementById('installModal').style.display = 'flex'; }, 2000);
     }
 };
 
-// Fungsi pembantu untuk membaca CSV dengan pemisah koma (,) atau titik koma (;) secara otomatis
-function parseCSV(text) {
-    const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line);
-    if (lines.length === 0) return [];
-    
-    const barisPertama = lines[0];
-    const pemisah = barisPertama.includes(';') ? ';' : ',';
-    
-    const splitCSVLine = (line, separator) => {
-        const result = [];
-        let current = "";
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-            let char = line.charAt(i);
-            if (char === '"') {
-                inQuotes = !inQuotes;
-            } else if (char === separator && !inQuotes) {
-                result.push(current.trim().replace(/^"|"$/g, ''));
-                current = "";
-            } else {
-                current += char;
-            }
-        }
-        result.push(current.trim().replace(/^"|"$/g, ''));
-        return result;
-    };
-
-    const headers = splitCSVLine(lines[0], pemisah).map(h => h.toLowerCase().replace(/\s/g, ''));
-    
-    // Mendaftarkan indeks untuk kolom gambar1, gambar2, dan gambar3
-    const idx = {
-        id: headers.indexOf('id'),
-        nama: headers.indexOf('nama'),
-        kategori: headers.indexOf('kategori'),
-        harga: headers.indexOf('harga'),
-        diskon: headers.indexOf('diskon'),
-        stok: headers.indexOf('stok'),
-        gambar1: headers.indexOf('gambar1'),
-        gambar2: headers.indexOf('gambar2'),
-        gambar3: headers.indexOf('gambar3'),
-        info: headers.indexOf('info')
-    };
-
-    return lines.slice(1).map(line => {
-        const columns = splitCSVLine(line, pemisah);
-        
-        return {
-            id: idx.id !== -1 ? columns[idx.id] : "",
-            nama: idx.nama !== -1 ? columns[idx.nama] : "Tanpa Nama",
-            kategori: idx.kategori !== -1 ? columns[idx.kategori] : "Lainnya",
-            harga: idx.harga !== -1 ? columns[idx.harga] : "0",
-            diskon: idx.diskon !== -1 ? columns[idx.diskon] : "0",
-            stok: idx.stok !== -1 ? columns[idx.stok] : "0",
-            gambar1: idx.gambar1 !== -1 ? columns[idx.gambar1] : "",
-            gambar2: idx.gambar2 !== -1 ? columns[idx.gambar2] : "",
-            gambar3: idx.gambar3 !== -1 ? columns[idx.gambar3] : "",
-            info: idx.info !== -1 ? columns[idx.info] : ""
+// Fungsi menginisialisasi library Supabase Client secara dinamis jika belum dimuat via HTML
+function initSupabase() {
+    if (typeof supabase === 'undefined') {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.onload = () => {
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            load();
         };
-    });
+        document.head.appendChild(script);
+    } else {
+        _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        load();
+    }
 }
+
+// 2. FUNGSI AMBIL DATA DARI SUPABASE (MENGGANTIKAN GOOGLE SHEETS CSV)
 async function load() {
     try {
-        const [res1, res2] = await Promise.all([
-            fetch(URL_PRODUK1),
-            fetch(URL_PRODUK2)
-        ]);
-        
-        const text1 = await res1.text();
-        const text2 = await res2.text();
-        
-        const produk1 = parseCSV(text1);
-        const produk2 = parseCSV(text2);
-        
-        produk = [...produk1, ...produk2];
+        // Mengambil seluruh data dari tabel bernama 'produk' di database Supabase Anda
+        const { data, error } = await _supabase
+            .from('produk')
+            .select('*');
+
+        if (error) throw error;
+
+        // Normalisasi data Supabase agar tipe data teks/angka seragam dengan logika render Anda
+        produk = (data || []).map(item => ({
+            id: String(item.id),
+            nama: item.nama || "Tanpa Nama",
+            kategori: item.kategori || "Lainnya",
+            harga: String(item.harga || 0),
+            diskon: String(item.diskon || 0),
+            stok: String(item.stok || 0),
+            gambar1: item.gambar1 || "",
+            gambar2: item.gambar2 || "",
+            gambar3: item.gambar3 || "",
+            info: item.info || ""
+        }));
         
         prosesUpdateSistem(produk);
         render();
         autoFillForm();
     } catch (e) { 
         console.error(e);
-        document.getElementById("list").innerHTML = "<p style='grid-column: span 2; text-align:center;'>Koneksi gagal.</p>"; 
+        document.getElementById("list").innerHTML = `<p style='grid-column: span 2; text-align:center; color:red;'>Koneksi database gagal: ${e.message}</p>`; 
     }
 }
 
@@ -114,18 +81,22 @@ function prosesUpdateSistem(data) {
 
 function tampilkanBadge(teks) {
     const b = document.getElementById('badge-promo');
-    b.innerText = teks;
-    b.style.display = 'block';
+    if(b) {
+        b.innerText = teks;
+        b.style.display = 'block';
+    }
 }
 
 function bukaPromo() {
     alert("📢 INFO TERBARU:\n\n" + pesanPromoTerbaru);
-    document.getElementById('badge-promo').style.display = 'none';
+    const b = document.getElementById('badge-promo');
+    if(b) b.style.display = 'none';
     const temp = localStorage.getItem('temp_state');
     if (temp) localStorage.setItem('duta_terang_state', temp);
     window.open("https://vesatukio.github.io/jualled/panduan", "_blank"); 
 }
 
+// 3. LOGIKA RENDER DAN TAMPILAN (TETAP MENJAGA SKELETON & KELAS CSS ASLI ANDA)
 function render() {
     let html = "", kategori = new Set();
     
@@ -137,22 +108,18 @@ function render() {
         const hrgFix = hargaAsli - (hargaAsli * disc / 100);
         const isHabis = Number(p.stok) <= 0;
 
-        // 1. MENGGABUNGKAN KOLOM GAMBAR 1, 2, & 3 SECARA OTOMATIS
         let daftarGambar = [];
         if (p.gambar1) daftarGambar.push(p.gambar1.trim());
         if (p.gambar2) daftarGambar.push(p.gambar2.trim());
         if (p.gambar3) daftarGambar.push(p.gambar3.trim());
         
-        // Jika semua kolom gambar kosong, pasang gambar placeholder bawaan
         if (daftarGambar.length === 0) daftarGambar = ['https://via.placeholder.com/150'];
 
-        // Membuat elemen HTML untuk masing-masing gambar
         let htmlGambar = "";
         daftarGambar.forEach((imgUrl, indexImg) => {
             htmlGambar += `<img src="${imgUrl}" class="slide-img prodImg-${indexProduk}" data-index="${indexImg}" style="display: ${indexImg === 0 ? 'block' : 'none'}; width:100%; cursor:pointer;" onclick="openZoom('${imgUrl}')">`;
         });
 
-        // Membuat tombol navigasi panah jika gambar yang terisi lebih dari satu kolom
         let tombolNavigasi = "";
         if (daftarGambar.length > 1) {
             tombolNavigasi = `
@@ -262,9 +229,11 @@ function openZoom(url) {
 
 function autoFillForm() {
     ['f_nama', 'f_alamat'].forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
         const s = localStorage.getItem(id);
-        if (s) document.getElementById(id).value = s;
-        document.getElementById(id).addEventListener('input', e => localStorage.setItem(id, e.target.value));
+        if (s) el.value = s;
+        el.addEventListener('input', e => localStorage.setItem(id, e.target.value));
     });
 }
 
@@ -274,7 +243,8 @@ function closeModal() { document.getElementById('installModal').style.display = 
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault(); deferredPrompt = e;
-    document.getElementById('btn-install-float').style.display = 'flex';
+    const btn = document.getElementById('btn-install-float');
+    if(btn) btn.style.display = 'flex';
 });
 
 async function actionInstall() {
@@ -286,7 +256,7 @@ async function actionInstall() {
 }
 
 function shareProduk(nama, harga) {
-    const urlToko = `https://vesatukio.github.io/jualled/?item=${encodeURIComponent(nama)}`;
+    const urlToko = `https://jualled.vesatukio.workers.dev/?item=${encodeURIComponent(nama)}`;
     const hargaIDR = "Rp " + harga.toLocaleString('id-ID');
 
     const listPesan = [
@@ -309,26 +279,22 @@ function shareProduk(nama, harga) {
         window.open(waUrl, '_blank');
     }
 }
-// Fungsi pembantu menangani logika perpindahan gambar slide produk saat diklik panah
+
 function geserGambar(idProduk, arah, totalGambar) {
     const elemenGambar = document.querySelectorAll(`.prodImg-${idProduk}`);
     let indeksSekarang = 0;
 
-    // Cari tahu gambar index ke berapa yang saat ini aktif tampil
     elemenGambar.forEach((img, index) => {
         if (img.style.display === 'block') {
             indeksSekarang = index;
         }
     });
 
-    // Sembunyikan gambar aktif saat ini
     elemenGambar[indeksSekarang].style.display = 'none';
 
-    // Hitung target gambar berikutnya
     let indeksBaru = indeksSekarang + arah;
-    if (indeksBaru >= totalGambar) indeksBaru = 0; // Balik ke awal jika klik kanan saat mentok
-    if (indeksBaru < 0) indeksBaru = totalGambar - 1; // Balik ke akhir jika klik kiri saat mentok
+    if (indeksBaru >= totalGambar) indeksBaru = 0;
+    if (indeksBaru < 0) indeksBaru = totalGambar - 1;
 
-    // Tampilkan gambar baru
     elemenGambar[indeksBaru].style.display = 'block';
 }
