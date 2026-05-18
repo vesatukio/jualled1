@@ -2,165 +2,188 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Duta Terang LED</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #007bff;
-            --pink: #ff477e;
-            --bg: #f1f5f9;
-            --text: #1e293b;
-            --danger: #ef4444;
-            --success: #22c55e;
+            --primary: #00bcd4; /* Disamakan dengan style.css baru */
+            --pink: #e91e63; /* Disamakan dengan style.css baru */
+            --bg: #f5f6f8;
+            --text: #222;
+            --danger: #ff4d4d;
+            --success: #25D366;
         }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg); color: var(--text); margin: 0; padding-bottom: 340px;
+            background: #e2e8f0; /* Efek background luar abu-abu di PC */
+            color: var(--text); 
+            margin: 0; 
+            padding: 0;
+            display: flex;
+            justify-content: center;
         }
-        .container { max-width: 1000px; margin: 0 auto; padding: 12px; background: #fff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+
+        /* CONTAINER UTAMA: Kunci Lebar Aplikasi Maksimal 500px (Sama seperti Segari) */
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding-bottom: 280px; /* Jarak aman terbawah dari kasir */
+            box-sizing: border-box;
+        }
+
+        .container { 
+            padding: 8px; 
+            width: 100%;
+            box-sizing: border-box;
+        }
         
         /* Header Toko */
-        .header-toko { display: flex; align-items: center; justify-content: space-between; padding: 10px 5px; border-bottom: 2px solid #f1f5f9; }
+        .header-toko { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px; background: #fff; border-bottom: 1px solid #e2e8f0; }
         .brand-title { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
         .brand-title span { color: var(--pink); }
 
         /* Banner Slider Bergilir */
-        .banner-wrapper { position: relative; width: 100%; overflow: hidden; border-radius: 12px; margin: 12px 0; }
+        .banner-wrapper { position: relative; width: 100%; overflow: hidden; border-radius: 12px; margin: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .banner-slider { display: flex; transition: transform 0.5s ease-in-out; width: 100%; }
-        .banner-slider img { width: 100%; flex-shrink: 0; aspect-ratio: 21 / 9; object-fit: contain; background: #000; }
+        .banner-slider img { width: 100%; flex-shrink: 0; aspect-ratio: 21 / 9; object-fit: cover; background: #fafafa; }
         .banner-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
         .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
         .dot.active { background: #fff; width: 12px; border-radius: 4px; }
 
         /* Kategori Warna-Warni */
-        .cat-container { display: flex; gap: 8px; overflow-x: auto; padding: 5px 0 12px; scrollbar-width: none; }
+        .cat-container { display: flex; gap: 8px; overflow-x: auto; padding: 6px 4px 12px; scrollbar-width: none; background: transparent; }
         .cat-container::-webkit-scrollbar { display: none; }
-        .cat-btn { padding: 8px 16px; border-radius: 20px; border: none; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .cat-btn { padding: 6px 14px; border-radius: 20px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
 
-        /* RESPONSIVE GRID: HP 2 Kolom, PC 4 Kolom */
-        .grid-produk { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        @media (min-width: 768px) {
-            .grid-produk { grid-template-columns: repeat(4, 1fr); gap: 16px; }
-        }
+        /* RESPONSIVE GRID: Di dalam app-container dikunci 2 kolom agar konsisten */
+        .grid-produk { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 4px; }
 
         /* Kartu Produk Rapi & Presisi */
         .product-card { 
-            background: #fff; border-radius: 12px; padding: 10px; border: 1px solid #e2e8f0; 
+            background: #fff; border-radius: 10px; padding: 8px; border: 1px solid #eaeaea; 
             position: relative; display: flex; flex-direction: column; justify-content: space-between; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02); height: 100%; box-sizing: border-box;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02); height: 100%; box-sizing: border-box;
         }
         
         /* Galeri Multi-Gambar Mini Dalam Card */
-        .img-container { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; background: #f8fafc; border: 1px solid #f1f5f9; }
+        .img-container { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; background: #fafafa; border: 1px solid #f1f5f9; }
         .galeri-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.3s ease; }
         .prod-img { width: 100%; height: 100%; object-fit: contain; flex-shrink: 0; cursor: zoom-in; }
         
         /* Titik Indikator Gambar Produk */
         .galeri-dots { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 3; }
-        .g-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,0.2); cursor: pointer; }
+        .g-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,0.15); cursor: pointer; }
         .g-dot.active { background: var(--primary); }
 
         /* Badges & Share */
-        .discount-badge { position: absolute; top: 6px; right: 6px; background: var(--pink); color: white; font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 6px; z-index: 2; }
-        .share-btn { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.9); border: none; width: 28px; height: 28px; border-radius: 50%; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 2; }
+        .discount-badge { position: absolute; top: 6px; right: 6px; background: var(--pink); color: white; font-size: 9px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 2; }
+        .share-btn { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.85); border: none; width: 26px; height: 26px; border-radius: 50%; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); z-index: 2; }
 
         /* Detail Informasi */
-        .price-box { margin: 6px 0; }
-        .price-now { font-weight: 800; color: var(--pink); font-size: 15px; display: block; }
-        .price-was { font-size: 11px; color: #94a3b8; text-decoration: line-through; }
+        .price-box { margin: 4px 0 6px 0; }
+        .price-now { font-weight: 800; color: var(--pink); font-size: 14px; display: block; }
+        .price-was { font-size: 10px; color: #94a3b8; text-decoration: line-through; }
 
         /* Tombol Order + - Standby Sejak Awal */
-        .order-control { margin-top: auto; display: flex; align-items: center; justify-content: space-between; width: 100%; height: 34px; background: #f1f5f9; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; }
-        .btn-qty { background: #cbd5e1; border: none; width: 35px; height: 100%; font-weight: bold; font-size: 18px; cursor: pointer; color: #1e293b; transition: background 0.2s; }
-        .btn-qty:hover { background: #cbd5e1; }
-        .qty-indicator { font-weight: bold; font-size: 15px; color: var(--text); }
+        .order-control { margin-top: auto; display: flex; align-items: center; justify-content: space-between; width: 100%; height: 30px; background: #f1f5f9; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1; }
+        .btn-qty { background: #cbd5e1; border: none; width: 32px; height: 100%; font-weight: bold; font-size: 16px; cursor: pointer; color: #1e293b; }
+        .qty-indicator { font-weight: bold; font-size: 14px; color: var(--text); }
 
-        /* Panel Kasir Belanja Bawah (Tersembunyi secara default, muncul jika qty > 0) */
-        .checkout-panel { position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(150%); width: 100%; max-width: 600px; background: white; box-shadow: 0 -6px 25px rgba(0,0,0,0.15); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 15px; z-index: 999; box-sizing: border-box; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* Panel Kasir Belanja Bawah Terkunci Mengikuti Lebar App Container */
+        .checkout-panel { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(150%); width: 100%; max-width: 500px; background: white; box-shadow: 0 -6px 25px rgba(0,0,0,0.12); border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 12px; z-index: 999; box-sizing: border-box; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
         .checkout-panel.active { transform: translateX(-50%) translateY(0); }
-        .checkout-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 12px; }
+        .checkout-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 10px; }
         .panel-left, .panel-right { display: flex; flex-direction: column; gap: 6px; }
-        .panel-right { border-left: 1px dashed #cbd5e1; padding-left: 12px; }
+        .panel-right { border-left: 1px dashed #cbd5e1; padding-left: 10px; }
         
-        .input-buyer { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background: #f8fafc; }
-        .summary-list { max-height: 75px; overflow-y: auto; font-size: 11px; color: #475569; margin: 0; padding-left: 15px; }
-        .total-box { font-size: 15px; font-weight: 800; display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: auto; }
+        .input-buyer { padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; background: #f8fafc; }
+        .summary-list { max-height: 65px; overflow-y: auto; font-size: 11px; color: #475569; margin: 0; padding-left: 15px; }
+        .total-box { font-size: 14px; font-weight: 800; display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: auto; }
         
-        .btn-wa { background: var(--success); color: white; border: none; padding: 10px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .btn-reset { background: var(--danger); color: white; border: none; padding: 8px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .btn-wa { background: var(--success); color: white; border: none; padding: 8px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-reset { background: var(--danger); color: white; border: none; padding: 6px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 11px; }
 
-        /* Menu Navigasi Bawah Sticky */
-        .nav-bottom { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: #fff; height: 60px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 500; cursor: pointer; background: none; border: none; }
+        /* Menu Navigasi Bawah Sticky Mengikuti Lebar App Container */
+        .nav-bottom { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; height: 60px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 500; cursor: pointer; background: none; border: none; flex: 1; }
         .nav-item.active { color: var(--primary); }
         .nav-item i { font-size: 18px; margin-bottom: 2px; }
 
         /* Tombol QRIS Jumbo Menarik */
-        .nav-item.qris-jumbo { background: var(--pink); color: white; width: 55px; height: 55px; border-radius: 50%; justify-content: center; transform: translateY(-12px); box-shadow: 0 4px 10px rgba(255, 71, 126, 0.4); border: 3px solid white; font-weight: bold; }
+        .nav-item.qris-jumbo { background: linear-gradient(45deg, var(--pink), #ff477e); color: white; width: 55px; height: 55px; border-radius: 50%; justify-content: center; transform: translateY(-12px); box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3); border: 3px solid white; font-weight: bold; flex: none; }
         .nav-item.qris-jumbo i { font-size: 22px; margin: 0; }
 
-        /* Tombol Rahasia Panel Admin */
-        .secret-admin-trigger { width: 20px; height: 20px; cursor: default; background: transparent; border: none; padding: 0; }
+        .secret-admin-trigger { width: 30px; height: 30px; cursor: default; background: transparent; border: none; padding: 0; }
 
         /* Modal Zoom Gambar */
         .modal-zoom { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
         .modal-zoom img { max-width: 90%; max-height: 80%; object-fit: contain; border-radius: 8px; }
 
-        /* Tombol Install PWA Mini (Kanan Tengah) */
-        .pwa-install-btn { display: none; position: fixed; right: 10px; top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; padding: 10px 8px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 998; font-size: 11px; font-weight: bold; text-align: center; width: 45px; flex-direction: column; gap: 4px; cursor: pointer; }
+        /* Tombol Install PWA Mini Menempel Sisi Kanan App Container */
+        .pwa-install-btn { display: none; position: fixed; right: calc(50% - 250px); top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; padding: 10px 6px; border-radius: 8px 0 0 8px; box-shadow: -2px 4px 10px rgba(0,0,0,0.15); z-index: 998; font-size: 10px; font-weight: bold; text-align: center; width: 45px; flex-direction: column; gap: 4px; cursor: pointer; }
+        @media (max-width: 500px) { .pwa-install-btn { right: 0; border-radius: 8px 0 0 8px; } }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<div class="container">
+<div class="app-container">
+    
     <div class="header-toko">
         <div class="brand-title">Duta Terang <span>LED</span></div>
         <button class="secret-admin-trigger" onclick="hitungKlikRahasia()"></button>
     </div>
 
-    <div class="banner-wrapper">
-        <div class="banner-slider" id="banner-slider">
-            <p style="text-align:center; width:100%; padding:20px 0; color:#999;">Memuat promosi...</p>
-        </div>
-        <div class="banner-dots" id="banner-dots"></div>
-    </div>
-    
-    <div class="cat-container" id="cat-bar"></div>
-    
-    <div class="grid-produk" id="list">
-        <p style="text-align:center; grid-column: span 2; color:#64748b;">Menyelaraskan etalase toko...</p>
-    </div>
-</div>
-
-<div class="checkout-panel" id="checkout-kasir">
-    <div class="checkout-container">
-        <div class="panel-left">
-            <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
-            <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Alamat Lengkap Pengiriman" style="resize:none; font-family:inherit;"></textarea>
-            <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan Order</button>
-        </div>
-        <div class="panel-right">
-            <div style="font-weight: 800; font-size: 12px; color: var(--primary); margin-bottom: 4px;">📋 Ringkasan Order:</div>
-            <ul id="summary-items" class="summary-list"></ul>
-            <div class="total-box">
-                <span>Total:</span>
-                <span id="summary-total" style="color: var(--pink);">Rp 0</span>
+    <div class="container">
+        <div class="banner-wrapper">
+            <div class="banner-slider" id="banner-slider">
+                <p style="text-align:center; width:100%; padding:20px 0; color:#999; font-size:12px;">Memuat promosi...</p>
             </div>
-            <button class="btn-wa" onclick="kirimKeWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Kirim WA</button>
+            <div class="banner-dots" id="banner-dots"></div>
+        </div>
+        
+        <div class="cat-container" id="cat-bar"></div>
+        
+        <div class="grid-produk" id="list">
+            <p style="text-align:center; grid-column: span 2; color:#64748b; font-size:13px; padding:20px;">Menyelaraskan etalase toko...</p>
         </div>
     </div>
-</div>
 
-<div class="nav-bottom">
-    <button class="nav-item active" onclick="pindahTab('home')"><i class="fa-solid fa-house"></i>Home</button>
-    <button class="nav-item qris-jumbo" onclick="pindahTab('qris')"><i class="fa-solid fa-qrcode"></i>QRIS</button>
-    <button class="nav-item" onclick="pindahTab('panduan')"><i class="fa-solid fa-book-open"></i>Panduan</button>
-</div>
+    <div class="checkout-panel" id="checkout-kasir">
+        <div class="checkout-container">
+            <div class="panel-left">
+                <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
+                <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Alamat Lengkap Pengiriman" style="resize:none; font-family:inherit;"></textarea>
+                <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan</button>
+            </div>
+            <div class="panel-right">
+                <div style="font-weight: 800; font-size: 11px; color: var(--primary); margin-bottom: 2px;">📋 Ringkasan Order:</div>
+                <ul id="summary-items" class="summary-list"></ul>
+                <div class="total-box">
+                    <span>Total:</span>
+                    <span id="summary-total" style="color: var(--pink);">Rp 0</span>
+                </div>
+                <button class="btn-wa" onclick="kirimKeWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Kirim WA</button>
+            </div>
+        </div>
+    </div>
 
-<button class="pwa-install-btn" id="pwaBtn" onclick="installAplikasiPWA()">
-    <i class="fa-solid fa-cloud-arrow-down" style="font-size:16px;"></i><br>Ambil App
+    <div class="nav-bottom">
+        <button class="nav-item active" onclick="pindahTab('home')"><i class="fa-solid fa-house"></i>Home</button>
+        <button class="nav-item qris-jumbo" onclick="pindahTab('qris')"><i class="fa-solid fa-qrcode"></i>QRIS</button>
+        <button class="nav-item" onclick="pindahTab('panduan')"><i class="fa-solid fa-book-open"></i>Panduan</button>
+    </div>
+
+</div> <button class="pwa-install-btn" id="pwaBtn" onclick="installAplikasiPWA()">
+    <i class="fa-solid fa-cloud-arrow-down" style="font-size:14px;"></i><br>Ambil App
 </button>
 
 <div class="modal-zoom" id="zoomModal" onclick="this.style.display='none'">
@@ -184,7 +207,6 @@
         await muatProdukDanOfflineCache();
     });
 
-    // 1. Ambil Banner Database & Geser Otomatis
     async function muatBannerBergilir() {
         try {
             let { data: banners } = await _supabase.from('banners').select('*').eq('aktif', true).order('urutan', { ascending: true });
@@ -213,8 +235,10 @@
 
         let current = 0;
         setInterval(() => {
-            current = (current + 1) % bannerData.length;
-            geserSlide(current);
+            if(bannerData.length > 0) {
+                current = (current + 1) % bannerData.length;
+                geserSlide(current);
+            }
         }, 4000);
     }
 
@@ -229,19 +253,16 @@
         }
     }
 
-    // 2. Ambil Produk & Manfaatkan PWA Local Storage agar Bisa Diakses Tanpa Internet (Offline)
     async function muatProdukDanOfflineCache() {
         try {
             let { data: produk, error } = await _supabase.from('produk').select('*').order('id', { ascending: false });
             if (produk && produk.length > 0) {
                 produkData = produk;
-                // Simpan otomatis ke penyimpanan lokal HP pembeli untuk akses offline
                 localStorage.setItem('duta_produk_cache', JSON.stringify(produk));
             }
         } catch (err) {
             console.log("Mode offline aktif, membaca data internal...");
         } finally {
-            // Jika internet putus, tarik data otomatis dari penyimpanan HP
             if (!produkData || produkData.length === 0) {
                 const cacheData = localStorage.getItem('duta_produk_cache');
                 if (cacheData) produkData = JSON.parse(cacheData);
@@ -273,7 +294,6 @@
         });
     }
 
-    // 3. Render Daftar Produk Grid (HP 2 Kolom, PC 4 Kolom) - Maks 3 Gambar per Produk
     function renderDaftarProduk(filterKat) {
         const container = document.getElementById('list');
         container.innerHTML = '';
@@ -281,7 +301,7 @@
         const filtered = filterKat === 'Semua' ? produkData : produkData.filter(p => p.kategori === filterKat);
 
         if(!filtered || filtered.length === 0) {
-            container.innerHTML = `<p style="grid-column:span 4; text-align:center; color:#94a3b8; padding:30px;">Tidak ada produk.</p>`;
+            container.innerHTML = `<p style="grid-column:span 2; text-align:center; color:#94a3b8; padding:30px; font-size:13px;">Tidak ada produk.</p>`;
             return;
         }
 
@@ -291,14 +311,12 @@
             const asli = Number(p.harga) || 0;
             const final = diskon > 0 ? asli * (1 - (diskon / 100)) : asli;
             
-            // Mengumpulkan maksimal 3 gambar terstruktur dari baris database produk Anda
             let galeriFoto = [];
             if(p.gambar1) galeriFoto.push(p.gambar1);
             if(p.gambar2) galeriFoto.push(p.gambar2);
             if(p.gambar3) galeriFoto.push(p.gambar3);
             if(galeriFoto.length === 0) galeriFoto.push('https://via.placeholder.com/150');
 
-            // Render Titik Indikator Gambar jika ada lebih dari 1 gambar
             let htmlDots = '';
             if(galeriFoto.length > 1) {
                 galeriFoto.forEach((_, fIdx) => {
@@ -306,6 +324,7 @@
                 });
             }
 
+            /* PERBAIKAN: Hapus 'white-space:nowrap' agar judul produk turun ke baris ke-2 sesuai CSS */
             const itemHtml = `
                 <div class="product-card">
                     <div class="img-container">
@@ -316,8 +335,8 @@
                         </div>
                         <div class="galeri-dots" id="gdots-${p.id}">${htmlDots}</div>
                     </div>
-                    <h4 style="margin:8px 0 2px; font-size:13px; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.nama}</h4>
-                    <p style="margin:0 0 6px; font-size:10px; color:#64748b;">Stok: ${p.stok || 0}</p>
+                    <h4 style="margin:8px 0 2px; font-size:12px; font-weight:600; color:#222; line-height:1.3; height:32px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${p.nama}</h4>
+                    <p style="margin:0 0 4px; font-size:10px; color:#64748b;">Stok: ${p.stok || 0}</p>
                     
                     <div class="price-box">
                         <span class="price-now">Rp ${final.toLocaleString('id-ID')}</span>
@@ -335,7 +354,6 @@
         });
     }
 
-    // Fungsi Geser Gambar Mini di Etalase
     function gantiFotoGaleri(prodId, targetIdx) {
         const wrapper = document.getElementById(`galeri-${prodId}`);
         const dots = document.getElementById(`gdots-${prodId}`).children;
@@ -347,7 +365,6 @@
         }
     }
 
-    // 4. Perubahan Angka & Penyembunyian/Pemunculan Otomatis Panel Ringkasan Bawah
     function ubahAngkaQty(id, ubah) {
         const item = produkData.find(p => p.id === id);
         let qtySekarang = keranjang[id] || 0;
@@ -388,11 +405,10 @@
                 const sub = hargaFinal * keranjang[id];
                 notaTotal += sub;
 
-                listWrap.innerHTML += `<li>${p.nama} (x${keranjang[id]})</li>`;
+                listWrap.innerHTML += `<li>${p.nama.substring(0, 20)}... (x${keranjang[id]})</li>`;
             }
         }
 
-        // SEMBUNYIKAN / TAMPILKAN PANEL KASIR SESUAI INSTRUKSI KLIK ORDER + -
         if (adaBarang) {
             panelKasir.classList.add('active');
         } else {
@@ -408,7 +424,6 @@
         pembaruanStrukRingkasan();
     }
 
-    // Fitur Zoom Gambar Eksklusif
     function bukaZoom(src) {
         const modal = document.getElementById('zoomModal');
         const img = document.getElementById('imgZoom');
@@ -426,7 +441,6 @@
         }
     }
 
-    // 5. Checkout via WhatsApp Toko
     function kirimKeWhatsApp() {
         const nama = document.getElementById('buyer-nama').value.trim();
         const alamat = document.getElementById('buyer-alamat').value.trim();
@@ -452,7 +466,7 @@
             }
         }
 
-        const nomorTokoWA = "6281234567890"; // GANTI DENGAN NOMOR WA DUTA TERANG LED ANDA
+        const nomorTokoWA = "6281234567890"; // GANTI DENGAN NOMOR WA SEBENARNYA
         const formatPesan = `*STRUK ORDERAN BARU - DUTA TERANG LED*\n\n` +
                             `👤 *Nama:* ${nama}\n` +
                             `📍 *Alamat Lengkap:* ${alamat}\n\n` +
@@ -463,7 +477,6 @@
         window.open(`https://api.whatsapp.com/send?phone=${nomorTokoWA}&text=${encodeURIComponent(formatPesan)}`, '_blank');
     }
 
-    // Navigasi Tab Utama
     function pindahTab(tujuan) {
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
         if (tujuan === 'home') {
@@ -475,7 +488,6 @@
         }
     }
 
-    // 6. Tombol Rahasia Ketuk 5 Kali Masuk Admin
     function hitungKlikRahasia() {
         klikRahasiaCount++;
         if (klikRahasiaCount >= 5) {
@@ -484,11 +496,9 @@
         }
     }
 
-    // 7. SISTEM INJEKSI AUTOMATIC PWA UNTUK INSTALASI DI LAYAR UTAMA HP
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         defferredPrompt = e;
-        // Munculkan tombol instalasi mini di kanan tengah layar
         document.getElementById('pwaBtn').style.display = 'flex';
     });
 
