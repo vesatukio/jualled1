@@ -123,9 +123,16 @@ header {
    ========================================== */
 .container { 
     padding: 8px; 
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Biarkan .container tetap normal, dan buat class grid khusus untuk membungkus kartu */
+.grid-produk { 
     display: grid; 
-    grid-template-columns: repeat(2, 1fr); /* Tetap 2 Kolom di HP maupun PC karena base-nya mobile view */
+    grid-template-columns: repeat(2, 1fr); /* Tetap 2 Kolom di HP maupun PC */
     gap: 8px; 
+    padding: 0 4px;
 }
 
 .card { 
@@ -140,16 +147,34 @@ header {
     border: 1px solid #eaeaea;
     overflow: hidden;
     height: 100%;
+    box-sizing: border-box; /* Menjamin ukuran padding tidak merusak lebar grid */
 }
 
-/* Mengunci Gambar Kotak Presisi & Tidak Ketinggian */
-.card img { 
+/* Mengunci container gambar agar ceper (4:3) dan pendek */
+.img-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3; /* Membuat tinggi gambar lebih pendek dan kompak */
+    max-height: 130px; /* Batas tinggi maksimal di layar besar */
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fafafa;
+    border: 1px solid #f1f5f9;
+}
+
+/* Memastikan galeri gambar geser di dalamnya menyesuaikan rasio 4:3 */
+.galeri-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.prod-img { 
     width: 100%; 
-    aspect-ratio: 4 / 3; 
-    max-height: 140px; 
+    height: 100%; 
     object-fit: contain; 
-    border-radius: 8px; 
-    background: #fafafa; 
+    flex-shrink: 0; 
     cursor: zoom-in; 
 }
 
@@ -157,7 +182,7 @@ header {
 .product-name { 
     font-size: 12px; 
     font-weight: 600; 
-    margin-top: 6px; 
+    margin: 6px 0 2px 0; 
     line-height: 1.3; 
     color: var(--text); 
     height: 32px; 
@@ -174,7 +199,6 @@ header {
     margin: 4px 0 8px 0; 
     display: block; 
 }
-
 /* ==========================================
    4. TOMBOL KONTROL [ + ]  0  [ - ] STANDBY
    ========================================== */
