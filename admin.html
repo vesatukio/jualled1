@@ -12,6 +12,7 @@
             --danger: #dc2626;
             --bg: #f8fafc;
             --text: #1e293b;
+            --pink: #ff477e;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -44,6 +45,7 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-pink { background: var(--pink); color: white; }
         
         .admin-badge {
             background: #e2e8f0;
@@ -54,6 +56,24 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* Nav Tab */
+        .tab-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            background: #e2e8f0;
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
         }
 
         /* Ringkasan Jumlah Produk */
@@ -102,21 +122,30 @@
             font-weight: 600;
             margin-bottom: 5px;
         }
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             padding: 8px;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
             font-size: 14px;
-            height: 38px;
             box-sizing: border-box;
         }
+        .form-group input, .form-group select {
+            height: 38px;
+        }
         
-        /* Table Styling */
+        /* Table & Section Styling */
+        .panel-section {
+            display: none;
+        }
+        .panel-section.active {
+            display: block;
+        }
         .table-responsive {
             overflow-x: auto;
             background: white;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-top: 15px;
         }
         table {
             width: 100%;
@@ -139,7 +168,7 @@
 <div class="container">
     <header>
         <div>
-            <h2>🛠️ Kontrol Katalog</h2>
+            <h2> Gauges & Manajemen Toko</h2>
             <div class="admin-badge">
                 👤 Admin: <span id="namaAdminAktif">-</span>
                 <a href="#" onclick="gantiAdmin()" style="color:var(--primary); font-size:11px; text-decoration:none;">(Ganti)</a>
@@ -147,96 +176,171 @@
         </div>
         <div>
             <button id="btnInstalAdmin" class="btn-success" style="display:none; margin-right: 5px;">📲 Instal Aplikasi</button>
-            <button class="btn-primary" onclick="bukaFormTambah()">+ Tambah Produk</button>
+            <a href="index.html" style="text-decoration:none;"><button class="btn-primary" style="background:#64748b;">👁️ Lihat Toko</button></a>
         </div>
     </header>
 
-    <div class="summary-box">
-        <div class="stat-card">
-            Total Jenis Produk
-            <span id="statTotalJenis">0</span>
+    <!-- Navigasi Menu Tab -->
+    <div class="tab-menu">
+        <button class="tab-btn active" onclick="switchTab('tab-produk', this)">📦 Katalog Produk</button>
+        <button class="tab-btn" onclick="switchTab('tab-promo', this)">🎥 Banner & Pengaturan</button>
+    </div>
+
+    <!-- ================== TAB KALOG PRODUK ================== -->
+    <div id="tab-produk" class="panel-section active">
+        <div class="summary-box">
+            <div class="stat-card">
+                Total Jenis Produk
+                <span id="statTotalJenis">0 Item</span>
+            </div>
+            <div class="stat-card">
+                Total Stok Barang
+                <span id="statTotalStok">0 Pcs</span>
+            </div>
+            <div class="stat-card" style="flex: 0.5; display: flex; align-items: center; justify-content: center;">
+                <button class="btn-primary" onclick="bukaFormTambah()" style="width: 100%; height: 100%;">+ Tambah Produk</button>
+            </div>
         </div>
-        <div class="stat-card">
-            Total Stok Barang
-            <span id="statTotalStok">0</span>
+
+        <div id="formCard" class="form-card">
+            <h3 id="formTitle">Tambah Produk Baru</h3>
+            <form id="prodForm" onsubmit="simpanProduk(event)">
+                <input type="hidden" id="prod_id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nama Produk</label>
+                        <input type="text" id="prod_nama" required placeholder="Contoh: Modul LED 12W">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display:flex; justify-content:space-between;">
+                            <span>Kategori</span>
+                            <a href="#" id="btnTambahKatBaru" onclick="aktifkanInputKategoriBaru(event)" style="font-size:11px; color:var(--primary); text-decoration:none;">+ Kategori Baru</a>
+                        </label>
+                        <select id="prod_kategori_select" onchange="handleKategoriSelect(this)">
+                            <option value="">-- Pilih Kategori --</option>
+                        </select>
+                        <input type="text" id="prod_kategori_manual" placeholder="Ketik kategori baru..." style="display:none; margin-top:5px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Harga (Rp)</label>
+                        <input type="number" id="prod_harga" required placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Diskon (%)</label>
+                        <input type="number" id="prod_diskon" value="0" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Stok</label>
+                        <input type="number" id="prod_stok" value="10" min="0">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Link Gambar 1 (Utama)</label>
+                        <input type="url" id="prod_gambar1" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Link Gambar 2</label>
+                        <input type="url" id="prod_gambar2" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Link Gambar 3</label>
+                        <input type="url" id="prod_gambar3" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Info Tambahan / Pesan Promo</label>
+                    <input type="text" id="prod_info" placeholder="Contoh: Cek video panduan rakit di YouTube!">
+                </div>
+                <button type="submit" class="btn-success">Simpan Data</button>
+                <button type="button" onclick="tutupForm()" style="background:#94a3b8; color:white;">Batal</button>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Gambar</th>
+                        <th>Nama Produk</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelProduk">
+                    <tr>
+                        <td colspan="6" style="text-align:center;">Memuat data dari database...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div id="formCard" class="form-card">
-        <h3 id="formTitle">Tambah Produk Baru</h3>
-        <form id="prodForm" onsubmit="simpanProduk(event)">
-            <input type="hidden" id="prod_id">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Nama Produk</label>
-                    <input type="text" id="prod_nama" required placeholder="Contoh: Modul LED 12W">
-                </div>
-                
-                <div class="form-group">
-                    <label style="display:flex; justify-content:space-between;">
-                        <span>Kategori</span>
-                        <a href="#" id="btnTambahKatBaru" onclick="aktifkanInputKategoriBaru(event)" style="font-size:11px; color:var(--primary); text-decoration:none;">+ Kategori Baru</a>
-                    </label>
-                    <select id="prod_kategori_select" onchange="handleKategoriSelect(this)">
-                        <option value="">-- Pilih Kategori --</option>
-                    </select>
-                    <input type="text" id="prod_kategori_manual" placeholder="Ketik kategori baru..." style="display:none; margin-top:5px;">
-                </div>
+    <!-- ================== TAB BANNER & CONFIG ================== -->
+    <div id="tab-promo" class="panel-section">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            
+            <!-- Pengaturan Umum Web -->
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3>📢 Pengaturan Beranda</h3>
+                <form id="form-pengaturan" onsubmit="simpanPengaturan(event)">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>Teks Berjalan Beranda (Running Text)</label>
+                        <textarea id="set-running-text" rows="3" required placeholder="Tulis info promo toko di sini..."></textarea>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>Total Aplikasi Terpasang (Counter Badge)</label>
+                        <input type="text" id="set-terpasang" required placeholder="Contoh: 1.284">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Simpan Konfigurasi</button>
+                </form>
+            </div>
 
-                <div class="form-group">
-                    <label>Harga (Rp)</label>
-                    <input type="number" id="prod_harga" required placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>Diskon (%)</label>
-                    <input type="number" id="prod_diskon" value="0" min="0" max="100">
-                </div>
-                <div class="form-group">
-                    <label>Stok</label>
-                    <input type="number" id="prod_stok" value="10" min="0">
-                </div>
+            <!-- Tambah Gambar Slider Promo Baru -->
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3>🎥 Tambah Banner Slider</h3>
+                <form id="form-banner" onsubmit="simpanBanner(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Judul Promo / Keterangan</label>
+                        <input type="text" id="banner-judul" placeholder="Contoh: Promo Flash Sale Lampu AC">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>URL Gambar Banner</label>
+                        <input type="url" id="banner-url" required placeholder="https://linkgambar.com/banner.jpg">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>Urutan Urutan Tampil (Angka)</label>
+                        <input type="number" id="banner-urutan" value="0" min="0">
+                    </div>
+                    <button type="submit" class="btn-pink" style="width: 100%;">Upload & Aktifkan Banner</button>
+                </form>
             </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Link Gambar 1 (Utama)</label>
-                    <input type="url" id="prod_gambar1" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label>Link Gambar 2</label>
-                    <input type="url" id="prod_gambar2" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label>Link Gambar 3</label>
-                    <input type="url" id="prod_gambar3" placeholder="https://...">
-                </div>
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label>Info Tambahan / Pesan Promo</label>
-                <input type="text" id="prod_info" placeholder="Contoh: Cek video panduan rakit di YouTube!">
-            </div>
-            <button type="submit" class="btn-success">Simpan Data</button>
-            <button type="button" onclick="tutupForm()" style="background:#94a3b8; color:white;">Batal</button>
-        </form>
-    </div>
+        </div>
 
-    <div class="table-responsive">
-        <table>
-            <thead>
-                <tr>
-                    <th>Gambar</th>
-                    <th>Nama Produk</th>
-                    <th>Kategori</th>
-                    <th>Harga</th>
-                    <th>Stok</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="tabelProduk">
-                <tr>
-                    <td colspan="6" style="text-align:center;">Memuat data dari database...</td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Tabel Monitoring Banner Aktif -->
+        <h3 style="margin-top: 30px; margin-bottom: 10px;">📋 Slide Banner Terpasang</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pratinjau</th>
+                        <th>Keterangan / Judul</th>
+                        <th>Urutan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelBanners">
+                    <tr>
+                        <td colspan="5" style="text-align:center;">Memuat data banner...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -267,11 +371,21 @@
         }
         document.getElementById('namaAdminAktif').innerText = namaAdmin.toUpperCase();
         muatDataAdmin();
+        muatDataPengaturanDanBanner();
     }
 
     function gantiAdmin() {
         localStorage.removeItem('duta_admin_name');
         location.reload();
+    }
+
+    // Pindah Tab Menu
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.panel-section').forEach(sec => sec.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        el.classList.add('active');
     }
 
     async function muatDataAdmin() {
@@ -285,7 +399,6 @@
             if (error) throw error;
             daftarProduk = data || [];
             
-            // Ekstrak kategori unik untuk dropdown pilihan
             daftarKategoriSedia.clear();
             daftarProduk.forEach(p => { if(p.kategori) daftarKategoriSedia.add(p.kategori); });
             
@@ -293,11 +406,103 @@
             hitungDanRenderSummary();
             renderTabel();
         } catch (e) {
-            alert("Gagal memuat data: " + e.message);
+            alert("Gagal memuat data produk: " + e.message);
         }
     }
 
-    // UPDATE ANGKA JUMLAH PRODUK DI ATAS
+    // MANAGEMENT UNTUK TAB PENGATURAN & BANNER PROMO
+    async function muatDataPengaturanDanBanner() {
+        try {
+            // Read Teks & Stats
+            let { data: config, error: errConfig } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
+            if (config) {
+                document.getElementById('set-running-text').value = config.running_text || '';
+                document.getElementById('set-terpasang').value = config.total_terpasang || '1.284';
+            }
+
+            // Read Banners List
+            let { data: banners, error: errBanner } = await _supabase.from('banners').select('*').order('urutan', { ascending: true });
+            renderTabelBanner(banners || []);
+        } catch (e) {
+            console.error("Gagal memuat set data sekunder", e);
+        }
+    }
+
+    // Simpan Config Beranda
+    async function simpanPengaturan(e) {
+        e.preventDefault();
+        const rText = document.getElementById('set-running-text').value;
+        const total = document.getElementById('set-terpasang').value;
+
+        try {
+            const { error } = await _supabase.from('pengaturan').update({ 
+                running_text: rText, 
+                total_terpasang: total 
+            }).eq('id', 1);
+
+            if (error) throw error;
+            alert('Konfigurasi Beranda sukses disimpan!');
+        } catch (err) {
+            alert('Gagal memperbarui pengaturan: ' + err.message);
+        }
+    }
+
+    // Tambah Banner Baru
+    async function simpanBanner(e) {
+        e.preventDefault();
+        const judul = document.getElementById('banner-judul').value;
+        const url = document.getElementById('banner-url').value;
+        const urutan = document.getElementById('banner-urutan').value;
+
+        try {
+            const { error } = await _supabase.from('banners').insert([
+                { judul: judul, image_url: url, urutan: parseInt(urutan), aktif: true }
+            ]);
+
+            if (error) throw error;
+            alert('Banner Slider Promo berhasil ditambahkan!');
+            document.getElementById('form-banner').reset();
+            muatDataPengaturanDanBanner();
+        } catch (err) {
+            alert('Gagal menyimpan banner: ' + err.message);
+        }
+    }
+
+    function renderTabelBanner(banners) {
+        let html = "";
+        if (banners.length === 0) {
+            html = `<tr><td colspan="5" style="text-align:center;">Belum ada banner slider aktif terpasang.</td></tr>`;
+        }
+        banners.forEach(b => {
+            html += `
+                <tr>
+                    <td><img src="${b.image_url}" class="prod-img" style="width: 80px; height: 45px;"></td>
+                    <td><strong>${b.judul || 'Tanpa Judul'}</strong></td>
+                    <td>${b.urutan}</td>
+                    <td><span style="color:${b.aktif ? 'green' : 'red'}; font-weight:bold;">${b.aktif ? '● Aktif' : '○ Nonaktif'}</span></td>
+                    <td>
+                        <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="hapusBanner(${b.id})">Hapus</button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById('tabelBanners').innerHTML = html;
+    }
+
+    async function hapusBanner(id) {
+        if (confirm("Apakah anda yakin ingin mencopot dan menghapus banner promo ini?")) {
+            try {
+                const { error } = await _supabase.from('banners').delete().eq('id', id);
+                if (error) throw error;
+                alert("Banner berhasil dihapus!");
+                muatDataPengaturanDanBanner();
+            } catch (err) {
+                alert("Gagal menghapus banner: " + err.message);
+            }
+        }
+    }
+
+    // LOGIKA CORE PRODUK BAWAN (TIDAK BERUBAH)
     function hitungDanRenderSummary() {
         let totalJenis = daftarProduk.length;
         let totalStok = 0;
@@ -308,7 +513,6 @@
         document.getElementById("statTotalStok").innerText = totalStok + " Pcs";
     }
 
-    // PERBARUI PILIHAN DI DROPDOWN KATEGORI
     function updateDropdownKategori() {
         const select = document.getElementById("prod_kategori_select");
         select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
@@ -375,7 +579,6 @@
         document.getElementById("prod_id").value = p.id;
         document.getElementById("prod_nama").value = p.nama || "";
         
-        // Atur Kategori saat edit
         const select = document.getElementById("prod_kategori_select");
         const inputManual = document.getElementById("prod_kategori_manual");
         if(p.kategori && daftarKategoriSedia.has(p.kategori)) {
@@ -409,7 +612,6 @@
         e.preventDefault();
         const id = document.getElementById("prod_id").value;
         
-        // Ambil nilai kategori dari input manual/select
         let kategoriFinal = document.getElementById("prod_kategori_manual").value || document.getElementById("prod_kategori_select").value;
         kategoriFinal = kategoriFinal ? kategoriFinal.trim() : "Lainnya";
 
