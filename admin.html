@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Duta Terang LED</title>
-    <link rel="manifest" href="manifest-admin.json">
     <style>
         :root {
             --primary: #2563eb;
@@ -47,15 +46,21 @@
         .btn-danger { background: var(--danger); color: white; }
         .btn-pink { background: var(--pink); color: white; }
         
-        .admin-badge {
+        .admin-selector-box {
             background: #e2e8f0;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: bold;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+        }
+        .admin-selector-box select {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+            font-weight: bold;
         }
 
         /* Nav Tab */
@@ -160,6 +165,16 @@
         th { background: #f1f5f9; }
         tr:hover { background: #f8fafc; }
         .prod-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .owner-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 4px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -169,30 +184,32 @@
     <header>
         <div>
             <h2>Gauges & Manajemen Toko</h2>
-            <div class="admin-badge">
-                👤 Admin: <span id="namaAdminAktif">-</span>
-                <a href="#" onclick="gantiAdmin(event)" style="color:var(--primary); font-size:11px; text-decoration:none; margin-left: 5px; font-weight: bold;">(Ganti)</a>
+            <div class="admin-selector-box">
+                👤 Pengguna Aktif:
+                <select id="dropdownAdmin" onchange="gantiAdminAktif(this.value)">
+                    <!-- Diisi otomatis dari database -->
+                </select>
+                <button class="btn-primary" onclick="tambahAdminBaru()" style="padding: 2px 8px; font-size: 12px;">+ Tambah Orang</button>
             </div>
         </div>
         <div>
-            <button id="btnInstalAdmin" class="btn-success" style="display:none; margin-right: 5px;">📲 Instal Aplikasi</button>
             <a href="index.html" style="text-decoration:none;"><button class="btn-primary" style="background:#64748b;">👁️ Lihat Toko</button></a>
         </div>
     </header>
 
     <div class="tab-menu">
-        <button class="tab-btn active" onclick="switchTab('tab-produk', this)">📦 Katalog Produk</button>
+        <button class="tab-btn active" onclick="switchTab('tab-produk', this)">📦 Katalog Produk (Semua Pemilik)</button>
         <button class="tab-btn" onclick="switchTab('tab-promo', this)">🎥 Banner & Pengaturan</button>
     </div>
 
     <div id="tab-produk" class="panel-section active">
         <div class="summary-box">
             <div class="stat-card">
-                Total Jenis Produk
+                Total Jenis Produk (Global)
                 <span id="statTotalJenis">0 Item</span>
             </div>
             <div class="stat-card">
-                Total Stok Barang
+                Total Stok Barang (Global)
                 <span id="statTotalStok">0 Pcs</span>
             </div>
             <div class="stat-card" style="flex: 0.5; display: flex; align-items: center; justify-content: center;">
@@ -204,6 +221,7 @@
             <h3 id="formTitle">Tambah Produk Baru</h3>
             <form id="prodForm" onsubmit="simpanProduk(event)">
                 <input type="hidden" id="prod_id">
+                <input type="hidden" id="prod_pemilik_lama">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Nama Produk</label>
@@ -279,18 +297,18 @@
     </div>
 
     <div id="tab-promo" class="panel-section">
+        <!-- Konten Banner & Pengaturan Beranda Tetap Dipertahankan -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            
             <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <h3>📢 Pengaturan Beranda</h3>
                 <form id="form-pengaturan" onsubmit="simpanPengaturan(event)">
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label>Teks Berjalan Beranda (Running Text)</label>
-                        <textarea id="set-running-text" rows="3" required placeholder="Tulis info promo toko di sini..."></textarea>
+                        <textarea id="set-running-text" rows="3" required></textarea>
                     </div>
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label>Total Aplikasi Terpasang (Counter Badge)</label>
-                        <input type="text" id="set-terpasang" required placeholder="Contoh: 1.284">
+                        <input type="text" id="set-terpasang" required>
                     </div>
                     <button type="submit" class="btn-primary" style="width: 100%;">Simpan Konfigurasi</button>
                 </form>
@@ -301,15 +319,15 @@
                 <form id="form-banner" onsubmit="simpanBanner(event)">
                     <div class="form-group" style="margin-bottom: 12px;">
                         <label>Judul Promo / Keterangan</label>
-                        <input type="text" id="banner-judul" placeholder="Contoh: Promo Flash Sale Lampu AC">
+                        <input type="text" id="banner-judul">
                     </div>
                     <div class="form-group" style="margin-bottom: 12px;">
                         <label>URL Gambar Banner</label>
-                        <input type="url" id="banner-url" required placeholder="https://linkgambar.com/banner.jpg">
+                        <input type="url" id="banner-url" required>
                     </div>
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label>Urutan Tampil (Angka)</label>
-                        <input type="number" id="banner-urutan" value="0" min="0">
+                        <input type="number" id="banner-urutan" value="0">
                     </div>
                     <button type="submit" class="btn-pink" style="width: 100%;">Upload & Aktifkan Banner</button>
                 </form>
@@ -345,91 +363,79 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let daftarProduk = [];
     let daftarKategoriSedia = new Set();
-    let namaAdmin = "";
+    let namaAdminAktif = "";
 
-    // SISTEM FILTER SECURITY - HANYA ADMIN INI YANG DIZINKAN
-    const ADMIN_DIIZINKAN = ["admin1", "admin2", "dutaterang", "pijarjaya"]; 
-
-    window.onload = () => { 
-        cekIdentitasAdmin();
+    window.onload = async () => { 
+        await muatDropdownAdmin();
+        await muatDataKatalog();
+        await muatDataPengaturanDanBanner();
     };
 
-    function cekIdentitasAdmin() {
-        namaAdmin = localStorage.getItem('duta_admin_name');
-        
-        if (!namaAdmin) {
-            let inputNama = prompt("🔒 Keamanan Berlapis. Masukkan Nama Admin Resmi Anda:");
-            
-            if (!inputNama || inputNama.trim() === "") {
-                alert("Akses ditolak! Identitas kosong.");
-                blokirAksesPanel();
-                return;
-            }
-            
-            namaAdmin = inputNama.trim().toLowerCase();
-            
-            // Cek validasi kecocokan dengan Whitelist array
-            if (!ADMIN_DIIZINKAN.includes(namaAdmin)) {
-                alert("❌ NAMA ADMIN TIDAK DIKENAL / TIDAK DIIZINKAN! Gagal mengakses database.");
-                blokirAksesPanel();
-                return;
-            }
-            
-            // Simpan hanya jika lolos verifikasi nama admin
-            localStorage.setItem('duta_admin_name', namaAdmin);
-        } else {
-            // Double-check proteksi jika user memodifikasi paksa localStorage
-            if (!ADMIN_DIIZINKAN.includes(namaAdmin.toLowerCase())) {
-                localStorage.removeItem('duta_admin_name');
-                blokirAksesPanel();
-                return;
-            }
-        }
-        
-        document.getElementById('namaAdminAktif').innerText = namaAdmin.toUpperCase();
-        muatDataAdmin();
-        muatDataPengaturanDanBanner();
-    }
+    // 1. SISTEM DINAMIS DROPDOWN ADMIN (DIAMBIL DARI TABEL 'akses_admin')
+    async function muatDropdownAdmin() {
+        try {
+            const { data, error } = await _supabase.from('akses_admin').select('username').order('username', { ascending: true });
+            if (error) throw error;
 
-    // FUNGSI BARU: Untuk mengganti user admin tanpa stuck di halaman blokir
-    function gantiAdmin(e) {
-        if(e) e.preventDefault();
-        if (confirm("Apakah Anda yakin ingin keluar dan mengganti akun Admin?")) {
-            localStorage.removeItem('duta_admin_name');
-            location.reload(); // Muat ulang untuk memicu prompt nama baru
+            const select = document.getElementById("dropdownAdmin");
+            select.innerHTML = "";
+
+            if (data && data.length > 0) {
+                data.forEach(acc => {
+                    select.innerHTML += `<option value="${acc.username}">${acc.username.toUpperCase()}</option>`;
+                });
+            } else {
+                // Fail-safe jika tabel kosong, otomatis buat satu default admin
+                select.innerHTML = `<option value="dutaterang">DUTATERANG</option>`;
+            }
+
+            // Pulihkan sesi login terakhir dari localstorage jika ada
+            let lastSession = localStorage.getItem('duta_admin_name');
+            if (lastSession && select.querySelector(`option[value="${lastSession}"]`)) {
+                select.value = lastSession;
+                namaAdminAktif = lastSession;
+            } else {
+                namaAdminAktif = select.value;
+                localStorage.setItem('duta_admin_name', namaAdminAktif);
+            }
+        } catch (e) {
+            alert("Gagal memuat daftar admin: " + e.message);
         }
     }
 
-    function blokirAksesPanel() {
-        // Hapus nama admin lama dari storage supaya kalau diklik 'Coba Lagi' bisa input baru
-        localStorage.removeItem('duta_admin_name');
-        
-        // Menghancurkan visual layout body agar aman dari manipulasi inspect element
-        document.body.innerHTML = `
-            <div style="text-align:center; margin-top:100px; color:var(--danger, #dc2626); font-family:sans-serif; padding:20px;">
-                <h2 style="font-size:50px; margin-bottom:15px;">🔒</h2>
-                <h2>Akses Ditolak - Un-Authorized Admin Name</h2>
-                <p>Nama Admin salah atau tidak memiliki otoritas otentikasi ke database Supabase Duta Terang LED.</p>
-                <button onclick="location.reload()" style="background:#2563eb; color:white; padding:10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:14px; margin-top:10px;">Coba Lagi / Masuk Kembali</button>
-            </div>
-        `;
+    function gantiAdminAktif(val) {
+        namaAdminAktif = val;
+        localStorage.setItem('duta_admin_name', val);
+        alert(`Pengguna aktif diganti ke: ${val.toUpperCase()}`);
     }
 
-    // Pindah Tab Menu
-    function switchTab(tabId, el) {
-        document.querySelectorAll('.panel-section').forEach(sec => sec.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active');
-        el.classList.add('active');
+    // 2. FITUR TAMBAH ORANG BARU LANGSUNG DARI DROPDOWN
+    async function tambahAdminBaru() {
+        let namaBaru = prompt("Masukkan nama pengguna/admin baru:");
+        if (!namaBaru || namaBaru.trim() === "") return;
+
+        namaBaru = namaBaru.trim().toLowerCase();
+
+        try {
+            // Masukkan ke tabel akses_admin di database
+            const { error } = await _supabase.from('akses_admin').insert([{ username: namaBaru, bisa_update: true }]);
+            if (error) throw error;
+
+            alert(`Admin "${namaBaru.toUpperCase()}" sukses terdaftar!`);
+            await muatDropdownAdmin(); // Refresh dropdown biar langsung muncul
+            document.getElementById("dropdownAdmin").value = namaBaru;
+            gantiAdminAktif(namaBaru);
+        } catch (e) {
+            alert("Gagal menambah pengguna baru (Kemungkinan nama sudah ada): " + e.message);
+        }
     }
 
-    async function muatDataAdmin() {
+    // 3. AMBIL SEMUA KATALOG (Agar admin bisa memantau semua barang kompetitor/rekanan)
+    async function muatDataKatalog() {
         try {
             const { data, error } = await _supabase
                 .from('produk')
                 .select('*')
-                .eq('pemilik', namaAdmin)
                 .order('id', { ascending: false });
 
             if (error) throw error;
@@ -446,174 +452,112 @@
         }
     }
 
-    // MANAGEMENT UNTUK TAB PENGATURAN & BANNER PROMO
-    async function muatDataPengaturanDanBanner() {
-        try {
-            // Read Teks & Stats
-            let { data: config, error: errConfig } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
-            if (config) {
-                document.getElementById('set-running-text').value = config.running_text || '';
-                document.getElementById('set-terpasang').value = config.total_terpasang || '1.284';
-            }
-
-            // Read Banners List
-            let { data: banners, error: errBanner } = await _supabase.from('banners').select('*').order('urutan', { ascending: true });
-            renderTabelBanner(banners || []);
-        } catch (e) {
-            console.error("Gagal memuat set data sekunder", e);
-        }
-    }
-
-    // Simpan Config Beranda
-    async function simpanPengaturan(e) {
-        e.preventDefault();
-        const rText = document.getElementById('set-running-text').value;
-        const total = document.getElementById('set-terpasang').value;
-
-        try {
-            const { error } = await _supabase.from('pengaturan').update({ 
-                running_text: rText, 
-                total_terpasang: total 
-            }).eq('id', 1);
-
-            if (error) throw error;
-            alert('Konfigurasi Beranda sukses disimpan!');
-        } catch (err) {
-            alert('Gagal memperbarui pengaturan: ' + err.message);
-        }
-    }
-
-    // Tambah Banner Baru
-    async function simpanBanner(e) {
-        e.preventDefault();
-        const judul = document.getElementById('banner-judul').value;
-        const url = document.getElementById('banner-url').value;
-        const urutan = document.getElementById('banner-urutan').value;
-
-        try {
-            const { error } = await _supabase.from('banners').insert([
-                { judul: judul, image_url: url, urutan: parseInt(urutan), aktif: true }
-            ]);
-
-            if (error) throw error;
-            alert('Banner Slider Promo berhasil ditambahkan!');
-            document.getElementById('form-banner').reset();
-            muatDataPengaturanDanBanner();
-        } catch (err) {
-            alert('Gagal menyimpan banner: ' + err.message);
-        }
-    }
-
-    function renderTabelBanner(banners) {
-        let html = "";
-        if (banners.length === 0) {
-            html = `<tr><td colspan="5" style="text-align:center;">Belum ada banner slider aktif terpasang.</td></tr>`;
-        }
-        banners.forEach(b => {
-            html += `
-                <tr>
-                    <td><img src="${b.image_url}" class="prod-img" style="width: 80px; height: 45px;"></td>
-                    <td><strong>${b.judul || 'Tanpa Judul'}</strong></td>
-                    <td>${b.urutan}</td>
-                    <td><span style="color:${b.aktif ? 'green' : 'red'}; font-weight:bold;">${b.aktif ? '● Aktif' : '○ Nonaktif'}</span></td>
-                    <td>
-                        <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="hapusBanner(${b.id})">Hapus</button>
-                    </td>
-                </tr>
-            `;
-        });
-        document.getElementById('tabelBanners').innerHTML = html;
-    }
-
-    async function hapusBanner(id) {
-        if (confirm("Apakah anda yakin ingin mencopot dan menghapus banner promo ini?")) {
-            try {
-                const { error } = await _supabase.from('banners').delete().eq('id', id);
-                if (error) throw error;
-                alert("Banner berhasil dihapus!");
-                muatDataPengaturanDanBanner();
-            } catch (err) {
-                alert("Gagal menghapus banner: " + err.message);
-            }
-        }
-    }
-
-    // LOGIKA CORE PRODUK BAWAAN
-    function hitungDanRenderSummary() {
-        let totalJenis = daftarProduk.length;
-        let totalStok = 0;
-        daftarProduk.forEach(p => {
-            totalStok += (Number(p.stok) || 0);
-        });
-        document.getElementById("statTotalJenis").innerText = totalJenis + " Item";
-        document.getElementById("statTotalStok").innerText = totalStok + " Pcs";
-    }
-
-    function updateDropdownKategori() {
-        const select = document.getElementById("prod_kategori_select");
-        select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
-        daftarKategoriSedia.forEach(kat => {
-            select.innerHTML += `<option value="${kat}">${kat}</option>`;
-        });
-    }
-
-    function aktifkanInputKategoriBaru(e) {
-        e.preventDefault();
-        const inputManual = document.getElementById("prod_kategori_manual");
-        const select = document.getElementById("prod_kategori_select");
-        
-        inputManual.style.display = "block";
-        inputManual.value = "";
-        select.value = "";
-        inputManual.focus();
-    }
-
-    function handleKategoriSelect(selectEl) {
-        const inputManual = document.getElementById("prod_kategori_manual");
-        if(selectEl.value !== "") {
-            inputManual.style.display = "none";
-            inputManual.value = selectEl.value;
-        }
-    }
-
     function renderTabel() {
         let html = "";
         if (daftarProduk.length === 0) {
-            html = `<tr><td colspan="6" style="text-align:center;">Anda belum menambahkan produk apapun ke database.</td></tr>`;
+            html = `<tr><td colspan="6" style="text-align:center;">Tidak ada data produk di database.</td></tr>`;
         }
         daftarProduk.forEach(p => {
             const imgUrl = p.gambar1 || 'https://via.placeholder.com/150';
+            const pemilikProduk = p.pemilik ? p.pemilik.toLowerCase() : "";
+            
             html += `
                 <tr>
                     <td><img src="${imgUrl}" class="prod-img"></td>
-                    <td><strong>${p.nama}</strong>${p.diskon > 0 ? ' <span style="color:red;font-size:11px;">(-'+p.diskon+'%)</span>' : ''}</td>
+                    <td>
+                        <strong>${p.nama}</strong>${p.diskon > 0 ? ' <span style="color:red;font-size:11px;">(-'+p.diskon+'%)</span>' : ''}
+                        <br><span class="owner-badge">👤 Pemilik: ${pemilikProduk.toUpperCase()}</span>
+                    </td>
                     <td>${p.kategori || '-'}</td>
                     <td>Rp ${(Number(p.harga)||0).toLocaleString('id-ID')}</td>
                     <td>${p.stok || '0'}</td>
                     <td>
                         <button class="btn-primary" style="padding:4px 8px; font-size:12px;" onclick="editForm(${p.id})">Edit</button>
-                        <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="hapusProduk(${p.id}, '${p.nama}')">Hapus</button>
+                        <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="hapusProduk(${p.id}, '${p.nama}', '${pemilikProduk}')">Hapus</button>
                     </td>
                 </tr>
             `;
         });
-        document.getElementById("text-align:left;");
         document.getElementById("tabelProduk").innerHTML = html;
     }
 
-    function bukaFormTambah() {
-        document.getElementById("prodForm").reset();
-        document.getElementById("prod_id").value = "";
-        document.getElementById("prod_kategori_manual").style.display = "none";
-        document.getElementById("formTitle").innerText = "Tambah Produk Baru";
-        document.getElementById("formCard").style.display = "block";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 4. VALIDASI PROTEKSI DATA SAAT UPDATE / SIMPAN
+    async function simpanProduk(e) {
+        e.preventDefault();
+        const id = document.getElementById("prod_id").value;
+        const pemilikLama = document.getElementById("prod_pemilik_lama").value;
+        
+        // JIKA EDIT: Validasi apakah admin yang aktif sekarang sama dengan pemilik asli barang
+        if (id && pemilikLama !== namaAdminAktif) {
+            alert(`❌ AKSES DITOLAK!\nProduk ini milik "${pemilikLama.toUpperCase()}".\nAnda (${namaAdminAktif.toUpperCase()}) tidak berhak mengubah data ini.`);
+            return;
+        }
+
+        let kategoriFinal = document.getElementById("prod_kategori_manual").value || document.getElementById("prod_kategori_select").value;
+        kategoriFinal = kategoriFinal ? kategoriFinal.trim() : "Lainnya";
+
+        const payload = {
+            nama: document.getElementById("prod_nama").value,
+            kategori: kategoriFinal,
+            harga: Number(document.getElementById("prod_harga").value),
+            diskon: Number(document.getElementById("prod_diskon").value),
+            stok: Number(document.getElementById("prod_stok").value),
+            gambar1: document.getElementById("prod_gambar1").value,
+            gambar2: document.getElementById("prod_gambar2").value,
+            gambar3: document.getElementById("prod_gambar3").value,
+            info: document.getElementById("prod_info").value,
+            pemilik: id ? pemilikLama : namaAdminAktif // Jika produk baru, otomatis milik admin aktif
+        };
+
+        try {
+            if (id) {
+                const { error } = await _supabase.from('produk').update(payload).eq('id', id);
+                if (error) throw error;
+                alert("Produk berhasil diperbarui!");
+            } else {
+                const { error } = await _supabase.from('produk').insert([payload]);
+                if (error) throw error;
+                alert("Produk baru berhasil ditambahkan!");
+            }
+            tutupForm();
+            muatDataKatalog();
+        } catch (err) {
+            alert("Gagal menyimpan: " + err.message);
+        }
+    }
+
+    // 5. VALIDASI PROTEKSI SAAT HAPUS
+    async function hapusProduk(id, nama, pemilik) {
+        if (pemilik !== namaAdminAktif) {
+            alert(`❌ AKSES DITOLAK!\nProduk ini milik "${pemilik.toUpperCase()}".\nAnda (${namaAdminAktif.toUpperCase()}) tidak memiliki izin menghapusnya.`);
+            return;
+        }
+
+        if (confirm(`Apakah Anda yakin ingin menghapus produk "${nama}"?`)) {
+            try {
+                const { error } = await _supabase.from('produk').delete().eq('id', id);
+                if (error) throw error;
+                alert("Produk berhasil dihapus!");
+                muatDataKatalog();
+            } catch (err) {
+                alert("Gagal menghapus: " + err.message);
+            }
+        }
     }
 
     function editForm(id) {
         const p = daftarProduk.find(item => item.id === id);
         if(!p) return;
+
+        const pemilikProduk = p.pemilik ? p.pemilik.toLowerCase() : "";
+        
+        // Peringatan dini sebelum isi form diubah-ubah oleh yang bukan pemiliknya
+        if (pemilikProduk !== namaAdminAktif) {
+            alert(`⚠️ INFORMASI:\nAnda dapat melihat detail produk ini, namun Anda tidak akan bisa menyimpannya karena produk ini milik "${pemilikProduk.toUpperCase()}".`);
+        }
+
         document.getElementById("prod_id").value = p.id;
+        document.getElementById("prod_pemilik_lama").value = pemilikProduk;
         document.getElementById("prod_nama").value = p.nama || "";
         
         const select = document.getElementById("prod_kategori_select");
@@ -641,81 +585,105 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function tutupForm() {
-        document.getElementById("formCard").style.display = "none";
+    // --- KODE UTASAN LAINNYA TETAP SAMA (DIPERTAHANKAN) ---
+    function hitungDanRenderSummary() {
+        let totalJenis = daftarProduk.length;
+        let totalStok = 0;
+        daftarProduk.forEach(p => { totalStok += (Number(p.stok) || 0); });
+        document.getElementById("statTotalJenis").innerText = totalJenis + " Item";
+        document.getElementById("statTotalStok").innerText = totalStok + " Pcs";
     }
 
-    async function simpanProduk(e) {
+    function updateDropdownKategori() {
+        const select = document.getElementById("prod_kategori_select");
+        select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+        daftarKategoriSedia.forEach(kat => { select.innerHTML += `<option value="${kat}">${kat}</option>`; });
+    }
+
+    function aktifkanInputKategoriBaru(e) {
         e.preventDefault();
-        const id = document.getElementById("prod_id").value;
-        
-        let kategoriFinal = document.getElementById("prod_kategori_manual").value || document.getElementById("prod_kategori_select").value;
-        kategoriFinal = kategoriFinal ? kategoriFinal.trim() : "Lainnya";
+        const inputManual = document.getElementById("prod_kategori_manual");
+        const select = document.getElementById("prod_kategori_select");
+        inputManual.style.display = "block"; inputManual.value = ""; select.value = ""; inputManual.focus();
+    }
 
-        const payload = {
-            nama: document.getElementById("prod_nama").value,
-            kategori: kategoriFinal,
-            harga: Number(document.getElementById("prod_harga").value),
-            diskon: Number(document.getElementById("prod_diskon").value),
-            stok: Number(document.getElementById("prod_stok").value),
-            gambar1: document.getElementById("prod_gambar1").value,
-            gambar2: document.getElementById("prod_gambar2").value,
-            gambar3: document.getElementById("prod_gambar3").value,
-            info: document.getElementById("prod_info").value,
-            pemilik: namaAdmin
-        };
+    function handleKategoriSelect(selectEl) {
+        const inputManual = document.getElementById("prod_kategori_manual");
+        if(selectEl.value !== "") { inputManual.style.display = "none"; inputManual.value = selectEl.value; }
+    }
 
+    function bukaFormTambah() {
+        document.getElementById("prodForm").reset();
+        document.getElementById("prod_id").value = "";
+        document.getElementById("prod_pemilik_lama").value = "";
+        document.getElementById("prod_kategori_manual").style.display = "none";
+        document.getElementById("formTitle").innerText = "Tambah Produk Baru";
+        document.getElementById("formCard").style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function tutupForm() { document.getElementById("formCard").style.display = "none"; }
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.panel-section').forEach(sec => sec.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active'); el.classList.add('active');
+    }
+
+    async function muatDataPengaturanDanBanner() {
         try {
-            if (id) {
-                const { error } = await _supabase.from('produk').update(payload).eq('id', id);
-                if (error) throw error;
-                alert("Produk berhasil diperbarui!");
-            } else {
-                const { error } = await _supabase.from('produk').insert([payload]);
-                if (error) throw error;
-                alert("Produk baru berhasil ditambahkan!");
+            let { data: config } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
+            if (config) {
+                document.getElementById('set-running-text').value = config.running_text || '';
+                document.getElementById('set-terpasang').value = config.total_terpasang || '1.284';
             }
-            tutupForm();
-            muatDataAdmin();
-        } catch (err) {
-            alert("Gagal menyimpan: " + err.message);
-        }
+            let { data: banners } = await _supabase.from('banners').select('*').order('urutan', { ascending: true });
+            renderTabelBanner(banners || []);
+        } catch (e) { console.error(e); }
     }
 
-    async function hapusProduk(id, nama) {
-        if (confirm(`Apakah Anda yakin ingin menghapus produk "${nama}"?`)) {
-            try {
-                const { error } = await _supabase.from('produk').delete().eq('id', id);
-                if (error) throw error;
-                alert("Produk berhasil dihapus!");
-                muatDataAdmin();
-            } catch (err) {
-                alert("Gagal menghapus: " + err.message);
-            }
-        }
-    }
-
-    // LOGIKA PEMASANGAN APLIKASI (PWA)
-    let promptInstalasi;
-    const tombolInstal = document.getElementById('btnInstalAdmin');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
+    async function simpanPengaturan(e) {
         e.preventDefault();
-        promptInstalasi = e;
-        if (tombolInstal) tombolInstal.style.display = 'inline-block';
-    });
+        try {
+            const { error } = await _supabase.from('pengaturan').update({ 
+                running_text: document.getElementById('set-running-text').value, 
+                total_terpasang: document.getElementById('set-terpasang').value 
+            }).eq('id', 1);
+            if (error) throw error; alert('Konfigurasi Beranda sukses disimpan!');
+        } catch (err) { alert(err.message); }
+    }
 
-    if (tombolInstal) {
-        tombolInstal.addEventListener('click', async () => {
-            if (promptInstalasi) {
-                promptInstalasi.prompt();
-                const { outcome } = await promptInstalasi.userChoice;
-                if (outcome === 'accepted') {
-                    tombolInstal.style.display = 'none';
-                }
-                promptInstalasi = null;
-            }
+    async function simpanBanner(e) {
+        e.preventDefault();
+        try {
+            const { error } = await _supabase.from('banners').insert([{ 
+                judul: document.getElementById('banner-judul').value, 
+                image_url: document.getElementById('banner-url').value, 
+                urutan: parseInt(document.getElementById('banner-urutan').value), aktif: true 
+            }]);
+            if (error) throw error; alert('Banner berhasil ditambahkan!');
+            document.getElementById('form-banner').reset(); muatDataPengaturanDanBanner();
+        } catch (err) { alert(err.message); }
+    }
+
+    function renderTabelBanner(banners) {
+        let html = "";
+        if (banners.length === 0) html = `<tr><td colspan="5" style="text-align:center;">Belum ada banner aktif.</td></tr>`;
+        banners.forEach(b => {
+            html += `<tr>
+                <td><img src="${b.image_url}" class="prod-img" style="width:80px;height:45px;"></td>
+                <td><strong>${b.judul || 'Tanpa Judul'}</strong></td>
+                <td>${b.urutan}</td>
+                <td><span style="color:${b.aktif?'green':'red'};">● Aktif</span></td>
+                <td><button class="btn-danger" style="padding:4px 8px;font-size:12px;" onclick="hapusBanner(${b.id})">Hapus</button></td>
+            </tr>`;
         });
+        document.getElementById('tabelBanners').innerHTML = html;
+    }
+
+    async function hapusBanner(id) {
+        if (confirm("Hapus banner promo ini?")) {
+            try { const { error } = await _supabase.from('banners').delete().eq('id', id); if (error) throw error; muatDataPengaturanDanBanner(); } catch (err) { alert(err.message); }
+        }
     }
 </script>
 </body>
