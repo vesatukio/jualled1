@@ -6,16 +6,17 @@ let daftarProduk = [];
 let daftarKategoriSedia = new Set();
 let namaAdminAktif = "";
 
-// Initial run
+// Pemicu awal saat web dibuka
 window.onload = async () => { 
     await muatDropdownAdmin();
-    await muatDataKatalog();
+    // muatDataKatalog otomatis dipanggil di dalam muatDropdownAdmin setelah namaAdminAktif dipastikan siap
     await muatDataPengaturanDanBanner();
 };
 
-// 1. ME-LOAD DROPDOWN SECARA REALTIME DARI DATABASE
+// 1. MEMUAT SEMUA DAFTAR ADMIN KE DROPDOWN (MENJAWAB: PEMILIK BELUM MUNCUL SEMUA)
 async function muatDropdownAdmin() {
     try {
+        // Ambil semua username tanpa filter agar semua pemilik muncul di dropdown atas
         const { data, error } = await _supabase.from('akses_admin').select('username').order('username', { ascending: true });
         if (error) throw error;
 
@@ -30,86 +31,52 @@ async function muatDropdownAdmin() {
             select.innerHTML = `<option value="dutaterang">DUTATERANG</option>`;
         }
 
+        // Cek sesi login terakhir
         let lastSession = localStorage.getItem('duta_admin_name');
         
         if (lastSession && select.querySelector(`option[value="${lastSession}"]`)) {
             select.value = lastSession;
             namaAdminAktif = lastSession;
         } else {
-            namaAdminAktif = select.value;
+            namaAdminAktif = select.value; // Jika tidak ada sesi, pakai admin pertama di list
             localStorage.setItem('duta_admin_name', namaAdminAktif);
         }
+
+        // SETELAH DROPDOWN DAN ADMIN AKTIF SIAP, BARU AMBIL DATA PRODUK
+        await muatDataKatalog();
+
     } catch (e) {
         alert("Gagal memuat sistem keamanan: " + e.message);
         blokirTotalPanel("Sistem Keamanan Gagal Dimuat");
     }
 }
 
-// 2. PROTEKSI KETAT SAAT USER MEMILIH / MENGUBAH VALUE DROPDOWN
+// 2. KETIKA DROPDOWN DIGANTI, VERIFIKASI DAN MUAT ULANG KATALOG YANG SESUAI
 async function gantiAdminAktif(val) {
     val = val.trim().toLowerCase();
     
     try {
-        // Validasi database untuk memastikan nama terdaftar asli
         const { data, error } = await _supabase.from('akses_admin').select('username').eq('username', val).single();
         
         if (error || !data) {
-            alert("❌ GAGAL! KODE ATAU NAMA ADMIN SALAH / TIDAK TERDAFTAR!");
+            alert("❌ AKSES DITOLAK!\nNama Admin tidak terdaftar di database!");
             blokirTotalPanel("AKSES DIKUNCI: IDENTITAS TIDAK VALID");
             return;
         }
 
         namaAdminAktif = val;
         localStorage.setItem('duta_admin_name', val);
-        alert(`Sesi Terverifikasi: ${val.toUpperCase()}`);
         
-        // Refresh katalog jika lolos validasi keamanan
-        muatDataKatalog();
-        muatDataPengaturanDanBanner();
+        // Refresh data produk & banner berdasarkan admin yang baru dipilih
+        await muatDataKatalog();
         
     } catch (e) {
-        alert("Terjadi masalah pada enkripsi verifikasi.");
+        alert("Terjadi kesalahan verifikasi identitas.");
         blokirTotalPanel("AKSES DIKUNCI");
     }
 }
 
-// 3. MENAMBAH ORANG BARU KE DALAM DATABASE LEWAT DROPDOWN PANEL
-async function tambahAdminBaru() {
-    let namaBaru = prompt("Masukkan nama pengguna/admin baru:");
-    if (!namaBaru || namaBaru.trim() === "") return;
-
-    namaBaru = namaBaru.trim().toLowerCase();
-
-    try {
-        const { error } = await _supabase.from('akses_admin').insert([{ username: namaBaru, bisa_update: true }]);
-        if (error) throw error;
-
-        alert(`Admin "${namaBaru.toUpperCase()}" berhasil ditambahkan!`);
-        await muatDropdownAdmin();
-        
-        document.getElementById("dropdownAdmin").value = namaBaru;
-        gantiAdminAktif(namaBaru);
-    } catch (e) {
-        alert("Gagal mendaftarkan nama baru (Nama mungkin sudah dipakai orang lain).");
-    }
-}
-
-// 4. KUNCI TOTAL TAMPILAN JIKA NAMA NGASAL / DI-MANIPULASI
-function blokirTotalPanel(pesan) {
-    daftarProduk = [];
-    document.getElementById("tabelProduk").innerHTML = `
-        <tr>
-            <td colspan="6" style="text-align:center; color: red; font-weight: bold; padding: 30px;">
-                ⚠️ ${pesan}. Pilih nama admin terdaftar pada opsi dropdown di atas!
-            </td>
-        </tr>
-    `;
-    document.getElementById("statTotalJenis").innerText = "0 Item";
-    document.getElementById("statTotalStok").innerText = "0 Pcs";
-    tutupForm();
-}
-
-// 5. AMBIL DATA DARI SUPABASE
+// 3. AMBIL DATA PRODUK (MENJAWAB: TIAP ORANG HANYA BISA LIHAT PRODUK MASING-MASING)
 async function muatDataKatalog() {
     if (!namaAdminAktif || namaAdminAktif === "") {
         blokirTotalPanel("IDENTITAS KOSONG");
@@ -117,14 +84,18 @@ async function muatDataKatalog() {
     }
 
     try {
+        // PERBAIKAN UTAMA: Tambahkan filter .eq('pemilik', namaAdminAktif) 
+        // Supaya database hanya mengembalikan produk milik admin yang sedang login saja!
         const { data, error } = await _supabase
             .from('produk')
             .select('*')
+            .eq('pemilik', namaAdminAktif)
             .order('id', { ascending: false });
 
         if (error) throw error;
         daftarProduk = data || [];
         
+        // Kumpulkan kategori khusus dari produk milik admin ini saja
         daftarKategoriSedia.clear();
         daftarProduk.forEach(p => { if(p.kategori) daftarKategoriSedia.add(p.kategori); });
         
@@ -136,14 +107,16 @@ async function muatDataKatalog() {
     }
 }
 
+// 4. RENDER TABEL PRODUK KHUSUS PEMILIK AKTIF
 function renderTabel() {
     let html = "";
     if (daftarProduk.length === 0) {
-        html = `<tr><td colspan="6" style="text-align:center;">Tidak ada data produk di database.</td></tr>`;
+        html = `<tr><td colspan="6" style="text-align:center; color:#64748b; padding:20px;">Anda belum mengupload produk. Silakan tambah produk baru!</td></tr>`;
     }
+    
     daftarProduk.forEach(p => {
         const imgUrl = p.gambar1 || 'https://via.placeholder.com/150';
-        const pemilikProduk = p.pemilik ? p.pemilik.toLowerCase() : "";
+        const pemilikProduk = p.pemilik ? p.pemilik.toLowerCase() : "tidak diketahui";
         
         html += `
             <tr>
@@ -157,7 +130,7 @@ function renderTabel() {
                 <td>${p.stok || '0'}</td>
                 <td>
                     <button class="btn-primary" style="padding:4px 8px; font-size:12px;" onclick="editForm(${p.id})">Edit</button>
-                    <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="hapusProduk(${p.id}, '${p.nama}', '${pemilikProduk}')">Hapus</button>
+                    <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="hapusProduk(${p.id}, '${p.nama}')">Hapus</button>
                 </td>
             </tr>
         `;
@@ -165,21 +138,18 @@ function renderTabel() {
     document.getElementById("tabelProduk").innerHTML = html;
 }
 
-// 6. VALIDASI KEPEMILIKAN PRODUK SAAT UPDATE / SIMPAN DATA
+// 5. PROSES SIMPAN PRODUK BARU / EDIT PRODUK LAMA
 async function simpanProduk(e) {
     e.preventDefault();
     const id = document.getElementById("prod_id").value;
-    const pemilikLama = document.getElementById("prod_pemilik_lama").value;
     
-    // Blokir aksi jika admin aktif mencoba memodifikasi barang milik orang lain
-    if (id && pemilikLama !== namaAdminAktif) {
-        alert(`❌ AKSES DITOLAK!\nProduk ini dibuat oleh "${pemilikLama.toUpperCase()}".\nAnda (${namaAdminAktif.toUpperCase()}) tidak berhak mengubah data ini.`);
-        return;
-    }
-
-    let kategoriFinal = document.getElementById("prod_kategori_manual").value || document.getElementById("prod_kategori_select").value;
+    let kategoriInputBaru = document.getElementById("prod_kategori_baru").value;
+    let kategoriDropdown = document.getElementById("prod_kategori_select").value;
+    
+    let kategoriFinal = kategoriInputBaru || kategoriDropdown;
     kategoriFinal = kategoriFinal ? kategoriFinal.trim() : "Lainnya";
 
+    // Payload data otomatis mengunci field 'pemilik' ke admin yang sedang aktif
     const payload = {
         nama: document.getElementById("prod_nama").value,
         kategori: kategoriFinal,
@@ -190,69 +160,97 @@ async function simpanProduk(e) {
         gambar2: document.getElementById("prod_gambar2").value,
         gambar3: document.getElementById("prod_gambar3").value,
         info: document.getElementById("prod_info").value,
-        pemilik: id ? pemilikLama : namaAdminAktif // Masukkan hak kepemilikan
+        pemilik: namaAdminAktif // Dipaksa masuk sebagai pemilik aktif
     };
 
     try {
         if (id) {
-            const { error } = await _supabase.from('produk').update(payload).eq('id', id);
+            // Update data
+            const { error } = await _supabase.from('produk').update(payload).eq('id', id).eq('pemilik', namaAdminAktif);
             if (error) throw error;
             alert("Produk berhasil diperbarui!");
         } else {
+            // Insert data baru
             const { error } = await _supabase.from('produk').insert([payload]);
             if (error) throw error;
             alert("Produk baru berhasil ditambahkan!");
         }
         tutupForm();
-        muatDataKatalog();
+        await muatDataKatalog(); // Muat ulang data terfilter
     } catch (err) {
         alert("Gagal menyimpan: " + err.message);
     }
 }
 
-// 7. VALIDASI KEPEMILIKAN PRODUK SAAT HAPUS DATA
-async function hapusProduk(id, nama, pemilik) {
-    if (pemilik !== namaAdminAktif) {
-        alert(`❌ AKSES DITOLAK!\nProduk ini milik "${pemilik.toUpperCase()}".\nAnda (${namaAdminAktif.toUpperCase()}) tidak memiliki izin menghapusnya.`);
-        return;
-    }
-
+// 6. PROSES HAPUS PRODUK (HANYA BISA MENGHAPUS DATA MILIK SENDIRI KARENA SINKRON API)
+async function hapusProduk(id, nama) {
     if (confirm(`Apakah Anda yakin ingin menghapus produk "${nama}"?`)) {
         try {
-            const { error } = await _supabase.from('produk').delete().eq('id', id);
+            const { error } = await _supabase.from('produk').delete().eq('id', id).eq('pemilik', namaAdminAktif);
             if (error) throw error;
             alert("Produk berhasil dihapus!");
-            muatDataKatalog();
+            await muatDataKatalog();
         } catch (err) {
             alert("Gagal menghapus: " + err.message);
         }
     }
 }
 
+// 7. TAMBAH ADMIN BARU LEWAT PANEL
+async function tambahAdminBaru() {
+    let namaBaru = prompt("Masukkan nama pengguna/admin baru:");
+    if (!namaBaru || namaBaru.trim() === "") return;
+
+    namaBaru = namaBaru.trim().toLowerCase();
+
+    try {
+        const { error } = await _supabase.from('akses_admin').insert([{ username: namaBaru, bisa_update: true }]);
+        if (error) throw error;
+
+        alert(`Admin "${namaBaru.toUpperCase()}" berhasil terdaftar!`);
+        await muatDropdownAdmin(); // Reload dropdown agar nama baru muncul
+        
+        document.getElementById("dropdownAdmin").value = namaBaru;
+        await gantiAdminAktif(namaBaru); // Langsung switch ke admin baru
+    } catch (e) {
+        alert("Gagal mendaftarkan nama baru (Kemungkinan nama sudah terdaftar).");
+    }
+}
+
+// 8. FUNGSI LOCKDOWN AMAN JIKA TERJADI INDIKASI MANIPULASI IDENTITAS
+function blokirTotalPanel(pesan) {
+    daftarProduk = [];
+    document.getElementById("tabelProduk").innerHTML = `
+        <tr>
+            <td colspan="6" style="text-align:center; color: red; font-weight: bold; padding: 30px;">
+                ⚠️ ${pesan}. Sila pilih kembali nama Admin yang sah pada dropdown di atas!
+            </td>
+        </tr>
+    `;
+    document.getElementById("statTotalJenis").innerText = "0 Item";
+    document.getElementById("statTotalStok").innerText = "0 Pcs";
+    tutupForm();
+}
+
+// --- SISA UTILITY KODE DI BAWAH TETAP SAMA ---
 function editForm(id) {
     const p = daftarProduk.find(item => item.id === id);
     if(!p) return;
 
-    const pemilikProduk = p.pemilik ? p.pemilik.toLowerCase() : "";
-    
-    if (pemilikProduk !== namaAdminAktif) {
-        alert(`⚠️ INFORMASI:\nAnda hanya dapat melihat spek detail produk ini. Anda tidak bisa menyimpannya karena produk ini milik "${pemilikProduk.toUpperCase()}".`);
-    }
-
     document.getElementById("prod_id").value = p.id;
-    document.getElementById("prod_pemilik_lama").value = pemilikProduk;
     document.getElementById("prod_nama").value = p.nama || "";
     
     const select = document.getElementById("prod_kategori_select");
-    const inputManual = document.getElementById("prod_kategori_manual");
-    if(p.kategori && daftarKategoriSedia.has(p.kategori)) {
+    const inputBaru = document.getElementById("prod_kategori_baru");
+    
+    inputBaru.style.display = "none";
+    inputBaru.value = p.kategori || "";
+
+    if (p.kategori && daftarKategoriSedia.has(p.kategori)) {
         select.value = p.kategori;
-        inputManual.style.display = "none";
-        inputManual.value = p.kategori;
     } else {
         select.value = "";
-        inputManual.style.display = "block";
-        inputManual.value = p.kategori || "";
+        if(p.kategori) inputBaru.style.display = "block";
     }
 
     document.getElementById("prod_harga").value = p.harga || 0;
@@ -268,7 +266,6 @@ function editForm(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- UTILITY SCRIPT (PENGATURAN COUNTER, KATEGORI & TAB) ---
 function hitungDanRenderSummary() {
     let totalJenis = daftarProduk.length;
     let totalStok = 0;
@@ -280,26 +277,27 @@ function hitungDanRenderSummary() {
 function updateDropdownKategori() {
     const select = document.getElementById("prod_kategori_select");
     select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
-    daftarKategoriSedia.forEach(kat => { select.innerHTML += `<option value="${kat}">${kat}</option>`; });
+    const kategoriUrut = Array.from(daftarKategoriSedia).sort();
+    kategoriUrut.forEach(kat => { if(kat) select.innerHTML += `<option value="${kat}">${kat}</option>`; });
 }
 
-function aktifkanInputKategoriBaru(e) {
+function bukaInputKategoriBaru(e) {
     e.preventDefault();
-    const inputManual = document.getElementById("prod_kategori_manual");
-    const select = document.getElementById("prod_kategori_select");
-    inputManual.style.display = "block"; inputManual.value = ""; select.value = ""; inputManual.focus();
+    const inputBaru = document.getElementById("prod_kategori_baru");
+    const selectUtama = document.getElementById("prod_kategori_select");
+    inputBaru.style.display = "block"; inputBaru.value = ""; selectUtama.value = ""; inputBaru.focus();
 }
 
-function handleKategoriSelect(selectEl) {
-    const inputManual = document.getElementById("prod_kategori_manual");
-    if(selectEl.value !== "") { inputManual.style.display = "none"; inputManual.value = selectEl.value; }
+function handlePilihDropdown(selectEl) {
+    const inputBaru = document.getElementById("prod_kategori_baru");
+    if (selectEl.value !== "") { inputBaru.style.display = "none"; inputBaru.value = selectEl.value; }
 }
 
 function bukaFormTambah() {
     document.getElementById("prodForm").reset();
     document.getElementById("prod_id").value = "";
-    document.getElementById("prod_pemilik_lama").value = "";
-    document.getElementById("prod_kategori_manual").style.display = "none";
+    document.getElementById("prod_kategori_baru").style.display = "none";
+    document.getElementById("prod_kategori_baru").value = "";
     document.getElementById("formTitle").innerText = "Tambah Produk Baru";
     document.getElementById("formCard").style.display = "block";
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -364,7 +362,7 @@ function renderTabelBanner(banners) {
     document.getElementById('tabelBanners').innerHTML = html;
 }
 
-async function logoutBanner(id) {
+async function hapusBanner(id) {
     if (confirm("Hapus banner promo ini?")) {
         try { const { error } = await _supabase.from('banners').delete().eq('id', id); if (error) throw error; muatDataPengaturanDanBanner(); } catch (err) { alert(err.message); }
     }
