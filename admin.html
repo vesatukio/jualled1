@@ -357,28 +357,62 @@
         cekIdentitasAdmin();
     };
 
-    function cekIdentitasAdmin() {
-        namaAdmin = localStorage.getItem('duta_admin_name');
-        if (!namaAdmin) {
-            namaAdmin = prompt("Masukkan Nama Anda untuk Mengakses Panel (Contoh: Admin1 atau Admin2):");
-            if (!namaAdmin || namaAdmin.trim() === "") {
-                alert("Nama admin wajib diisi!");
-                cekIdentitasAdmin();
-                return;
-            }
-            namaAdmin = namaAdmin.trim().toLowerCase();
-            localStorage.setItem('duta_admin_name', namaAdmin);
+    // SISTEM FILTER SECURITY - HANYA ADMIN INI YANG DIZINKAN
+const ADMIN_DIIZINKAN = ["admin1", "admin2", "dutaterang", "pijarjaya"]; 
+
+function cekIdentitasAdmin() {
+    namaAdmin = localStorage.getItem('duta_admin_name');
+    
+    if (!namaAdmin) {
+        let inputNama = prompt("🔒 Keamanan Berlapis. Masukkan Nama Admin Resmi Anda:");
+        
+        if (!inputNama || inputNama.trim() === "") {
+            alert("Akses ditolak! Identitas kosong.");
+            blokirAksesPanel();
+            return;
         }
-        document.getElementById('namaAdminAktif').innerText = namaAdmin.toUpperCase();
-        muatDataAdmin();
-        muatDataPengaturanDanBanner();
+        
+        namaAdmin = inputNama.trim().toLowerCase();
+        
+        // Cek validasi kecocokan dengan Whitelist array
+        if (!ADMIN_DIIZINKAN.includes(namaAdmin)) {
+            alert("❌ NAMA ADMIN TIDAK DIKEMBALIKAN / TIDAK DIIZINKAN! Gagal mengakses database.");
+            blokirAksesPanel();
+            return;
+        }
+        
+        // Simpan hanya jika lolos verifikasi nama admin
+        localStorage.setItem('duta_admin_name', namaAdmin);
+    } else {
+        // Double-check proteksi jika user memodifikasi paksa localStorage
+        if (!ADMIN_DIIZINKAN.includes(namaAdmin.toLowerCase())) {
+            localStorage.removeItem('duta_admin_name');
+            blokirAksesPanel();
+            return;
+        }
     }
+    
+    document.getElementById('namaAdminAktif').innerText = namaAdmin.toUpperCase();
+    muatDataAdmin();
+    muatDataPengaturanDanBanner();
+}
 
-    function gantiAdmin() {
-        localStorage.removeItem('duta_admin_name');
-        location.reload();
-    }
+function blokirAksesPanel() {
+    // Menghancurkan visual layout body agar tidak bisa dimanipulasi inspeksi element
+    document.body.innerHTML = `
+        <div style="text-align:center; margin-top:100px; color:var(--danger, #dc2626); font-family:sans-serif; padding:20px;">
+            <i class="fa-solid fa-lock" style="font-size:50px; margin-bottom:15px;"></i>
+            <h2>Akses Ditolak - Un-Authorized Admin Name</h2>
+            <p>Nama Admin salah atau tidak memiliki otoritas otentikasi ke database Supabase Duta Terang LED.</p>
+            <button onclick="lokasiUlangLogin()" style="background:var(--primary, #2563eb); color:white; padding:10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Coba Lagi</button>
+        </div>
+    `;
+}
 
+function lokasiUlangLogin() {
+    localStorage.removeItem('duta_admin_name');
+    location.reload();
+}
     // Pindah Tab Menu
     function switchTab(tabId, el) {
         document.querySelectorAll('.panel-section').forEach(sec => sec.classList.remove('active'));
