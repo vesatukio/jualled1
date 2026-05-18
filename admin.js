@@ -339,12 +339,15 @@ function handlePilihDropdown(selectEl) {
 function bukaFormTambah() {
     document.getElementById("prodForm").reset();
     document.getElementById("prod_id").value = "";
-    document.getElementById("prod_kategori_baru").style.display = "none";
-    document.getElementById("prod_kategori_baru").value = "";
+    
+    // GANTI DUA BARIS INI MENGGUNAKAN "prod_kategori_manual"
+    document.getElementById("prod_kategori_manual").style.display = "none";
+    document.getElementById("prod_kategori_manual").value = "";
+    
     document.getElementById("formTitle").innerText = "Tambah Produk Baru";
     document.getElementById("formCard").style.display = "block";
     window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+} // Jangan lupa pastikan ada penutup kurung kurawal di akhir fungsi
 
 function tutupForm() { document.getElementById("formCard").style.display = "none"; }
 
