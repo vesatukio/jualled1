@@ -137,9 +137,16 @@
 
 <div class="app-container">
     
-    <div class="header-toko">
+    <!-- Bagian Header yang disesuaikan dengan CSS baru -->
+    <header>
         <div class="brand-title">Duta Terang <span>LED</span></div>
         <button class="secret-admin-trigger" onclick="hitungKlikRahasia()"></button>
+    </header>
+
+    <!-- Tempat teks berjalan dinamis Supabase -->
+    <div class="marquee-container">
+        <i class="fa-solid fa-bullhorn"></i>
+        <marquee scrollamount="4" id="teks-berjalan">Memuat informasi toko...</marquee>
     </div>
 
     <div class="container">
