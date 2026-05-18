@@ -145,10 +145,10 @@ header {
 /* Mengunci Gambar Kotak Presisi & Tidak Ketinggian */
 .card img { 
     width: 100%; 
-    aspect-ratio: 1 / 1; 
+    aspect-ratio: 4 / 3; 
     max-height: 140px; 
     object-fit: contain; 
-    border-radius: 6px; 
+    border-radius: 8px; 
     background: #fafafa; 
     cursor: zoom-in; 
 }
