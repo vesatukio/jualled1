@@ -1,7 +1,7 @@
 {
-  "name": "Duta Terang LED",
-  "short_name": "DT LED",
-  "start_url": "./index.html",
+  "name": "Toko Dutakita",
+  "short_name": "Dutakita",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#00bcd4",
