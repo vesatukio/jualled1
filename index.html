@@ -3,238 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duta Terang LED</title>
+    <title>Katalog Toko</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
-            --primary-bg: #0f172a;
+            --bg-color: #0f172a;
             --card-bg: #1e293b;
-            --text-main: #f8fafc;
+            --text-color: #f8fafc;
             --text-muted: #94a3b8;
-            --neon-blue: #38bdf8;
-            --neon-pink: #f43f5e;
+            --accent-color: #38bdf8;
+            --danger-color: #ef4444;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--primary-bg);
-            color: var(--text-main);
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
         }
 
-        /* 1. TEKS BERJALAN DI HEADER (DI ATAS BANNER) */
-        .marquee-container {
-            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+        /* 1. SEGMEN BARU: TEKS BERJALAN DI HEADER (DI ATAS BANNER) */
+        .header-marquee {
+            background-color: #1e3a8a;
             color: #ffffff;
+            padding: 6px 10px;
             font-size: 13px;
             font-weight: bold;
-            padding: 8px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 10;
-        }
-        .marquee-text {
-            display: flex;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-        .marquee-text marquee {
-            width: 100%;
+            border-bottom: 1px solid #2563eb;
         }
 
-        /* HEADER & AREA RAHASIA */
         header {
-            background-color: #0b0f19;
-            padding: 15px 20px;
+            background-color: #0b1329;
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #1e293b;
-            position: relative;
-        }
-        .logo-area {
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            background: linear-gradient(to right, #ffffff, var(--neon-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        /* 2. TOMBOL RAHASIA BENTUK HATI DI ATAS HEADER */
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        /* 2. SEGMEN BARU: TOMBOL HATI RAHASIA DI KANAN ATAS */
         .secret-heart-btn {
             background: none;
             border: none;
+            font-size: 18px;
             cursor: pointer;
-            font-size: 16px;
-            color: rgba(244, 63, 94, 0.15); /* Samar agar tidak dicurigai pembeli */
-            transition: all 0.3s ease;
-            user-select: none;
+            opacity: 0.15; /* Dibuat sangat samar agar tidak terlihat pembeli */
+            transition: opacity 0.2s;
             -webkit-tap-highlight-color: transparent;
-            padding: 5px;
         }
         .secret-heart-btn:active {
-            color: var(--neon-pink);
-            transform: scale(1.3);
-            text-shadow: 0 0 10px var(--neon-pink);
+            opacity: 1;
+            transform: scale(1.2);
         }
 
-        /* MAIN CONTENT & BANNER */
         .container {
             max-width: 840px;
             margin: 0 auto;
-            padding: 15px;
+            padding: 20px;
         }
+
         .banner-slider {
             width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            margin-bottom: 25px;
+            height: auto;
             aspect-ratio: 840 / 360;
+            border-radius: 10px;
+            overflow: hidden;
             background-color: var(--card-bg);
+            margin-bottom: 20px;
             position: relative;
         }
+
         .banner-slider img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: none;
         }
+
         .banner-slider img.active {
             display: block;
         }
 
-        /* DUMMY KATALOG (Supaya layout terlihat seimbang) */
-        .katalog-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
         .grid-produk {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 15px;
-            margin-bottom: 80px; /* Jarak aman agar tidak tertutup tombol bawah */
+            margin-bottom: 80px; /* Jarak agar tidak tertutup navbar bawah */
         }
+
         .card-produk {
             background-color: var(--card-bg);
             border-radius: 8px;
             overflow: hidden;
-            border: 1px solid #334155;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .img-placeholder {
+
+        .card-produk img {
             width: 100%;
-            aspect-ratio: 1/1;
-            background-color: #0f172a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            font-size: 12px;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
         }
+
         .info-produk {
-            padding: 10px;
+            padding: 12px;
         }
+
         .nama-produk {
             font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-weight: bold;
+            margin-bottom: 8px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .harga-produk {
-            color: var(--neon-blue);
+            color: var(--accent-color);
             font-weight: bold;
             font-size: 15px;
         }
 
-        /* 3. TOMBOL RAHASIA DI BAGIAN BAWAH (NAVBAR) */
         .bottom-navbar {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: #0b0f19;
-            border-top: 1px solid #1e293b;
+            background-color: #0b1329;
             display: flex;
             justify-content: space-around;
-            align-items: center;
-            padding: 12px 0;
-            z-index: 90;
-        }
-        .nav-item {
-            color: var(--text-muted);
-            font-size: 12px;
-            text-align: center;
-            cursor: pointer;
-            flex: 1;
-            background: none;
-            border: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .nav-item span {
-            display: block;
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
-        /* Tombol Rahasia Bawah */
-        .secret-bottom-btn {
-            opacity: 0.4; /* Terlihat seperti dekorasi titik biasa */
-            transition: all 0.2s;
-        }
-        .secret-bottom-btn:active {
-            transform: scale(0.8);
-            opacity: 1;
+            padding: 12px;
+            border-top: 1px solid #1e293b;
+            z-index: 10;
         }
 
-        /* 4. TOMBOL INSTALL MELAYANG (KANAN TENGAH) */
+        .nav-item {
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .nav-item span {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        /* 3. SEGMEN BARU: TOMBOL RAHASIA DI NAV BAWAH */
+        .secret-bottom-btn {
+            opacity: 0.3; /* Terlihat samar seperti tombol menu biasa */
+        }
+
+        /* 4. SEGMEN BARU: TOMBOL INSTALL PWA MELAYANG (KANAN TENGAH) */
         .floating-install-btn {
             position: fixed;
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            background: linear-gradient(135deg, var(--neon-pink), #ec4899);
+            background: linear-gradient(135deg, #ef4444, #ec4899);
             color: white;
             border: none;
-            width: 55px;
-            height: 55px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             cursor: pointer;
             z-index: 99;
-            display: none; /* Hanya muncul jika PWA siap di-install */
+            display: none; /* Hanya muncul jika browser mendeteksi bisa di-install */
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            animation: pulse-animation 2s infinite;
+            font-size: 18px;
             -webkit-tap-highlight-color: transparent;
         }
         .floating-install-btn span {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
-            margin-top: -2px;
             text-transform: uppercase;
+            margin-top: -2px;
         }
 
-        @keyframes pulse-animation {
-            0% { transform: translateY(-50%) scale(1); box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4); }
-            50% { transform: translateY(-50%) scale(1.08); box-shadow: 0 4px 25px rgba(244, 63, 94, 0.7); }
-            100% { transform: translateY(-50%) scale(1); box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4); }
-        }
-
-        /* 5. BOX POPUP INTERAKTIF INSTALASI PWA */
-        .pwa-popup-overlay {
+        /* 5. SEGMEN BARU: BOX POPUP KOTAK PWA */
+        .pwa-overlay {
             position: fixed;
             inset: 0;
-            background-color: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(3px);
             z-index: 100;
             display: flex;
             align-items: center;
@@ -242,107 +204,56 @@
             padding: 20px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
         }
-        .pwa-popup-overlay.show {
+        .pwa-overlay.show {
             opacity: 1;
             pointer-events: auto;
         }
         .pwa-box {
-            background-color: var(--card-bg);
-            border: 2px solid var(--neon-blue);
-            border-radius: 16px;
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 320px;
             width: 100%;
-            max-width: 360px;
-            padding: 25px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2);
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        .pwa-popup-overlay.show .pwa-box {
-            transform: scale(1);
-        }
-        .pwa-icon {
-            font-size: 45px;
-            background: linear-gradient(to bottom, var(--neon-blue), #2563eb);
-            -webkit-background-clip: text;
-            -webkit-text-color: transparent;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-        .pwa-box h3 {
-            margin: 10px 0 5px 0;
-            font-size: 18px;
-        }
-        .pwa-box p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        .pwa-buttons {
-            display: flex;
-            gap: 10px;
-        }
+        .pwa-box h3 { margin: 10px 0; font-size: 18px; }
+        .pwa-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+        .pwa-btn-group { display: flex; gap: 10px; }
         .pwa-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            transition: opacity 0.2s;
+            flex: 1; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;
         }
-        .pwa-btn:active {
-            opacity: 0.8;
-        }
-        .pwa-btn-confirm {
-            background-color: var(--neon-blue);
-            color: #0f172a;
-        }
-        .pwa-btn-cancel {
-            background-color: #334155;
-            color: var(--text-main);
-        }
+        .pwa-btn-install { background-color: var(--accent-color); color: #0f172a; }
+        .pwa-btn-close { background-color: #334155; color: var(--text-color); }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <div class="marquee-container">
-        <div class="marquee-text">
-            <marquee id="runningTextBeranda" behavior="scroll" direction="left" scrollamount="5">
-                Selamat Datang di Duta Terang LED! Memuat pesan promo terbaru dari database...
-            </marquee>
-        </div>
+    <div class="header-marquee">
+        <marquee id="runningTextBeranda" behavior="scroll" direction="left" scrollamount="5">
+            Memuat informasi promo berjalan dari database...
+        </marquee>
     </div>
 
     <header>
-        <div class="logo-area">DUTA TERANG LED</div>
+        <h1>Duta Terang LED</h1>
         
-        <button class="secret-heart-btn" id="heartSecretBtn" title="Fitur Dekorasi">❤️</button>
+        <button class="secret-heart-btn" id="heartSecretBtn">❤️</button>
     </header>
 
     <div class="container">
-        
         <div class="banner-slider" id="bannerContainer">
-            <div style="color: var(--text-muted); text-align:center; padding-top: 15%; font-size:14px;" id="bannerLoader">
-                Menghubungkan ke database banner...
+            <div style="text-align: center; padding-top: 15%; color: var(--text-muted);" id="bannerLoader">
+                Memuat data banner...
             </div>
         </div>
 
-        <div class="katalog-title">📦 Sparepart & Produk Sedia</div>
         <div class="grid-produk" id="tabelProdukBeranda">
-            <div class="card-produk">
-                <div class="img-placeholder">Loading...</div>
-                <div class="info-produk">
-                    <div class="nama-produk">Mengambil data...</div>
-                    <div class="harga-produk">Rp 0</div>
-                </div>
             </div>
-        </div>
     </div>
 
     <div class="bottom-navbar">
@@ -351,27 +262,27 @@
         </button>
         
         <button class="nav-item secret-bottom-btn" id="bottomSecretBtn">
-            <span>🔹</span>Sistem
+            <span>⚙️</span>Sistem
         </button>
         
-        <button class="nav-item" onclick="bukaPopupInstalasiManual()">
-            <span>📲</span>Aplikasi
+        <button class="nav-item" onclick="bukaPopupInstalasi()">
+            <span>📥</span>Aplikasi
         </button>
     </div>
 
-    <button class="floating-install-btn" id="floatingInstallBtn" onclick="bukaPopupInstalasiManual()">
-        📥
+    <button class="floating-install-btn" id="floatingInstallBtn" onclick="bukaPopupInstalasi()">
+        📲
         <span>Ambil</span>
     </button>
 
-    <div class="pwa-popup-overlay" id="pwaPopupOverlay">
+    <div class="pwa-overlay" id="pwaOverlay">
         <div class="pwa-box">
-            <div class="pwa-icon">📲</div>
+            <div style="font-size: 40px;">📲</div>
             <h3>Pasang Aplikasi Resmi?</h3>
-            <p>Dapatkan kemudahan akses katalog sparepart LED & Audio tanpa memakan kuota browser. Ukuran sangat ringan!</p>
-            <div class="pwa-buttons">
-                <button class="pwa-btn pwa-btn-cancel" onclick="tutupPopupInstalasi()">Batal</button>
-                <button class="pwa-btn pwa-btn-confirm" id="btnProsesInstalPWA">Pasang Sekarang</button>
+            <p>Akses katalog sparepart jadi lebih cepat, ringan, dan hemat kuota langsung dari layar utama HP Anda.</p>
+            <div class="pwa-btn-group">
+                <button class="pwa-btn pwa-btn-close" onclick="tutupPopupInstalasi()">Batal</button>
+                <button class="pwa-btn pwa-btn-install" id="btnEksekusiInstallPWA">Install</button>
             </div>
         </div>
     </div>
@@ -382,87 +293,63 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Variabel Penghitung Ketukan Rahasia
-    let hitungKlikAtas = 0;
-    let hitungKlikBawah = 0;
+    // Variabel Deteksi Rahasia
+    let klikAtas = 0, klikBawah = 0;
     let timerAtas, timerBawah;
 
     window.onload = () => {
-        muatPengaturanDanTeks();
-        muatBannerPromosi();
-        muatProdukBeranda();
-        inisialisasiTombolRahasia();
+        muatRunningText();
+        muatBannerSesuaiDatabase();
+        muatKatalogBarang();
+        aktifkanSistemTombolRahasia();
     };
 
-    // ================= LOGIKA DATABASE & CONFIG =================
+    // --- LOGIKA MENAMPILKAN DATA ORIGINAL ---
 
-    async function muatPengaturanDanTeks() {
+    async function muatRunningText() {
         try {
-            let { data, error } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
+            let { data } = await _supabase.from('pengaturan').select('running_text').eq('id', 1).single();
             if (data && data.running_text) {
                 document.getElementById('runningTextBeranda').innerText = data.running_text;
             }
-        } catch (e) {
-            console.log("Gagal memuat Running Text database.");
-        }
+        } catch (e) { console.log(e); }
     }
 
-    async function muatBannerPromosi() {
+    async function muatBannerSesuaiDatabase() {
         try {
-            let { data: banners, error } = await _supabase.from('banners').select('*').eq('aktif', true).order('urutan', { ascending: true });
-            
-            if (error) throw error;
-
+            let { data: banners } = await _supabase.from('banners').select('*').eq('aktif', true).order('urutan', { ascending: true });
             if (!banners || banners.length === 0) {
-                document.getElementById('bannerContainer').innerHTML = `<div style="padding-top:15%; color:var(--text-muted); text-align:center;">Belum ada banner aktif.</div>`;
+                document.getElementById('bannerContainer').innerHTML = "<div style='padding:20px; text-align:center;'>Tidak ada banner.</div>";
                 return;
             }
-
-            let bannerHtml = "";
+            let html = "";
             banners.forEach((b, index) => {
-                bannerHtml += `<img src="${b.image_url}" class="${index === 0 ? 'active' : ''}" alt="${b.judul || 'Promo'}">`;
+                html += `<img src="${b.image_url}" class="${index === 0 ? 'active' : ''}">`;
             });
-            document.getElementById('bannerContainer').innerHTML = bannerHtml;
-
-            // Alur Slider Otomatis per 4 detik jika banner lebih dari satu
-            if(banners.length > 1) {
-                startBannerSlider();
-            }
-        } catch (e) {
-            document.getElementById('bannerContainer').innerHTML = `<div style="padding-top:15%; color:var(--neon-pink); text-align:center;">Gagal mengambil gambar banner.</div>`;
-        }
+            document.getElementById('bannerContainer').innerHTML = html;
+            if(banners.length > 1) jalankanSliderOtomatis();
+        } catch (e) { console.log(e); }
     }
 
-    function startBannerSlider() {
+    function jalankanSliderOtomatis() {
         setInterval(() => {
             const wadah = document.getElementById('bannerContainer');
-            const gambars = wadah.querySelectorAll('img');
-            if(gambars.length === 0) return;
-            
-            let indeksAktif = Array.from(gambars).findIndex(img => img.classList.contains('active'));
-            gambars[indeksAktif].classList.remove('active');
-            
-            let indeksBerikutnya = (indeksAktif + 1) % gambars.length;
-            gambars[indeksBerikutnya].classList.add('active');
+            const listImg = wadah.querySelectorAll('img');
+            let indexAktif = Array.from(listImg).findIndex(img => img.classList.contains('active'));
+            listImg[indexAktif].classList.remove('active');
+            let indexBerikutnya = (indexAktif + 1) % listImg.length;
+            listImg[indexBerikutnya].classList.add('active');
         }, 4000);
     }
 
-    async function muatProdukBeranda() {
+    async function muatKatalogBarang() {
         try {
-            let { data: produk, error } = await _supabase.from('produk').select('*').order('id', { ascending: false });
-            if (error) throw error;
-
-            if(!produk || produk.length === 0) {
-                document.getElementById('tabelProdukBeranda').innerHTML = `<div style="color:var(--text-muted);">Toko belum memasukkan produk barang.</div>`;
-                return;
-            }
-
+            let { data: produk } = await _supabase.from('produk').select('*').order('id', { ascending: false });
             let html = "";
             produk.forEach(p => {
-                let foto = p.gambar1 || 'https://via.placeholder.com/150';
                 html += `
                     <div class="card-produk">
-                        <img src="${foto}" style="width:100%; aspect-ratio:1/1; object-fit:cover;" onerror="this.src='https://via.placeholder.com/150'">
+                        <img src="${p.gambar1 || 'https://via.placeholder.com/150'}" onerror="this.src='https://via.placeholder.com/150'">
                         <div class="info-produk">
                             <div class="nama-produk">${p.nama}</div>
                             <div class="harga-produk">Rp ${(Number(p.harga)||0).toLocaleString('id-ID')}</div>
@@ -471,97 +358,80 @@
                 `;
             });
             document.getElementById('tabelProdukBeranda').innerHTML = html;
-        } catch(e) {
-            document.getElementById('tabelProdukBeranda').innerHTML = `<div style="color:var(--neon-pink);">Gagal memuat produk toko.</div>`;
-        }
+        } catch (e) { console.log(e); }
     }
 
+    // --- LOGIKA TOMBOL RAHASIA (KETUK 5 KALI CEPAT) ---
 
-    // ================= LOGIKA DETEKSI TOMBOL RAHASIA =================
-
-    function inisialisasiTombolRahasia() {
-        // A. Rahasia Hati Di Atas (Ketuk 5 Kali)
-        const heartBtn = document.getElementById('heartSecretBtn');
-        heartBtn.addEventListener('click', () => {
-            hitungKlikAtas++;
+    function aktifkanSistemTombolRahasia() {
+        // Klik Rahasia Atas (Hati)
+        document.getElementById('heartSecretBtn').addEventListener('click', () => {
+            klikAtas++;
             clearTimeout(timerAtas);
-            
-            if (hitungKlikAtas >= 5) {
-                hitungKlikAtas = 0;
-                masukKePanelAdmin();
+            if (klikAtas >= 5) {
+                klikAtas = 0;
+                bukaHalamanAdmin();
             }
-            
-            timerAtas = setTimeout(() => { hitungKlikAtas = 0; }, 2000);
+            timerAtas = setTimeout(() => { klikAtas = 0; }, 2000);
         });
 
-        // B. Rahasia Titik Nav Bawah (Ketuk 5 Kali)
-        const bottomBtn = document.getElementById('bottomSecretBtn');
-        bottomBtn.addEventListener('click', () => {
-            hitungKlikBawah++;
+        // Klik Rahasia Bawah (Sistem)
+        document.getElementById('bottomSecretBtn').addEventListener('click', () => {
+            klikBawah++;
             clearTimeout(timerBawah);
-            
-            if (hitungKlikBawah >= 5) {
-                hitungKlikBawah = 0;
-                masukKePanelAdmin();
+            if (klikBawah >= 5) {
+                klikBawah = 0;
+                bukaHalamanAdmin();
             }
-            
-            timerBawah = setTimeout(() => { hitungKlikBawah = 0; }, 2000);
+            timerBawah = setTimeout(() => { klikBawah = 0; }, 2000);
         });
     }
 
-    function masukKePanelAdmin() {
-        alert("🔓 Akses terverifikasi. Membuka pintu gerbang Admin Panel...");
+    function bukaHalamanAdmin() {
+        alert("Akses Admin Terdeteksi. Menuju halaman admin...");
         window.location.href = "admin.html";
     }
 
+    // --- LOGIKA PWA INSTALASI POPUP & FLOATING BUTTON ---
 
-    // ================= LOGIKA POPUP PWA & TOMBOL MELAYANG =================
+    let tangkapanPromptPWA;
+    const tombolMelayang = document.getElementById('floatingInstallBtn');
+    const overlayPopup = document.getElementById('pwaOverlay');
 
-    let promptPWAUtama;
-    const flInstallBtn = document.getElementById('floatingInstallBtn');
-    const popupOverlay = document.getElementById('pwaPopupOverlay');
-    const prosesInstalBtn = document.getElementById('btnProsesInstalPWA');
-
-    // Menangkap sinyal instalasi dari browser
     window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault(); 
-        promptPWAUtama = e; // Simpan trigger agar bisa dieksekusi manual
+        e.preventDefault();
+        tangkapanPromptPWA = e;
         
-        // Memunculkan tombol melayang di kanan tengah
-        flInstallBtn.style.display = 'flex';
+        // Munculkan tombol melayang kanan tengah jika PWA siap pasang
+        tombolMelayang.style.display = 'flex';
     });
 
-    function bukaPopupInstalasiManual() {
-        if (!promptPWAUtama) {
-            alert("Aplikasi PWA sudah terpasang atau browser Anda tidak mendukung fitur install otomatis ini.");
+    function bukaPopupInstalasi() {
+        if (!tangkapanPromptPWA) {
+            alert("Aplikasi sudah terpasang atau browser Anda tidak mendukung instalasi otomatis.");
             return;
         }
-        popupOverlay.classList.add('show');
+        overlayPopup.classList.add('show');
     }
 
     function tutupPopupInstalasi() {
-        popupOverlay.classList.remove('show');
+        overlayPopup.classList.remove('show');
     }
 
-    // Eksekusi instalasi saat user menyetujui di dalam pop-up kotak
-    prosesInstalBtn.addEventListener('click', async () => {
-        if (promptPWAUtama) {
+    document.getElementById('btnEksekusiInstallPWA').addEventListener('click', async () => {
+        if (tangkapanPromptPWA) {
             tutupPopupInstalasi();
-            promptPWAUtama.prompt(); // Tampilkan dialog resmi bawaan HP/Chrome
-            
-            const { outcome } = await promptPWAUtama.userChoice;
+            tangkapanPromptPWA.prompt();
+            const { outcome } = await tangkapanPromptPWA.userChoice;
             if (outcome === 'accepted') {
-                console.log('User sukses memasang aplikasi.');
-                flInstallBtn.style.display = 'none'; // Sembunyikan tombol melayang
+                tombolMelayang.style.display = 'none';
             }
-            promptPWAUtama = null;
+            tangkapanPromptPWA = null;
         }
     });
 
-    // Otomatis hilangkan tombol jika aplikasi sukses di-install dari tempat lain
     window.addEventListener('appinstalled', () => {
-        console.log('PWA Duta Terang LED sukses di-instal.');
-        flInstallBtn.style.display = 'none';
+        tombolMelayang.style.display = 'none';
         tutupPopupInstalasi();
     });
 </script>
