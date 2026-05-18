@@ -165,13 +165,13 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="adminMainContent">
     <header>
         <div>
-            <h2> Gauges & Manajemen Toko</h2>
+            <h2>Gauges & Manajemen Toko</h2>
             <div class="admin-badge">
                 👤 Admin: <span id="namaAdminAktif">-</span>
-                <a href="#" onclick="gantiAdmin()" style="color:var(--primary); font-size:11px; text-decoration:none;">(Ganti)</a>
+                <a href="#" onclick="gantiAdmin(event)" style="color:var(--primary); font-size:11px; text-decoration:none; margin-left: 5px; font-weight: bold;">(Ganti)</a>
             </div>
         </div>
         <div>
@@ -180,13 +180,11 @@
         </div>
     </header>
 
-    <!-- Navigasi Menu Tab -->
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('tab-produk', this)">📦 Katalog Produk</button>
         <button class="tab-btn" onclick="switchTab('tab-promo', this)">🎥 Banner & Pengaturan</button>
     </div>
 
-    <!-- ================== TAB KALOG PRODUK ================== -->
     <div id="tab-produk" class="panel-section active">
         <div class="summary-box">
             <div class="stat-card">
@@ -280,11 +278,9 @@
         </div>
     </div>
 
-    <!-- ================== TAB BANNER & CONFIG ================== -->
     <div id="tab-promo" class="panel-section">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
             
-            <!-- Pengaturan Umum Web -->
             <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <h3>📢 Pengaturan Beranda</h3>
                 <form id="form-pengaturan" onsubmit="simpanPengaturan(event)">
@@ -300,7 +296,6 @@
                 </form>
             </div>
 
-            <!-- Tambah Gambar Slider Promo Baru -->
             <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <h3>🎥 Tambah Banner Slider</h3>
                 <form id="form-banner" onsubmit="simpanBanner(event)">
@@ -313,7 +308,7 @@
                         <input type="url" id="banner-url" required placeholder="https://linkgambar.com/banner.jpg">
                     </div>
                     <div class="form-group" style="margin-bottom: 15px;">
-                        <label>Urutan Urutan Tampil (Angka)</label>
+                        <label>Urutan Tampil (Angka)</label>
                         <input type="number" id="banner-urutan" value="0" min="0">
                     </div>
                     <button type="submit" class="btn-pink" style="width: 100%;">Upload & Aktifkan Banner</button>
@@ -321,7 +316,6 @@
             </div>
         </div>
 
-        <!-- Tabel Monitoring Banner Aktif -->
         <h3 style="margin-top: 30px; margin-bottom: 10px;">📋 Slide Banner Terpasang</h3>
         <div class="table-responsive">
             <table>
@@ -353,66 +347,74 @@
     let daftarKategoriSedia = new Set();
     let namaAdmin = "";
 
+    // SISTEM FILTER SECURITY - HANYA ADMIN INI YANG DIZINKAN
+    const ADMIN_DIIZINKAN = ["admin1", "admin2", "dutaterang", "pijarjaya"]; 
+
     window.onload = () => { 
         cekIdentitasAdmin();
     };
 
-    // SISTEM FILTER SECURITY - HANYA ADMIN INI YANG DIZINKAN
-const ADMIN_DIIZINKAN = ["admin1", "admin2", "dutaterang", "pijarjaya"]; 
+    function cekIdentitasAdmin() {
+        namaAdmin = localStorage.getItem('duta_admin_name');
+        
+        if (!namaAdmin) {
+            let inputNama = prompt("🔒 Keamanan Berlapis. Masukkan Nama Admin Resmi Anda:");
+            
+            if (!inputNama || inputNama.trim() === "") {
+                alert("Akses ditolak! Identitas kosong.");
+                blokirAksesPanel();
+                return;
+            }
+            
+            namaAdmin = inputNama.trim().toLowerCase();
+            
+            // Cek validasi kecocokan dengan Whitelist array
+            if (!ADMIN_DIIZINKAN.includes(namaAdmin)) {
+                alert("❌ NAMA ADMIN TIDAK DIKENAL / TIDAK DIIZINKAN! Gagal mengakses database.");
+                blokirAksesPanel();
+                return;
+            }
+            
+            // Simpan hanya jika lolos verifikasi nama admin
+            localStorage.setItem('duta_admin_name', namaAdmin);
+        } else {
+            // Double-check proteksi jika user memodifikasi paksa localStorage
+            if (!ADMIN_DIIZINKAN.includes(namaAdmin.toLowerCase())) {
+                localStorage.removeItem('duta_admin_name');
+                blokirAksesPanel();
+                return;
+            }
+        }
+        
+        document.getElementById('namaAdminAktif').innerText = namaAdmin.toUpperCase();
+        muatDataAdmin();
+        muatDataPengaturanDanBanner();
+    }
 
-function cekIdentitasAdmin() {
-    namaAdmin = localStorage.getItem('duta_admin_name');
-    
-    if (!namaAdmin) {
-        let inputNama = prompt("🔒 Keamanan Berlapis. Masukkan Nama Admin Resmi Anda:");
-        
-        if (!inputNama || inputNama.trim() === "") {
-            alert("Akses ditolak! Identitas kosong.");
-            blokirAksesPanel();
-            return;
-        }
-        
-        namaAdmin = inputNama.trim().toLowerCase();
-        
-        // Cek validasi kecocokan dengan Whitelist array
-        if (!ADMIN_DIIZINKAN.includes(namaAdmin)) {
-            alert("❌ NAMA ADMIN TIDAK DIKEMBALIKAN / TIDAK DIIZINKAN! Gagal mengakses database.");
-            blokirAksesPanel();
-            return;
-        }
-        
-        // Simpan hanya jika lolos verifikasi nama admin
-        localStorage.setItem('duta_admin_name', namaAdmin);
-    } else {
-        // Double-check proteksi jika user memodifikasi paksa localStorage
-        if (!ADMIN_DIIZINKAN.includes(namaAdmin.toLowerCase())) {
+    // FUNGSI BARU: Untuk mengganti user admin tanpa stuck di halaman blokir
+    function gantiAdmin(e) {
+        if(e) e.preventDefault();
+        if (confirm("Apakah Anda yakin ingin keluar dan mengganti akun Admin?")) {
             localStorage.removeItem('duta_admin_name');
-            blokirAksesPanel();
-            return;
+            location.reload(); // Muat ulang untuk memicu prompt nama baru
         }
     }
-    
-    document.getElementById('namaAdminAktif').innerText = namaAdmin.toUpperCase();
-    muatDataAdmin();
-    muatDataPengaturanDanBanner();
-}
 
-function blokirAksesPanel() {
-    // Menghancurkan visual layout body agar tidak bisa dimanipulasi inspeksi element
-    document.body.innerHTML = `
-        <div style="text-align:center; margin-top:100px; color:var(--danger, #dc2626); font-family:sans-serif; padding:20px;">
-            <i class="fa-solid fa-lock" style="font-size:50px; margin-bottom:15px;"></i>
-            <h2>Akses Ditolak - Un-Authorized Admin Name</h2>
-            <p>Nama Admin salah atau tidak memiliki otoritas otentikasi ke database Supabase Duta Terang LED.</p>
-            <button onclick="lokasiUlangLogin()" style="background:var(--primary, #2563eb); color:white; padding:10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Coba Lagi</button>
-        </div>
-    `;
-}
+    function blokirAksesPanel() {
+        // Hapus nama admin lama dari storage supaya kalau diklik 'Coba Lagi' bisa input baru
+        localStorage.removeItem('duta_admin_name');
+        
+        // Menghancurkan visual layout body agar aman dari manipulasi inspect element
+        document.body.innerHTML = `
+            <div style="text-align:center; margin-top:100px; color:var(--danger, #dc2626); font-family:sans-serif; padding:20px;">
+                <h2 style="font-size:50px; margin-bottom:15px;">🔒</h2>
+                <h2>Akses Ditolak - Un-Authorized Admin Name</h2>
+                <p>Nama Admin salah atau tidak memiliki otoritas otentikasi ke database Supabase Duta Terang LED.</p>
+                <button onclick="location.reload()" style="background:#2563eb; color:white; padding:10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:14px; margin-top:10px;">Coba Lagi / Masuk Kembali</button>
+            </div>
+        `;
+    }
 
-function lokasiUlangLogin() {
-    localStorage.removeItem('duta_admin_name');
-    location.reload();
-}
     // Pindah Tab Menu
     function switchTab(tabId, el) {
         document.querySelectorAll('.panel-section').forEach(sec => sec.classList.remove('active'));
@@ -536,7 +538,7 @@ function lokasiUlangLogin() {
         }
     }
 
-    // LOGIKA CORE PRODUK BAWAN (TIDAK BERUBAH)
+    // LOGIKA CORE PRODUK BAWAAN
     function hitungDanRenderSummary() {
         let totalJenis = daftarProduk.length;
         let totalStok = 0;
@@ -595,6 +597,7 @@ function lokasiUlangLogin() {
                 </tr>
             `;
         });
+        document.getElementById("text-align:left;");
         document.getElementById("tabelProduk").innerHTML = html;
     }
 
