@@ -216,6 +216,49 @@ async function tambahAdminBaru() {
         alert("Gagal mendaftarkan nama baru (Kemungkinan nama sudah terdaftar).");
     }
 }
+// ==================== FITUR BARU: HAPUS / NONAKTIFKAN ADMIN ====================
+async function hapusAdminAktif() {
+    // Ambil nama admin yang sedang terpilih di dropdown saat ini
+    const adminYangAkanDihapus = document.getElementById("dropdownAdmin").value;
+
+    if (!adminYangAkanDihapus) {
+        alert("Pilih nama admin yang ingin dihapus terlebih dahulu pada dropdown di atas!");
+        return;
+    }
+
+    // Proteksi keamanan: Jangan biarkan admin utama 'dutaterang' dihapus agar sistem tidak rusak
+    if (adminYangAkanDihapus.toLowerCase() === "dutaterang") {
+        alert("❌ AKSES DITOLAK!\nAdmin utama 'dutaterang' adalah sistem pusat dan tidak boleh dihapus.");
+        return;
+    }
+
+    const konfirmasi = confirm(`Apakah Anda yakin ingin MENGHAPUS total admin "${adminYangAkanDihapus.toUpperCase()}"?\n\nSemua hak akses masuk orang ini akan dicabut seketika.`);
+    
+    if (konfirmasi) {
+        try {
+            // Eksekusi hapus baris data di tabel Supabase akses_admin
+            const { error } = await _supabase
+                .from('akses_admin')
+                .delete()
+                .eq('username', adminYangAkanDihapus);
+
+            if (error) throw error;
+
+            alert(`Admin "${adminYangAkanDihapus.toUpperCase()}" telah berhasil dihapus dari sistem!`);
+            
+            // Bersihkan sesi login localstorage jika dia menghapus dirinya sendiri
+            if (namaAdminAktif === adminYangAkanDihapus) {
+                localStorage.removeItem('duta_admin_name');
+            }
+
+            // Muat ulang dropdown admin agar nama orang tersebut hilang dari daftar pilihan
+            await muatDropdownAdmin();
+
+        } catch (e) {
+            alert("Gagal menghapus admin: " + e.message);
+        }
+    }
+}
 
 // 8. FUNGSI LOCKDOWN AMAN JIKA TERJADI INDIKASI MANIPULASI IDENTITAS
 function blokirTotalPanel(pesan) {
