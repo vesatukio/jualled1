@@ -393,3 +393,28 @@ header {
 .btn-share-prod { position: absolute; top: 12px; right: 12px; z-index: 50; width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(255, 255, 255, 0.85); display: flex; align-items: center; justify-content: center; color: #444; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
 .status-habis { position: absolute; inset: 0; background: rgba(255,255,255,0.75); color: var(--danger); display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 10; border-radius: 8px; pointer-events: none; }
 .hide { display: none !important; }
+/* Gaya Label Habis untuk Halaman Utama Toko */
+.img-container-produk {
+    position: relative;
+    width: 100%;
+}
+
+.badge-habis {
+    position: absolute;
+    bottom: 8px;      /* Jarak dari bawah foto */
+    left: 8px;        /* Jarak dari kiri foto */
+    background-color: #dc2626; /* Merah menyala */
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+/* Opsional: Membuat kartu produk yang habis sedikit agak pudar */
+.produk-habis-pudar {
+    opacity: 0.7;
+}
