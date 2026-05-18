@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Duta Terang LED</title>
+    <title>Dutakita LED</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -162,7 +162,7 @@
     
     <!-- Bagian Header Toko -->
     <header>
-    <div class="brand-title">Duta Terang <span>LED</span></div>
+    <div class="brand-title">Dutakita <span>LED</span></div>
     
     <!-- KLIK 5X PADA BADGE INI UNTUK MASUK ADMIN -->
     <div class="counter-badge-admin" onclick="hitungKlikRahasia()" style="background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; border: 1px solid #cbd5e1; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px;">
@@ -268,7 +268,7 @@
         } catch (err) { 
             console.error("Gagal memuat pengaturan:", err); 
             const runningTextEl = document.getElementById('text-promo-running');
-            if (runningTextEl) runningTextEl.innerText = "Selamat Datang di Duta Terang LED!";
+            if (runningTextEl) runningTextEl.innerText = "Selamat Datang di Dutakita LED!";
         }
     }
 
@@ -498,7 +498,7 @@
     }
 
     function shareKeMedsos(nama, harga, img) {
-        const isiTeks = `Cek ${nama} seharga Rp ${harga.toLocaleString('id-ID')} di Duta Terang LED. Lihat spesifikasinya disini: ${img}`;
+        const isiTeks = `Cek ${nama} seharga Rp ${harga.toLocaleString('id-ID')} di Dutakita LED. Lihat spesifikasinya disini: ${img}`;
         if (navigator.share) {
             navigator.share({ title: nama, text: isiTeks, url: window.location.href });
         } else {
@@ -533,7 +533,7 @@
         }
 
         const nomorTokoWA = "6283157925577"; // GANTI DENGAN NOMOR WA SEBENARNYA
-        const formatPesan = `*STRUK ORDERAN BARU - DUTA TERANG LED*\n\n` +
+        const formatPesan = `*STRUK ORDERAN BARU - DUTAKITA LED*\n\n` +
                             `👤 *Nama:* ${nama}\n` +
                             `📍 *Alamat Lengkap:* ${alamat}\n\n` +
                             `📦 *Rincian Produk:*\n${teksBelanjaan}\n` +
