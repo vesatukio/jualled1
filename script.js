@@ -2,7 +2,7 @@
 const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8"; 
 
-// Inisialisasi menggunakan variabel _supabase agar konsisten
+// Gunakan nama variabel penampung yang berbeda, misalnya _supabase
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // State Aplikasi Global
