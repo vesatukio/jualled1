@@ -1,97 +1,211 @@
-/* style.css */
+/* ==========================================
+   1. UTALITAS UTAMA & VARIABEL
+   ========================================== */
 :root { 
     --primary: #00bcd4; 
     --pink: #e91e63; 
     --wa: #25D366; 
     --danger: #ff4d4d; 
     --blue-old: #2196F3; 
+    --bg: #f5f6f8;
+    --text: #222;
+}
+
+* { 
+    box-sizing: border-box; 
 }
 
 body { 
     margin: 0; 
     font-family: 'Segoe UI', Roboto, sans-serif; 
-    background: #f5f6f8; 
-    padding-bottom: 250px; 
+    background: var(--bg); 
+    padding-bottom: 300px; /* Jarak ruang agar tidak tertutup panel kasir bawah */
 }
 
-* { box-sizing: border-box; }
+/* ==========================================
+   2. NAVIGASI ATAS & KATEGORI
+   ========================================== */
+.top-nav { 
+    position: sticky; 
+    top: 0; 
+    z-index: 9000; 
+    background: #fff; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+}
 
-.top-nav { position: sticky; top: 0; z-index: 9000; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-header { background: var(--primary); color: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
-.promo-running { background: #f1f1f1; color: #333; font-size: 11px; padding: 10px 0; font-weight: bold; border-bottom: 1px solid #ddd; overflow: hidden; }
+header { 
+    background: var(--primary); 
+    color: #fff; 
+    padding: 12px 15px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
 
-#cat-bar { display: flex; gap: 8px; padding: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; background: #fff; }
-#cat-bar::-webkit-scrollbar { display: none; }
-#cat-bar button { border: 1px solid #ddd; padding: 6px 12px; border-radius: 20px; background: #fff; font-size: 12px; white-space: nowrap; color: #666; cursor: pointer; transition: 0.3s; }
+.promo-running { 
+    background: #f1f1f1; 
+    color: #333; 
+    font-size: 11px; 
+    padding: 10px 0; 
+    font-weight: bold; 
+    border-bottom: 1px solid #ddd; 
+    overflow: hidden; 
+}
 
-.container { padding: 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.card { background: #fff; border-radius: 10px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; display: flex; flex-direction: column; }
-.card img { width: 100%; height: 110px; object-fit: contain; border-radius: 5px; background: #fafafa; cursor: zoom-in; }
-.product-name { font-size: 12px; font-weight: bold; margin-top: 8px; line-height: 1.2; color: #222; min-height: 30px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.price-new { color: var(--pink); font-weight: 800; font-size: 14px; margin-top: 4px; display: block; }
+#cat-bar { 
+    display: flex; 
+    gap: 8px; 
+    padding: 10px; 
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; 
+    background: #fff; 
+}
+#cat-bar::-webkit-scrollbar { 
+    display: none; 
+}
+#cat-bar button { 
+    border: 1px solid #ddd; 
+    padding: 6px 12px; 
+    border-radius: 20px; 
+    background: #fff; 
+    font-size: 12px; 
+    white-space: nowrap; 
+    color: #666; 
+    cursor: pointer; 
+    transition: 0.3s; 
+}
 
-.qty-wrapper { display: flex; align-items: center; background: #f0f0f0; border-radius: 4px; margin-top: 8px; height: 30px; overflow: hidden; }
-.qty-wrapper button { width: 35px; height: 100%; border: none; background: var(--primary); color: white; font-weight: bold; font-size: 18px; cursor: pointer; }
-.qty-wrapper span { font-size: 13px; font-weight: bold; flex-grow: 1; text-align: center; }
+/* ==========================================
+   3. RESPONSIVE GRID & KARTU PRODUK (ALA SHOPEE)
+   ========================================== */
+.container { 
+    padding: 8px; 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); /* Tampilan HP: 2 Kolom */
+    gap: 8px; /* Jarak antar kartu lebih rapat & efisien */
+}
 
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
-.promo-box { background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 320px; width: 100%; animation: popUp 0.3s ease-out; }
+@media (min-width: 768px) {
+    .container { 
+        grid-template-columns: repeat(4, 1fr); /* Tampilan PC: 4 Kolom */
+        gap: 12px; 
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+}
 
-@keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-#cart { position: fixed; bottom: 75px; left: 0; right: 0; background: #fff; padding: 12px; border-top: 3px solid var(--primary); display: flex; gap: 10px; z-index: 8000; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); max-height: 220px; }
-.cart-left { flex: 1.2; display: flex; flex-direction: column; gap: 5px; }
-.cart-left input, .cart-left textarea, .cart-left select { padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; width: 100%; }
-.cart-right { flex: 1; border-left: 1px dashed #ddd; padding-left: 10px; display: flex; flex-direction: column; }
-#cart-list-render { font-size: 11px; color: #666; max-height: 60px; overflow-y: auto; white-space: pre-line; }
-#total { color: var(--pink); font-weight: 800; font-size: 15px; margin-bottom: 5px; }
-#btn-wa { background: var(--wa); color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 9500; padding-bottom: env(safe-area-inset-bottom); }
-.nav-item { display: flex; flex-direction: column; align-items: center; color: #888; text-decoration: none; font-size: 11px; font-weight: 500; flex: 1; transition: 0.3s; position: relative; }
-.nav-item.active { color: var(--primary); }
-.nav-item span:first-child { font-size: 22px; margin-bottom: 2px; }
-
-.badge-notif { position: absolute; top: -5px; right: 15px; background: var(--pink); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; display: none; border: 2px solid #fff; animation: pulse-red 2s infinite; }
-@keyframes pulse-red { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.7); } 70% { transform: scale(1.2); box-shadow: 0 0 0 5px rgba(233, 30, 99, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0); } }
-
-.qris-wrapper { position: relative; top: -20px; background: #f5f6f8; padding: 6px; border-radius: 50%; }
-.btn-qris { width: 60px; height: 60px; background: linear-gradient(45deg, var(--primary), #00d2ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; box-shadow: 0 4px 15px rgba(0,188,212,0.4); border: 4px solid #fff; cursor: pointer; }
-
-#camera-modal { position: fixed; inset: 0; background: #000; z-index: 20000; display: none; }
-#video-preview { width: 100%; height: 100%; object-fit: cover; }
-.scan-box { width: 250px; height: 250px; border: 2px solid var(--primary); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 4000px rgba(0,0,0,0.5); }
-
-#btn-install-float { position: fixed; right: 0; top: 40%; background: var(--pink); color: white; border: none; padding: 10px 5px; border-radius: 10px 0 0 10px; font-size: 11px; z-index: 8500; display: none; flex-direction: column; cursor: pointer; }
-.hide { display: none !important; }
-
-./* Container kartu produk harus relatif agar tombol bisa menempel */
-.card {
-    position: relative;
-    overflow: hidden; /* Agar efek menyatu lebih rapi */
-    background: #fff;
-    border-radius: 12px;
+.card { 
+    background: #fff; 
+    border-radius: 8px; 
+    padding: 8px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.04); 
+    position: relative; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between;
     border: 1px solid #eee;
+    overflow: hidden;
     transition: transform 0.2s;
+    height: 100%;
 }
 
-/* Desain Tombol Share Profesional */
+/* Mengatur Rasio Gambar Pendek & Kompak */
+.card img { 
+    width: 100%; 
+    aspect-ratio: 1 / 1; /* Mengunci bentuk kotak persegi */
+    max-height: 135px; /* Batasi tinggi gambar di HP agar tidak melar kebawah */
+    object-fit: contain; /* Foto utuh masuk wadah, tidak terpotong */
+    border-radius: 6px; 
+    background: #fafafa; 
+    cursor: zoom-in; 
+}
+
+@media (min-width: 768px) {
+    .card img { 
+        max-height: 170px; /* Batasi tinggi gambar proporsional di PC */
+    }
+}
+
+/* Pembatasan Teks Judul Produk (Maksimal 2 Baris) */
+.product-name { 
+    font-size: 12px; 
+    font-weight: 600; 
+    margin-top: 6px; 
+    line-height: 1.3; 
+    color: var(--text); 
+    height: 32px; /* Menjaga tinggi wadah judul tetap rata sejajar komputer */
+    display: -webkit-box; 
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical; 
+    overflow: hidden; 
+}
+
+.price-new { 
+    color: var(--pink); 
+    font-weight: 800; 
+    font-size: 13.5px; 
+    margin: 4px 0 8px 0; 
+    display: block; 
+}
+
+/* ==========================================
+   4. TOMBOL KONTROL [ + ] 0 [ - ] STANDBY
+   ========================================== */
+.qty-wrapper { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    background: #f1f5f9; 
+    border-radius: 6px; 
+    margin-top: auto; /* Memaksa posisi tombol selalu mentok di bawah kartu */
+    height: 28px; /* Lebih tipis dan rapi */
+    overflow: hidden; 
+    border: 1px solid #cbd5e1;
+}
+
+.qty-wrapper button { 
+    width: 30px; 
+    height: 100%; 
+    border: none; 
+    background: #cbd5e1; /* Warna abu netral serasi untuk tombol siaga */
+    color: #1e293b; 
+    font-weight: bold; 
+    font-size: 16px; 
+    cursor: pointer; 
+    transition: background 0.2s;
+}
+
+.qty-wrapper button:hover {
+    background: #bfdbfe;
+}
+
+.qty-wrapper span { 
+    font-size: 13px; 
+    font-weight: bold; 
+    flex-grow: 1; 
+    text-align: center; 
+    color: var(--text);
+}
+
+/* ==========================================
+   5. FITUR MINI: SHARE & STATUS STOCK
+   ========================================== */
 .btn-share-prod {
     position: absolute;
-    top: 10px;
-    right: 10px; /* Di pojok kanan atas gambar */
+    top: 12px;
+    right: 12px;
     z-index: 50;
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     border: none;
-    background: rgba(255, 255, 255, 0.7); /* Transparan putih */
-    backdrop-filter: blur(4px); /* Efek kaca kekinian */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
     color: #444;
 }
@@ -103,21 +217,253 @@ header { background: var(--primary); color: #fff; padding: 12px 15px; display: f
 }
 
 .btn-share-prod svg {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
 }
 
-/* Tambahkan sedikit overlay bayangan halus di pojok atas agar icon lebih terlihat */
-.card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(to bottom left, rgba(0,0,0,0.05), transparent);
-    pointer-events: none;
-    z-index: 40;
+.status-habis { 
+    position: absolute; 
+    inset: 0; 
+    background: rgba(255,255,255,0.75); 
+    color: var(--danger); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 900; 
+    font-size: 14px;
+    z-index: 10; 
+    border-radius: 8px; 
+    pointer-events: none; 
 }
 
-.status-habis { position: absolute; inset: 0; background: rgba(255,255,255,0.7); color: var(--danger); display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 10; border-radius: 10px; pointer-events: none; }
+/* ==========================================
+   6. PANEL KASIR / KERANJANG (CHOUT PANEL)
+   ========================================== */
+#cart { 
+    position: fixed; 
+    bottom: 70px; /* Berada tepat di atas sticky navigasi menu */
+    left: 50%; 
+    right: auto;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 600px; /* Menjaga ukuran proporsional di PC */
+    background: #fff; 
+    padding: 12px; 
+    border-top: 3px solid var(--primary); 
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    display: flex; 
+    gap: 10px; 
+    z-index: 8000; 
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.12); 
+    max-height: 220px; 
+    box-sizing: border-box;
+}
+
+/* Sembunyikan panel jika tidak aktif secara default di JS */
+#cart.hide-panel {
+    display: none !important;
+}
+
+.cart-left { 
+    flex: 1.2; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 6px; 
+}
+.cart-left input, .cart-left textarea, .cart-left select { 
+    padding: 6px 8px; 
+    border: 1px solid #cbd5e1; 
+    border-radius: 6px; 
+    font-size: 12px; 
+    width: 100%; 
+    outline: none;
+    background: #f8fafc;
+}
+.cart-right { 
+    flex: 1; 
+    border-left: 1px dashed #ddd; 
+    padding-left: 10px; 
+    display: flex; 
+    flex-direction: column; 
+}
+#cart-list-render { 
+    font-size: 11px; 
+    color: #555; 
+    max-height: 70px; 
+    overflow-y: auto; 
+    white-space: pre-line; 
+    margin-bottom: 4px;
+}
+#total { 
+    color: var(--pink); 
+    font-weight: 800; 
+    font-size: 15px; 
+    margin-top: auto;
+    margin-bottom: 6px; 
+    display: flex;
+    justify-content: space-between;
+}
+#btn-wa { 
+    background: var(--wa); 
+    color: white; 
+    border: none; 
+    padding: 8px; 
+    border-radius: 6px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-size: 13px;
+}
+
+/* ==========================================
+   7. STICKY NAVIGASI MENU BAWAH & QRIS JUMBO
+   ========================================= */
+.bottom-nav { 
+    position: fixed; 
+    bottom: 0; 
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 600px;
+    height: 65px; 
+    background: #fff; 
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center; 
+    box-shadow: 0 -2px 15px rgba(0,0,0,0.08); 
+    z-index: 9500; 
+    padding-bottom: env(safe-area-inset-bottom); 
+    border-top: 1px solid #e2e8f0;
+}
+
+.nav-item { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    color: #888; 
+    text-decoration: none; 
+    font-size: 11px; 
+    font-weight: 500; 
+    flex: 1; 
+    transition: 0.3s; 
+    position: relative; 
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.nav-item.active { 
+    color: var(--primary); 
+}
+.nav-item span:first-child { 
+    font-size: 20px; 
+    margin-bottom: 2px; 
+}
+
+/* Desain Bulatan QRIS Menjadi Ukuran Jumbo Menarik */
+.qris-wrapper { 
+    position: relative; 
+    top: -15px; 
+    background: #fff; 
+    padding: 4px; 
+    border-radius: 50%; 
+    box-shadow: 0 -3px 10px rgba(0,0,0,0.05);
+}
+.btn-qris { 
+    width: 55px; 
+    height: 55px; 
+    background: linear-gradient(45deg, var(--pink), #ff477e); /* Menggunakan warna pink agar kontras menarik perhatian */
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: white; 
+    font-size: 24px; 
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4); 
+    border: 3px solid #fff; 
+    cursor: pointer; 
+}
+
+/* ==========================================
+   8. MODAL MODAL & PWA FLOATING BUTTON
+   ========================================== */
+.modal { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.85); 
+    display: none; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 10000; 
+    padding: 20px; 
+}
+.promo-box { 
+    background: white; 
+    padding: 25px; 
+    border-radius: 20px; 
+    text-align: center; 
+    max-width: 320px; 
+    width: 100%; 
+    animation: popUp 0.3s ease-out; 
+}
+
+#camera-modal { 
+    position: fixed; 
+    inset: 0; 
+    background: #000; 
+    z-index: 20000; 
+    display: none; 
+}
+#video-preview { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+}
+.scan-box { 
+    width: 250px; 
+    height: 250px; 
+    border: 2px solid var(--primary); 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    box-shadow: 0 0 0 4000px rgba(0,0,0,0.5); 
+}
+
+/* Tombol PWA Mini di Kanan Tengah */
+#btn-install-float { 
+    position: fixed; 
+    right: 0; 
+    top: 45%; 
+    background: var(--primary); 
+    color: white; 
+    border: none; 
+    padding: 10px 6px; 
+    border-radius: 8px 0 0 8px; 
+    font-size: 10px; 
+    font-weight: bold;
+    z-index: 8500; 
+    display: none; 
+    flex-direction: column; 
+    align-items: center;
+    gap: 4px;
+    cursor: pointer; 
+    box-shadow: -2px 4px 10px rgba(0,0,0,0.15);
+}
+
+.badge-notif { 
+    position: absolute; 
+    top: -5px; 
+    right: 15px; 
+    background: var(--pink); 
+    color: white; 
+    font-size: 10px; 
+    padding: 2px 6px; 
+    border-radius: 10px; 
+    font-weight: bold; 
+    display: none; 
+    border: 2px solid #fff; 
+    animation: pulse-red 2s infinite; 
+}
+
+.hide { display: none !important; }
