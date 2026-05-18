@@ -371,7 +371,7 @@
         await muatDataPengaturanDanBanner();
     };
 
-    // 1. SISTEM DINAMIS DROPDOWN ADMIN (DIAMBIL DARI TABEL 'akses_admin')
+    // 1. SISTEM DINAMIS DROPDOWN ADMIN (DENGAN PROTEKSI KETAT)
     async function muatDropdownAdmin() {
         try {
             const { data, error } = await _supabase.from('akses_admin').select('username').order('username', { ascending: true });
@@ -385,28 +385,127 @@
                     select.innerHTML += `<option value="${acc.username}">${acc.username.toUpperCase()}</option>`;
                 });
             } else {
-                // Fail-safe jika tabel kosong, otomatis buat satu default admin
+                // Fail-safe jika tabel kosong di awal setup
                 select.innerHTML = `<option value="dutaterang">DUTATERANG</option>`;
             }
 
             // Pulihkan sesi login terakhir dari localstorage jika ada
             let lastSession = localStorage.getItem('duta_admin_name');
+            
+            // VALIDASI UTAMA: Apakah session terakhir valid & ada di database?
             if (lastSession && select.querySelector(`option[value="${lastSession}"]`)) {
                 select.value = lastSession;
                 namaAdminAktif = lastSession;
             } else {
-                namaAdminAktif = select.value;
+                // Jika session kosong atau namanya ngawur (tidak ada di dropdown)
+                namaAdminAktif = select.value; // Paksa pakai pilihan pertama yang valid
                 localStorage.setItem('duta_admin_name', namaAdminAktif);
             }
         } catch (e) {
-            alert("Gagal memuat daftar admin: " + e.message);
+            alert("Gagal memuat sistem keamanan: " + e.message);
+            blokirTotalPanel("Sistem Keamanan Gagal Dimuat");
         }
     }
 
-    function gantiAdminAktif(val) {
-        namaAdminAktif = val;
-        localStorage.setItem('duta_admin_name', val);
-        alert(`Pengguna aktif diganti ke: ${val.toUpperCase()}`);
+    // Fungsi pengetatan saat dropdown diganti atau diubah paksa lewat console/inspect
+    async function gantiAdminAktif(val) {
+        val = val.trim().toLowerCase();
+        
+        try {
+            // Cek langsung ke database apakah nama ini benar-benar terdaftar
+            const { data, error } = await _supabase.from('akses_admin').select('username').eq('username', val).single();
+            
+            if (error || !data) {
+                // JIKA SALAH NAMA / KODE TIDAK TERDAFTAR
+                alert("❌ AKSES DITOLAK!\nNama atau Kode Admin yang Anda masukkan SALAH/Tidak Terdaftar!");
+                blokirTotalPanel("AKSES DIKUNCI: IDENTITAS TIDAK VALID");
+                return;
+            }
+
+            // Jika benar, baru izinkan masuk
+            namaAdminAktif = val;
+            localStorage.setItem('duta_admin_name', val);
+            alert(`Sesi aktif berhasil diverifikasi: ${val.toUpperCase()}`);
+            
+            // Muat ulang katalog setelah terverifikasi
+            muatDataKatalog();
+            muatDataPengaturanDanBanner();
+            
+        } catch (e) {
+            alert("Terjadi kesalahan verifikasi identitas.");
+            blokirTotalPanel("AKSES DIKUNCI");
+        }
+    }
+
+    // 2. FITUR TAMBAH ORANG BARU LANGSUNG DARI DROPDOWN
+    async function tambahAdminBaru() {
+        let namaBaru = prompt("Masukkan nama pengguna/admin baru:");
+        if (!namaBaru || namaBaru.trim() === "") return;
+
+        namaBaru = namaBaru.trim().toLowerCase();
+
+        try {
+            const { error } = await _supabase.from('akses_admin').insert([{ username: namaBaru, bisa_update: true }]);
+            if (error) throw error;
+
+            alert(`Admin "${namaBaru.toUpperCase()}" sukses terdaftar!`);
+            await muatDropdownAdmin(); // Refresh list dropdown
+            
+            // Langsung switch ke admin baru
+            document.getElementById("dropdownAdmin").value = namaBaru;
+            gantiAdminAktif(namaBaru);
+        } catch (e) {
+            alert("Gagal menambah pengguna baru (Kemungkinan nama sudah terdaftar sebelumnya).");
+        }
+    }
+
+    // 3. AMBIL SEMUA KATALOG (Hanya jalan jika nama admin aktif valid)
+    async function muatDataKatalog() {
+        // Double check sebelum tarik data dari Supabase
+        if (!namaAdminAktif || namaAdminAktif === "") {
+            blokirTotalPanel("IDENTITAS KOSONG");
+            return;
+        }
+
+        try {
+            const { data, error } = await _supabase
+                .from('produk')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error) throw error;
+            daftarProduk = data || [];
+            
+            daftarKategoriSedia.clear();
+            daftarProduk.forEach(p => { if(p.kategori) daftarKategoriSedia.add(p.kategori); });
+            
+            updateDropdownKategori();
+            hitungDanRenderSummary();
+            renderTabel();
+        } catch (e) {
+            alert("Gagal memuat data produk: " + e.message);
+        }
+    }
+
+    // FUNGSI BARU: Untuk mengunci total tampilan jika ada indikasi manipulasi nama admin
+    function blokirTotalPanel(pesan) {
+        daftarProduk = []; // Kosongkan data lokal di memori browser
+        
+        // Kosongkan tabel produk secara visual agar tidak bisa diintip
+        document.getElementById("tabelProduk").innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center; color: red; font-weight: bold; padding: 30px;">
+                    ⚠️ ${pesan}. Sila pilih kembali nama Admin yang sah pada dropdown di atas!
+                </td>
+            </tr>
+        `;
+        
+        // Reset statistik menjadi nol
+        document.getElementById("statTotalJenis").innerText = "0 Item";
+        document.getElementById("statTotalStok").innerText = "0 Pcs";
+        
+        // Sembunyikan form input agar tidak bisa melakukan manipulasi tambah barang
+        tutupForm();
     }
 
     // 2. FITUR TAMBAH ORANG BARU LANGSUNG DARI DROPDOWN
