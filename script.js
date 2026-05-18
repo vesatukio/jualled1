@@ -1,8 +1,9 @@
-// GANTI DENGAN KREDENSIAL SUPABASE ANDA
-const SUPABASE_URL = "https://xyzcompany.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey..."; 
+// KREDENSIAL SUPABASE ASLI (Sudah disamakan dengan database Duta Terang LED Anda)
+const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8"; 
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inisialisasi menggunakan variabel _supabase agar konsisten
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // State Aplikasi Global
 let produkData = [];
@@ -19,37 +20,54 @@ document.addEventListener("DOMContentLoaded", async () => {
 // 1. Ambil Pengaturan Umum Website (Text Running Promo & Counter Install)
 async function muatPengaturanSistem() {
     try {
-        let { data: settings, error } = await supabase
+        let { data: settings, error } = await _supabase
             .from('pengaturan')
             .select('*')
+            .eq('id', 1)
             .single();
         
+        if (error) throw error;
+
         if (settings) {
-            document.getElementById('text-promo-running').innerHTML = `📢 ${settings.running_text}`;
-            document.getElementById('app-stats').innerText = settings.total_terpasang;
+            const runningTextEl = document.getElementById('text-promo-running');
+            const appStatsEl = document.getElementById('app-stats');
+            
+            if (runningTextEl) runningTextEl.innerHTML = `📢 ${settings.running_text}`;
+            if (appStatsEl) appStatsEl.innerText = settings.total_terpasang;
         }
-    } catch (err) { console.error("Gagal memuat pengaturan:", err); }
+    } catch (err) { 
+        console.error("Gagal memuat pengaturan:", err); 
+    }
 }
 
 // 2. Ambil Data Banner Gambar Berubah Otomatis
 async function muatBanners() {
     try {
-        let { data: banners, error } = await supabase
+        let { data: banners, error } = await _supabase
             .from('banners')
             .select('*')
             .eq('aktif', true)
             .order('urutan', { ascending: true });
 
+        if (error) throw error;
+
         if (banners && banners.length > 0) {
             bannerData = banners;
             renderBanners();
+        } else {
+            const slider = document.getElementById('banner-slider');
+            if (slider) slider.innerHTML = `<p style="text-align:center; padding:20px; color:#999;">Belum ada banner promo.</p>`;
         }
-    } catch (err) { console.error("Gagal memuat banner:", err); }
+    } catch (err) { 
+        console.error("Gagal memuat banner:", err); 
+    }
 }
 
 function renderBanners() {
     const slider = document.getElementById('banner-slider');
     const dotsContainer = document.getElementById('banner-dots');
+    if (!slider || !dotsContainer) return;
+
     slider.innerHTML = '';
     dotsContainer.innerHTML = '';
 
@@ -72,7 +90,10 @@ function renderBanners() {
 
     // Jalankan auto-play slider per 4 detik
     let currentSlide = 0;
-    setInterval(() => {
+    // Bersihkan interval lama jika ada agar tidak bentrok
+    if (window.bannerInterval) clearInterval(window.bannerInterval);
+    
+    window.bannerInterval = setInterval(() => {
         currentSlide = (currentSlide + 1) % bannerData.length;
         gantiSlide(currentSlide);
     }, 4000);
@@ -80,7 +101,10 @@ function renderBanners() {
 
 function gantiSlide(index) {
     const slider = document.getElementById('banner-slider');
-    const dots = document.getElementById('banner-dots').children;
+    const dotsContainer = document.getElementById('banner-dots');
+    if (!slider || !dotsContainer) return;
+    
+    const dots = dotsContainer.children;
     slider.style.transform = `translateX(-${index * 100}%)`;
     
     for (let i = 0; i < dots.length; i++) {
@@ -91,34 +115,40 @@ function gantiSlide(index) {
 // 3. Ambil Data Produk & Kategori
 async function muatProduk() {
     try {
-        let { data: produk, error } = await supabase
+        let { data: produk, error } = await _supabase
             .from('produk')
             .select('*')
             .order('id', { ascending: false });
+
+        if (error) throw error;
 
         if (produk) {
             produkData = produk;
             
             // Ekstrak kategori unik untuk mengisi kategori bar
-            const kategoriUnik = ['Semua', ...new Set(produk.map(p => p.kategori))];
+            const kategoriUnik = ['Semua', ...new Set(produk.map(p => p.kategori).filter(Boolean))];
             renderKategoriBar(kategoriUnik);
             
             // Tampilkan seluruh produk awal
             renderDaftarProduk('Semua');
         }
     } catch (err) {
-        document.getElementById('list').innerHTML = `<p style="text-align:center; color:red;">Gagal memuat data produk.</p>`;
+        console.error("Gagal memuat produk:", err);
+        const listEl = document.getElementById('list');
+        if (listEl) listEl.innerHTML = `<p style="text-align:center; color:red; padding:20px;">Gagal memuat data produk: ${err.message}</p>`;
     }
 }
 
 function renderKategoriBar(kategoriArr) {
     const catBar = document.getElementById('cat-bar');
+    if (!catBar) return;
     catBar.innerHTML = '';
+    
     kategoriArr.forEach((kat, index) => {
         const btn = document.createElement('button');
         btn.innerText = kat;
         btn.className = index === 0 ? 'cat-btn active' : 'cat-btn';
-        btn.style.cssText = `padding: 6px 15px; border-radius: 15px; border: none; font-weight: bold; background: ${index === 0 ? 'var(--primary, #007bff)' : '#f1f5f9'}; color: ${index === 0 ? '#fff' : '#333'}; white-space: nowrap; cursor: pointer;`;
+        btn.style.cssText = `padding: 6px 15px; border-radius: 15px; border: none; font-weight: bold; background: ${index === 0 ? 'var(--primary, #007bff)' : '#f1f5f9'}; color: ${index === 0 ? '#fff' : '#333'}; white-space: nowrap; cursor: pointer; margin-right: 5px;`;
         btn.onclick = (e) => {
             document.querySelectorAll('.cat-btn').forEach(b => {
                 b.style.background = '#f1f5f9';
@@ -134,6 +164,7 @@ function renderKategoriBar(kategoriArr) {
 
 function renderDaftarProduk(filterKategori) {
     const listContainer = document.getElementById('list');
+    if (!listContainer) return;
     listContainer.innerHTML = '';
 
     const produkDifilter = filterKategori === 'Semua' 
@@ -146,13 +177,16 @@ function renderDaftarProduk(filterKategori) {
     }
 
     produkDifilter.forEach(prod => {
+        // Toleransi jika database menggunakan gambar1 atau gambar_url
+        const imgUrl = prod.gambar1 || prod.gambar_url || 'https://via.placeholder.com/150';
+        
         const itemHtml = `
             <div class="product-card" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff;">
-                <img src="${prod.gambar_url}" style="width:100%; height:120px; object-fit:cover; border-radius:6px; cursor:zoom-in;" onclick="zoomGambar('${prod.gambar_url}')">
+                <img src="${imgUrl}" style="width:100%; height:120px; object-fit:cover; border-radius:6px; cursor:zoom-in;" onclick="zoomGambar('${imgUrl}')">
                 <h4 style="margin: 8px 0 4px; font-size: 14px; color:#333;">${prod.nama}</h4>
-                <p style="font-size: 11px; color:#777; margin:0 0 8px;">Stok: ${prod.stok} | Kategori: ${prod.kategori}</p>
-                <div style="display:flex; justify-content:between; align-items:center; gap:5px;">
-                    <span style="font-weight:bold; color:var(--pink, #ff477e); font-size:14px;">Rp ${parseInt(prod.harga).toLocaleString('id-ID')}</span>
+                <p style="font-size: 11px; color:#777; margin:0 0 8px;">Stok: ${prod.stok || 0} | Kategori: ${prod.kategori || '-'}</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:5px;">
+                    <span style="font-weight:bold; color:var(--pink, #ff477e); font-size:14px;">Rp ${(Number(prod.harga) || 0).toLocaleString('id-ID')}</span>
                     <button onclick="tambahKeKeranjang(${prod.id}, '${prod.nama}', ${prod.harga})" style="background:var(--primary, #007bff); color:white; border:none; padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Beli</button>
                 </div>
             </div>
@@ -163,9 +197,9 @@ function renderDaftarProduk(filterKategori) {
 
 function zoomGambar(src) {
     const modal = document.getElementById('zoomModal');
-    document.getElementById('imgZoom').src = src;
-    modal.style.display = 'flex';
+    const imgZoom = document.getElementById('imgZoom');
+    if (modal && imgZoom) {
+        imgZoom.src = src;
+        modal.style.display = 'flex';
+    }
 }
-
-// Hubungkan fungsi keranjang belanja bawaan Anda di bawah sini...
-// (Gunakan id, nama, dan harga dari objek produk Supabase)
