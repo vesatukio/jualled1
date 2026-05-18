@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #00bcd4; /* Disamakan dengan style.css baru */
-            --pink: #e91e63; /* Disamakan dengan style.css baru */
+            --primary: #00bcd4; 
+            --pink: #e91e63; 
             --bg: #f5f6f8;
             --text: #222;
             --danger: #ff4d4d;
@@ -17,7 +17,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #e2e8f0; /* Efek background luar abu-abu di PC */
+            background: #e2e8f0; 
             color: var(--text); 
             margin: 0; 
             padding: 0;
@@ -25,7 +25,7 @@
             justify-content: center;
         }
 
-        /* CONTAINER UTAMA: Kunci Lebar Aplikasi Maksimal 500px (Sama seperti Segari) */
+        /* CONTAINER UTAMA */
         .app-container {
             width: 100%;
             max-width: 500px;
@@ -35,7 +35,7 @@
             flex-direction: column;
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            padding-bottom: 280px; /* Jarak aman terbawah dari kasir */
+            padding-bottom: 280px; 
             box-sizing: border-box;
         }
 
@@ -45,10 +45,32 @@
             box-sizing: border-box;
         }
         
-        /* Header Toko */
-        .header-toko { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        /* Gaya Navigasi Atas / Header Baru */
+        header { 
+            background: #fff; 
+            padding: 12px 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid #e2e8f0;
+        }
         .brand-title { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
         .brand-title span { color: var(--pink); }
+
+        /* Gaya Kustomisasi Teks Berjalan Promo */
+        .marquee-container {
+            background: #fff3f8;
+            border-bottom: 1px solid #fce7f3;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--pink);
+            display: flex;
+            align-items: center;
+        }
+        .marquee-container marquee {
+            margin-left: 6px;
+        }
 
         /* Banner Slider Bergilir */
         .banner-wrapper { position: relative; width: 100%; overflow: hidden; border-radius: 12px; margin: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -63,7 +85,7 @@
         .cat-container::-webkit-scrollbar { display: none; }
         .cat-btn { padding: 6px 14px; border-radius: 20px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
 
-        /* RESPONSIVE GRID: Di dalam app-container dikunci 2 kolom agar konsisten */
+        /* RESPONSIVE GRID */
         .grid-produk { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 4px; }
 
         /* Kartu Produk Rapi & Presisi */
@@ -97,7 +119,7 @@
         .btn-qty { background: #cbd5e1; border: none; width: 32px; height: 100%; font-weight: bold; font-size: 16px; cursor: pointer; color: #1e293b; }
         .qty-indicator { font-weight: bold; font-size: 14px; color: var(--text); }
 
-        /* Panel Kasir Belanja Bawah Terkunci Mengikuti Lebar App Container */
+        /* Panel Kasir Belanja Bawah */
         .checkout-panel { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(150%); width: 100%; max-width: 500px; background: white; box-shadow: 0 -6px 25px rgba(0,0,0,0.12); border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 12px; z-index: 999; box-sizing: border-box; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
         .checkout-panel.active { transform: translateX(-50%) translateY(0); }
         .checkout-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 10px; }
@@ -111,13 +133,13 @@
         .btn-wa { background: var(--success); color: white; border: none; padding: 8px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-reset { background: var(--danger); color: white; border: none; padding: 6px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 11px; }
 
-        /* Menu Navigasi Bawah Sticky Mengikuti Lebar App Container */
+        /* Menu Navigasi Bawah Sticky */
         .nav-bottom { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; height: 60px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 500; cursor: pointer; background: none; border: none; flex: 1; }
         .nav-item.active { color: var(--primary); }
         .nav-item i { font-size: 18px; margin-bottom: 2px; }
 
-        /* Tombol QRIS Jumbo Menarik */
+        /* Tombol QRIS Jumbo */
         .nav-item.qris-jumbo { background: linear-gradient(45deg, var(--pink), #ff477e); color: white; width: 55px; height: 55px; border-radius: 50%; justify-content: center; transform: translateY(-12px); box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3); border: 3px solid white; font-weight: bold; flex: none; }
         .nav-item.qris-jumbo i { font-size: 22px; margin: 0; }
 
@@ -127,7 +149,7 @@
         .modal-zoom { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
         .modal-zoom img { max-width: 90%; max-height: 80%; object-fit: contain; border-radius: 8px; }
 
-        /* Tombol Install PWA Mini Menempel Sisi Kanan App Container */
+        /* Floating PWA Install Button */
         .pwa-install-btn { display: none; position: fixed; right: calc(50% - 250px); top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; padding: 10px 6px; border-radius: 8px 0 0 8px; box-shadow: -2px 4px 10px rgba(0,0,0,0.15); z-index: 998; font-size: 10px; font-weight: bold; text-align: center; width: 45px; flex-direction: column; gap: 4px; cursor: pointer; }
         @media (max-width: 500px) { .pwa-install-btn { right: 0; border-radius: 8px 0 0 8px; } }
     </style>
@@ -135,8 +157,21 @@
 </head>
 <body>
 
-<div class="app-container
+<!-- PERBAIKAN: Menutup tag pembuka div app-container dengan benar -->
+<div class="app-container">
+    
+    <!-- Bagian Header Toko -->
+    <header>
+        <div class="brand-title">Duta Terang <span>LED</span></div>
+        <button class="secret-admin-trigger" onclick="hitungKlikRahasia()"></button>
+    </header>
 
+    <!-- Bagian Teks Berjalan (ID disesuaikan dengan fungsi Supabase 'text-promo-running') -->
+    <div class="marquee-container">
+        <i class="fa-solid fa-bullhorn"></i>
+        <marquee scrollamount="4" id="text-promo-running">Memuat informasi toko...</marquee>
+    </div>
+    
     <div class="container">
         <div class="banner-wrapper">
             <div class="banner-slider" id="banner-slider">
@@ -177,7 +212,12 @@
         <button class="nav-item" onclick="pindahTab('panduan')"><i class="fa-solid fa-book-open"></i>Panduan</button>
     </div>
 
-</div> <button class="pwa-install-btn" id="pwaBtn" onclick="installAplikasiPWA()">
+</div> 
+
+<!-- Bagian Statistik PWA Terpasang (ID: app-stats) jika diperlukan agar sistem tidak error -->
+<span id="app-stats" style="display: none;">0</span>
+
+<button class="pwa-install-btn" id="pwaBtn" onclick="installAplikasiPWA()">
     <i class="fa-solid fa-cloud-arrow-down" style="font-size:14px;"></i><br>Ambil App
 </button>
 
@@ -198,9 +238,35 @@
     let defferredPrompt;
 
     document.addEventListener("DOMContentLoaded", async () => {
+        await muatPengaturanSistem(); // 🌟 Ditambahkan agar sistem memanggil teks berjalan dari database
         await muatBannerBergilir();
         await muatProdukDanOfflineCache();
     });
+
+    // 🌟 Fungsi sinkronisasi pengaturan teks running promo & counter install dari Supabase
+    async function muatPengaturanSistem() {
+        try {
+            let { data: settings, error } = await _supabase
+                .from('pengaturan')
+                .select('*')
+                .eq('id', 1)
+                .single();
+            
+            if (error) throw error;
+
+            if (settings) {
+                const runningTextEl = document.getElementById('text-promo-running');
+                const appStatsEl = document.getElementById('app-stats');
+                
+                if (runningTextEl) runningTextEl.innerHTML = `${settings.running_text}`;
+                if (appStatsEl) appStatsEl.innerText = settings.total_terpasang;
+            }
+        } catch (err) { 
+            console.error("Gagal memuat pengaturan:", err); 
+            const runningTextEl = document.getElementById('text-promo-running');
+            if (runningTextEl) runningTextEl.innerText = "Selamat Datang di Duta Terang LED!";
+        }
+    }
 
     async function muatBannerBergilir() {
         try {
@@ -319,7 +385,6 @@
                 });
             }
 
-            /* PERBAIKAN: Hapus 'white-space:nowrap' agar judul produk turun ke baris ke-2 sesuai CSS */
             const itemHtml = `
                 <div class="product-card">
                     <div class="img-container">
@@ -360,6 +425,7 @@
         }
     }
 
+    // Fungsi kontrol belanja lainnya tetap dipertahankan
     function ubahAngkaQty(id, ubah) {
         const item = produkData.find(p => p.id === id);
         let qtySekarang = keranjang[id] || 0;
@@ -414,6 +480,7 @@
     }
 
     function resetKeranjang() {
+        shadowKeranjang = {};
         keranjang = {};
         document.querySelectorAll('.qty-indicator').forEach(el => el.innerText = '0');
         pembaruanStrukRingkasan();
