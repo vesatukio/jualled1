@@ -67,6 +67,32 @@ header {
     overflow: hidden; 
     text-align: center;
 }
+.promo-running { 
+    background: #f1f1f1; 
+    color: #333; 
+    font-size: 11px; 
+    padding: 8px 10px; 
+    font-weight: bold; 
+    border-bottom: 1px solid #ddd; 
+    overflow: hidden; 
+    text-align: center;
+}
+
+/* 🌟 TAMBAHKAN KODE INI DI SINI 🌟 */
+.marquee-container {
+    background: #fff3f8;
+    border-bottom: 1px solid #fce7f3;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pink);
+    display: flex;
+    align-items: center;
+}
+.marquee-container i {
+    margin-right: 6px;
+    color: var(--pink);
+}
 
 #cat-bar { 
     display: flex; 
