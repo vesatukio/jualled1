@@ -162,9 +162,13 @@
     
     <!-- Bagian Header Toko -->
     <header>
-        <div class="brand-title">Duta Terang <span>LED</span></div>
-        <button class="secret-admin-trigger" onclick="hitungKlikRahasia()"></button>
-    </header>
+    <div class="brand-title">Duta Terang <span>LED</span></div>
+    
+    <!-- KLIK 5X PADA BADGE INI UNTUK MASUK ADMIN -->
+    <div class="counter-badge-admin" onclick="hitungKlikRahasia()" style="background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; border: 1px solid #cbd5e1; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px;">
+        <i class="fa-solid fa-download"></i> Terpasang: <span id="app-stats">0</span>
+    </div>
+</header>
 
     <!-- Bagian Teks Berjalan (ID disesuaikan dengan fungsi Supabase 'text-promo-running') -->
     <div class="marquee-container">
