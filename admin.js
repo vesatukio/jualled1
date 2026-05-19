@@ -337,8 +337,25 @@ function handlePilihDropdown(selectEl) {
 }
 
 function bukaFormTambah() {
-    document.getElementById("prodForm").reset();
-    document.getElementById("prod_id").value = "";
+    // 1. Pastikan form dan input ID ada sebelum di-reset
+    const prodForm = document.getElementById("prodForm");
+    const prodId = document.getElementById("prod_id");
+
+    if (prodForm) prodForm.reset();
+    if (prodId) prodId.value = "";
+
+    // 2. Amankan bagian pencarian elemen modal/form pop-up
+    // GANTI "modalForm" dengan ID elemen pop-up/modal yang ingin Anda munculkan
+    const modalTarget = document.getElementById("modalForm"); 
+
+    if (modalTarget) {
+        modalTarget.style.display = "block"; // atau "flex" sesuai CSS Anda
+    } else {
+        // Jika error, pasang alert ini agar Anda tahu ID mana yang salah/tidak ada di HTML
+        alert("Gagal membuka form! JavaScript tidak menemukan elemen target.");
+        console.error("JavaScript mencari elemen, tapi tidak ketemu. Periksa kembali ID di HTML Anda.");
+    }
+}
     
     // GANTI DUA BARIS INI MENGGUNAKAN "prod_kategori_manual"
     document.getElementById("prod_kategori_manual").style.display = "none";
