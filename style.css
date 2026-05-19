@@ -120,21 +120,31 @@ header {
 /* Kategori WARNA-WARNI KINI BISA DIGESER LEBIH RAPAT */
 .cat-container { 
     display: flex; 
+    flex-wrap: nowrap;          /* Memaksa semua tombol tetap satu baris lurus ke kanan */
     gap: 6px; 
-    overflow-x: auto; 
+    overflow-x: auto;           /* Mengaktifkan scroll horizontal/geser kanan-kiri */
+    overflow-y: hidden;         /* Mengunci scroll vertikal agar tidak berantakan */
     padding: 6px 4px 8px; 
     background: transparent;
     white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch; /* Optimasi geser halus di HP (iOS & Android) */
 }
+
 /* Menyembunyikan scrollbar bawaan browser tapi fungsi geser tetap aktif */
-.cat-container::-webkit-scrollbar { display: none; }
-.cat-container { -ms-overflow-style: none; scrollbar-width: none; }
+.cat-container::-webkit-scrollbar { 
+    display: none !important; 
+}
+.cat-container { 
+    -ms-overflow-style: none !important; 
+    scrollbar-width: none !important; 
+}
 
 .cat-btn { 
     display: inline-flex;
     align-items: center;
-    padding: 6px 12px; 
+    padding: 6px 14px; 
     border-radius: 20px; 
     border: none; 
     font-weight: bold; 
@@ -142,7 +152,7 @@ header {
     cursor: pointer; 
     white-space: nowrap; 
     box-shadow: 0 1px 4px rgba(0,0,0,0.04); 
-    flex-shrink: 0; /* Mencegah tombol mengkerut agar teks penuh terlihat */
+    flex-shrink: 0 !important;  /* Mencegah tombol menyusut/mengkerut agar teks penuh terlihat dan bisa meluap untuk digeser */
 }
 
 /* TAMPILAN FILTER DROPDOWN */
