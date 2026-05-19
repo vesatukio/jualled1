@@ -5,222 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dutakita LED</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #00bcd4; 
-            --pink: #e91e63; 
-            --bg: #f5f6f8;
-            --text: #222;
-            --danger: #ff4d4d;
-            --success: #25D366;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #e2e8f0; 
-            color: var(--text); 
-            margin: 0; 
-            padding: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        /* CONTAINER UTAMA */
-        .app-container {
-            width: 100%;
-            max-width: 500px;
-            background: var(--bg);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            padding-bottom: 280px; 
-            box-sizing: border-box;
-        }
-
-        .container { 
-            padding: 8px; 
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        /* Gaya Navigasi Atas / Header Baru */
-        header { 
-            background: #fff; 
-            padding: 10px 12px; 
-            display: flex; 
-            flex-direction: column;
-            gap: 8px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-        .brand-title { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
-        .brand-title span { color: var(--pink); }
-
-        /* KOTAK PENCARIAN MANUAL */
-        .search-container {
-            position: relative;
-            width: 100%;
-        }
-        .search-input {
-            width: 100%;
-            padding: 8px 12px 8px 35px;
-            border: 1px solid #cbd5e1;
-            border-radius: 20px;
-            font-size: 13px;
-            outline: none;
-            box-sizing: border-box;
-            background: #f8fafc;
-            transition: all 0.3s;
-        }
-        .search-input:focus {
-            border-color: var(--primary);
-            background: #fff;
-        }
-        .search-container i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        /* Gaya Kustomisasi Teks Berjalan Promo */
-        .marquee-container {
-            background: #fff3f8;
-            border-bottom: 1px solid #fce7f3;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--pink);
-            display: flex;
-            align-items: center;
-        }
-        .marquee-container marquee {
-            margin-left: 6px;
-        }
-
-        /* Banner Slider Bergilir */
-        .banner-wrapper { position: relative; width: 100%; overflow: hidden; border-radius: 12px; margin: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .banner-slider { display: flex; transition: transform 0.5s ease-in-out; width: 100%; }
-        .banner-slider img { width: 100%; flex-shrink: 0; aspect-ratio: 21 / 9; object-fit: cover; background: #fafafa; }
-        .banner-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
-        .dot.active { background: #fff; width: 12px; border-radius: 4px; }
-
-        /* Kategori Lebih Rapat & Bisa Digeser */
-        .cat-container { 
-            display: flex; 
-            gap: 5px; 
-            overflow-x: auto; 
-            padding: 6px 2px 8px; 
-            scrollbar-width: none; 
-            background: transparent;
-            -webkit-overflow-scrolling: touch;
-        }
-        .cat-container::-webkit-scrollbar { display: none; }
-        .cat-btn { 
-            padding: 5px 10px; 
-            border-radius: 15px; 
-            border: none; 
-            font-weight: bold; 
-            font-size: 11px; 
-            cursor: pointer; 
-            white-space: nowrap; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04); 
-        }
-
-        /* TAMPILAN FILTER DROPDOWN */
-        .filter-container {
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 4px 8px;
-        }
-        .filter-select {
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            background-color: white;
-            color: #475569;
-            outline: none;
-            cursor: pointer;
-        }
-
-        /* RESPONSIVE GRID */
-        .grid-produk { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 4px; }
-
-        /* Kartu Produk Rapi & Presisi */
-        .product-card { 
-            background: #fff; border-radius: 10px; padding: 8px; border: 1px solid #eaeaea; 
-            position: relative; display: flex; flex-direction: column; justify-content: space-between; 
-            box-shadow: 0 1px 4px rgba(0,0,0,0.02); height: 100%; box-sizing: border-box;
-        }
-        
-        /* Galeri Multi-Gambar Mini Dalam Card */
-        .img-container { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; background: #fafafa; border: 1px solid #f1f5f9; }
-        .galeri-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.3s ease; }
-        .prod-img { width: 100%; height: 100%; object-fit: contain; flex-shrink: 0; cursor: zoom-in; }
-        
-        /* Titik Indikator Gambar Produk */
-        .galeri-dots { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 3; }
-        .g-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,0.15); cursor: pointer; }
-        .g-dot.active { background: var(--primary); }
-
-        /* Badges & Share */
-        .discount-badge { position: absolute; top: 6px; right: 6px; background: var(--pink); color: white; font-size: 9px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 2; }
-        .share-btn { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.85); border: none; width: 26px; height: 26px; border-radius: 50%; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); z-index: 2; }
-
-        /* Detail Informasi */
-        .price-box { margin: 4px 0 6px 0; }
-        .price-now { font-weight: 800; color: var(--pink); font-size: 14px; display: block; }
-        .price-was { font-size: 10px; color: #94a3b8; text-decoration: line-through; }
-
-        /* Tombol Order + - Standby Sejak Awal */
-        .order-control { margin-top: auto; display: flex; align-items: center; justify-content: space-between; width: 100%; height: 30px; background: #f1f5f9; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1; }
-        .btn-qty { background: #cbd5e1; border: none; width: 32px; height: 100%; font-weight: bold; font-size: 16px; cursor: pointer; color: #1e293b; }
-        .qty-indicator { font-weight: bold; font-size: 14px; color: var(--text); }
-
-        /* Panel Kasir Belanja Bawah */
-        .checkout-panel { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(150%); width: 100%; max-width: 500px; background: white; box-shadow: 0 -6px 25px rgba(0,0,0,0.12); border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 12px; z-index: 999; box-sizing: border-box; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
-        .checkout-panel.active { transform: translateX(-50%) translateY(0); }
-        .checkout-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 10px; }
-        .panel-left, .panel-right { display: flex; flex-direction: column; gap: 6px; }
-        .panel-right { border-left: 1px dashed #cbd5e1; padding-left: 10px; }
-        
-        .input-buyer { padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; background: #f8fafc; }
-        .summary-list { max-height: 65px; overflow-y: auto; font-size: 11px; color: #475569; margin: 0; padding-left: 15px; }
-        .total-box { font-size: 14px; font-weight: 800; display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: auto; }
-        
-        .btn-wa { background: var(--success); color: white; border: none; padding: 8px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .btn-reset { background: var(--danger); color: white; border: none; padding: 6px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 11px; }
-
-        /* Menu Navigasi Bawah Sticky */
-        .nav-bottom { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; height: 60px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 500; cursor: pointer; background: none; border: none; flex: 1; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 18px; margin-bottom: 2px; }
-
-        /* Tombol QRIS Jumbo */
-        .nav-item.qris-jumbo { background: linear-gradient(45deg, var(--pink), #ff477e); color: white; width: 55px; height: 55px; border-radius: 50%; justify-content: center; transform: translateY(-12px); box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3); border: 3px solid white; font-weight: bold; flex: none; }
-        .nav-item.qris-jumbo i { font-size: 22px; margin: 0; }
-
-        /* Modal Zoom Gambar */
-        .modal-zoom { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
-        .modal-zoom img { max-width: 90%; max-height: 80%; object-fit: contain; border-radius: 8px; }
-
-        /* Floating PWA Install Button */
-        .pwa-install-btn { display: none; position: fixed; right: calc(50% - 250px); top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; padding: 10px 6px; border-radius: 8px 0 0 8px; box-shadow: -2px 4px 10px rgba(0,0,0,0.15); z-index: 998; font-size: 10px; font-weight: bold; text-align: center; width: 45px; flex-direction: column; gap: 4px; cursor: pointer; }
-        @media (max-width: 500px) { .pwa-install-btn { right: 0; border-radius: 8px 0 0 8px; } }
-    </style>
+    <!-- MENGHUBUNGKAN KE FILE CSS TERPISAH -->
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="manifest" href="manifest.json">
 </head>
@@ -228,19 +14,11 @@
 
 <div class="app-container">
     
-    <!-- Bagian Header Toko + Kotak Pencarian -->
+    <!-- Bagian Header Toko -->
     <header>
-        <div class="header-top">
-            <div class="brand-title">Dutakita <span>LED</span></div>
-            <!-- KLIK 5X PADA BADGE INI UNTUK MASUK ADMIN -->
-            <div class="counter-badge-admin" onclick="hitungKlikRahasia()" style="background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; border: 1px solid #cbd5e1; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px;">
-                <i class="fa-solid fa-download"></i> Terpasang: <span id="app-stats">0</span>
-            </div>
-        </div>
-        <!-- Kotak Pencarian Manual Baru -->
-        <div class="search-container">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="search-box" class="search-input" placeholder="Cari produk LED favoritmu di sini..." oninput="jalankanFilterDanSortir()">
+        <div class="brand-title">Dutakita <span>LED</span></div>
+        <div class="counter-badge-admin" onclick="hitungKlikRahasia()" style="background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; border: 1px solid #cbd5e1; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-download"></i> Terpasang: <span id="app-stats">0</span>
         </div>
     </header>
 
@@ -251,15 +29,21 @@
     </div>
     
     <div class="container">
-        <!-- Banner -->
+        <!-- Banner Wrapper Bergulir + Didalamnya ada Kotak Pencarian Manual -->
         <div class="banner-wrapper">
             <div class="banner-slider" id="banner-slider">
                 <p style="text-align:center; width:100%; padding:20px 0; color:#999; font-size:12px;">Memuat promosi...</p>
             </div>
             <div class="banner-dots" id="banner-dots"></div>
+
+            <!-- Posisi Kotak Pencarian Tepat di Tengah Gambar Banner -->
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-box" class="search-input" placeholder="Cari sparepart atau produk LED..." oninput="jalankanFilterDanSortir()">
+            </div>
         </div>
         
-        <!-- Bar Kategori Berjalan -->
+        <!-- Bar Kategori Berjalan Samping (Rapat & Scrollable) -->
         <div class="cat-container" id="cat-bar"></div>
 
         <!-- Dropdown Filter Pengurutan -->
@@ -278,7 +62,7 @@
         </div>
     </div>
 
-    <!-- Struk/Kasir Panel -->
+    <!-- Struk/Kasir Panel Belanja -->
     <div class="checkout-panel" id="checkout-kasir">
         <div class="checkout-container">
             <div class="panel-left">
@@ -298,7 +82,7 @@
         </div>
     </div>
 
-    <!-- Navigasi Bawah -->
+    <!-- Navigasi Bawah Sticky -->
     <div class="nav-bottom">
         <button class="nav-item active" onclick="pindahTab('home')"><i class="fa-solid fa-house"></i>Home</button>
         <button class="nav-item qris-jumbo" onclick="pindahTab('qris')"><i class="fa-solid fa-qrcode"></i>QRIS</button>
@@ -307,7 +91,7 @@
 
 </div> 
 
-<!-- Bagian Statistik PWA -->
+<!-- Bagian Statistik PWA jika dibutuhkan -->
 <span id="app-stats" style="display: none;">0</span>
 
 <button class="pwa-install-btn" id="pwaBtn" onclick="installAplikasiPWA()">
@@ -442,33 +226,28 @@
         });
     }
 
-    // Fungsi Utama Penanganan Filter Kategori, Kotak Pencarian, dan Dropdown Sortir secara Bersamaan
     function jalankanFilterDanSortir() {
         const kataKunci = document.getElementById('search-box').value.toLowerCase().trim();
         const tipeSortir = document.getElementById('sort-box').value;
         
-        // 1. Filter Berdasarkan Kategori
         let hasil = kategoriTerpilih === 'Semua' ? produkData : produkData.filter(p => p.kategori === kategoriTerpilih);
 
-        // 2. Filter Berdasarkan Kotak Pencarian
         if (kataKunci !== '') {
             hasil = hasil.filter(p => p.nama.toLowerCase().includes(kataKunci));
         }
 
-        // Helper hitung harga akhir setelah diskon
         const dapatHargaFinal = (p) => {
             const diskon = Number(p.diskon) || 0;
             const asli = Number(p.harga) || 0;
             return diskon > 0 ? asli * (1 - (diskon / 100)) : asli;
         };
 
-        // 3. Eksekusi Pengurutan Dropdown
         if (tipeSortir === 'termurah') {
             hasil.sort((a, b) => dapatHargaFinal(a) - dapatHargaFinal(b));
         } else if (tipeSortir === 'termahal') {
             hasil.sort((a, b) => dapatHargaFinal(b) - dapatHargaFinal(a));
         } else if (tipeSortir === 'terlaris') {
-            hasil.sort((a, b) => (b.stok || 0) - (a.stok || 0)); // Diasumsikan stok banyak = produk utama/laris disiapkan
+            hasil.sort((a, b) => (b.stok || 0) - (a.stok || 0)); 
         } else if (tipeSortir === 'terbaru') {
             hasil.sort((a, b) => b.id - a.id);
         }
