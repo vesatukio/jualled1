@@ -168,3 +168,161 @@ tr:hover { background: #f8fafc; }
     display: inline-block;
     margin-top: 4px;
 }
+/* ==========================================================================
+   STYLE TAMBAHAN: MANAGEMENT PRODUK MASSAL (BULK TOOL)
+   ========================================================================== */
+.bulk-container {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-sizing: border-box;
+    width: 100%;
+}
+.bulk-header {
+    margin-bottom: 20px;
+    border-bottom: 1px dashed #cbd5e1;
+    padding-bottom: 15px;
+    text-align: left;
+}
+.bulk-header h3 {
+    margin: 0 0 4px 0;
+    color: #1e293b;
+    font-size: 18px;
+    font-weight: 700;
+}
+.bulk-subtitle {
+    font-size: 12px;
+    color: #64748b;
+}
+.bulk-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+.bulk-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+.bulk-card h4 {
+    margin: 12px 0 6px 0;
+    color: #334155;
+    font-size: 15px;
+    font-weight: 600;
+}
+.bulk-card p {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+}
+.bulk-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+.btn-download-icon { background: #e0f2fe; color: #0284c7; }
+.btn-upload-icon { background: #dcfce7; color: #16a34a; }
+
+.template-group {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.file-drop-area {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: 0.2s;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+.file-drop-area:hover {
+    border-color: #0284c7;
+    background-color: #f0fdfa;
+}
+.fake-btn {
+    flex-shrink: 0;
+    background-color: #64748b;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-right: 8px;
+}
+.file-msg {
+    font-size: 11px;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.file-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.btn-bulk {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+    box-sizing: border-box;
+}
+.btn-template {
+    background: #64748b;
+    color: white;
+    font-size: 11px;
+    padding: 8px;
+}
+.btn-template:hover { background: #475569; }
+
+.btn-download {
+    background: #0284c7;
+    color: white;
+    margin-top: auto; 
+}
+.btn-download:hover { background: #0369a1; }
+
+.btn-upload {
+    background: #16a34a;
+    color: white;
+}
+.btn-upload:hover { background: #15803d; }
