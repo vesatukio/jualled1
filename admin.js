@@ -337,23 +337,20 @@ function handlePilihDropdown(selectEl) {
 }
 
 function bukaFormTambah() {
-    // 1. Pastikan form dan input ID ada sebelum di-reset
+    // 1. Memastikan form dan input ID dibersihkan saat tombol tambah diklik
     const prodForm = document.getElementById("prodForm");
     const prodId = document.getElementById("prod_id");
 
     if (prodForm) prodForm.reset();
     if (prodId) prodId.value = "";
 
-    // 2. Amankan bagian pencarian elemen modal/form pop-up
-    // GANTI "modalForm" dengan ID elemen pop-up/modal yang ingin Anda munculkan
-    const modalTarget = document.getElementById("modalForm"); 
+    // 2. Menampilkan form card berdasarkan ID asli di HTML Anda
+    const modalTarget = document.getElementById("formCard"); 
 
     if (modalTarget) {
-        modalTarget.style.display = "block"; // atau "flex" sesuai CSS Anda
+        modalTarget.style.display = "block"; // Mengubah dari tersembunyi menjadi tampil
     } else {
-        // Jika error, pasang alert ini agar Anda tahu ID mana yang salah/tidak ada di HTML
-        alert("Gagal membuka form! JavaScript tidak menemukan elemen target.");
-        console.error("JavaScript mencari elemen, tapi tidak ketemu. Periksa kembali ID di HTML Anda.");
+        console.error("Error: Elemen dengan ID 'formCard' tidak ditemukan di HTML.");
     }
 }
     
