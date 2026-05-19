@@ -506,11 +506,11 @@ async function downloadSemuaProdukAktif() {
     }
 }
 
-// 4. FUNGSI MEMBACA FILE & MASUKKAN MASSAL (MAX 50 BARIS)
+// 4. PERBAIKAN TOTAL DETECTION SEPARATOR (Aman untuk Koma, Tab, dan Titik Koma Excel)
 async function prosesUploadMassal() {
     const fileInput = document.querySelector('.file-input');
     if (!fileInput.files || fileInput.files.length === 0) {
-        return alert("Silakan pilih file format CSV/Excel hasil isi template terlebih dahulu!");
+        return alert("Silakan pilih file Excel/CSV hasil isi template terlebih dahulu!");
     }
 
     const file = fileInput.files[0];
@@ -518,30 +518,42 @@ async function prosesUploadMassal() {
 
     reader.onload = async function(e) {
         const text = e.target.result;
-        // Memisahkan baris teks dan membuang baris kosong kosong
-        const rows = text.split("\n").map(r => r.trim()).filter(row => row !== "");
         
-        if (rows.length <= 1) return alert("File bermasalah atau hanya terdeteksi baris judul kolom saja!");
+        // Memisahkan baris berdasarkan Enter baru
+        const rows = text.split(/\r?\n/).map(r => r.trim()).filter(row => row !== "");
+        if (rows.length <= 1) return alert("File kosong atau hanya terdeteksi baris judul kolom!");
         
-        const headers = rows[0].split(/[,\t]/).map(h => h.trim().replace(/['"]/g, ''));
+        // DETEKSI OTOMATIS PEMISAH: Cek apakah file pakai Titik Koma (;), Tab (\t), atau Koma (,)
+        let separator = ",";
+        if (rows[0].includes(";")) {
+            separator = ";";
+        } else if (rows[0].includes("\t")) {
+            separator = "\t";
+        }
+        
+        // Membersihkan nama kolom dari tanda kutip dan spasi samping
+        const headers = rows[0].split(separator).map(h => h.trim().replace(/['"]/g, '').toLowerCase());
         const dataRows = rows.slice(1);
 
-        // PROTEKSI LOCK SISTEM: Batasi Maksimal 50 Produk Sekali Upload
+        // LOCK VALIDASI: Maksimal 50 baris data produk
         if (dataRows.length > 50) {
-            return alert(`Gagal Upload! Anda mencoba memasukkan ${dataRows.length} produk sekaligus. Sistem membatasi maksimal 50 produk per upload agar server tidak overload.`);
+            return alert(`Gagal! Anda mencoba memasukkan ${dataRows.length} produk sekaligus. Sistem membatasi maksimal 50 produk per upload.`);
         }
 
         const dataToInsert = [];
         
         dataRows.forEach(row => {
-            // Regex parsing sederhana untuk memisahkan koma/tab dan menghapus tanda kutip penutup teks data
-            const values = row.split(/[,\t]/).map(v => v.trim().replace(/['"]/g, ''));
+            // Memisahkan isi kolom berdasarkan pemisah yang terdeteksi
+            const values = row.split(separator).map(v => v.trim().replace(/['"]/g, ''));
+            
             if (values.length >= headers.length) {
                 let produkObj = {};
                 headers.forEach((header, index) => {
-                    // Penyesuaian tipe variabel angka otomatis agar database tidak menolak string
+                    // Masukkan data ke objek sesuai kolom database Supabase
                     if (['harga', 'stok', 'diskon'].includes(header)) {
-                        produkObj[header] = Number(values[index]) || 0;
+                        // Bersihkan karakter non-angka jika ada (seperti Rp atau Titik ribuan)
+                        let angkaBersih = values[index].replace(/[^0-9]/g, '');
+                        produkObj[header] = Number(angkaBersih) || 0;
                     } else {
                         produkObj[header] = values[index] || "";
                     }
@@ -550,22 +562,27 @@ async function prosesUploadMassal() {
             }
         });
 
-        // Eksekusi Massal ke Supabase
+        if (dataToInsert.length === 0) return alert("Tidak ada data produk valid yang bisa diproses.");
+
+        // Eksekusi Simpan Massal ke Supabase
         try {
-            const clientSupabase = typeof _supabase !== 'undefined' ? _supabase : supabase;
+            const clientSupabase = typeof _supabase !== 'undefined' ? _supabase : (typeof supabase !== 'undefined' ? supabase : null);
             
+            if (!clientSupabase) {
+                return alert("Koneksi Supabase tidak ditemukan. Periksa variabel inisialisasi database Anda.");
+            }
+
             const { error } = await clientSupabase
                 .from('produk') 
                 .insert(dataToInsert);
 
             if (error) throw error;
 
-            alert(`Sukses! Berhasil memasukkan ${dataToInsert.length} data produk baru secara massal ke dalam katalog.`);
+            alert(`Sukses! Berhasil mengunggah ${dataToInsert.length} data produk baru secara massal.`);
+            location.reload(); // Refresh halaman agar tabel terupdate otomatis
             
-            // Auto refresh halaman atau memanggil fungsi render tabel bawaan Anda
-            location.reload();
         } catch (err) {
-            alert("Gagal memproses data ke Supabase: " + err.message);
+            alert("Gagal memproses ke database Supabase:\n" + err.message);
         }
     };
 
