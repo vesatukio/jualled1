@@ -442,3 +442,132 @@ async function hapusBanner(id) {
         try { const { error } = await _supabase.from('banners').delete().eq('id', id); if (error) throw error; muatDataPengaturanDanBanner(); } catch (err) { alert(err.message); }
     }
 }
+// 1. UPDATE TEKS NAMA FILE SAAT DIEMBAT USER
+function updateFileNameDisplay(input) {
+    const messageSpan = document.getElementById('fileChosenMessage');
+    if (input.files && input.files.length > 0) {
+        messageSpan.innerText = input.files[0].name;
+        messageSpan.style.color = "#16a34a";
+        messageSpan.style.fontWeight = "bold";
+    } else {
+        messageSpan.innerText = "atau seret file ke sini";
+        messageSpan.style.color = "#64748b";
+        messageSpan.style.fontWeight = "normal";
+    }
+}
+
+// 2. FUNGSI DOWNLOAD TEMPLATE KOSONG (Mencegah Salah Kolom)
+function downloadTemplateMassal(format) {
+    const headers = ["nama", "kategori", "harga", "diskon", "stok", "gambar1", "gambar2", "gambar3", "info"];
+    const contohData = ["Modul LED 12W Super", "Modul", "45000", "0", "10", "https://link-gambar.com/1.jpg", "", "", "Promo cuci gudang"];
+    
+    let content = "";
+    if (format === 'csv') {
+        content = "data:text/csv;charset=utf-8," + [headers.join(","), contohData.join(",")].join("\n");
+    } else {
+        content = "data:application/vnd.ms-excel;charset=utf-8," + [headers.join("\t"), contohData.join("\t")].join("\n");
+    }
+    
+    const encodedUri = encodeURI(content);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `template_produk_massal.${format === 'csv' ? 'csv' : 'xls'}`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// 3. FUNGSI DOWNLOAD DATA PRODUK YANG SUDAH ADA DI SUPABASE
+async function downloadSemuaProdukAktif() {
+    try {
+        // Menggunakan library supabase yang sudah dipanggil di HTML (Ganti ke 'supabase' jika '_supabase' error)
+        const clientSupabase = typeof _supabase !== 'undefined' ? _supabase : supabase;
+        
+        const { data, error } = await clientSupabase
+            .from('produk') // Sesuaikan nama tabel katalog produk Anda di Supabase
+            .select('nama, kategori, harga, diskon, stok, gambar1, gambar2, gambar3, info');
+
+        if (error) throw error;
+        if (!data || data.length === 0) return alert("Belum ada data produk di database untuk diunduh.");
+
+        const headers = Object.keys(data[0]);
+        const rows = data.map(row => headers.map(header => `"${row[header] !== null ? row[header] : ''}"`).join(","));
+        
+        let csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "backup_produk_katalog.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (err) {
+        alert("Gagal mengunduh data: " + err.message);
+    }
+}
+
+// 4. FUNGSI MEMBACA FILE & MASUKKAN MASSAL (MAX 50 BARIS)
+async function prosesUploadMassal() {
+    const fileInput = document.querySelector('.file-input');
+    if (!fileInput.files || fileInput.files.length === 0) {
+        return alert("Silakan pilih file format CSV/Excel hasil isi template terlebih dahulu!");
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+        const text = e.target.result;
+        // Memisahkan baris teks dan membuang baris kosong kosong
+        const rows = text.split("\n").map(r => r.trim()).filter(row => row !== "");
+        
+        if (rows.length <= 1) return alert("File bermasalah atau hanya terdeteksi baris judul kolom saja!");
+        
+        const headers = rows[0].split(/[,\t]/).map(h => h.trim().replace(/['"]/g, ''));
+        const dataRows = rows.slice(1);
+
+        // PROTEKSI LOCK SISTEM: Batasi Maksimal 50 Produk Sekali Upload
+        if (dataRows.length > 50) {
+            return alert(`Gagal Upload! Anda mencoba memasukkan ${dataRows.length} produk sekaligus. Sistem membatasi maksimal 50 produk per upload agar server tidak overload.`);
+        }
+
+        const dataToInsert = [];
+        
+        dataRows.forEach(row => {
+            // Regex parsing sederhana untuk memisahkan koma/tab dan menghapus tanda kutip penutup teks data
+            const values = row.split(/[,\t]/).map(v => v.trim().replace(/['"]/g, ''));
+            if (values.length >= headers.length) {
+                let produkObj = {};
+                headers.forEach((header, index) => {
+                    // Penyesuaian tipe variabel angka otomatis agar database tidak menolak string
+                    if (['harga', 'stok', 'diskon'].includes(header)) {
+                        produkObj[header] = Number(values[index]) || 0;
+                    } else {
+                        produkObj[header] = values[index] || "";
+                    }
+                });
+                dataToInsert.push(produkObj);
+            }
+        });
+
+        // Eksekusi Massal ke Supabase
+        try {
+            const clientSupabase = typeof _supabase !== 'undefined' ? _supabase : supabase;
+            
+            const { error } = await clientSupabase
+                .from('produk') 
+                .insert(dataToInsert);
+
+            if (error) throw error;
+
+            alert(`Sukses! Berhasil memasukkan ${dataToInsert.length} data produk baru secara massal ke dalam katalog.`);
+            
+            // Auto refresh halaman atau memanggil fungsi render tabel bawaan Anda
+            location.reload();
+        } catch (err) {
+            alert("Gagal memproses data ke Supabase: " + err.message);
+        }
+    };
+
+    reader.readAsText(file);
+}
