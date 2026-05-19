@@ -140,6 +140,7 @@ async function simpanProduk(e) {
     let kategoriInputBaru = document.getElementById("prod_kategori_baru").value;
     let kategoriDropdown = document.getElementById("prod_kategori_select").value;
     
+    // Mengambil nilai dari input text baru jika diisi, jika tidak gunakan dropdown
     let kategoriFinal = kategoriInputBaru || kategoriDropdown;
     kategoriFinal = kategoriFinal ? kategoriFinal.trim() : "Lainnya";
 
@@ -160,16 +161,16 @@ async function simpanProduk(e) {
         if (id) {
             const { error } = await _supabase.from('produk').update(payload).eq('id', id).eq('pemilik', namaAdminAktif);
             if (error) throw error;
-            alert("Produk berhasil diperbarui!");
+            alert("✅ Produk berhasil diperbarui!");
         } else {
             const { error } = await _supabase.from('produk').insert([payload]);
             if (error) throw error;
-            alert("Produk baru berhasil ditambahkan!");
+            alert("✅ Produk baru berhasil ditambahkan!");
         }
         tutupForm();
         await muatDataKatalog();
     } catch (err) {
-        alert("Gagal menyimpan: " + err.message);
+        alert("❌ Gagal menyimpan: " + err.message);
     }
 }
 
@@ -305,25 +306,44 @@ function hitungDanRenderSummary() {
     document.getElementById("statTotalStok").innerText = totalStok + " Pcs";
 }
 
+// ==================== PERBAIKAN DI ADMIN.JS (BAGIAN 10) ====================
+
 function updateDropdownKategori() {
     const select = document.getElementById("prod_kategori_select");
     select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
     const kategoriUrut = Array.from(daftarKategoriSedia).sort();
-    kategoriUrut.forEach(kat => { if(kat) select.innerHTML += `<option value="${kat}">${kat}</option>`; });
+    kategoriUrut.forEach(kat => { 
+        if(kat) select.innerHTML += `<option value="${kat}">${kat}</option>`; 
+    });
 }
 
-function bukaInputKategoriBaru(e) {
+// DIGANTI: Mengikuti nama fungsi di HTML Anda (aktifkanInputKategoriBaru)
+function aktifkanInputKategoriBaru(e) {
     e.preventDefault();
     const inputBaru = document.getElementById("prod_kategori_baru");
     const selectUtama = document.getElementById("prod_kategori_select");
-    inputBaru.style.display = "block"; inputBaru.value = ""; selectUtama.value = ""; inputBaru.focus();
+    
+    if (inputBaru && selectUtama) {
+        inputBaru.style.display = "block"; 
+        inputBaru.value = ""; 
+        selectUtama.value = ""; 
+        inputBaru.focus();
+    }
 }
 
-function handlePilihDropdown(selectEl) {
+// DIGANTI: Mengikuti nama fungsi di HTML Anda (handleKategoriSelect)
+function handleKategoriSelect(selectEl) {
     const inputBaru = document.getElementById("prod_kategori_baru");
-    if (selectEl.value !== "") { inputBaru.style.display = "none"; inputBaru.value = selectEl.value; }
+    if (inputBaru) {
+        if (selectEl.value !== "") { 
+            inputBaru.style.display = "none"; 
+            inputBaru.value = selectEl.value; 
+        } else {
+            inputBaru.style.display = "none";
+            inputBaru.value = "";
+        }
+    }
 }
-
 // ==================== PERBAIKAN STRUKTUR UTAMA DI SINI ====================
 function bukaFormTambah() {
     // 1. Memastikan form dan input ID dibersihkan saat tombol tambah diklik
