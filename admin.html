@@ -6,6 +6,8 @@
     <title>Admin Panel - Duta Terang LED</title>
     <!-- Memanggil CSS Khusus Admin agar tidak tabrakan dengan CSS Home -->
     <link rel="stylesheet" href="admin-style.css">
+    <!-- Memanggil FontAwesome untuk ikon tombol download & upload -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Memanggil library resmi Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -23,12 +25,10 @@
                 <button class="btn-primary" onclick="tambahAdminBaru()" style="padding: 2px 8px; font-size: 12px;">+ Tambah Orang</button>
             </div>
         </div>
-        <!-- CARI BAGIAN DROPDOWN ADMIN DAN TAMBAHKAN TOMBOL INI DI SEBELAHNYA -->
-<div style="display: flex; gap: 8px; margin-bottom: 15px;">
-    <button type="button" class="btn-primary" onclick="tambahAdminBaru()">+ Tambah Admin</button>
-    <!-- Tombol Baru untuk Hapus/Nonaktif Admin -->
-    <button type="button" class="btn-danger" style="background-color: #dc2626;" onclick="hapusAdminAktif()">❌ Hapus Admin Pilihan</button>
-</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+            <button type="button" class="btn-primary" onclick="tambahAdminBaru()">+ Tambah Admin</button>
+            <button type="button" class="btn-danger" style="background-color: #dc2626;" onclick="hapusAdminAktif()">❌ Hapus Admin Pilihan</button>
+        </div>
         <div>
             <a href="index.html" style="text-decoration:none;"><button class="btn-primary" style="background:#64748b;">👁️ Lihat Toko</button></a>
         </div>
@@ -113,6 +113,58 @@
                 <button type="button" onclick="tutupForm()" style="background:#94a3b8; color:white;">Batal</button>
             </form>
         </div>
+
+        <!-- ======================= MODUL BARU: KELOLA PRODUK MASSAL ======================= -->
+        <div class="bulk-container" style="margin-bottom: 20px;">
+            <div class="bulk-header">
+                <h3>Kelola Produk Massal (Maks. 50 Produk)</h3>
+                <span class="bulk-subtitle">Gunakan menu ini untuk mengunduh data atau mengunggah maksimal 50 produk sekaligus.</span>
+            </div>
+            
+            <div class="bulk-grid">
+                <!-- BLOK DOWNLOAD & TEMPLATE -->
+                <div class="bulk-card">
+                    <div class="bulk-icon btn-download-icon">
+                        <i class="fas fa-file-download"></i>
+                    </div>
+                    <h4>Download Produk & Template</h4>
+                    <p>Unduh data produk yang sudah ada atau ambil template kosong yang benar sebelum mengisi data baru.</p>
+                    
+                    <div class="template-group">
+                        <button type="button" class="btn-bulk btn-template" onclick="downloadTemplateMassal('excel')">
+                            <i class="fas fa-file-excel"></i> Template Excel (.xlsx)
+                        </button>
+                        <button type="button" class="btn-bulk btn-template" onclick="downloadTemplateMassal('csv')">
+                            <i class="fas fa-file-csv"></i> Template CSV (.csv)
+                        </button>
+                    </div>
+                    
+                    <button type="button" class="btn-bulk btn-download" onclick="downloadSemuaProdukAktif()">
+                        <i class="fas fa-download"></i> Download Semua Produk
+                    </button>
+                </div>
+
+                <!-- BLOK UPLOAD (MAKS 50) -->
+                <div class="bulk-card">
+                    <div class="bulk-icon btn-upload-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h4>Upload Produk Massal</h4>
+                    <p>Pilih file Excel/CSV yang sesuai template. <strong style="color:#ff4d4d;">Maksimal 50 baris produk</strong> per sekali upload.</p>
+                    
+                    <div class="file-drop-area">
+                        <span class="fake-btn">Pilih File</span>
+                        <span class="file-msg" id="fileChosenMessage">atau seret file ke sini</span>
+                        <input class="file-input" type="file" accept=".csv, .xlsx, .xls" onchange="updateFileNameDisplay(this)">
+                    </div>
+                    
+                    <button type="button" class="btn-bulk btn-upload" onclick="prosesUploadMassal()">
+                        <i class="fas fa-upload"></i> Mulai Upload (Maks 50)
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- ============================================================================== -->
 
         <!-- Tabel Data Utama -->
         <div class="table-responsive">
