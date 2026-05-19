@@ -456,48 +456,66 @@ function updateFileNameDisplay(input) {
     }
 }
 
-// 2. FUNGSI DOWNLOAD TEMPLATE KOSONG (Mencegah Salah Kolom)
+// 2. MEMBUAT TEMPLATE DENGAN KOLOM PEMILIK DI DALAMNYA
 function downloadTemplateMassal(format) {
-    const headers = ["nama", "kategori", "harga", "diskon", "stok", "gambar1", "gambar2", "gambar3", "info"];
-    const contohData = ["Modul LED 12W Super", "Modul", "45000", "0", "10", "https://link-gambar.com/1.jpg", "", "", "Promo cuci gudang"];
+    // Menambahkan 'pemilik' ke dalam susunan header template
+    const headers = ["nama", "pemilik", "kategori", "harga", "diskon", "stok", "gambar1", "gambar2", "gambar3", "info"];
+    const contohData = ["Modul LED 12W Super", "Duta Terang", "Modul", "45000", "0", "10", "https://link-gambar.com/1.jpg", "", "", "Promo cuci gudang"];
     
     let content = "";
+    let mimeType = "";
+    let extension = "";
+
     if (format === 'csv') {
-        content = "data:text/csv;charset=utf-8," + [headers.join(","), contohData.join(",")].join("\n");
+        content = [headers.join(","), contohData.join(",")].join("\n");
+        mimeType = "text/csv;charset=utf-8;";
+        extension = "csv";
     } else {
-        content = "data:application/vnd.ms-excel;charset=utf-8," + [headers.join("\t"), contohData.join("\t")].join("\n");
+        // Format Tab-Separated (XLS) agar terbaca rapi per kolom di Excel
+        content = [headers.join("\t"), contohData.join("\t")].join("\n");
+        mimeType = "application/vnd.ms-excel;charset=utf-8;";
+        extension = "xls";
     }
     
-    const encodedUri = encodeURI(content);
+    const blob = new Blob([content], { type: mimeType });
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `template_produk_massal.${format === 'csv' ? 'csv' : 'xls'}`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    if (navigator.msSaveBlob) { 
+        navigator.msSaveBlob(blob, `template_produk_massal.${extension}`);
+    } else {
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `template_produk_massal.${extension}`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 }
 
-// 3. FUNGSI DOWNLOAD DATA PRODUK YANG SUDAH ADA DI SUPABASE
+// 3. DOWNLOAD BACKUP DATA (TERMASUK KOLOM PEMILIK)
 async function downloadSemuaProdukAktif() {
     try {
-        // Menggunakan library supabase yang sudah dipanggil di HTML (Ganti ke 'supabase' jika '_supabase' error)
-        const clientSupabase = typeof _supabase !== 'undefined' ? _supabase : supabase;
+        const clientSupabase = typeof _supabase !== 'undefined' ? _supabase : (typeof supabase !== 'undefined' ? supabase : null);
         
+        if (!clientSupabase) {
+            return alert("Koneksi Supabase tidak ditemukan.");
+        }
+
+        // Mengunduh kolom pemilik juga dari database
         const { data, error } = await clientSupabase
-            .from('produk') // Sesuaikan nama tabel katalog produk Anda di Supabase
-            .select('nama, kategori, harga, diskon, stok, gambar1, gambar2, gambar3, info');
+            .from('produk') 
+            .select('nama, pemilik, kategori, harga, diskon, stok, gambar1, gambar2, gambar3, info');
 
         if (error) throw error;
-        if (!data || data.length === 0) return alert("Belum ada data produk di database untuk diunduh.");
+        if (!data || data.length === 0) return alert("Belum ada data produk di database.");
 
         const headers = Object.keys(data[0]);
         const rows = data.map(row => headers.map(header => `"${row[header] !== null ? row[header] : ''}"`).join(","));
+        const csvContent = [headers.join(","), ...rows].join("\n");
         
-        let csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
-        const encodedUri = encodeURI(csvContent);
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "backup_produk_katalog.csv");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", "backup_semua_produk.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -506,7 +524,7 @@ async function downloadSemuaProdukAktif() {
     }
 }
 
-// 4. PERBAIKAN TOTAL DETECTION SEPARATOR (Aman untuk Koma, Tab, dan Titik Koma Excel)
+// 4. PROSES UPLOAD MASSAL (MEMBACA DATA PEMILIK LANGSUNG DARI FILE EXCEL)
 async function prosesUploadMassal() {
     const fileInput = document.querySelector('.file-input');
     if (!fileInput.files || fileInput.files.length === 0) {
@@ -519,11 +537,10 @@ async function prosesUploadMassal() {
     reader.onload = async function(e) {
         const text = e.target.result;
         
-        // Memisahkan baris berdasarkan Enter baru
         const rows = text.split(/\r?\n/).map(r => r.trim()).filter(row => row !== "");
         if (rows.length <= 1) return alert("File kosong atau hanya terdeteksi baris judul kolom!");
         
-        // DETEKSI OTOMATIS PEMISAH: Cek apakah file pakai Titik Koma (;), Tab (\t), atau Koma (,)
+        // Deteksi pemisah kolom otomatis (; , atau tab)
         let separator = ",";
         if (rows[0].includes(";")) {
             separator = ";";
@@ -531,45 +548,42 @@ async function prosesUploadMassal() {
             separator = "\t";
         }
         
-        // Membersihkan nama kolom dari tanda kutip dan spasi samping
         const headers = rows[0].split(separator).map(h => h.trim().replace(/['"]/g, '').toLowerCase());
         const dataRows = rows.slice(1);
 
-        // LOCK VALIDASI: Maksimal 50 baris data produk
         if (dataRows.length > 50) {
-            return alert(`Gagal! Anda mencoba memasukkan ${dataRows.length} produk sekaligus. Sistem membatasi maksimal 50 produk per upload.`);
+            return alert(`Gagal! Maksimal 50 produk per upload.`);
         }
 
         const dataToInsert = [];
         
-        dataRows.forEach(row => {
-            // Memisahkan isi kolom berdasarkan pemisah yang terdeteksi
+        dataRows.forEach((row) => {
             const values = row.split(separator).map(v => v.trim().replace(/['"]/g, ''));
             
             if (values.length >= headers.length) {
                 let produkObj = {};
                 headers.forEach((header, index) => {
-                    // Masukkan data ke objek sesuai kolom database Supabase
                     if (['harga', 'stok', 'diskon'].includes(header)) {
-                        // Bersihkan karakter non-angka jika ada (seperti Rp atau Titik ribuan)
-                        let angkaBersih = values[index].replace(/[^0-9]/g, '');
+                        let angkaBersih = values[index] ? values[index].replace(/[^0-9]/g, '') : "0";
                         produkObj[header] = Number(angkaBersih) || 0;
                     } else {
+                        // Membaca string teks termasuk kolom 'pemilik' yang diisi di excel
                         produkObj[header] = values[index] || "";
                     }
                 });
+
                 dataToInsert.push(produkObj);
             }
         });
 
         if (dataToInsert.length === 0) return alert("Tidak ada data produk valid yang bisa diproses.");
 
-        // Eksekusi Simpan Massal ke Supabase
+        // Eksekusi kirim data massal ke Supabase
         try {
             const clientSupabase = typeof _supabase !== 'undefined' ? _supabase : (typeof supabase !== 'undefined' ? supabase : null);
             
             if (!clientSupabase) {
-                return alert("Koneksi Supabase tidak ditemukan. Periksa variabel inisialisasi database Anda.");
+                return alert("Koneksi Supabase tidak ditemukan.");
             }
 
             const { error } = await clientSupabase
@@ -578,8 +592,16 @@ async function prosesUploadMassal() {
 
             if (error) throw error;
 
-            alert(`Sukses! Berhasil mengunggah ${dataToInsert.length} data produk baru secara massal.`);
-            location.reload(); // Refresh halaman agar tabel terupdate otomatis
+            alert(`Sukses! Berhasil mengunggah ${dataToInsert.length} data produk baru dari file template.`);
+            
+            // Membaca ulang dashboard admin agar tabel & statistik langsung sinkron
+            if (typeof muatUlangTabelProduk === "function") {
+                muatUlangTabelProduk();
+            } else if (typeof ambilDataSupabase === "function") {
+                ambilDataSupabase();
+            } else {
+                window.location.reload();
+            }
             
         } catch (err) {
             alert("Gagal memproses ke database Supabase:\n" + err.message);
