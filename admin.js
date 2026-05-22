@@ -644,20 +644,29 @@ async function prosesUploadMassal() {
 
     reader.readAsText(file);
 }
-// Fungsi hitung laba bersih real-time langsung di dalam Form Tambah Produk
 function hitungLabaAdminOtomatis() {
     const hargaBeli = parseFloat(document.getElementById('prod_harga_beli').value) || 0;
     const hargaJualAsli = parseFloat(document.getElementById('prod_harga').value) || 0;
     const diskonPersen = parseFloat(document.getElementById('prod_diskon').value) || 0;
 
-    // Rumus: Harga jual dipotong diskon terlebih dahulu
+    // Rumus: Harga jual dipotong diskon
     const hargaJualSetelahDiskon = hargaJualAsli - (hargaJualAsli * (diskonPersen / 100));
     
     // Laba = Harga jual bersih dikurangi modal beli
     const untungPcs = hargaJualSetelahDiskon - hargaBeli;
 
-    // Tampilkan hasil kurs rupiah ke kolom estimasi untung
+    // 1. Tampilkan ke User (Format Rupiah)
     document.getElementById('prod_estimasi_untung').value = new Intl.NumberFormat('id-ID', { 
         style: 'currency', currency: 'IDR', maximumFractionDigits: 0 
     }).format(untungPcs);
+
+    // 2. Simpan nilai murni (angka saja) ke hidden input untuk database
+    // Pastikan ID 'prod_estimasi_untung_val' sudah ada di HTML Anda
+    const hiddenUntung = document.getElementById('prod_estimasi_untung_val');
+    if (hiddenUntung) {
+        hiddenUntung.value = untungPcs;
+    }
+
+    // 3. (Opsional) Beri warna merah jika rugi
+    document.getElementById('prod_estimasi_untung').style.color = untungPcs < 0 ? '#dc2626' : '#15803d';
 }
