@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Internal Admin - Duta Terang</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .container-katalog {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 15px;
+        }
+        .judul-katalog {
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .wrapper-tabel {
+            overflow-x: auto;
+        }
+        .tabel-data {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .tabel-data th {
+            background-color: #2c3e50;
+            color: white;
+            text-align: left;
+            padding: 12px;
+            font-size: 13px;
+        }
+        .tabel-data td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #444;
+        }
+        .tabel-data tr:hover {
+            background-color: #f9f9f9;
+        }
+        .text-center { text-align: center !important; }
+        .text-right { text-align: right !important; }
+        .badge-untung {
+            background-color: #2e7d32;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        #status-akses {
+            text-align: center;
+            padding: 30px;
+            font-style: italic;
+            color: #666;
+        }
+        .pesan-error {
+            color: #c0392b;
+            font-weight: bold;
+            background-color: #fde8e8;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #f8b4b4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-katalog">
+    <h2 class="judul-katalog">Analisis Harga & Keuntungan Produk (Khusus Admin)</h2>
+    
+    <div id="status-akses">Memeriksa verifikasi akun admin...</div>
+    
+    <div class="wrapper-tabel" id="konten-admin" style="display: none;">
+        <table class="tabel-data">
+            <thead>
+                <tr>
+                    <th>Tanggal Restock</th>
+                    <th>Nama Produk</th>
+                    <th class="text-right">Harga Beli (Modal)</th>
+                    <th class="text-right">Harga Jual (PWA)</th>
+                    <th class="text-center">Potongan Diskon</th>
+                    <th class="text-right">Estimasi Untung / Pcs</th>
+                    <th class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody id="list-order-supplier">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://opgeeqnucxrdqcgwcuge.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8';
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function formatRupiah(angka) {
+        return new Intl.NumberFormat('id-ID', { 
+            style: 'currency', currency: 'IDR', maximumFractionDigits: 0 
+        }).format(angka);
+    }
+
+    // Fungsi Utama: Validasi User Admin sebelum memuat data keuangan
+    async function proteksiDanMuatKatalog() {
+        const infoAkses = document.getElementById('status-akses');
+        const kontenAdmin = document.getElementById('konten-admin');
+
+        try {
+            // 1. Cek sesi login user saat ini di browser
+            const { data: { session }, error: authError } = await supabaseClient.auth.getSession();
+            
+            if (authError) throw authError;
+
+            // 2. JIKA BELUM LOGIN / BUKAN ADMIN DUTA TERANG
+            if (!session || session.user.email !== 'noval') { 
+                // Catatan: Ganti 'noval' di atas dengan email lengkap login admin kamu, misal 'noval@gmail.com' jika verifikasi berbasis email.
+                // Jika login panelmu berbasis data tabel khusus, sistem mendeteksi id user yang aktif.
+                infoAkses.innerHTML = `<div class="pesan-error">⚠️ Akses Ditolak! Halaman analisis keuntungan ini hanya boleh dibuka oleh pemilik Duta Terang.</div>`;
+                return;
+            }
+
+            // 3. JIKA LOLOS VERIFIKASI ADMIN, AMBIL DATA KEUANGAN (MEMANFAATKAN INDEX BARU)
+            infoAkses.innerText = "Verifikasi sukses. Memuat data keuntungan...";
+
+            const { data: orders, error: dbError } = await supabaseClient
+                .from('order_supplier')
+                .select(`
+                    id,
+                    qty_order,
+                    harga_beli_satuan,
+                    status_order,
+                    created_at,
+                    produk (
+                        nama,
+                        harga,
+                        diskon
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (dbError) throw dbError;
+
+            const tbody = document.getElementById('list-order-supplier');
+            tbody.innerHTML = '';
+
+            if (orders && orders.length > 0) {
+                orders.forEach(order => {
+                    const tanggal = new Date(order.created_at).toLocaleDateString('id-ID', {
+                        day: 'numeric', month: 'short', year: 'numeric'
+                    });
+
+                    const hargaDasar = order.harga_beli_satuan || 0;
+                    const hargaJualAsli = order.produk?.harga || 0;
+                    const nilaiDiskonPersen = order.produk?.diskon || 0;
+
+                    const hargaJualSetelahDiskon = hargaJualAsli - (hargaJualAsli * (nilaiDiskonPersen / 100));
+                    const keuntungan = hargaJualSetelahDiskon - hargaDasar;
+
+                    let warnaStatus = '#f39c12'; 
+                    if (order.status_order === 'Selesai') warnaStatus = '#27ae60'; 
+                    if (order.status_order === 'Dibatalkan') warnaStatus = '#c0392b'; 
+
+                    const baris = `
+                        <tr>
+                            <td>${tanggal}</td>
+                            <td><b>${order.produk?.nama || 'Produk Tanpa Nama'}</b></td>
+                            <td class="text-right" style="color: #c0392b;">${formatRupiah(hargaDasar)}</td>
+                            <td class="text-right" style="color: #2980b9;">${formatRupiah(hargaJualSetelahDiskon)}</td>
+                            <td class="text-center">
+                                <span class="badge-untung" style="background-color: #d35400;">${nilaiDiskonPersen}%</span>
+                            </td>
+                            <td class="text-right">
+                                <b style="color: #27ae60;">${formatRupiah(keuntungan)}</b>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge-untung" style="background-color: ${warnaStatus};">
+                                    ${order.status_order}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', baris);
+                });
+
+                // Tampilkan tabel utama
+                infoAkses.style.display = 'none';
+                kontenAdmin.style.display = 'block';
+            } else {
+                infoAkses.innerText = 'Tidak ada rekaman data restock barang.';
+            }
+
+        } catch (error) {
+            console.error('Kendala Keamanan:', error);
+            infoAkses.innerHTML = `<div class="pesan-error">Gagal memproses hak akses: ${error.message}</div>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', proteksiDanMuatKatalog);
+</script>
+
+</body>
+</html>
