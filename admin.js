@@ -144,12 +144,16 @@ async function simpanProduk(e) {
     let kategoriFinal = kategoriInputBaru || kategoriDropdown;
     kategoriFinal = kategoriFinal ? kategoriFinal.trim() : "Lainnya";
 
+    // AMBIL NILAI INPUT HARGA BELI / MODAL BARU
+    const hargaBeli = Number(document.getElementById("prod_harga_beli").value) || 0;
+    const qtyStok = Number(document.getElementById("prod_stok").value);
+
     const payload = {
         nama: document.getElementById("prod_nama").value,
         kategori: kategoriFinal,
         harga: Number(document.getElementById("prod_harga").value),
         diskon: Number(document.getElementById("prod_diskon").value),
-        stok: Number(document.getElementById("prod_stok").value),
+        stok: qtyStok,
         gambar1: document.getElementById("prod_gambar1").value,
         gambar2: document.getElementById("prod_gambar2").value,
         gambar3: document.getElementById("prod_gambar3").value,
@@ -159,13 +163,43 @@ async function simpanProduk(e) {
 
     try {
         if (id) {
+            // PROSES UPDATE PRODUK LAMA
             const { error } = await _supabase.from('produk').update(payload).eq('id', id).eq('pemilik', namaAdminAktif);
             if (error) throw error;
+
+            // Opsional: Jika saat mengedit kamu memasukkan harga beli baru > 0, catat sebagai riwayat restock baru
+            if (hargaBeli > 0) {
+                await _supabase.from('order_supplier').insert([{
+                    produk_id: Number(id),
+                    qty_order: qtyStok,
+                    harga_beli_satuan: hargaBeli,
+                    total_tagihan: qtyStok * hargaBeli,
+                    status_order: 'selesai'
+                }]);
+            }
+
             alert("✅ Produk berhasil diperbarui!");
         } else {
-            const { error } = await _supabase.from('produk').insert([payload]);
+            // PROSES TAMBAH PRODUK BARU (Ditambah .select() untuk mengambil ID yang baru tercipta)
+            const { data: produkBaru, error } = await _supabase.from('produk').insert([payload]).select();
             if (error) throw error;
-            alert("✅ Produk baru berhasil ditambahkan!");
+
+            // JIKA PRODUK BARU BERHASIL DI-INSERT, OTOMATIS MASUKKAN KE ORDER_SUPPLIER
+            if (produkBaru && produkBaru.length > 0) {
+                const idProdukBaru = produkBaru[0].id;
+                
+                const { error: errorSupplier } = await _supabase.from('order_supplier').insert([{
+                    produk_id: idProdukBaru,
+                    qty_order: qtyStok,
+                    harga_beli_satuan: hargaBeli,
+                    total_tagihan: qtyStok * hargaBeli,
+                    status_order: 'selesai'
+                }]);
+                
+                if (errorSupplier) throw errorSupplier;
+            }
+
+            alert("✅ Produk baru & data analisis keuntungan berhasil ditambahkan!");
         }
         tutupForm();
         await muatDataKatalog();
