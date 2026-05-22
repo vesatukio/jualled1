@@ -610,3 +610,20 @@ async function prosesUploadMassal() {
 
     reader.readAsText(file);
 }
+// Fungsi hitung laba bersih real-time langsung di dalam Form Tambah Produk
+function hitungLabaAdminOtomatis() {
+    const hargaBeli = parseFloat(document.getElementById('prod_harga_beli').value) || 0;
+    const hargaJualAsli = parseFloat(document.getElementById('prod_harga').value) || 0;
+    const diskonPersen = parseFloat(document.getElementById('prod_diskon').value) || 0;
+
+    // Rumus: Harga jual dipotong diskon terlebih dahulu
+    const hargaJualSetelahDiskon = hargaJualAsli - (hargaJualAsli * (diskonPersen / 100));
+    
+    // Laba = Harga jual bersih dikurangi modal beli
+    const untungPcs = hargaJualSetelahDiskon - hargaBeli;
+
+    // Tampilkan hasil kurs rupiah ke kolom estimasi untung
+    document.getElementById('prod_estimasi_untung').value = new Intl.NumberFormat('id-ID', { 
+        style: 'currency', currency: 'IDR', maximumFractionDigits: 0 
+    }).format(untungPcs);
+}
