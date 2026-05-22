@@ -74,65 +74,80 @@
             </div>
         </div>
 
-        <!-- Form Input Data Produk -->
         <div id="formCard" class="form-card">
-            <h3 id="formTitle">Tambah Produk Baru</h3>
-            <form id="prodForm" onsubmit="simpanProduk(event)">
-                <input type="hidden" id="prod_id">
-                <input type="hidden" id="prod_pemilik_lama">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Nama Produk</label>
-                        <input type="text" id="prod_nama" required placeholder="Contoh: Modul LED 12W">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label style="display:flex; justify-content:space-between;">
-                            <span>Kategori</span>
-                            <a href="#" id="btnTambahKatBaru" onclick="aktifkanInputKategoriBaru(event)" style="font-size:11px; color:var(--primary); text-decoration:none;">+ Kategori Baru</a>
-                        </label>
-                        <select id="prod_kategori_select" onchange="handleKategoriSelect(this)">
-                            <option value="">-- Pilih Kategori --</option>
-                        </select>
-                        <input type="text" id="prod_kategori_baru" placeholder="Ketik kategori baru..." style="display:none; margin-top:5px;">
-                    </div>
+    <h3 id="formTitle">Tambah Produk Baru</h3>
+    <form id="prodForm" onsubmit="simpanProduk(event)">
+        <input type="hidden" id="prod_id">
+        <input type="hidden" id="prod_pemilik_lama">
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nama Produk</label>
+                <input type="text" id="prod_nama" required placeholder="Contoh: Modul LED 12W">
+            </div>
+            
+            <div class="form-group">
+                <label style="display:flex; justify-content:space-between;">
+                    <span>Kategori</span>
+                    <a href="#" id="btnTambahKatBaru" onclick="aktifkanInputKategoriBaru(event)" style="font-size:11px; color:var(--primary); text-decoration:none;">+ Kategori Baru</a>
+                </label>
+                <select id="prod_kategori_select" onchange="handleKategoriSelect(this)">
+                    <option value="">-- Pilih Kategori --</option>
+                </select>
+                <input type="text" id="prod_kategori_baru" placeholder="Ketik kategori baru..." style="display:none; margin-top:5px;">
+            </div>
 
-                    <div class="form-group">
-                        <label>Harga (Rp)</label>
-                        <input type="number" id="prod_harga" required placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Diskon (%)</label>
-                        <input type="number" id="prod_diskon" value="0" min="0" max="100">
-                    </div>
-                    <div class="form-group">
-                        <label>Stok</label>
-                        <input type="number" id="prod_stok" value="10" min="0">
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Link Gambar 1 (Utama)</label>
-                        <input type="url" id="prod_gambar1" placeholder="https://...">
-                    </div>
-                    <div class="form-group">
-                        <label>Link Gambar 2</label>
-                        <input type="url" id="prod_gambar2" placeholder="https://...">
-                    </div>
-                    <div class="form-group">
-                        <label>Link Gambar 3</label>
-                        <input type="url" id="prod_gambar3" placeholder="https://...">
-                    </div>
-                </div>
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label>Info Tambahan / Pesan Promo</label>
-                    <input type="text" id="prod_info" placeholder="Contoh: Cek video panduan rakit di YouTube!">
-                </div>
-                <button type="submit" class="btn-success">Simpan Data</button>
-                <button type="button" onclick="tutupForm()" style="background:#94a3b8; color:white;">Batal</button>
-            </form>
+            <div class="form-group">
+                <label>Stok Masuk / Saat Ini</label>
+                <input type="number" id="prod_stok" value="10" min="0">
+            </div>
         </div>
 
+        <div class="form-grid" style="background: #f1f5f9; padding: 15px; border-radius: 6px; margin-top: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1;">
+            <div class="form-group">
+                <label style="color: #b91c1c;">Harga Beli Satuan (Modal)</label>
+                <input type="number" id="prod_harga_beli" value="0" min="0" placeholder="Rp" oninput="hitungLabaAdminOtomatis()">
+            </div>
+            <div class="form-group">
+                <label style="color: #1d4ed8;">Harga Jual Toko (PWA)</label>
+                <input type="number" id="prod_harga" required placeholder="0" oninput="hitungLabaAdminOtomatis()">
+            </div>
+            <div class="form-group">
+                <label>Diskon (%)</label>
+                <input type="number" id="prod_diskon" value="0" min="0" max="100" oninput="hitungLabaAdminOtomatis()">
+            </div>
+            <div class="form-group">
+                <label style="color: #15803d; font-weight: bold;">Estimasi Untung / Pcs</label>
+                <input type="text" id="prod_estimasi_untung" value="Rp 0" disabled style="background: #e2e8f0; font-weight: bold; color: #15803d;">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Info Tambahan / Pesan Promo</label>
+            <input type="text" id="prod_info" placeholder="Contoh: Cek video panduan rakit di YouTube!">
+        </div>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Link Gambar 1 (Utama)</label>
+                <input type="url" id="prod_gambar1" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Link Gambar 2</label>
+                <input type="url" id="prod_gambar2" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Link Gambar 3</label>
+                <input type="url" id="prod_gambar3" placeholder="https://...">
+            </div>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button type="submit" class="btn-success">Simpan Data</button>
+            <button type="button" onclick="tutupForm()" style="background:#94a3b8; color:white;">Batal</button>
+        </div>
+    </form>
+</div>
         <!-- ======================= MODUL BARU: KELOLA PRODUK MASSAL ======================= -->
         <div class="bulk-container" style="margin-bottom: 20px;">
             <div class="bulk-header">
