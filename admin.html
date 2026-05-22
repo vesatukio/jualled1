@@ -32,11 +32,30 @@
         <div>
             <a href="index.html" style="text-decoration:none;"><button class="btn-primary" style="background:#64748b;">👁️ Lihat Toko</button></a>
         </div>
+        <div>
+    <a href="katalog.html" style="text-decoration:none;">
+        <button class="btn-primary" style="background:#2e7d32; margin-right: 5px;">
+            <i class="fas fa-chart-line"></i> 📊 Analisis Keuntungan
+        </button>
+    </a>
+
+    <a href="index.html" style="text-decoration:none;">
+        <button class="btn-primary" style="background:#64748b;">👁️ Lihat Toko</button>
+    </a>
+</div>
     </header>
 
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('tab-produk', this)">📦 Katalog Produk (Semua Pemilik)</button>
         <button class="tab-btn" onclick="switchTab('tab-promo', this)">🎥 Banner & Pengaturan</button>
+        <div class="tab-menu">
+    <button class="tab-btn active" onclick="switchTab('tab-produk', this)">📦 Katalog Produk (Semua Pemilik)</button>
+    <button class="tab-btn" onclick="switchTab('tab-promo', this)">🎥 Banner & Pengaturan</button>
+    
+    <button class="tab-btn" onclick="window.location.href='katalog.html'" style="color: #2e7d32; font-weight: bold;">
+        <i class="fas fa-wallet"></i> Laba Restock Supplier
+    </button>
+</div>
     </div>
 
     <!-- TAB KATALOG PRODUK -->
