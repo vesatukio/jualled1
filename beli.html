@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Produk Duta Terang</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 10px; }
+        .container { max-width: 600px; margin: auto; }
+        .produk-card { 
+            background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px;
+            display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .produk-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; margin-right: 15px; background: #eee; }
+        .info { flex-grow: 1; }
+        .nama { font-weight: bold; color: #333; display: block; }
+        .harga { color: #2c3e50; font-size: 14px; }
+        .empty { text-align: center; padding: 40px; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="katalog-list">
+    <h2 style="text-align: center;">Katalog Produk</h2>
+    <div id="loader">Memuat produk...</div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://opgeeqnucxrdqcgwcuge.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function muatKatalog() {
+        const container = document.getElementById('katalog-list');
+        const { data, error } = await supabaseClient.from('produk').select('nama, harga_beli, image_url');
+        
+        document.getElementById('loader').style.display = 'none';
+
+        if (error) {
+            container.innerHTML = `<p class="empty">Gagal memuat data: ${error.message}</p>`;
+            return;
+        }
+
+        if (data.length === 0) {
+            container.innerHTML = '<p class="empty">Belum ada produk.</p>';
+            return;
+        }
+
+        data.forEach(p => {
+            container.innerHTML += `
+                <div class="produk-card">
+                    <img src="${p.image_url || 'https://via.placeholder.com/60'}" class="produk-img" alt="${p.nama}">
+                    <div class="info">
+                        <span class="nama">${p.nama}</span>
+                        <span class="harga">Modal: Rp ${Number(p.harga_beli).toLocaleString('id-ID')}</span>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    muatKatalog();
+</script>
+</body>
+</html>
