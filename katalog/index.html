@@ -86,11 +86,20 @@
 
 <div class="container-katalog">
     <div class="judul-katalog">
-    <h2>Analisis Harga & Keuntungan (Duta Terang)</h2>
+    <div>
+        <h2>Analisis Harga & Keuntungan (Duta Terang)</h2>
+        
+        <select id="pilih-admin" onchange="muatKatalogKeuntungan()" style="padding: 8px; border-radius: 4px; margin-top: 10px; width: 100%; max-width: 300px;">
+            <option value="">-- Pilih Admin --</option>
+        </select>
+    </div>
+    
     <a href="https://dutaled.my.id/admin" class="btn-kembali">⬅️ Kembali ke Admin</a>
 </div>
-    
-    <div id="status-akses">Memeriksa verifikasi hak akses admin...</div>
+
+<div id="status-akses" style="margin-top: 20px; font-style: italic;">
+    Memeriksa verifikasi hak akses admin...
+</div>
     
     <div class="wrapper-tabel" id="konten-admin" style="display: none;">
         <table class="tabel-data">
