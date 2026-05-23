@@ -203,3 +203,15 @@ function zoomGambar(src) {
         modal.style.display = 'flex';
     }
 }
+function toggleModalMode() {
+    modeLihatModal = !modeLihatModal;
+    const btn = document.querySelector('button[onclick="toggleModalMode()"]');
+    btn.style.color = modeLihatModal ? '#ef4444' : '#cbd5e1'; // Berubah warna jika aktif
+    
+    // Refresh tampilan daftar produk
+    jalankanFilterDanSortir();
+    
+    if(modeLihatModal) {
+        alert("Mode Admin: Harga Modal Diaktifkan");
+    }
+}
