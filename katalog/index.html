@@ -57,6 +57,21 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Fungsi mengisi dropdown admin
+    async function isiDropdownAdmin() {
+        const select = document.getElementById("pilih-admin");
+        try {
+            const { data, error } = await supabaseClient.from('akses_admin').select('username').order('username');
+            if (error) throw error;
+            select.innerHTML = '<option value="">-- Semua Admin --</option>';
+            data.forEach(acc => {
+                select.innerHTML += `<option value="${acc.username}">${acc.username.toUpperCase()}</option>`;
+            });
+            const adminTersimpan = localStorage.getItem('duta_admin_name');
+            if (adminTersimpan) select.value = adminTersimpan;
+        } catch (e) { console.error("Gagal isi dropdown:", e.message); }
+    }
+
     async function muatKatalogKeuntungan() {
         const infoAkses = document.getElementById('status-akses');
         const kontenAdmin = document.getElementById('konten-admin');
@@ -68,7 +83,6 @@
         kontenAdmin.style.display = 'none';
         
         try {
-            // Menghapus .order('created_at'...) karena kolomnya tidak ada
             let query = supabaseClient.from('produk').select('*');
             if (adminTerpilih) query = query.eq('pemilik', adminTerpilih);
 
@@ -114,8 +128,9 @@
         } catch (error) { alert("Gagal: " + error.message); }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        muatKatalogKeuntungan();
+    document.addEventListener('DOMContentLoaded', async () => {
+        await isiDropdownAdmin();
+        await muatKatalogKeuntungan();
     });
 </script>
 </body>
