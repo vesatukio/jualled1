@@ -152,3 +152,15 @@ function bukaFormTambah() {
 }
 
 function tutupForm() { document.getElementById("formCard").style.display = "none"; }
+function updateDropdownKategori() {
+    const select = document.getElementById("prod_kategori_select");
+    if (!select) return;
+
+    // Ambil data unik dari daftarProduk
+    const kategoriUnik = [...new Set(daftarProduk.map(p => p.kategori).filter(Boolean))];
+    
+    select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+    kategoriUnik.sort().forEach(kat => {
+        select.innerHTML += `<option value="${kat}">${kat}</option>`;
+    });
+}
