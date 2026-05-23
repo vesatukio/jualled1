@@ -71,15 +71,16 @@ async function muatDataKatalog() {
 async function simpanProduk() {
     const prodId = document.getElementById("prod_id").value;
     
-    // Pastikan ID HTML ('prod_harga_beli') sesuai dengan yang ada di file HTML Anda
-    const hargaModalInput = document.getElementById("prod_harga_beli").value;
+    // 1. Ambil nilai input harga beli dengan benar
+    const hargaBeliInput = document.getElementById("prod_harga_beli")?.value || 0;
     
+    // 2. Susun objek dataForm
     const dataForm = {
         nama: document.getElementById("prod_nama").value,
         harga: parseFloat(document.getElementById("prod_harga").value) || 0,
         stok: parseInt(document.getElementById("prod_stok").value) || 0,
         
-        // Tambahkan ini agar harga modal terkirim ke database
+        // Pastikan nama kunci ini 'harga_beli' sama dengan nama kolom di Supabase
         harga_beli: parseFloat(hargaBeliInput) || 0, 
         
         gambar1: document.getElementById("prod_gambar1")?.value || "",
@@ -93,11 +94,11 @@ async function simpanProduk() {
     try {
         let error;
         if (prodId) {
-            // EDIT
+            // EDIT: Update produk berdasarkan ID
             const { error: err } = await _supabase.from('produk').update(dataForm).eq('id', prodId);
             error = err;
         } else {
-            // TAMBAH BARU
+            // TAMBAH: Insert data baru
             const { error: err } = await _supabase.from('produk').insert([dataForm]);
             error = err;
         }
@@ -106,9 +107,10 @@ async function simpanProduk() {
 
         alert("Data berhasil disimpan!");
         tutupForm();
-        await muatDataKatalog();
+        
+        // Refresh otomatis agar tabel langsung update
+        await muatDataKatalog(); 
     } catch (e) {
-        // Penting: Lihat pesan error di sini
         console.error("Error Detail:", e);
         alert("Gagal simpan: " + e.message);
     }
