@@ -239,3 +239,30 @@ function downloadTemplateMassal(tipe) { alert("Download " + tipe); }
 function downloadSemuaProdukAktif() { alert("Download semua produk"); }
 function updateFileNameDisplay(el) { console.log(el.value); }
 function prosesUploadMassal() { alert("Proses upload..."); }
+function hitungLabaAdminOtomatis() {
+    // Ambil elemen input
+    const hargaBeli = parseFloat(document.getElementById('prod_harga_beli')?.value) || 0;
+    const hargaJualAsli = parseFloat(document.getElementById('prod_harga')?.value) || 0;
+    const diskonPersen = parseFloat(document.getElementById('prod_diskon')?.value) || 0;
+
+    // Kalkulasi
+    const hargaJualSetelahDiskon = hargaJualAsli - (hargaJualAsli * (diskonPersen / 100));
+    const untungPcs = hargaJualSetelahDiskon - hargaBeli;
+
+    // Debugging: cek di Console (F12) apakah nilai untung muncul
+    console.log("Untung per pcs:", untungPcs);
+
+    // Tampilkan ke layar (format Rupiah)
+    const elTampil = document.getElementById('prod_estimasi_untung');
+    if (elTampil) {
+        elTampil.value = new Intl.NumberFormat('id-ID', { 
+            style: 'currency', currency: 'IDR', maximumFractionDigits: 0 
+        }).format(untungPcs);
+    }
+
+    // Simpan nilai murni ke hidden input untuk database
+    const elHidden = document.getElementById('prod_estimasi_untung_val');
+    if (elHidden) {
+        elHidden.value = untungPcs;
+    }
+}
