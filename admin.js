@@ -187,8 +187,44 @@ async function isiDropdownAdmin() {
     }
 }
 async function simpanProduk() {
-    // ... proses insert ke supabase ...
-    const { error } = await _supabase.from('produk').insert([dataBaru]);
+    const prodId = document.getElementById("prod_id").value;
+    
+    // 1. Ambil data dari form
+    const dataForm = {
+        nama: document.getElementById("prod_nama").value,
+        harga: parseFloat(document.getElementById("prod_harga").value),
+        stok: parseInt(document.getElementById("prod_stok").value),
+        pemilik: namaAdminAktif // Menggunakan variabel admin yang aktif
+    };
+
+    try {
+        let error;
+        if (prodId) {
+            // JIKA ADA ID: Lakukan Update
+            const { error: updateError } = await _supabase
+                .from('produk')
+                .update(dataForm)
+                .eq('id', prodId)
+                .eq('pemilik', namaAdminAktif);
+            error = updateError;
+        } else {
+            // JIKA TIDAK ADA ID: Lakukan Insert
+            const { error: insertError } = await _supabase
+                .from('produk')
+                .insert([dataForm]);
+            error = insertError;
+        }
+
+        if (error) throw error;
+
+        alert("Berhasil!");
+        tutupForm();
+        // 2. WAJIB: Muat ulang data agar tabel terupdate
+        await muatDataKatalog(); 
+    } catch (e) {
+        alert("Gagal simpan: " + e.message);
+    }
+}
     
     if (!error) {
         alert("Produk berhasil ditambah!");
