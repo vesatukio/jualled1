@@ -184,5 +184,27 @@ const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
     function pembaruanStrukRingkasan() {
         // Logika struk tetap sama
     }
-    
+    // Tunggu sampai semua elemen selesai dimuat
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Script dimuat dengan sukses!");
+
+    // Menghubungkan tombol secara paksa
+    document.getElementById("btn-customer").addEventListener("click", () => bukaMenu('customer'));
+    document.getElementById("btn-grosir").addEventListener("click", () => bukaMenu('grosir'));
+    document.getElementById("btn-admin").addEventListener("click", () => bukaMenu('admin'));
+});
+
+// Pastikan fungsi ini ada di level paling luar (tidak di dalam function lain)
+window.bukaMenu = function(tipe) {
+    console.log("Fungsi bukaMenu berjalan untuk:", tipe);
+    if (tipe === 'customer') {
+        alert("Mode Customer Aktif");
+    } else if (tipe === 'grosir') {
+        const pin = prompt("Masukkan PIN untuk akses Grosir:");
+        if (pin === "1234") alert("Mode Grosir Aktif!");
+    } else if (tipe === 'admin') {
+        const pin = prompt("Masukkan PIN Admin:");
+        if (pin === "admin123") window.location.href = "admin.html";
+    }
+};
     // (Sisa fungsi lainnya kirimKeWhatsApp, bukaZoom, dll tetap sama)
