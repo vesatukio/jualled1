@@ -177,7 +177,19 @@ function renderDaftarProduk(filterKategori) {
     }
 
     produkDifilter.forEach(prod => {
-        // Toleransi jika database menggunakan gambar1 atau gambar_url
+        // 1. Ambil data dasar
+        const hargaAsli = Number(prod.harga) || 0;
+        const diskonReguler = Number(prod.diskon) || 0;
+        const diskonGrosir = Number(prod.diskon_grosir) || 0;
+
+        // 2. Hitung harga setelah diskon reguler
+        let hargaJual = hargaAsli * (1 - (diskonReguler / 100));
+
+        // 3. Jika mode grosir aktif, potong harga lagi dengan diskon_grosir
+        if (isModeGrosir && diskonGrosir > 0) {
+            hargaJual = hargaJual * (1 - (diskonGrosir / 100));
+        }
+
         const imgUrl = prod.gambar1 || prod.gambar_url || 'https://via.placeholder.com/150';
         
         const itemHtml = `
@@ -186,9 +198,12 @@ function renderDaftarProduk(filterKategori) {
                 <h4 style="margin: 8px 0 4px; font-size: 14px; color:#333;">${prod.nama}</h4>
                 <p style="font-size: 11px; color:#777; margin:0 0 8px;">Stok: ${prod.stok || 0} | Kategori: ${prod.kategori || '-'}</p>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:5px;">
-                    <span style="font-weight:bold; color:var(--pink, #ff477e); font-size:14px;">Rp ${(Number(prod.harga) || 0).toLocaleString('id-ID')}</span>
-                    <button onclick="tambahKeKeranjang(${prod.id}, '${prod.nama}', ${prod.harga})" style="background:var(--primary, #007bff); color:white; border:none; padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Beli</button>
+                    <span style="font-weight:bold; color:var(--pink, #ff477e); font-size:14px;">
+                        Rp ${hargaJual.toLocaleString('id-ID')}
+                    </span>
+                    <button onclick="tambahKeKeranjang(${prod.id}, '${prod.nama}', ${hargaJual})" style="background:var(--primary, #007bff); color:white; border:none; padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Beli</button>
                 </div>
+                ${isModeGrosir && diskonGrosir > 0 ? `<div style="font-size:9px; color:red; margin-top:5px;">Harga Grosir (-${diskonGrosir}%)</div>` : ''}
             </div>
         `;
         listContainer.insertAdjacentHTML('beforeend', itemHtml);
