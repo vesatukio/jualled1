@@ -160,7 +160,7 @@ function editForm(id) {
     document.getElementById("prod_stok").value = p.stok;
     
     // TAMBAHKAN INI agar data muncul di form:
-    document.getElementById("prod_harga_beli").value = p.harga_modal || ""; // Pastikan nama kolom di DB adalah harga_modal
+    document.getElementById("prod_harga_beli").value = p.harga_beli || ""; // Pastikan nama kolom di DB adalah harga_beli
     document.getElementById("prod_gambar1").value = p.gambar1 || "";
     document.getElementById("prod_gambar2").value = p.gambar2 || "";
     document.getElementById("prod_gambar3").value = p.gambar3 || "";
