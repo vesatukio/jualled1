@@ -39,7 +39,6 @@
         <table class="tabel-data">
             <thead>
                 <tr>
-                    <th>Tanggal Input</th>
                     <th>Nama Produk</th>
                     <th class="text-right">Harga Beli</th>
                     <th class="text-right">Harga Jual</th>
@@ -69,7 +68,8 @@
         kontenAdmin.style.display = 'none';
         
         try {
-            let query = supabaseClient.from('produk').select('*').order('created_at', { ascending: false });
+            // Menghapus .order('created_at'...) karena kolomnya tidak ada
+            let query = supabaseClient.from('produk').select('*');
             if (adminTerpilih) query = query.eq('pemilik', adminTerpilih);
 
             const { data: produkList, error: dbError } = await query;
@@ -85,14 +85,7 @@
                     const untung = hJualNet - hBeli;
                     const warna = untung >= 0 ? "green" : "red";
 
-                    // Formating Tanggal: DD/MM/YYYY HH:MM
-                    const tglObj = new Date(p.created_at);
-                    const tglFormated = p.created_at ? 
-                        `${tglObj.getDate().toString().padStart(2, '0')}/${(tglObj.getMonth()+1).toString().padStart(2, '0')}/${tglObj.getFullYear()} ${tglObj.getHours().toString().padStart(2, '0')}:${tglObj.getMinutes().toString().padStart(2, '0')}` 
-                        : '-';
-
                     tbody.innerHTML += `<tr>
-                        <td>${tglFormated}</td>
                         <td><b>${p.nama}</b></td>
                         <td class="text-right">Rp ${hBeli.toLocaleString('id-ID')}</td>
                         <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
@@ -121,9 +114,7 @@
         } catch (error) { alert("Gagal: " + error.message); }
     }
 
-    // Panggil saat load
     document.addEventListener('DOMContentLoaded', () => {
-        // (isiDropdownAdmin sudah dipanggil di sini jika Anda ingin menambahkan fungsinya)
         muatKatalogKeuntungan();
     });
 </script>
