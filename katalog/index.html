@@ -6,144 +6,69 @@
     <title>Katalog Keuntungan Restock - Duta Terang</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .container-katalog {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 15px;
-        }
-        .judul-katalog {
-            color: #333;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .wrapper-tabel {
-            overflow-x: auto;
-        }
-        .tabel-data {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .tabel-data th {
-            background-color: #2c3e50;
-            color: white;
-            text-align: left;
-            padding: 12px;
-            font-size: 13px;
-        }
-        .tabel-data td {
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 13px;
-            color: #444;
-        }
-        .tabel-data tr:hover {
-            background-color: #f9f9f9;
-        }
+        .container-katalog { font-family: 'Segoe UI', sans-serif; max-width: 1200px; margin: 20px auto; padding: 15px; }
+        .judul-katalog { color: #333; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .wrapper-tabel { overflow-x: auto; }
+        .tabel-data { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tabel-data th { background-color: #2c3e50; color: white; text-align: left; padding: 12px; font-size: 13px; }
+        .tabel-data td { padding: 12px; border-bottom: 1px solid #e0e0e0; font-size: 13px; color: #444; }
+        .tabel-data tr:hover { background-color: #f9f9f9; }
         .text-center { text-align: center !important; }
         .text-right { text-align: right !important; }
-        .badge-untung {
-            background-color: #2e7d32;
-            color: white;
-            padding: 3px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 11px;
-        }
-        #status-akses {
-            text-align: center;
-            padding: 30px;
-        }
-        .pesan-error {
-            color: #c0392b;
-            font-weight: bold;
-            background-color: #fde8e8;
-            padding: 20px;
-            border-radius: 5px;
-            border: 1px solid #f8b4b4;
-            display: inline-block;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .btn-kembali {
-            background-color: #64748b;
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
-        }
+        #status-akses { text-align: center; padding: 30px; }
+        .pesan-error { color: #c0392b; font-weight: bold; background-color: #fde8e8; padding: 20px; border-radius: 5px; border: 1px solid #f8b4b4; }
+        .btn-kembali { background-color: #64748b; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-size: 13px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container-katalog">
     <div class="judul-katalog">
-    <div>
-        <h2>Analisis Harga & Keuntungan (Duta Terang)</h2>
-        
-        <select id="pilih-admin" onchange="muatKatalogKeuntungan()" style="padding: 8px; border-radius: 4px; margin-top: 10px; width: 100%; max-width: 300px;">
-            <option value="">-- Pilih Admin --</option>
-        </select>
+        <div>
+            <h2>Analisis Harga & Keuntungan</h2>
+            <select id="pilih-admin" onchange="muatKatalogKeuntungan()" style="padding: 8px; border-radius: 4px; margin-top: 10px; width: 100%; max-width: 300px;">
+                <option value="">-- Semua Admin --</option>
+            </select>
+        </div>
+        <a href="https://dutaled.my.id/admin" class="btn-kembali">⬅️ Kembali ke Admin</a>
     </div>
-    
-    <a href="https://dutaled.my.id/admin" class="btn-kembali">⬅️ Kembali ke Admin</a>
-</div>
 
-<div id="status-akses" style="margin-top: 20px; font-style: italic;">
-    Memeriksa verifikasi hak akses admin...
-</div>
+    <div id="status-akses" style="margin-top: 20px; font-style: italic;">Memeriksa data...</div>
     
     <div class="wrapper-tabel" id="konten-admin" style="display: none;">
         <table class="tabel-data">
             <thead>
-    <tr>
-        <th>Tanggal Dibuat</th>
-        <th>Nama Produk</th>
-        <th class="text-right">Harga Beli</th>
-        <th class="text-right">Harga Jual</th>
-        <th class="text-center">Diskon</th>
-        <th class="text-right">Estimasi Untung</th>
-        <th class="text-center">Aksi</th>
-    </tr>
-</thead>
-            <tbody id="list-order-supplier">
-            </tbody>
+                <tr>
+                    <th>Tanggal Dibuat</th>
+                    <th>Nama Produk</th>
+                    <th class="text-right">Harga Beli</th>
+                    <th class="text-right">Harga Jual</th>
+                    <th class="text-center">Diskon</th>
+                    <th class="text-right">Estimasi Untung</th>
+                    <th class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="list-order-supplier"></tbody>
         </table>
     </div>
 </div>
+
 <script>
     const SUPABASE_URL = 'https://opgeeqnucxrdqcgwcuge.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8';
-    
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function isiDropdownAdmin() {
         const select = document.getElementById("pilih-admin");
         try {
-            const { data, error } = await supabaseClient
-                .from('akses_admin')
-                .select('username')
-                .order('username');
+            const { data, error } = await supabaseClient.from('akses_admin').select('username').order('username');
             if (error) throw error;
-
-            select.innerHTML = '<option value="">-- Semua Admin --</option>';
             data.forEach(acc => {
                 select.innerHTML += `<option value="${acc.username}">${acc.username.toUpperCase()}</option>`;
             });
-
             const adminTersimpan = localStorage.getItem('duta_admin_name');
             if (adminTersimpan) select.value = adminTersimpan;
-        } catch (e) {
-            console.error("Gagal isi dropdown:", e.message);
-        }
+        } catch (e) { console.error("Gagal isi dropdown:", e.message); }
     }
 
     async function muatKatalogKeuntungan() {
@@ -157,16 +82,8 @@
         kontenAdmin.style.display = 'none';
         
         try {
-            // Query langsung ke tabel produk
-            let query = supabaseClient
-                .from('produk')
-                .select('*')
-                .order('id', { ascending: false });
-
-            // Filter berdasarkan pemilik jika admin dipilih
-            if (adminTerpilih) {
-                query = query.eq('pemilik', adminTerpilih);
-            }
+            let query = supabaseClient.from('produk').select('*').order('id', { ascending: false });
+            if (adminTerpilih) query = query.eq('pemilik', adminTerpilih);
 
             const { data: produkList, error: dbError } = await query;
             if (dbError) throw dbError;
@@ -174,11 +91,9 @@
             tbody.innerHTML = '';
             if (produkList && produkList.length > 0) {
                 produkList.forEach(p => {
-                    // Pastikan nama kolom di DB sesuai: harga_beli, harga, diskon
                     const hBeli = p.harga_beli || 0; 
                     const hJual = p.harga || 0;
                     const diskon = p.diskon || 0;
-                    
                     const hJualNet = hJual - (hJual * (diskon / 100));
                     const untung = hJualNet - hBeli;
 
@@ -189,9 +104,7 @@
                         <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
                         <td class="text-center">${diskon}%</td>
                         <td class="text-right"><b style="color:green;">Rp ${untung.toLocaleString('id-ID')}</b></td>
-                        <td class="text-center">
-                            <button onclick="hapusProduk(${p.id}, '${p.nama}')" style="color:red; cursor:pointer;">Hapus</button>
-                        </td>
+                        <td class="text-center"><button onclick="hapusProduk(${p.id}, '${p.nama}')" style="color:red; cursor:pointer;">Hapus</button></td>
                     </tr>`;
                 });
                 infoAkses.style.display = 'none';
@@ -204,18 +117,20 @@
         }
     }
 
-    // Fungsi Hapus Produk yang baru
     async function hapusProduk(id, nama) {
-        if (!confirm(`Yakin ingin menghapus produk "${nama}" secara permanen?`)) return;
+        if (!confirm(`Yakin ingin menghapus produk "${nama}"?`)) return;
         try {
             const { error } = await supabaseClient.from('produk').delete().eq('id', id);
             if (error) throw error;
-            alert("Produk berhasil dihapus!");
+            alert("Berhasil dihapus!");
             await muatKatalogKeuntungan();
-        } catch (error) {
-            alert("Gagal menghapus: " + error.message);
-        }
+        } catch (error) { alert("Gagal: " + error.message); }
     }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await isiDropdownAdmin();
+        await muatKatalogKeuntungan(); // PENTING: Menambahkan ini agar data muncul saat dibuka
+    });
 </script>
 </body>
 </html>
