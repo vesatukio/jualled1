@@ -142,3 +142,21 @@ function hitungDanRenderSummary() {
     if (elJenis) elJenis.innerText = daftarProduk.length + " Item";
     if (elStok) elStok.innerText = daftarProduk.reduce((a, b) => a + (Number(b.stok) || 0), 0) + " Pcs";
 }
+// Tambahkan fungsi ini di admin.js
+function hitungLabaAdminOtomatis() {
+    const hargaBeli = parseFloat(document.getElementById('prod_harga_beli').value) || 0;
+    const hargaJualAsli = parseFloat(document.getElementById('prod_harga').value) || 0;
+    const diskonPersen = parseFloat(document.getElementById('prod_diskon').value) || 0;
+
+    const hargaJualSetelahDiskon = hargaJualAsli - (hargaJualAsli * (diskonPersen / 100));
+    const untungPcs = hargaJualSetelahDiskon - hargaBeli;
+
+    // Tampilkan di layar
+    document.getElementById('prod_estimasi_untung').value = new Intl.NumberFormat('id-ID', { 
+        style: 'currency', currency: 'IDR', maximumFractionDigits: 0 
+    }).format(untungPcs);
+
+    // Simpan nilai murni (angka saja) ke hidden input untuk database
+    const hiddenUntung = document.getElementById('prod_estimasi_untung_val');
+    if (hiddenUntung) hiddenUntung.value = untungPcs;
+}
