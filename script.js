@@ -8,17 +8,38 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let produkData = [];
 let bannerData = [];
 let keranjang = {};
-let modeLihatModal = false; // Tambahan: Status mode admin
-let kategoriTerpilih = 'Semua'; // Tambahan: Menyimpan kategori saat ini
+let modeLihatModal = false; 
+let kategoriTerpilih = 'Semua'; 
+
+// Fungsi Toggle Mode Admin
+function toggleModalMode() {
+    modeLihatModal = !modeLihatModal;
+    
+    // Indikator warna tombol
+    const btn = document.getElementById('btn-rahasia');
+    if(btn) btn.style.color = modeLihatModal ? '#ef4444' : '#cbd5e1';
+    
+    renderDaftarProduk(kategoriTerpilih);
+    
+    if(modeLihatModal) {
+        console.log("Mode Admin: Harga Modal Diaktifkan");
+    }
+}
 
 // Inisialisasi Data
 document.addEventListener("DOMContentLoaded", async () => {
+    // Registrasi tombol rahasia dengan Event Listener (PENTING)
+    const btnRahasia = document.getElementById('btn-rahasia');
+    if(btnRahasia) {
+        btnRahasia.addEventListener('click', toggleModalMode);
+    }
+
     await muatPengaturanSistem();
     await muatBanners();
     await muatProduk();
 });
 
-// [Fungsi muatPengaturanSistem, muatBanners, renderBanners, gantiSlide tetap sama...]
+// [Fungsi-fungsi pendukung lainnya tetap di bawah sini...]
 async function muatPengaturanSistem() {
     try {
         let { data: settings, error } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
@@ -32,15 +53,6 @@ async function muatPengaturanSistem() {
     } catch (err) { console.error("Gagal memuat pengaturan:", err); }
 }
 
-async function muatBanners() {
-    try {
-        let { data: banners, error } = await _supabase.from('banners').select('*').eq('aktif', true).order('urutan', { ascending: true });
-        if (error) throw error;
-        if (banners && banners.length > 0) { bannerData = banners; renderBanners(); }
-    } catch (err) { console.error("Gagal memuat banner:", err); }
-}
-
-// 3. Ambil Data Produk
 async function muatProduk() {
     try {
         let { data: produk, error } = await _supabase.from('produk').select('*').order('id', { ascending: false });
@@ -51,28 +63,7 @@ async function muatProduk() {
             renderKategoriBar(kategoriUnik);
             renderDaftarProduk('Semua');
         }
-    } catch (err) {
-        console.error("Gagal memuat produk:", err);
-    }
-}
-
-function renderKategoriBar(kategoriArr) {
-    const catBar = document.getElementById('cat-bar');
-    if (!catBar) return;
-    catBar.innerHTML = '';
-    kategoriArr.forEach((kat, index) => {
-        const btn = document.createElement('button');
-        btn.innerText = kat;
-        btn.className = index === 0 ? 'cat-btn active' : 'cat-btn';
-        btn.style.cssText = `padding: 6px 15px; border-radius: 15px; border: none; font-weight: bold; background: ${index === 0 ? 'var(--primary, #007bff)' : '#f1f5f9'}; color: ${index === 0 ? '#fff' : '#333'}; white-space: nowrap; cursor: pointer; margin-right: 5px;`;
-        btn.onclick = () => {
-            kategoriTerpilih = kat;
-            document.querySelectorAll('.cat-btn').forEach(b => { b.style.background = '#f1f5f9'; b.style.color = '#333'; });
-            btn.style.background = 'var(--primary, #007bff)'; btn.style.color = '#fff';
-            renderDaftarProduk(kat);
-        };
-        catBar.appendChild(btn);
-    });
+    } catch (err) { console.error("Gagal memuat produk:", err); }
 }
 
 function renderDaftarProduk(filterKategori) {
@@ -85,11 +76,10 @@ function renderDaftarProduk(filterKategori) {
 
     produkDifilter.forEach(prod => {
         const imgUrl = prod.gambar1 || prod.gambar_url || 'https://via.placeholder.com/150';
-        // Logika tampilan harga modal
         const htmlModal = modeLihatModal ? 
-    `<div style="font-size:11px; color:#ef4444; margin-top:5px; font-weight:bold;">
-        Modal: Rp ${(Number(prod.harga_modal) || 0).toLocaleString('id-ID')}
-    </div>` : '';
+            `<div style="font-size:11px; color:#ef4444; margin-top:5px; font-weight:bold;">
+                Modal: Rp ${(Number(prod.harga_modal) || 0).toLocaleString('id-ID')}
+            </div>` : '';
         
         const itemHtml = `
             <div class="product-card" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff;">
@@ -105,18 +95,4 @@ function renderDaftarProduk(filterKategori) {
         `;
         listContainer.insertAdjacentHTML('beforeend', itemHtml);
     });
-}
-
-// Fungsi Toggle Mode Admin
-function toggleModalMode() {
-    modeLihatModal = !modeLihatModal;
-    // Menggunakan pemilih yang sesuai dengan tombol di header
-    const btn = document.querySelector('button[onclick="toggleModalMode()"]');
-    if(btn) btn.style.color = modeLihatModal ? '#ef4444' : '#cbd5e1';
-    
-    renderDaftarProduk(kategoriTerpilih); // Refresh dengan kategori saat ini
-    
-    if(modeLihatModal) {
-        alert("Mode Admin: Harga Modal Diaktifkan");
-    }
 }
