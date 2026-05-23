@@ -160,3 +160,29 @@ function hitungLabaAdminOtomatis() {
     const hiddenUntung = document.getElementById('prod_estimasi_untung_val');
     if (hiddenUntung) hiddenUntung.value = untungPcs;
 }
+// Tambahkan fungsi ini di atas fungsi muatKatalogKeuntungan
+async function isiDropdownAdmin() {
+    const select = document.getElementById("pilih-admin");
+    if (!select) return;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('akses_admin')
+            .select('username')
+            .order('username');
+        
+        if (error) throw error;
+
+        select.innerHTML = '<option value="">-- Pilih Admin --</option>';
+        data.forEach(acc => {
+            select.innerHTML += `<option value="${acc.username}">${acc.username.toUpperCase()}</option>`;
+        });
+
+        // Set value jika sudah ada di localStorage
+        const adminTersimpan = localStorage.getItem('duta_admin_name');
+        if (adminTersimpan) select.value = adminTersimpan;
+        
+    } catch (e) {
+        console.error("Gagal memuat dropdown admin:", e.message);
+    }
+}
