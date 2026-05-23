@@ -186,3 +186,15 @@ async function isiDropdownAdmin() {
         console.error("Gagal memuat dropdown admin:", e.message);
     }
 }
+async function simpanProduk() {
+    // ... proses insert ke supabase ...
+    const { error } = await _supabase.from('produk').insert([dataBaru]);
+    
+    if (!error) {
+        alert("Produk berhasil ditambah!");
+        tutupForm(); // Tutup form
+        await muatDataKatalog(); // <--- WAJIB ADA: Ini memanggil ulang data dari database
+    } else {
+        alert("Gagal: " + error.message);
+    }
+}
