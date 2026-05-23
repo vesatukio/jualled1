@@ -119,14 +119,12 @@
         </table>
     </div>
 </div>
-
 <script>
     const SUPABASE_URL = 'https://opgeeqnucxrdqcgwcuge.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8';
     
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 1. Fungsi untuk mengisi dropdown admin
     async function isiDropdownAdmin() {
         const select = document.getElementById("pilih-admin");
         try {
@@ -148,17 +146,18 @@
         }
     }
 
-    // 2. Fungsi utama muat data (termasuk filter)
     async function muatKatalogKeuntungan() {
         const infoAkses = document.getElementById('status-akses');
         const kontenAdmin = document.getElementById('konten-admin');
-        const adminTerpilih = document.getElementById("pilih-admin").value;
         const tbody = document.getElementById('list-order-supplier');
+        const adminTerpilih = document.getElementById("pilih-admin").value;
 
+        infoAkses.style.display = 'block';
         infoAkses.innerText = "Memuat data...";
+        kontenAdmin.style.display = 'none';
         
         try {
-            // Query dengan filter admin (jika ada)
+            // Query menggunakan relasi ke tabel produk
             let query = supabaseClient
                 .from('order_supplier')
                 .select(`
@@ -167,6 +166,7 @@
                 `)
                 .order('created_at', { ascending: false });
 
+            // Filter jika admin dipilih
             if (adminTerpilih) {
                 query = query.eq('produk.pemilik', adminTerpilih);
             }
@@ -184,26 +184,25 @@
                     const untung = hJualNet - hBeli;
 
                     tbody.innerHTML += `<tr>
-                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>${new Date(order.created_at).toLocaleDateString('id-ID')}</td>
                         <td><b>${order.produk?.nama || 'Produk Tanpa Nama'}</b></td>
-                        <td class="text-right">Rp ${hBeli.toLocaleString()}</td>
-                        <td class="text-right">Rp ${hJualNet.toLocaleString()}</td>
+                        <td class="text-right">Rp ${hBeli.toLocaleString('id-ID')}</td>
+                        <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
                         <td class="text-center">${diskon}%</td>
-                        <td class="text-right"><b style="color:green;">Rp ${untung.toLocaleString()}</b></td>
-                        <td class="text-center">${order.status_order}</td>
+                        <td class="text-right"><b style="color:green;">Rp ${untung.toLocaleString('id-ID')}</b></td>
+                        <td class="text-center">${order.status_order || '-'}</td>
                     </tr>`;
                 });
                 infoAkses.style.display = 'none';
                 kontenAdmin.style.display = 'block';
             } else {
-                infoAkses.innerText = 'Data tidak ditemukan.';
+                infoAkses.innerText = 'Tidak ada data ditemukan.';
             }
         } catch (error) {
             infoAkses.innerHTML = `<div class="pesan-error">Error: ${error.message}</div>`;
         }
     }
 
-    // 3. Inisialisasi
     document.addEventListener('DOMContentLoaded', async () => {
         await isiDropdownAdmin();
         await muatKatalogKeuntungan();
