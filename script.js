@@ -17,30 +17,17 @@
 
     // --- 3. FUNGSI NAVIGASI & MENU (Bisa diakses dari tombol HTML) ---
     function bukaMenu(tipe) {
-        if (tipe === 'customer') {
-            isModeGrosir = false;
-            alert("Mode Customer aktif. Harga normal.");
-            renderDaftarProduk('Semua');
-        } 
-        else if (tipe === 'grosir') {
-            const pin = prompt("Masukkan PIN untuk akses Grosir:");
-            if (pin === "1234") {
-                isModeGrosir = true;
-                alert("Akses Grosir Diterima!");
-                renderDaftarProduk('Semua');
-            } else {
-                alert("PIN Grosir Salah!");
-            }
-        } 
-        else if (tipe === 'admin') {
-            const pin = prompt("Masukkan PIN untuk akses Admin:");
-            if (pin === "admin123") {
-                window.location.href = "admin.html";
-            } else {
-                alert("PIN Admin Salah!");
-            }
+    if (tipe === 'customer') {
+        isModeGrosir = false;
+        renderDaftarProduk('Semua'); // Paksa render ulang
+    } else if (tipe === 'grosir') {
+        const pin = prompt("Masukkan PIN:");
+        if (pin === "1234") {
+            isModeGrosir = true; // Ubah status global
+            renderDaftarProduk('Semua'); // Paksa render ulang dengan status baru
         }
     }
+}
 
     // --- 4. FUNGSI RENDER & DATA ---
     async function muatProduk() {
