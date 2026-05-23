@@ -205,30 +205,26 @@ function zoomGambar(src) {
 }
 function bukaMenu(tipe) {
     if (tipe === 'customer') {
-        // Mengembalikan ke harga normal
         isModeGrosir = false;
-        alert("Mode Customer aktif. Harga kembali ke harga normal.");
-        renderDaftarProduk('Semua'); // Refresh tampilan
-        
-    } else {
-        // Logika proteksi PIN
-        const pin = prompt(`Masukkan PIN untuk akses ${tipe.toUpperCase()}:`);
-        
-        const pinGrosir = "1234";
-        const pinAdmin = "admin123";
-
-        if (tipe === 'grosir' && pin === pinGrosir) {
-            // Aktifkan mode grosir, tidak perlu pindah halaman
+        alert("Mode Customer aktif. Menampilkan harga normal.");
+        jalankanFilterDanSortir();
+    } 
+    else if (tipe === 'grosir') {
+        const pin = prompt("Masukkan PIN untuk akses Grosir:");
+        if (pin === "1234") { // Ganti "1234" dengan PIN Grosir Anda
             isModeGrosir = true;
-            alert("Akses Grosir berhasil! Harga telah disesuaikan.");
-            renderDaftarProduk('Semua'); // Refresh tampilan agar harga berubah
-            
-        } else if (tipe === 'admin' && pin === pinAdmin) {
-            // Tetap pindah halaman untuk admin
-            window.location.href = "admin.html";
-            
+            alert("Akses Grosir Diterima! Harga grosir ditampilkan.");
+            jalankanFilterDanSortir();
         } else {
-            alert("PIN Salah! Akses ditolak.");
+            alert("PIN Grosir Salah!");
+        }
+    } 
+    else if (tipe === 'admin') {
+        const pin = prompt("Masukkan PIN untuk akses Admin:");
+        if (pin === "admin123") { // Ganti "admin123" dengan PIN Admin Anda
+            window.location.href = "admin.html";
+        } else {
+            alert("PIN Admin Salah!");
         }
     }
 }
