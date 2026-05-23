@@ -9,26 +9,28 @@
         body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; margin: 0; padding: 15px; }
         .container { max-width: 1000px; margin: auto; }
         
-        /* Filter Kategori */
-        .filter-wrapper { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; margin-bottom: 20px; }
+        /* Pencarian & Filter */
+        .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .filter-wrapper { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; }
         .btn-filter { padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; white-space: nowrap; }
         .btn-filter.active { background: #2c3e50; color: white; border-color: #2c3e50; }
 
-        /* Grid System: 2 di HP, 4 di PC */
+        /* Grid System */
         .produk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         @media (min-width: 992px) { .produk-grid { grid-template-columns: repeat(4, 1fr); } }
 
         .produk-card { background: white; border-radius: 12px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
         .produk-img { width: 100%; aspect-ratio: 1/1; border-radius: 8px; object-fit: cover; background: #eee; }
-        .nama { font-weight: 600; font-size: 13px; margin: 10px 0 5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .nama { font-weight: 600; font-size: 13px; margin: 10px 0 5px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .harga { color: #555; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <input type="text" class="search-box" id="search-input" placeholder="Cari nama produk..." oninput="filterData()">
     <div class="filter-wrapper" id="kategori-list">
-        <button class="btn-filter active" onclick="filterProduk('Semua')">Semua</button>
+        <button class="btn-filter active" onclick="setKategori('Semua', this)">Semua</button>
     </div>
     <div class="produk-grid" id="produk-grid"></div>
 </div>
@@ -39,27 +41,36 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let semuaProduk = [];
+    let kategoriAktif = 'Semua';
 
     async function ambilData() {
         const { data } = await supabaseClient.from('produk').select('nama, harga_beli, gambar1, kategori');
         semuaProduk = data;
-        renderKategori(data);
-        renderProduk(data);
-    }
-
-    function renderKategori(data) {
-        const kategori = [...new Set(data.map(p => p.kategori).filter(Boolean))];
+        
+        // Render kategori unik
+        const kategoriList = [...new Set(data.map(p => p.kategori).filter(Boolean))];
         const wrapper = document.getElementById('kategori-list');
-        kategori.forEach(kat => {
-            wrapper.innerHTML += `<button class="btn-filter" onclick="filterProduk('${kat}', this)">${kat}</button>`;
+        kategoriList.forEach(kat => {
+            wrapper.innerHTML += `<button class="btn-filter" onclick="setKategori('${kat}', this)">${kat}</button>`;
         });
+        
+        renderProduk(semuaProduk);
     }
 
-    function filterProduk(kat, btn) {
+    function setKategori(kat, btn) {
+        kategoriAktif = kat;
         document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-        
-        const filtered = kat === 'Semua' ? semuaProduk : semuaProduk.filter(p => p.kategori === kat);
+        filterData();
+    }
+
+    function filterData() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        const filtered = semuaProduk.filter(p => {
+            const matchKategori = (kategoriAktif === 'Semua' || p.kategori === kategoriAktif);
+            const matchSearch = p.nama.toLowerCase().includes(query);
+            return matchKategori && matchSearch;
+        });
         renderProduk(filtered);
     }
 
