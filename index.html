@@ -16,19 +16,11 @@
     
     <!-- Bagian Header Toko -->
     <header>
-    <div class="brand-title">Dutakita <span>LED</span></div>
-    
-    <!-- Menu Tambahan -->
-    <div class="menu-akses">
-        <button onclick="bukaMenu('customer')" class="menu-btn">👤 Customer</button>
-        <button onclick="bukaMenu('grosir')" class="menu-btn">📦 Grosir</button>
-        <button onclick="bukaMenu('admin')" class="menu-btn">⚙️ Admin</button>
-    </div>
-
-    <div style="text-align: center; font-size: 10px; color: #94a3b8; margin: 8px 0 4px 0;">
-        Pengguna Terpasang: <span id="app-stats">0</span>
-    </div>
-</header>
+        <div class="brand-title">Dutakita <span>LED</span></div>
+        <div class="counter-badge-admin" onclick="hitungKlikRahasia()" style="background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; border: 1px solid #cbd5e1; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-download"></i> Terpasang: <span id="app-stats">0</span>
+        </div>
+    </header>
 
     <!-- Bagian Teks Berjalan -->
     <div class="marquee-container">
@@ -115,6 +107,7 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    let produkData = [];
     let bannerData = [];
     let keranjang = {}; 
     let kategoriWarna = ['#e0f2fe', '#fef3c7', '#dcfce7', '#fce7f3', '#ffedd5', '#f3e8ff'];
@@ -479,6 +472,5 @@
         }
     }
 </script>
-  
 </body>
 </html>
