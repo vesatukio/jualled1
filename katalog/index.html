@@ -104,16 +104,16 @@
     <div class="wrapper-tabel" id="konten-admin" style="display: none;">
         <table class="tabel-data">
             <thead>
-                <tr>
-                    <th>Tanggal Restock</th>
-                    <th>Nama Produk</th>
-                    <th class="text-right">Harga Beli (Modal)</th>
-                    <th class="text-right">Harga Jual Toko</th>
-                    <th class="text-center">Potongan Diskon</th>
-                    <th class="text-right">Estimasi Untung / Pcs</th>
-                    <th class="text-center">Status Order</th>
-                </tr>
-            </thead>
+    <tr>
+        <th>Tanggal Dibuat</th>
+        <th>Nama Produk</th>
+        <th class="text-right">Harga Beli</th>
+        <th class="text-right">Harga Jual</th>
+        <th class="text-center">Diskon</th>
+        <th class="text-right">Estimasi Untung</th>
+        <th class="text-center">Aksi</th>
+    </tr>
+</thead>
             <tbody id="list-order-supplier">
             </tbody>
         </table>
@@ -157,56 +157,65 @@
         kontenAdmin.style.display = 'none';
         
         try {
-            // Query menggunakan relasi ke tabel produk
+            // Query langsung ke tabel produk
             let query = supabaseClient
-                .from('order_supplier')
-                .select(`
-                    id, qty_order, harga_beli_satuan, status_order, created_at,
-                    produk ( nama, harga, diskon, pemilik )
-                `)
-                .order('created_at', { ascending: false });
+                .from('produk')
+                .select('*')
+                .order('id', { ascending: false });
 
-            // Filter jika admin dipilih
+            // Filter berdasarkan pemilik jika admin dipilih
             if (adminTerpilih) {
-                query = query.eq('produk.pemilik', adminTerpilih);
+                query = query.eq('pemilik', adminTerpilih);
             }
 
-            const { data: orders, error: dbError } = await query;
+            const { data: produkList, error: dbError } = await query;
             if (dbError) throw dbError;
 
             tbody.innerHTML = '';
-            if (orders && orders.length > 0) {
-                orders.forEach(order => {
-                    const hBeli = order.harga_beli_satuan || 0;
-                    const hJual = order.produk?.harga || 0;
-                    const diskon = order.produk?.diskon || 0;
+            if (produkList && produkList.length > 0) {
+                produkList.forEach(p => {
+                    // Pastikan nama kolom di DB sesuai: harga_beli, harga, diskon
+                    const hBeli = p.harga_beli || 0; 
+                    const hJual = p.harga || 0;
+                    const diskon = p.diskon || 0;
+                    
                     const hJualNet = hJual - (hJual * (diskon / 100));
                     const untung = hJualNet - hBeli;
 
                     tbody.innerHTML += `<tr>
-                        <td>${new Date(order.created_at).toLocaleDateString('id-ID')}</td>
-                        <td><b>${order.produk?.nama || 'Produk Tanpa Nama'}</b></td>
+                        <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : '-'}</td>
+                        <td><b>${p.nama}</b></td>
                         <td class="text-right">Rp ${hBeli.toLocaleString('id-ID')}</td>
                         <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
                         <td class="text-center">${diskon}%</td>
                         <td class="text-right"><b style="color:green;">Rp ${untung.toLocaleString('id-ID')}</b></td>
-                        <td class="text-center">${order.status_order || '-'}</td>
+                        <td class="text-center">
+                            <button onclick="hapusProduk(${p.id}, '${p.nama}')" style="color:red; cursor:pointer;">Hapus</button>
+                        </td>
                     </tr>`;
                 });
                 infoAkses.style.display = 'none';
                 kontenAdmin.style.display = 'block';
             } else {
-                infoAkses.innerText = 'Tidak ada data ditemukan.';
+                infoAkses.innerText = 'Tidak ada produk ditemukan.';
             }
         } catch (error) {
             infoAkses.innerHTML = `<div class="pesan-error">Error: ${error.message}</div>`;
         }
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        await isiDropdownAdmin();
-        await muatKatalogKeuntungan();
-    });
+    // Fungsi Hapus Produk yang baru
+    async function hapusProduk(id, nama) {
+        if (!confirm(`Yakin ingin menghapus produk "${nama}" secara permanen?`)) return;
+        try {
+            const { error } = await supabaseClient.from('produk').delete().eq('id', id);
+            if (error) throw error;
+            alert("Produk berhasil dihapus!");
+            await muatKatalogKeuntungan();
+        } catch (error) {
+            alert("Gagal menghapus: " + error.message);
+        }
+    }
 </script>
 </body>
 </html>
