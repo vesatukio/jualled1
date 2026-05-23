@@ -124,13 +124,7 @@
     let klikRahasiaCount = 0;
     let defferredPrompt;
     let kategoriTerpilih = 'Semua';
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        await muatPengaturanSistem();
-        await muatBannerBergilir();
-        await muatProdukDanOfflineCache();
-    });
-
+    let isModeGrosir = false; // Tambahkan ini agar aplikasi mengenali mode grosir
     async function muatPengaturanSistem() {
         try {
             let { data: settings, error } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
