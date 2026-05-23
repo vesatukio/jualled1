@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Keuntungan Restock - Duta Terang</title>
+    <title>Katalog Keuntungan - Duta Terang</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .container-katalog { font-family: 'Segoe UI', sans-serif; max-width: 1200px; margin: 20px auto; padding: 15px; }
@@ -39,7 +39,7 @@
         <table class="tabel-data">
             <thead>
                 <tr>
-                    <th>Tanggal Dibuat</th>
+                    <th>Tanggal Input</th>
                     <th>Nama Produk</th>
                     <th class="text-right">Harga Beli</th>
                     <th class="text-right">Harga Jual</th>
@@ -58,19 +58,6 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function isiDropdownAdmin() {
-        const select = document.getElementById("pilih-admin");
-        try {
-            const { data, error } = await supabaseClient.from('akses_admin').select('username').order('username');
-            if (error) throw error;
-            data.forEach(acc => {
-                select.innerHTML += `<option value="${acc.username}">${acc.username.toUpperCase()}</option>`;
-            });
-            const adminTersimpan = localStorage.getItem('duta_admin_name');
-            if (adminTersimpan) select.value = adminTersimpan;
-        } catch (e) { console.error("Gagal isi dropdown:", e.message); }
-    }
-
     async function muatKatalogKeuntungan() {
         const infoAkses = document.getElementById('status-akses');
         const kontenAdmin = document.getElementById('konten-admin');
@@ -82,7 +69,7 @@
         kontenAdmin.style.display = 'none';
         
         try {
-            let query = supabaseClient.from('produk').select('*').order('id', { ascending: false });
+            let query = supabaseClient.from('produk').select('*').order('created_at', { ascending: false });
             if (adminTerpilih) query = query.eq('pemilik', adminTerpilih);
 
             const { data: produkList, error: dbError } = await query;
@@ -91,36 +78,29 @@
             tbody.innerHTML = '';
             if (produkList && produkList.length > 0) {
                 produkList.forEach(p => {
-    // Pastikan angka diambil sebagai Number
-    const hBeli = Number(p.harga_beli) || 0; 
-    const hJual = Number(p.harga) || 0;
-    const diskon = Number(p.diskon) || 0;
-    
-    // Rumus Harga Jual Netto (setelah dipotong diskon)
-    // 17000 - (17000 * 0.02) = 16660
-    const hJualNet = hJual - (hJual * (diskon / 100));
-    
-    // Rumus Untung
-    // 16660 - 12000 = 4660
-    const untung = hJualNet - hBeli;
-    
-    // Warna teks (Hijau jika untung, Merah jika rugi)
-    const warna = untung >= 0 ? "green" : "red";
+                    const hBeli = Number(p.harga_beli) || 0; 
+                    const hJual = Number(p.harga) || 0;
+                    const diskon = Number(p.diskon) || 0;
+                    const hJualNet = hJual - (hJual * (diskon / 100));
+                    const untung = hJualNet - hBeli;
+                    const warna = untung >= 0 ? "green" : "red";
 
-    tbody.innerHTML += `<tr>
-        <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : '-'}</td>
-        <td><b>${p.nama}</b></td>
-        <td class="text-right">Rp ${hBeli.toLocaleString('id-ID')}</td>
-        <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
-        <td class="text-center">${diskon}%</td>
-        <td class="text-right">
-            <b style="color: ${warna};">Rp ${untung.toLocaleString('id-ID')}</b>
-        </td>
-        <td class="text-center">
-            <button onclick="hapusProduk(${p.id}, '${p.nama}')" style="color:red; cursor:pointer;">Hapus</button>
-        </td>
-    </tr>`;
-});
+                    // Formating Tanggal: DD/MM/YYYY HH:MM
+                    const tglObj = new Date(p.created_at);
+                    const tglFormated = p.created_at ? 
+                        `${tglObj.getDate().toString().padStart(2, '0')}/${(tglObj.getMonth()+1).toString().padStart(2, '0')}/${tglObj.getFullYear()} ${tglObj.getHours().toString().padStart(2, '0')}:${tglObj.getMinutes().toString().padStart(2, '0')}` 
+                        : '-';
+
+                    tbody.innerHTML += `<tr>
+                        <td>${tglFormated}</td>
+                        <td><b>${p.nama}</b></td>
+                        <td class="text-right">Rp ${hBeli.toLocaleString('id-ID')}</td>
+                        <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
+                        <td class="text-center">${diskon}%</td>
+                        <td class="text-right"><b style="color: ${warna};">Rp ${untung.toLocaleString('id-ID')}</b></td>
+                        <td class="text-center"><button onclick="hapusProduk(${p.id}, '${p.nama}')" style="color:red; cursor:pointer;">Hapus</button></td>
+                    </tr>`;
+                });
                 infoAkses.style.display = 'none';
                 kontenAdmin.style.display = 'block';
             } else {
@@ -141,9 +121,10 @@
         } catch (error) { alert("Gagal: " + error.message); }
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        await isiDropdownAdmin();
-        await muatKatalogKeuntungan(); // PENTING: Menambahkan ini agar data muncul saat dibuka
+    // Panggil saat load
+    document.addEventListener('DOMContentLoaded', () => {
+        // (isiDropdownAdmin sudah dipanggil di sini jika Anda ingin menambahkan fungsinya)
+        muatKatalogKeuntungan();
     });
 </script>
 </body>
