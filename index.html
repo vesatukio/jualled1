@@ -485,5 +485,33 @@
         }
     }
 </script>
+    <script>
+        // PASTIKAN FUNGSI INI BERADA DI LUAR ADDEVENTLISTENER
+        function bukaMenu(tipe) {
+            console.log("Tombol diklik: " + tipe); // Jika muncul di console, berarti berhasil!
+            
+            if (tipe === 'customer') {
+                isModeGrosir = false;
+                alert("Mode Customer aktif.");
+            } else if (tipe === 'grosir') {
+                const pin = prompt("Masukkan PIN:");
+                if (pin === "1234") {
+                    isModeGrosir = true;
+                    alert("Mode Grosir Aktif!");
+                } else {
+                    alert("PIN Salah!");
+                    return; // Berhenti di sini jika PIN salah
+                }
+            }
+            
+            // Setelah mode berubah, jalankan fungsi render untuk update harga
+            // Gunakan 'Semua' atau variabel kategori yang sedang aktif
+            renderDaftarProduk('Semua'); 
+        }
+
+        // --- Fungsi lainnya (muatProduk, dll) diletakkan di bawah sini ---
+    </script>
+</body>
+</html>
 </body>
 </html>
