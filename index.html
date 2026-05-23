@@ -1,26 +1,11 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dutakita LED</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- MENGHUBUNGKAN KE FILE CSS TERPISAH -->
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="manifest" href="manifest.json">
-</head>
-<body>
-
-<div class="app-container">
-    
-<!-- Bagian Header Toko -->
 <header>
     <div class="brand-title">Dutakita <span>LED</span></div>
-    <div style="text-align: center; font-size: 10px; color: #94a3b8; margin-top: 5px;">
-    Pengguna Terpasang: <span id="app-stats">0</span>
-</div>
-    <div class="menu-akses-tambahan" style="margin-top: 12px; display: flex; gap: 8px; justify-content: center;">
+    
+    <div style="text-align: center; font-size: 10px; color: #94a3b8; margin: 5px 0;">
+        Pengguna Terpasang: <span id="app-stats">0</span>
+    </div>
+
+    <div class="menu-akses-tambahan" style="margin-top: 8px; display: flex; gap: 8px; justify-content: center;">
         <button onclick="bukaMenu('customer')" style="font-size: 11px; padding: 6px 12px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer;">
             👤 Customer
         </button>
