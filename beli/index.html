@@ -3,32 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Produk Duta Terang</title>
+    <title>Katalog Duta Terang</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; margin: 0; padding: 15px; }
-        .container { max-width: 1000px; margin: auto; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 10px; }
+        .container { max-width: 1200px; margin: auto; }
         
-        /* Pencarian & Filter */
-        .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .filter-wrapper { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; }
-        .btn-filter { padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; white-space: nowrap; }
-        .btn-filter.active { background: #2c3e50; color: white; border-color: #2c3e50; }
+        .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; }
+        
+        .filter-wrapper { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+        .filter-wrapper::-webkit-scrollbar { display: none; }
+        .btn-filter { padding: 6px 16px; border-radius: 16px; border: none; background: #e0e0e0; cursor: pointer; white-space: nowrap; font-size: 13px; }
+        .btn-filter.active { background: #2c3e50; color: white; }
 
-        /* Grid System */
-        .produk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        @media (min-width: 992px) { .produk-grid { grid-template-columns: repeat(4, 1fr); } }
+        /* Grid System: 3 di HP, 6 di PC */
+        .produk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        @media (min-width: 992px) { .produk-grid { grid-template-columns: repeat(6, 1fr); gap: 20px; } }
 
-        .produk-card { background: white; border-radius: 12px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
-        .produk-img { width: 100%; aspect-ratio: 1/1; border-radius: 8px; object-fit: cover; background: #eee; }
-        .nama { font-weight: 600; font-size: 13px; margin: 10px 0 5px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .harga { color: #555; font-size: 12px; }
+        .produk-card { background: white; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .produk-img { width: 100%; aspect-ratio: 1/1; border-radius: 4px; object-fit: cover; background: #eee; }
+        .nama { font-weight: 500; font-size: 11px; margin-top: 8px; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.2; }
+        .harga { color: #d32f2f; font-size: 12px; font-weight: bold; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <input type="text" class="search-box" id="search-input" placeholder="Cari nama produk..." oninput="filterData()">
+    <input type="text" class="search-box" id="search-input" placeholder="Cari barang..." oninput="filterData()">
     <div class="filter-wrapper" id="kategori-list">
         <button class="btn-filter active" onclick="setKategori('Semua', this)">Semua</button>
     </div>
@@ -45,10 +46,9 @@
 
     async function ambilData() {
         const { data } = await supabaseClient.from('produk').select('nama, harga_beli, gambar1, kategori');
-        semuaProduk = data;
+        semuaProduk = data || [];
         
-        // Render kategori unik
-        const kategoriList = [...new Set(data.map(p => p.kategori).filter(Boolean))];
+        const kategoriList = [...new Set(semuaProduk.map(p => p.kategori).filter(Boolean))];
         const wrapper = document.getElementById('kategori-list');
         kategoriList.forEach(kat => {
             wrapper.innerHTML += `<button class="btn-filter" onclick="setKategori('${kat}', this)">${kat}</button>`;
@@ -80,7 +80,7 @@
             <div class="produk-card">
                 <img src="${p.gambar1 || 'https://via.placeholder.com/150'}" class="produk-img" alt="${p.nama}">
                 <span class="nama">${p.nama}</span>
-                <span class="harga">Rp ${Number(p.harga_beli).toLocaleString('id-ID')}</span>
+                <span class="harga">Rp${Number(p.harga_beli).toLocaleString('id-ID')}</span>
             </div>
         `).join('');
     }
