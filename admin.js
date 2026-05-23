@@ -71,31 +71,33 @@ async function muatDataKatalog() {
 async function simpanProduk() {
     const prodId = document.getElementById("prod_id").value;
     
-    // 1. Ambil data dari form termasuk 3 gambar & estimasi untung
+    // Pastikan ID HTML ('prod_harga_beli') sesuai dengan yang ada di file HTML Anda
+    const hargaModalInput = document.getElementById("prod_harga_beli").value;
+    
     const dataForm = {
         nama: document.getElementById("prod_nama").value,
         harga: parseFloat(document.getElementById("prod_harga").value) || 0,
         stok: parseInt(document.getElementById("prod_stok").value) || 0,
         
-        // Menangkap data gambar baru
+        // Tambahkan ini agar harga modal terkirim ke database
+        harga_modal: parseFloat(hargaModalInput) || 0, 
+        
         gambar1: document.getElementById("prod_gambar1")?.value || "",
         gambar2: document.getElementById("prod_gambar2")?.value || "",
         gambar3: document.getElementById("prod_gambar3")?.value || "",
         
-        // Menangkap data untung (yang sudah dihitung fungsi hitungLabaAdminOtomatis)
-        estimasi_untung: document.getElementById("prod_estimasi_untung_val")?.value || 0,
-        
+        estimasi_untung: parseFloat(document.getElementById("prod_estimasi_untung_val")?.value) || 0,
         pemilik: namaAdminAktif
     };
 
     try {
         let error;
         if (prodId) {
-            // EDIT: Update produk berdasarkan ID
+            // EDIT
             const { error: err } = await _supabase.from('produk').update(dataForm).eq('id', prodId);
             error = err;
         } else {
-            // TAMBAH: Insert data baru
+            // TAMBAH BARU
             const { error: err } = await _supabase.from('produk').insert([dataForm]);
             error = err;
         }
@@ -104,10 +106,10 @@ async function simpanProduk() {
 
         alert("Data berhasil disimpan!");
         tutupForm();
-        
-        // Refresh otomatis agar tabel langsung update
-        await muatDataKatalog(); 
+        await muatDataKatalog();
     } catch (e) {
+        // Penting: Lihat pesan error di sini
+        console.error("Error Detail:", e);
         alert("Gagal simpan: " + e.message);
     }
 }
