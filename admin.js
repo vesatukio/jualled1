@@ -208,3 +208,34 @@ function updateDropdownKategori() {
         select.innerHTML += `<option value="${kat}">${kat}</option>`;
     });
 }
+// Tambahkan fungsi-fungsi pelengkap ini agar HTML tidak error
+function handleKategoriSelect(el) {
+    const inputBaru = document.getElementById("prod_kategori_baru");
+    if (el.value === "tambah_baru") { // Anda perlu menyesuaikan logika ini
+        inputBaru.style.display = "block";
+    } else {
+        inputBaru.style.display = "none";
+    }
+}
+
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.panel-section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).style.display = 'block';
+    btn.classList.add('active');
+}
+
+function aktifkanInputKategoriBaru(e) {
+    e.preventDefault();
+    document.getElementById("prod_kategori_baru").style.display = "block";
+}
+
+// Fungsi Dummy (Isi nanti sesuai kebutuhan)
+function tambahAdminBaru() { alert("Fitur tambah admin belum dibuat"); }
+function hapusAdminAktif() { alert("Fitur hapus admin belum dibuat"); }
+function simpanPengaturan(e) { e.preventDefault(); alert("Simpan pengaturan..."); }
+function simpanBanner(e) { e.preventDefault(); alert("Simpan banner..."); }
+function downloadTemplateMassal(tipe) { alert("Download " + tipe); }
+function downloadSemuaProdukAktif() { alert("Download semua produk"); }
+function updateFileNameDisplay(el) { console.log(el.value); }
+function prosesUploadMassal() { alert("Proses upload..."); }
