@@ -91,17 +91,20 @@
             tbody.innerHTML = '';
             if (produkList && produkList.length > 0) {
                 produkList.forEach(p => {
-    const hBeli = p.harga_beli || 0; 
-    const hJual = p.harga || 0;
-    const diskon = p.diskon || 0;
+    // Pastikan angka diambil sebagai Number
+    const hBeli = Number(p.harga_beli) || 0; 
+    const hJual = Number(p.harga) || 0;
+    const diskon = Number(p.diskon) || 0;
     
     // Rumus Harga Jual Netto (setelah dipotong diskon)
+    // 17000 - (17000 * 0.02) = 16660
     const hJualNet = hJual - (hJual * (diskon / 100));
     
-    // Rumus Untung/Rugi
+    // Rumus Untung
+    // 16660 - 12000 = 4660
     const untung = hJualNet - hBeli;
     
-    // Logika warna: Hijau jika untung (>=0), Merah jika rugi (<0)
+    // Warna teks (Hijau jika untung, Merah jika rugi)
     const warna = untung >= 0 ? "green" : "red";
 
     tbody.innerHTML += `<tr>
