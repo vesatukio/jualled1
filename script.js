@@ -14,10 +14,12 @@ const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
         await muatProdukDanOfflineCache();
     });
 
-    // FUNGSI MENU AKSES
-    function bukaMenu(tipe) {
+    <script>
+    // 1. DEFINISI FUNGSI HARUS DI PALING ATAS
+    window.bukaMenu = function(tipe) {
+        console.log("Fungsi bukaMenu dipanggil untuk:", tipe);
         if (tipe === 'customer') {
-            alert("Mode Customer: Harga Eceran Aktif");
+            alert("Mode Customer Aktif");
         } else if (tipe === 'grosir') {
             const pin = prompt("Masukkan PIN untuk akses Grosir:");
             if (pin === "1234") alert("Mode Grosir Aktif!");
@@ -27,8 +29,12 @@ const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
             if (pin === "admin123") window.location.href = "admin.html";
             else alert("PIN Salah!");
         }
-    }
+    };
 
+    // 2. KODE LAINNYA DI BAWAH
+    const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
+    // ... (sisanya tetap sama)
+</script>
     async function muatProdukDanOfflineCache() {
         try {
             // Pastikan tabel di Supabase bernama 'produk'
