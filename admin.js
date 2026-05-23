@@ -80,7 +80,7 @@ async function simpanProduk() {
         stok: parseInt(document.getElementById("prod_stok").value) || 0,
         
         // Tambahkan ini agar harga modal terkirim ke database
-        harga_modal: parseFloat(hargaModalInput) || 0, 
+        harga_beli: parseFloat(hargaBeliInput) || 0, 
         
         gambar1: document.getElementById("prod_gambar1")?.value || "",
         gambar2: document.getElementById("prod_gambar2")?.value || "",
