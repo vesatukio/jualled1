@@ -678,3 +678,33 @@ const { data, error } = await supabase
     admin_detail:akses_admin(username)
   `)
   .eq('admin_id', 1); // Ganti angka 1 sesuai ID admin yang sedang login
+// Panggil ini saat halaman dimuat
+async function init() {
+    await ambilDaftarAdmin();
+    // muatKatalogKeuntungan(); // Opsional: buka data default jika mau
+}
+
+async function ambilDaftarAdmin() {
+    const dropdown = document.getElementById('pilih-admin');
+    
+    // Ambil data admin dari tabel akses_admin
+    const { data: admins, error } = await supabaseClient
+        .from('akses_admin')
+        .select('id, nama_admin'); // Sesuaikan 'nama_admin' dengan nama kolom di tabel Anda
+
+    if (error) {
+        console.error("Gagal ambil daftar admin:", error);
+        return;
+    }
+
+    // Masukkan ke dropdown
+    admins.forEach(admin => {
+        const option = document.createElement('option');
+        option.value = admin.id;
+        option.text = admin.nama_admin;
+        dropdown.appendChild(option);
+    });
+}
+
+// Jalankan saat load
+document.addEventListener('DOMContentLoaded', init);
