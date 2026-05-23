@@ -164,3 +164,37 @@ function updateDropdownKategori() {
         select.innerHTML += `<option value="${kat}">${kat}</option>`;
     });
 }
+// --- FUNGSI YANG HILANG (Tambahkan ini di bagian bawah admin.js) ---
+
+function hitungDanRenderSummary() {
+    const elJenis = document.getElementById("statTotalJenis");
+    const elStok = document.getElementById("statTotalStok");
+    
+    // Hitung total item unik dan total stok
+    const totalJenis = daftarProduk.length;
+    const totalStok = daftarProduk.reduce((sum, p) => sum + (Number(p.stok) || 0), 0);
+    
+    if (elJenis) elJenis.innerText = totalJenis + " Item";
+    if (elStok) elStok.innerText = totalStok + " Pcs";
+}
+
+async function gantiAdminAktif(val) {
+    if (!val) return;
+    namaAdminAktif = val.trim().toLowerCase();
+    localStorage.setItem('duta_admin_name', namaAdminAktif);
+    // Muat ulang data saat admin diganti
+    await muatDataKatalog();
+}
+
+function updateDropdownKategori() {
+    const select = document.getElementById("prod_kategori_select");
+    if (!select) return;
+    
+    // Ambil kategori unik
+    const kategoriList = [...new Set(daftarProduk.map(p => p.kategori).filter(k => k))];
+    
+    select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+    kategoriList.sort().forEach(kat => {
+        select.innerHTML += `<option value="${kat}">${kat}</option>`;
+    });
+}
