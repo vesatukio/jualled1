@@ -6,24 +6,27 @@
     <title>Katalog Produk Duta Terang</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; margin: 0; padding: 10px; }
         .container { max-width: 600px; margin: auto; }
         .produk-card { 
-            background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px;
-            display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background: white; border-radius: 12px; padding: 12px; margin-bottom: 10px;
+            display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .produk-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; margin-right: 15px; background: #eee; }
+        .produk-img { 
+            width: 70px; height: 70px; border-radius: 8px; object-fit: cover; 
+            margin-right: 15px; background: #eee;
+        }
         .info { flex-grow: 1; }
-        .nama { font-weight: bold; color: #333; display: block; }
-        .harga { color: #2c3e50; font-size: 14px; }
+        .nama { font-weight: 600; color: #222; display: block; font-size: 15px; }
+        .harga { color: #555; font-size: 13px; margin-top: 5px; }
         .empty { text-align: center; padding: 40px; color: #888; }
     </style>
 </head>
 <body>
 
 <div class="container" id="katalog-list">
-    <h2 style="text-align: center;">Katalog Produk</h2>
-    <div id="loader">Memuat produk...</div>
+    <h2 style="text-align: center; color: #333;">Katalog Produk</h2>
+    <div id="loader" style="text-align: center; color: #666;">Memuat data...</div>
 </div>
 
 <script>
@@ -33,12 +36,14 @@
 
     async function muatKatalog() {
         const container = document.getElementById('katalog-list');
-        const { data, error } = await supabaseClient.from('produk').select('nama, harga_beli, image_url');
+        
+        // Mengambil kolom: nama, harga_beli, dan gambar1
+        const { data, error } = await supabaseClient.from('produk').select('nama, harga_beli, gambar1');
         
         document.getElementById('loader').style.display = 'none';
 
         if (error) {
-            container.innerHTML = `<p class="empty">Gagal memuat data: ${error.message}</p>`;
+            container.innerHTML = `<p class="empty">Error: ${error.message}</p>`;
             return;
         }
 
@@ -48,9 +53,12 @@
         }
 
         data.forEach(p => {
+            // Jika gambar1 kosong, tampilkan ikon box
+            const img = p.gambar1 ? `<img src="${p.gambar1}" class="produk-img" alt="${p.nama}">` : '<div class="produk-img" style="display:flex; align-items:center; justify-content:center;">📦</div>';
+            
             container.innerHTML += `
                 <div class="produk-card">
-                    <img src="${p.image_url || 'https://via.placeholder.com/60'}" class="produk-img" alt="${p.nama}">
+                    ${img}
                     <div class="info">
                         <span class="nama">${p.nama}</span>
                         <span class="harga">Modal: Rp ${Number(p.harga_beli).toLocaleString('id-ID')}</span>
