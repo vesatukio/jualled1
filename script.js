@@ -86,7 +86,10 @@ function renderDaftarProduk(filterKategori) {
     produkDifilter.forEach(prod => {
         const imgUrl = prod.gambar1 || prod.gambar_url || 'https://via.placeholder.com/150';
         // Logika tampilan harga modal
-        const htmlModal = modeLihatModal ? `<div style="font-size:11px; color:#ef4444; margin-top:5px; font-weight:bold;">Modal: Rp ${(Number(prod.harga_modal) || 0).toLocaleString('id-ID')}</div>` : '';
+        const htmlModal = modeLihatModal ? 
+    `<div style="font-size:11px; color:#ef4444; margin-top:5px; font-weight:bold;">
+        Modal: Rp ${(Number(prod.harga_modal) || 0).toLocaleString('id-ID')}
+    </div>` : '';
         
         const itemHtml = `
             <div class="product-card" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff;">
