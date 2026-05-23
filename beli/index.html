@@ -6,27 +6,31 @@
     <title>Katalog Produk Duta Terang</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; margin: 0; padding: 10px; }
-        .container { max-width: 600px; margin: auto; }
-        .produk-card { 
-            background: white; border-radius: 12px; padding: 12px; margin-bottom: 10px;
-            display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .produk-img { 
-            width: 70px; height: 70px; border-radius: 8px; object-fit: cover; 
-            margin-right: 15px; background: #eee;
-        }
-        .info { flex-grow: 1; }
-        .nama { font-weight: 600; color: #222; display: block; font-size: 15px; }
-        .harga { color: #555; font-size: 13px; margin-top: 5px; }
-        .empty { text-align: center; padding: 40px; color: #888; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; margin: 0; padding: 15px; }
+        .container { max-width: 1000px; margin: auto; }
+        
+        /* Filter Kategori */
+        .filter-wrapper { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; margin-bottom: 20px; }
+        .btn-filter { padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; white-space: nowrap; }
+        .btn-filter.active { background: #2c3e50; color: white; border-color: #2c3e50; }
+
+        /* Grid System: 2 di HP, 4 di PC */
+        .produk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        @media (min-width: 992px) { .produk-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .produk-card { background: white; border-radius: 12px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .produk-img { width: 100%; aspect-ratio: 1/1; border-radius: 8px; object-fit: cover; background: #eee; }
+        .nama { font-weight: 600; font-size: 13px; margin: 10px 0 5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .harga { color: #555; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="container" id="katalog-list">
-    <h2 style="text-align: center; color: #333;">Katalog Produk</h2>
-    <div id="loader" style="text-align: center; color: #666;">Memuat data...</div>
+<div class="container">
+    <div class="filter-wrapper" id="kategori-list">
+        <button class="btn-filter active" onclick="filterProduk('Semua')">Semua</button>
+    </div>
+    <div class="produk-grid" id="produk-grid"></div>
 </div>
 
 <script>
@@ -34,41 +38,43 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function muatKatalog() {
-        const container = document.getElementById('katalog-list');
-        
-        // Mengambil kolom: nama, harga_beli, dan gambar1
-        const { data, error } = await supabaseClient.from('produk').select('nama, harga_beli, gambar1');
-        
-        document.getElementById('loader').style.display = 'none';
+    let semuaProduk = [];
 
-        if (error) {
-            container.innerHTML = `<p class="empty">Error: ${error.message}</p>`;
-            return;
-        }
+    async function ambilData() {
+        const { data } = await supabaseClient.from('produk').select('nama, harga_beli, gambar1, kategori');
+        semuaProduk = data;
+        renderKategori(data);
+        renderProduk(data);
+    }
 
-        if (data.length === 0) {
-            container.innerHTML = '<p class="empty">Belum ada produk.</p>';
-            return;
-        }
-
-        data.forEach(p => {
-            // Jika gambar1 kosong, tampilkan ikon box
-            const img = p.gambar1 ? `<img src="${p.gambar1}" class="produk-img" alt="${p.nama}">` : '<div class="produk-img" style="display:flex; align-items:center; justify-content:center;">📦</div>';
-            
-            container.innerHTML += `
-                <div class="produk-card">
-                    ${img}
-                    <div class="info">
-                        <span class="nama">${p.nama}</span>
-                        <span class="harga">Modal: Rp ${Number(p.harga_beli).toLocaleString('id-ID')}</span>
-                    </div>
-                </div>
-            `;
+    function renderKategori(data) {
+        const kategori = [...new Set(data.map(p => p.kategori).filter(Boolean))];
+        const wrapper = document.getElementById('kategori-list');
+        kategori.forEach(kat => {
+            wrapper.innerHTML += `<button class="btn-filter" onclick="filterProduk('${kat}', this)">${kat}</button>`;
         });
     }
 
-    muatKatalog();
+    function filterProduk(kat, btn) {
+        document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
+        
+        const filtered = kat === 'Semua' ? semuaProduk : semuaProduk.filter(p => p.kategori === kat);
+        renderProduk(filtered);
+    }
+
+    function renderProduk(data) {
+        const grid = document.getElementById('produk-grid');
+        grid.innerHTML = data.map(p => `
+            <div class="produk-card">
+                <img src="${p.gambar1 || 'https://via.placeholder.com/150'}" class="produk-img" alt="${p.nama}">
+                <span class="nama">${p.nama}</span>
+                <span class="harga">Rp ${Number(p.harga_beli).toLocaleString('id-ID')}</span>
+            </div>
+        `).join('');
+    }
+
+    ambilData();
 </script>
 </body>
 </html>
