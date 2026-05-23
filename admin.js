@@ -64,7 +64,6 @@ async function muatDataKatalog() {
         daftarKategoriSedia.clear();
         daftarProduk.forEach(p => { if(p.kategori) daftarKategoriSedia.add(p.kategori); });
         
-        // Panggil fungsi pendukung yang tadinya menyebabkan error
         updateDropdownKategori();
         hitungDanRenderSummary();
         renderTabel();
@@ -73,33 +72,61 @@ async function muatDataKatalog() {
     }
 }
 
-// 4. RENDER TABEL
+// 4. RENDER TABEL & FUNGSI AKSI
 function renderTabel() {
     const tbody = document.getElementById("tabelProduk");
     if (!tbody) return;
 
     let html = "";
-    if (daftarProduk.length === 0) {
-        html = `<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada produk untuk admin ini.</td></tr>`;
-    } else {
-        daftarProduk.forEach(p => {
-            html += `<tr>
-                <td><img src="${p.gambar1 || 'https://via.placeholder.com/50'}" style="width:50px;"></td>
-                <td><strong>${p.nama}</strong><br><span style="font-size:10px;">👤 ${p.pemilik}</span></td>
-                <td>${p.kategori || '-'}</td>
-                <td>Rp ${Number(p.harga).toLocaleString()}</td>
-                <td>${p.stok}</td>
-                <td>
-                    <button onclick="editForm(${p.id})">Edit</button>
-                    <button onclick="hapusProduk(${p.id})">Hapus</button>
-                </td>
-            </tr>`;
-        });
-    }
-    tbody.innerHTML = html;
+    daftarProduk.forEach(p => {
+        html += `<tr>
+            <td><img src="${p.gambar1 || 'https://via.placeholder.com/50'}" style="width:50px;"></td>
+            <td><strong>${p.nama}</strong><br><span style="font-size:10px;">👤 ${p.pemilik}</span></td>
+            <td>${p.kategori || '-'}</td>
+            <td>Rp ${Number(p.harga).toLocaleString()}</td>
+            <td>${p.stok}</td>
+            <td>
+                <button onclick="editForm(${p.id})">Edit</button>
+                <button onclick="hapusProduk(${p.id}, '${p.nama}')">Hapus</button>
+            </td>
+        </tr>`;
+    });
+    tbody.innerHTML = html || '<tr><td colspan="6">Belum ada produk.</td></tr>';
 }
 
-// 5. FUNGSI PENDUKUNG (AGAR TIDAK ERROR)
+// 5. HAPUS PRODUK
+async function hapusProduk(id, nama) {
+    if (!confirm(`Hapus produk "${nama}"?`)) return;
+    try {
+        const { error } = await _supabase.from('produk').delete().eq('id', id).eq('pemilik', namaAdminAktif);
+        if (error) throw error;
+        alert("Produk berhasil dihapus!");
+        await muatDataKatalog();
+    } catch (e) { alert("Error hapus: " + e.message); }
+}
+
+// 6. BUKA FORM (TAMBAH/EDIT)
+function bukaFormTambah() {
+    document.getElementById("prodForm").reset();
+    document.getElementById("prod_id").value = "";
+    document.getElementById("formTitle").innerText = "Tambah Produk Baru";
+    document.getElementById("formCard").style.display = "block";
+}
+
+function editForm(id) {
+    const p = daftarProduk.find(i => i.id === id);
+    if(!p) return;
+    document.getElementById("prod_id").value = p.id;
+    document.getElementById("prod_nama").value = p.nama;
+    document.getElementById("prod_harga").value = p.harga;
+    document.getElementById("prod_stok").value = p.stok;
+    document.getElementById("formTitle").innerText = "Edit Produk";
+    document.getElementById("formCard").style.display = "block";
+}
+
+function tutupForm() { document.getElementById("formCard").style.display = "none"; }
+
+// 7. FUNGSI PENDUKUNG
 function updateDropdownKategori() {
     const select = document.getElementById("prod_kategori_select");
     if (!select) return;
@@ -115,7 +142,3 @@ function hitungDanRenderSummary() {
     if (elJenis) elJenis.innerText = daftarProduk.length + " Item";
     if (elStok) elStok.innerText = daftarProduk.reduce((a, b) => a + (Number(b.stok) || 0), 0) + " Pcs";
 }
-
-// Tambahkan fungsi dummy/placeholder jika editForm/hapusProduk belum ada
-function editForm(id) { alert("Edit produk ID: " + id); }
-function hapusProduk(id) { alert("Hapus produk ID: " + id); }
