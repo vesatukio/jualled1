@@ -68,35 +68,45 @@ async function muatDataKatalog() {
     }
 }
 
-// 3. SIMPAN (TAMBAH/EDIT)
 async function simpanProduk() {
     const prodId = document.getElementById("prod_id").value;
     
-    // Ambil data dari form
+    // 1. Ambil data dari form termasuk 3 gambar & estimasi untung
     const dataForm = {
         nama: document.getElementById("prod_nama").value,
         harga: parseFloat(document.getElementById("prod_harga").value) || 0,
         stok: parseInt(document.getElementById("prod_stok").value) || 0,
+        
+        // Menangkap data gambar baru
+        gambar1: document.getElementById("prod_gambar1")?.value || "",
+        gambar2: document.getElementById("prod_gambar2")?.value || "",
+        gambar3: document.getElementById("prod_gambar3")?.value || "",
+        
+        // Menangkap data untung (yang sudah dihitung fungsi hitungLabaAdminOtomatis)
+        estimasi_untung: document.getElementById("prod_estimasi_untung_val")?.value || 0,
+        
         pemilik: namaAdminAktif
     };
 
     try {
         let error;
         if (prodId) {
-            // EDIT
+            // EDIT: Update produk berdasarkan ID
             const { error: err } = await _supabase.from('produk').update(dataForm).eq('id', prodId);
             error = err;
         } else {
-            // TAMBAH
+            // TAMBAH: Insert data baru
             const { error: err } = await _supabase.from('produk').insert([dataForm]);
             error = err;
         }
 
         if (error) throw error;
 
-        alert("Berhasil disimpan!");
+        alert("Data berhasil disimpan!");
         tutupForm();
-        await muatDataKatalog(); // Refresh otomatis
+        
+        // Refresh otomatis agar tabel langsung update
+        await muatDataKatalog(); 
     } catch (e) {
         alert("Gagal simpan: " + e.message);
     }
