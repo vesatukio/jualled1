@@ -144,23 +144,34 @@ async function hapusProduk(id, nama) {
 
 // 6. FUNGSI UI
 function editForm(id) {
+    // 1. Cari produk berdasarkan ID
     const p = daftarProduk.find(i => i.id === id);
-    if(!p) return;
+    if(!p) {
+        alert("Data produk tidak ditemukan!");
+        return;
+    }
+    
+    // 2. Isi data ke elemen form (PASTIKAN ID HTML SAMA)
     document.getElementById("prod_id").value = p.id;
     document.getElementById("prod_nama").value = p.nama;
-    document.getElementById("prod_harga").value = p.harga;
+    document.getElementById("prod_harga").value = p.harga; // Harga Jual
     document.getElementById("prod_stok").value = p.stok;
+    
+    // TAMBAHKAN INI agar data muncul di form:
+    document.getElementById("prod_harga_beli").value = p.harga_beli || 0; // Pastikan nama kolom di DB adalah harga_beli
+    document.getElementById("prod_gambar1").value = p.gambar1 || "";
+    document.getElementById("prod_gambar2").value = p.gambar2 || "";
+    document.getElementById("prod_gambar3").value = p.gambar3 || "";
+    
+    // 3. Panggil fungsi hitung agar angka untung muncul otomatis saat form edit dibuka
+    if (typeof hitungLabaAdminOtomatis === 'function') {
+        hitungLabaAdminOtomatis();
+    }
+    
+    // 4. Tampilkan form
     document.getElementById("formTitle").innerText = "Edit Produk";
     document.getElementById("formCard").style.display = "block";
 }
-
-function bukaFormTambah() {
-    document.getElementById("prodForm").reset();
-    document.getElementById("prod_id").value = "";
-    document.getElementById("formTitle").innerText = "Tambah Produk Baru";
-    document.getElementById("formCard").style.display = "block";
-}
-
 function tutupForm() { document.getElementById("formCard").style.display = "none"; }
 function updateDropdownKategori() {
     const select = document.getElementById("prod_kategori_select");
