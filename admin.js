@@ -670,3 +670,11 @@ function hitungLabaAdminOtomatis() {
     // 3. (Opsional) Beri warna merah jika rugi
     document.getElementById('prod_estimasi_untung').style.color = untungPcs < 0 ? '#dc2626' : '#15803d';
 }
+// Contoh untuk menampilkan data order milik admin dengan ID 1 (dutaterang)
+const { data, error } = await supabase
+  .from('order_supplier')
+  .select(`
+    *,
+    admin_detail:akses_admin(username)
+  `)
+  .eq('admin_id', 1); // Ganti angka 1 sesuai ID admin yang sedang login
