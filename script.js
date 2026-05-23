@@ -55,35 +55,37 @@
     }
 
     function renderDaftarProduk(filterKategori) {
-        const listContainer = document.getElementById('list');
-        if (!listContainer) return;
-        listContainer.innerHTML = '';
+    const listContainer = document.getElementById('list');
+    if (!listContainer) return;
+    listContainer.innerHTML = '';
 
-        const data = filterKategori === 'Semua' ? produkData : produkData.filter(p => p.kategori === filterKategori);
+    // Filter data
+    const data = filterKategori === 'Semua' ? produkData : produkData.filter(p => p.kategori === filterKategori);
 
-        data.forEach(prod => {
-            const hargaAsli = Number(prod.harga) || 0;
-            const diskon = Number(prod.diskon) || 0;
-            const diskonGrosir = Number(prod.diskon_grosir) || 0;
+    data.forEach(prod => {
+        // Ambil data dari database
+        const hargaAsli = Number(prod.harga) || 0;
+        const diskonReguler = Number(prod.diskon) || 0;
+        const diskonGrosir = Number(prod.diskon_grosir) || 0;
 
-            // Hitung harga final
-            let hargaJual = hargaAsli * (1 - (diskon / 100));
-            if (isModeGrosir && diskonGrosir > 0) {
-                hargaJual = hargaJual * (1 - (diskonGrosir / 100));
-            }
+        // --- RUMUS HARGA ---
+        let hargaJual = hargaAsli * (1 - (diskonReguler / 100));
+        
+        // Cek status Global: apakah sedang mode grosir?
+        if (isModeGrosir === true) {
+            hargaJual = hargaJual * (1 - (diskonGrosir / 100));
+        }
 
-            const imgUrl = prod.gambar1 || 'https://via.placeholder.com/150';
-
-            listContainer.insertAdjacentHTML('beforeend', `
-                <div class="product-card" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff;">
-                    <img src="${imgUrl}" style="width:100%; height:120px; object-fit:cover; border-radius:6px;">
-                    <h4 style="margin:8px 0; font-size:14px;">${prod.nama}</h4>
-                    <span style="font-weight:bold; color:var(--pink, #ff477e);">Rp ${hargaJual.toLocaleString('id-ID')}</span>
-                    ${isModeGrosir && diskonGrosir > 0 ? `<div style="font-size:9px; color:red;">Grosir: -${diskonGrosir}%</div>` : ''}
-                </div>
-            `);
-        });
-    }
+        // --- RENDER KE LAYAR ---
+        listContainer.insertAdjacentHTML('beforeend', `
+            <div class="product-card">
+                <h4>${prod.nama}</h4>
+                <p>Harga: Rp ${hargaJual.toLocaleString('id-ID')}</p>
+                ${isModeGrosir ? `<small style="color:red;">Mode Grosir Aktif</small>` : ''}
+            </div>
+        `);
+    });
+}
 
     // Fungsi pendukung lainnya (muatPengaturanSistem, muatBanners, dll) 
     // tetap letakkan di sini...
