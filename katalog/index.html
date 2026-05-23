@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Keuntungan - Duta Terang</title>
+    <title>Manajemen Katalog Produk - Duta Terang</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .container-katalog { font-family: 'Segoe UI', sans-serif; max-width: 1200px; margin: 20px auto; padding: 15px; }
@@ -25,15 +25,15 @@
 <div class="container-katalog">
     <div class="judul-katalog">
         <div>
-            <h2>Analisis Harga & Keuntungan</h2>
-            <select id="pilih-admin" onchange="muatKatalogKeuntungan()" style="padding: 8px; border-radius: 4px; margin-top: 10px; width: 100%; max-width: 300px;">
+            <h2>Data Produk & Keuntungan</h2>
+            <select id="pilih-admin" onchange="muatKatalogProduk()" style="padding: 8px; border-radius: 4px; margin-top: 10px; width: 100%; max-width: 300px;">
                 <option value="">-- Semua Admin --</option>
             </select>
         </div>
         <a href="https://dutaled.my.id/admin" class="btn-kembali">⬅️ Kembali ke Admin</a>
     </div>
 
-    <div id="status-akses" style="margin-top: 20px; font-style: italic;">Memeriksa data...</div>
+    <div id="status-akses" style="margin-top: 20px; font-style: italic;">Memuat data...</div>
     
     <div class="wrapper-tabel" id="konten-admin" style="display: none;">
         <table class="tabel-data">
@@ -42,12 +42,12 @@
                     <th>Nama Produk</th>
                     <th class="text-right">Harga Beli</th>
                     <th class="text-right">Harga Jual</th>
-                    <th class="text-center">Diskon</th>
+                    <th class="text-center">Diskon (%)</th>
                     <th class="text-right">Estimasi Untung</th>
                     <th class="text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody id="list-order-supplier"></tbody>
+            <tbody id="list-produk"></tbody>
         </table>
     </div>
 </div>
@@ -57,7 +57,6 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Fungsi mengisi dropdown admin
     async function isiDropdownAdmin() {
         const select = document.getElementById("pilih-admin");
         try {
@@ -72,18 +71,26 @@
         } catch (e) { console.error("Gagal isi dropdown:", e.message); }
     }
 
-    async function muatKatalogKeuntungan() {
+    async function updateData(id, kolom, nilai) {
+        try {
+            const nilaiUpdate = (kolom !== 'nama') ? Number(nilai) : nilai;
+            const { error } = await supabaseClient.from('produk').update({ [kolom]: nilaiUpdate }).eq('id', id);
+            if (error) throw error;
+            await muatKatalogProduk();
+        } catch (error) { alert("Gagal menyimpan: " + error.message); }
+    }
+
+    async function muatKatalogProduk() {
         const infoAkses = document.getElementById('status-akses');
         const kontenAdmin = document.getElementById('konten-admin');
-        const tbody = document.getElementById('list-order-supplier');
+        const tbody = document.getElementById('list-produk');
         const adminTerpilih = document.getElementById("pilih-admin").value;
 
         infoAkses.style.display = 'block';
-        infoAkses.innerText = "Memuat data...";
         kontenAdmin.style.display = 'none';
         
         try {
-            let query = supabaseClient.from('produk').select('*');
+            let query = supabaseClient.from('produk').select('*').order('id', { ascending: false });
             if (adminTerpilih) query = query.eq('pemilik', adminTerpilih);
 
             const { data: produkList, error: dbError } = await query;
@@ -100,10 +107,10 @@
                     const warna = untung >= 0 ? "green" : "red";
 
                     tbody.innerHTML += `<tr>
-                        <td><b>${p.nama}</b></td>
-                        <td class="text-right">Rp ${hBeli.toLocaleString('id-ID')}</td>
-                        <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
-                        <td class="text-center">${diskon}%</td>
+                        <td><input type="text" value="${p.nama}" onchange="updateData(${p.id}, 'nama', this.value)" style="width:90%"></td>
+                        <td class="text-right"><input type="number" value="${hBeli}" onchange="updateData(${p.id}, 'harga_beli', this.value)" style="width:80px"></td>
+                        <td class="text-right"><input type="number" value="${hJual}" onchange="updateData(${p.id}, 'harga', this.value)" style="width:80px"></td>
+                        <td class="text-center"><input type="number" value="${diskon}" onchange="updateData(${p.id}, 'diskon', this.value)" style="width:40px"></td>
                         <td class="text-right"><b style="color: ${warna};">Rp ${untung.toLocaleString('id-ID')}</b></td>
                         <td class="text-center"><button onclick="hapusProduk(${p.id}, '${p.nama}')" style="color:red; cursor:pointer;">Hapus</button></td>
                     </tr>`;
@@ -113,9 +120,7 @@
             } else {
                 infoAkses.innerText = 'Tidak ada produk ditemukan.';
             }
-        } catch (error) {
-            infoAkses.innerHTML = `<div class="pesan-error">Error: ${error.message}</div>`;
-        }
+        } catch (error) { infoAkses.innerHTML = `<div class="pesan-error">Error: ${error.message}</div>`; }
     }
 
     async function hapusProduk(id, nama) {
@@ -123,14 +128,13 @@
         try {
             const { error } = await supabaseClient.from('produk').delete().eq('id', id);
             if (error) throw error;
-            alert("Berhasil dihapus!");
-            await muatKatalogKeuntungan();
+            await muatKatalogProduk();
         } catch (error) { alert("Gagal: " + error.message); }
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
         await isiDropdownAdmin();
-        await muatKatalogKeuntungan();
+        await muatKatalogProduk();
     });
 </script>
 </body>
