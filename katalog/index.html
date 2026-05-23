@@ -126,119 +126,88 @@
     
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function formatRupiah(angka) {
-        return new Intl.NumberFormat('id-ID', { 
-            style: 'currency', currency: 'IDR', maximumFractionDigits: 0 
-        }).format(angka);
-    }
-
-    async function muatKatalogKeuntungan() {
-        const infoAkses = document.getElementById('status-akses');
-        const kontenAdmin = document.getElementById('konten-admin');
-
+    // 1. Fungsi untuk mengisi dropdown admin
+    async function isiDropdownAdmin() {
+        const select = document.getElementById("pilih-admin");
         try {
-            // Mengambil data pengguna aktif dari localStorage browser yang disave oleh admin.html
-            // Jika sistem panelmu menggunakan key lain (seperti 'current_admin'), dia akan mendeteksi otomatis nilainya.
-            const adminAktifLocal = localStorage.getItem('selected_admin') || localStorage.getItem('admin_aktif');
-            
-            // Jika kamu membuka langsung tanpa lewat admin panel, atau data kosong:
-            // Kita beri toleransi bypass agar kamu tetep bisa lihat selama kamu yang buka di browsermu
-            infoAkses.innerText = "Menghubungkan ke database Supabase Duta Terang...";
+            const { data, error } = await supabaseClient
+                .from('akses_admin')
+                .select('username')
+                .order('username');
+            if (error) throw error;
 
-            const { data: orders, error: dbError } = await supabaseClient
-                .from('order_supplier')
-                .select(`
-                    id,
-                    qty_order,
-                    harga_beli_satuan,
-                    status_order,
-                    created_at,
-                    produk (
-                        nama,
-                        harga,
-                        diskon
-                    )
-                `)
-                .order('created_at', { ascending: false });
+            select.innerHTML = '<option value="">-- Semua Admin --</option>';
+            data.forEach(acc => {
+                select.innerHTML += `<option value="${acc.username}">${acc.username.toUpperCase()}</option>`;
+            });
 
-            if (dbError) throw dbError;
-
-            const tbody = document.getElementById('list-order-supplier');
-            tbody.innerHTML = '';
-
-            if (orders && orders.length > 0) {
-                orders.forEach(order => {
-                    const tanggal = new Date(order.created_at).toLocaleDateString('id-ID', {
-                        day: 'numeric', month: 'short', year: 'numeric'
-                    });
-
-                    const hargaDasar = order.harga_beli_satuan || 0;
-                    const hargaJualAsli = order.produk?.harga || 0;
-                    const nilaiDiskonPersen = order.produk?.diskon || 0;
-
-                    const hargaJualSetelahDiskon = hargaJualAsli - (hargaJualAsli * (nilaiDiskonPersen / 100));
-                    const keuntungan = hargaJualSetelahDiskon - hargaDasar;
-
-                    let warnaStatus = '#f39c12'; 
-                    if (order.status_order === 'Selesai') warnaStatus = '#27ae60'; 
-                    if (order.status_order === 'Dibatalkan') warnaStatus = '#c0392b'; 
-
-                    const baris = `
-                        <tr>
-                            <td>${tanggal}</td>
-                            <td><b>${order.produk?.nama || 'Produk Tanpa Nama'}</b></td>
-                            <td class="text-right" style="color: #c0392b;">${formatRupiah(hargaDasar)}</td>
-                            <td class="text-right" style="color: #2980b9;">${formatRupiah(hargaJualSetelahDiskon)}</td>
-                            <td class="text-center">
-                                <span class="badge-untung" style="background-color: #d35400;">${nilaiDiskonPersen}%</span>
-                            </td>
-                            <td class="text-right">
-                                <b style="color: #27ae60;">${formatRupiah(keuntungan)}</b>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge-untung" style="background-color: ${warnaStatus};">
-                                    ${order.status_order}
-                                </span>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.insertAdjacentHTML('beforeend', baris);
-                });
-
-                infoAkses.style.display = 'none';
-                kontenAdmin.style.display = 'block';
-            } else {
-                infoAkses.innerText = 'Tidak ada rekaman data restock barang dari supplier.';
-            }
-
-        } catch (error) {
-            console.error('Gagal memuat data:', error);
-            infoAkses.innerHTML = `<div class="pesan-error">Gagal memproses data Supabase: ${error.message}</div>`;
+            const adminTersimpan = localStorage.getItem('duta_admin_name');
+            if (adminTersimpan) select.value = adminTersimpan;
+        } catch (e) {
+            console.error("Gagal isi dropdown:", e.message);
         }
     }
 
+    // 2. Fungsi utama muat data (termasuk filter)
+    async function muatKatalogKeuntungan() {
+        const infoAkses = document.getElementById('status-akses');
+        const kontenAdmin = document.getElementById('konten-admin');
+        const adminTerpilih = document.getElementById("pilih-admin").value;
+        const tbody = document.getElementById('list-order-supplier');
+
+        infoAkses.innerText = "Memuat data...";
+        
+        try {
+            // Query dengan filter admin (jika ada)
+            let query = supabaseClient
+                .from('order_supplier')
+                .select(`
+                    id, qty_order, harga_beli_satuan, status_order, created_at,
+                    produk ( nama, harga, diskon, pemilik )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (adminTerpilih) {
+                query = query.eq('produk.pemilik', adminTerpilih);
+            }
+
+            const { data: orders, error: dbError } = await query;
+            if (dbError) throw dbError;
+
+            tbody.innerHTML = '';
+            if (orders && orders.length > 0) {
+                orders.forEach(order => {
+                    const hBeli = order.harga_beli_satuan || 0;
+                    const hJual = order.produk?.harga || 0;
+                    const diskon = order.produk?.diskon || 0;
+                    const hJualNet = hJual - (hJual * (diskon / 100));
+                    const untung = hJualNet - hBeli;
+
+                    tbody.innerHTML += `<tr>
+                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td><b>${order.produk?.nama || 'Produk Tanpa Nama'}</b></td>
+                        <td class="text-right">Rp ${hBeli.toLocaleString()}</td>
+                        <td class="text-right">Rp ${hJualNet.toLocaleString()}</td>
+                        <td class="text-center">${diskon}%</td>
+                        <td class="text-right"><b style="color:green;">Rp ${untung.toLocaleString()}</b></td>
+                        <td class="text-center">${order.status_order}</td>
+                    </tr>`;
+                });
+                infoAkses.style.display = 'none';
+                kontenAdmin.style.display = 'block';
+            } else {
+                infoAkses.innerText = 'Data tidak ditemukan.';
+            }
+        } catch (error) {
+            infoAkses.innerHTML = `<div class="pesan-error">Error: ${error.message}</div>`;
+        }
+    }
+
+    // 3. Inisialisasi
     document.addEventListener('DOMContentLoaded', async () => {
-    await isiDropdownAdmin(); // Isi dropdown dulu
-    await muatKatalogKeuntungan(); // Baru muat datanya
-});
-    // Dapatkan nama admin yang dipilih
-const adminTerpilih = document.getElementById("pilih-admin").value;
-
-let query = supabaseClient
-    .from('order_supplier')
-    .select(`
-        id, qty_order, harga_beli_satuan, status_order, created_at,
-        produk ( nama, harga, diskon, pemilik )
-    `)
-    .order('created_at', { ascending: false });
-
-// Jika admin dipilih, filter berdasarkan pemilik produk
-if (adminTerpilih) {
-    query = query.eq('produk.pemilik', adminTerpilih);
-}
-
-const { data: orders, error: dbError } = await query;
+        await isiDropdownAdmin();
+        await muatKatalogKeuntungan();
+    });
 </script>
-
 </body>
 </html>
