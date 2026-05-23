@@ -91,22 +91,33 @@
             tbody.innerHTML = '';
             if (produkList && produkList.length > 0) {
                 produkList.forEach(p => {
-                    const hBeli = p.harga_beli || 0; 
-                    const hJual = p.harga || 0;
-                    const diskon = p.diskon || 0;
-                    const hJualNet = hJual - (hJual * (diskon / 100));
-                    const untung = hJualNet - hBeli;
+    const hBeli = p.harga_beli || 0; 
+    const hJual = p.harga || 0;
+    const diskon = p.diskon || 0;
+    
+    // Rumus Harga Jual Netto (setelah dipotong diskon)
+    const hJualNet = hJual - (hJual * (diskon / 100));
+    
+    // Rumus Untung/Rugi
+    const untung = hJualNet - hBeli;
+    
+    // Logika warna: Hijau jika untung (>=0), Merah jika rugi (<0)
+    const warna = untung >= 0 ? "green" : "red";
 
-                    tbody.innerHTML += `<tr>
-                        <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : '-'}</td>
-                        <td><b>${p.nama}</b></td>
-                        <td class="text-right">Rp ${hBeli.toLocaleString('id-ID')}</td>
-                        <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
-                        <td class="text-center">${diskon}%</td>
-                        <td class="text-right"><b style="color:green;">Rp ${untung.toLocaleString('id-ID')}</b></td>
-                        <td class="text-center"><button onclick="hapusProduk(${p.id}, '${p.nama}')" style="color:red; cursor:pointer;">Hapus</button></td>
-                    </tr>`;
-                });
+    tbody.innerHTML += `<tr>
+        <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : '-'}</td>
+        <td><b>${p.nama}</b></td>
+        <td class="text-right">Rp ${hBeli.toLocaleString('id-ID')}</td>
+        <td class="text-right">Rp ${hJualNet.toLocaleString('id-ID')}</td>
+        <td class="text-center">${diskon}%</td>
+        <td class="text-right">
+            <b style="color: ${warna};">Rp ${untung.toLocaleString('id-ID')}</b>
+        </td>
+        <td class="text-center">
+            <button onclick="hapusProduk(${p.id}, '${p.nama}')" style="color:red; cursor:pointer;">Hapus</button>
+        </td>
+    </tr>`;
+});
                 infoAkses.style.display = 'none';
                 kontenAdmin.style.display = 'block';
             } else {
