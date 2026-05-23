@@ -6,13 +6,12 @@ let daftarProduk = [];
 let daftarKategoriSedia = new Set();
 let namaAdminAktif = "";
 
-// INISIALISASI SAAT HALAMAN DIMUAT
+// INISIALISASI
 document.addEventListener('DOMContentLoaded', async () => {
     await muatDropdownAdmin();
-    await muatDataPengaturanDanBanner();
 });
 
-// 1. MEMUAT DAFTAR ADMIN KE DROPDOWN
+// 1. MEMUAT DAFTAR ADMIN
 async function muatDropdownAdmin() {
     const select = document.getElementById("dropdownAdmin");
     if (!select) return;
@@ -26,7 +25,6 @@ async function muatDropdownAdmin() {
             select.innerHTML += `<option value="${acc.username}">${acc.username.toUpperCase()}</option>`;
         });
 
-        // Set admin dari localStorage
         let lastSession = localStorage.getItem('duta_admin_name');
         if (lastSession && select.querySelector(`option[value="${lastSession}"]`)) {
             select.value = lastSession;
@@ -36,7 +34,6 @@ async function muatDropdownAdmin() {
             select.value = namaAdminAktif;
             localStorage.setItem('duta_admin_name', namaAdminAktif);
         }
-
         await muatDataKatalog();
     } catch (e) {
         console.error("Gagal memuat admin:", e.message);
@@ -54,7 +51,6 @@ async function gantiAdminAktif(val) {
 // 3. AMBIL DATA PRODUK
 async function muatDataKatalog() {
     if (!namaAdminAktif) return;
-
     try {
         const { data, error } = await _supabase
             .from('produk')
@@ -68,6 +64,7 @@ async function muatDataKatalog() {
         daftarKategoriSedia.clear();
         daftarProduk.forEach(p => { if(p.kategori) daftarKategoriSedia.add(p.kategori); });
         
+        // Panggil fungsi pendukung yang tadinya menyebabkan error
         updateDropdownKategori();
         hitungDanRenderSummary();
         renderTabel();
@@ -83,7 +80,7 @@ function renderTabel() {
 
     let html = "";
     if (daftarProduk.length === 0) {
-        html = `<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada produk.</td></tr>`;
+        html = `<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada produk untuk admin ini.</td></tr>`;
     } else {
         daftarProduk.forEach(p => {
             html += `<tr>
@@ -102,4 +99,23 @@ function renderTabel() {
     tbody.innerHTML = html;
 }
 
-// Fungsi lainnya (simpanProduk, hapusProduk, dll) tetap di bawah sini...
+// 5. FUNGSI PENDUKUNG (AGAR TIDAK ERROR)
+function updateDropdownKategori() {
+    const select = document.getElementById("prod_kategori_select");
+    if (!select) return;
+    select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+    Array.from(daftarKategoriSedia).sort().forEach(kat => {
+        select.innerHTML += `<option value="${kat}">${kat}</option>`;
+    });
+}
+
+function hitungDanRenderSummary() {
+    const elJenis = document.getElementById("statTotalJenis");
+    const elStok = document.getElementById("statTotalStok");
+    if (elJenis) elJenis.innerText = daftarProduk.length + " Item";
+    if (elStok) elStok.innerText = daftarProduk.reduce((a, b) => a + (Number(b.stok) || 0), 0) + " Pcs";
+}
+
+// Tambahkan fungsi dummy/placeholder jika editForm/hapusProduk belum ada
+function editForm(id) { alert("Edit produk ID: " + id); }
+function hapusProduk(id) { alert("Hapus produk ID: " + id); }
