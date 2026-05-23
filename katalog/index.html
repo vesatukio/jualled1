@@ -6,19 +6,34 @@
     <title>Manajemen Katalog Produk - Duta Terang</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .container-katalog { font-family: 'Segoe UI', sans-serif; max-width: 1200px; margin: 20px auto; padding: 15px; }
-        .judul-katalog { color: #333; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .wrapper-tabel { overflow-x: auto; }
-        .tabel-data { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .tabel-data th { background-color: #2c3e50; color: white; text-align: left; padding: 12px; font-size: 13px; }
-        .tabel-data td { padding: 12px; border-bottom: 1px solid #e0e0e0; font-size: 13px; color: #444; }
-        .tabel-data tr:hover { background-color: #f9f9f9; }
-        .text-center { text-align: center !important; }
-        .text-right { text-align: right !important; }
-        #status-akses { text-align: center; padding: 30px; }
-        .pesan-error { color: #c0392b; font-weight: bold; background-color: #fde8e8; padding: 20px; border-radius: 5px; border: 1px solid #f8b4b4; }
-        .btn-kembali { background-color: #64748b; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-size: 13px; font-weight: bold; }
-    </style>
+    .container-katalog { font-family: 'Segoe UI', sans-serif; max-width: 1200px; margin: 10px auto; padding: 10px; }
+    .tabel-data { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .tabel-data th { background-color: #2c3e50; color: white; padding: 10px; font-size: 12px; }
+    .tabel-data td { padding: 8px; border-bottom: 1px solid #eee; }
+    
+    /* Menghilangkan kotak input */
+    .tabel-data input {
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: center;
+        color: #333;
+    }
+    .tabel-data input:focus { background: #f0f7ff; outline: none; border-radius: 4px; }
+    
+    .text-right input { text-align: right; }
+    .text-left input { text-align: left; }
+    
+    /* Tombol Hapus lebih kecil di HP */
+    button { padding: 4px 8px; cursor: pointer; border: none; background: #fee2e2; color: #dc2626; border-radius: 4px; }
+</style>
+
+<tbody id="list-produk">
+    // Contoh:
+    <td><input type="text" class="text-left" value="${p.nama}" onchange="updateData(${p.id}, 'nama', this.value)"></td>
+    <td class="text-right"><input type="number" class="text-right" value="${hBeli}" onchange="updateData(${p.id}, 'harga_beli', this.value)"></td>
+    // ... dst
+</tbody>
 </head>
 <body>
 
