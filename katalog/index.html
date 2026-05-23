@@ -217,7 +217,27 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', muatKatalogKeuntungan);
+    document.addEventListener('DOMContentLoaded', async () => {
+    await isiDropdownAdmin(); // Isi dropdown dulu
+    await muatKatalogKeuntungan(); // Baru muat datanya
+});
+    // Dapatkan nama admin yang dipilih
+const adminTerpilih = document.getElementById("pilih-admin").value;
+
+let query = supabaseClient
+    .from('order_supplier')
+    .select(`
+        id, qty_order, harga_beli_satuan, status_order, created_at,
+        produk ( nama, harga, diskon, pemilik )
+    `)
+    .order('created_at', { ascending: false });
+
+// Jika admin dipilih, filter berdasarkan pemilik produk
+if (adminTerpilih) {
+    query = query.eq('produk.pemilik', adminTerpilih);
+}
+
+const { data: orders, error: dbError } = await query;
 </script>
 
 </body>
