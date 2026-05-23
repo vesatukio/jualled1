@@ -203,3 +203,24 @@ function zoomGambar(src) {
         modal.style.display = 'flex';
     }
 }
+function bukaMenu(tipe) {
+    if (tipe === 'customer') {
+        alert("Selamat datang, Customer! Silakan pilih produk pilihan Anda.");
+        // Arahkan ke halaman/fitur customer jika ada
+    } else {
+        // Logika proteksi PIN untuk Grosir & Admin
+        const pin = prompt(`Masukkan PIN untuk akses ${tipe.toUpperCase()}:`);
+        
+        // Sesuaikan PIN di bawah ini
+        const pinGrosir = "1234";
+        const pinAdmin = "admin123";
+
+        if (tipe === 'grosir' && pin === pinGrosir) {
+            window.location.href = "grosir.html"; // Ganti dengan nama file/link Anda
+        } else if (tipe === 'admin' && pin === pinAdmin) {
+            window.location.href = "admin.html";
+        } else {
+            alert("PIN Salah! Akses ditolak.");
+        }
+    }
+}
