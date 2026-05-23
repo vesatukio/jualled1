@@ -485,36 +485,44 @@
     }
 </script>
    <script>
-    // 1. Variabel Global (Diletakkan di luar, agar bisa diakses semua fungsi)
-    let isModeGrosir = false;
+    // 1. VARIABEL GLOBAL (HARUS DI PALING ATAS)
     let produkData = [];
+    let isModeGrosir = false;
 
-    // 2. Fungsi bukaMenu HARUS BERADA DI LUAR DOMContentLoaded
-    function bukaMenu(tipe) {
-        if (tipe === 'customer') {
-            isModeGrosir = false;
-            alert("Mode Customer aktif.");
-        } else if (tipe === 'grosir') {
-            const pin = prompt("Masukkan PIN:");
-            if (pin === "1234") {
-                isModeGrosir = true;
-                alert("Mode Grosir Aktif!");
-            } else {
-                alert("PIN Salah!");
-                return;
-            }
-        }
-        
-        // Panggil fungsi render ulang setiap tombol ditekan
-        if (typeof renderDaftarProduk === 'function') {
+    // 2. FUNGSI MUAT PRODUK (DEFINISI HARUS DI ATAS PANGGILAN)
+    async function muatProduk() {
+        console.log("Memulai memuat produk...");
+        try {
+            // Contoh pemanggilan Supabase
+            let { data: produk, error } = await _supabase.from('produk').select('*');
+            if (error) throw error;
+            produkData = produk || [];
             renderDaftarProduk('Semua');
+        } catch (err) {
+            console.error("Gagal di fungsi muatProduk:", err);
         }
     }
 
-    // 3. Inisialisasi Data (Jalankan saat halaman siap)
+    // 3. FUNGSI RENDER
+    function renderDaftarProduk(filterKategori) {
+        // ... (masukkan kode render Anda di sini)
+        console.log("Produk berhasil di-render");
+    }
+
+    // 4. FUNGSI MENU (Tombol memanggil ini)
+    function bukaMenu(tipe) {
+        if (tipe === 'grosir') {
+            const pin = prompt("Masukkan PIN:");
+            if (pin === "1234") {
+                isModeGrosir = true;
+                renderDaftarProduk('Semua');
+            }
+        }
+    }
+
+    // 5. INISIALISASI (TERAKHIR)
     document.addEventListener("DOMContentLoaded", async () => {
-        // Panggil fungsi muat data Anda di sini
-        await muatProduk(); 
+        await muatProduk(); // Sekarang fungsi muatProduk sudah didefinisikan di atas!
     });
 </script>
 </body>
