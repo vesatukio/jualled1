@@ -486,71 +486,37 @@
     }
 </script>
    <script>
-    // 1. VARIABEL GLOBAL (HARUS ADA DI LUAR SEMUA FUNGSI)
+    // 1. Variabel Global (Diletakkan di luar, agar bisa diakses semua fungsi)
+    let isModeGrosir = false;
     let produkData = [];
-    let isModeGrosir = false; 
 
-    // 2. FUNGSI RENDER (Diletakkan di bagian atas agar bisa diakses fungsi lain)
-    function renderDaftarProduk(filterKategori) {
-        const listContainer = document.getElementById('list');
-        if (!listContainer) return;
-        listContainer.innerHTML = '';
-
-        const data = filterKategori === 'Semua' ? produkData : produkData.filter(p => p.kategori === filterKategori);
-
-        data.forEach(prod => {
-            const hargaAsli = Number(prod.harga) || 0;
-            const diskon = Number(prod.diskon) || 0;
-            const diskonGrosir = Number(prod.diskon_grosir) || 0;
-
-            let hargaJual = hargaAsli * (1 - (diskon / 100));
-            if (isModeGrosir && diskonGrosir > 0) {
-                hargaJual = hargaJual * (1 - (diskonGrosir / 100));
-            }
-
-            const imgUrl = prod.gambar1 || 'https://via.placeholder.com/150';
-
-            listContainer.insertAdjacentHTML('beforeend', `
-                <div class="product-card" style="border: 1px solid #e2e8f0; padding: 10px; margin: 5px;">
-                    <img src="${imgUrl}" style="width:100%; height:100px;">
-                    <h4>${prod.nama}</h4>
-                    <p>Rp ${hargaJual.toLocaleString('id-ID')}</p>
-                    ${isModeGrosir ? '<small style="color:red;">Grosir Aktif</small>' : ''}
-                </div>
-            `);
-        });
-    }
-
-    // 3. FUNGSI MENU (Pasti bisa dipanggil karena sudah di luar)
+    // 2. Fungsi bukaMenu HARUS BERADA DI LUAR DOMContentLoaded
     function bukaMenu(tipe) {
         if (tipe === 'customer') {
             isModeGrosir = false;
             alert("Mode Customer aktif.");
-            renderDaftarProduk('Semua'); 
         } else if (tipe === 'grosir') {
             const pin = prompt("Masukkan PIN:");
             if (pin === "1234") {
                 isModeGrosir = true;
                 alert("Mode Grosir Aktif!");
-                renderDaftarProduk('Semua');
             } else {
                 alert("PIN Salah!");
+                return;
             }
+        }
+        
+        // Panggil fungsi render ulang setiap tombol ditekan
+        if (typeof renderDaftarProduk === 'function') {
+            renderDaftarProduk('Semua');
         }
     }
 
-    // 4. INISIALISASI DATA
+    // 3. Inisialisasi Data (Jalankan saat halaman siap)
     document.addEventListener("DOMContentLoaded", async () => {
-        // Ambil data produk dari Supabase atau localStorage
-        // Pastikan variabel 'produkData' terisi di sini
+        // Panggil fungsi muat data Anda di sini
         await muatProduk(); 
     });
-
-    async function muatProduk() {
-        // Isi logika pengambilan data Anda di sini
-        // Pastikan produkData = ... (data dari database)
-        // Lalu panggil: renderDaftarProduk('Semua');
-    }
 </script>
 </body>
 </html>
