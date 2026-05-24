@@ -203,3 +203,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // ... panggil fungsi lain Anda ...
     muatPesananAdmin(); 
 });
+function switchTab(tabId, btn) {
+    // Sembunyikan semua panel
+    document.querySelectorAll('.panel-section').forEach(s => s.style.display = 'none');
+    // Tampilkan panel yang dipilih
+    document.getElementById(tabId).style.display = 'block';
+    
+    // Hapus class active dari semua tombol
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    // Tambahkan class active ke tombol yang diklik
+    btn.classList.add('active');
+
+    // Jika tab pesanan dibuka, muat datanya
+    if (tabId === 'tab-pesanan') {
+        muatPesananAdmin();
+    }
+}
