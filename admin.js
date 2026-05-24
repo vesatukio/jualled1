@@ -159,3 +159,42 @@ function hitungLabaAdminOtomatis() {
     if (elTampil) elTampil.value = "Rp " + untung.toLocaleString();
     document.getElementById('prod_estimasi_untung_val').value = untung;
 }
+// Fungsi untuk memuat pesanan
+async function muatPesananAdmin() {
+    const tbody = document.getElementById('body-pesanan');
+    let { data: orders, error } = await _supabase
+        .from('orders')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error) return;
+    
+    tbody.innerHTML = '';
+    orders.forEach(ord => {
+        let items = ord.daftar_item.map(i => `${i.nama_produk} (x${i.qty})`).join(', ');
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>${ord.nama_pembeli}</strong><br><small>${ord.alamat_lengkap}</small></td>
+                <td>${items}</td>
+                <td>Rp ${ord.total_harga.toLocaleString('id-ID')}</td>
+                <td><span class="status-badge ${ord.status}">${ord.status}</span></td>
+                <td>
+                    <button class="btn-success" onclick="updateStatusPesanan(${ord.id}, 'Diproses')">Proses</button>
+                    <button class="btn-danger" onclick="hapusOrder(${ord.id})">Hapus</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Fungsi update status
+async function updateStatusPesanan(id, status) {
+    await _supabase.from('orders').update({ status: status }).eq('id', id);
+    muatPesananAdmin(); // Refresh tabel
+}
+
+// Tambahkan panggil fungsi ini saat halaman admin dibuka
+document.addEventListener("DOMContentLoaded", () => {
+    // ... panggil fungsi lain Anda ...
+    muatPesananAdmin(); 
+});
