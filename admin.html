@@ -238,7 +238,26 @@
                     <button type="submit" class="btn-primary" style="width: 100%;">Simpan Konfigurasi</button>
                 </form>
             </div>
-
+<!-- TAB PESANAN -->
+<div id="tab-pesanan" class="panel-section">
+    <h3>🛒 Daftar Pesanan Masuk</h3>
+    <div id="tabelPesanan" class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Pelanggan</th>
+                    <th>Detail Item</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="body-pesanan">
+                <!-- Data akan dimuat via JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
             <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <h3>🎥 Tambah Banner Slider</h3>
                 <form id="form-banner" onsubmit="simpanBanner(event)">
