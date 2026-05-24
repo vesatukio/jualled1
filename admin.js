@@ -52,7 +52,7 @@ async function muatDataKatalog() {
             .from('produk')
             .select('*')
             .eq('pemilik', namaAdminAktif)
-            .order('id', { ascending: false });
+            .order('updated_at', { ascending: false }); // UBAH INI (sebelumnya order 'id')
 
         if (error) throw error;
         daftarProduk = data || [];
