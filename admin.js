@@ -162,30 +162,35 @@ function hitungLabaAdminOtomatis() {
 // Fungsi untuk memuat pesanan
 async function muatPesananAdmin() {
     const tbody = document.getElementById('body-pesanan');
+    tbody.innerHTML = '<tr><td colspan="5">Memuat pesanan...</td></tr>';
+
     let { data: orders, error } = await _supabase
         .from('orders')
         .select('*')
-        .order('id', { ascending: false });
+        .order('created_at', { ascending: false });
 
-    if (error) return;
-    
+    if (error) {
+        console.error("Error:", error);
+        return;
+    }
+
     tbody.innerHTML = '';
-    orders.forEach(ord => {
-        let items = ord.daftar_item.map(i => `${i.nama_produk} (x${i.qty})`).join(', ');
+    orders.forEach(o => {
         tbody.innerHTML += `
             <tr>
-                <td><strong>${ord.nama_pembeli}</strong><br><small>${ord.alamat_lengkap}</small></td>
-                <td>${items}</td>
-                <td>Rp ${ord.total_harga.toLocaleString('id-ID')}</td>
-                <td><span class="status-badge ${ord.status}">${ord.status}</span></td>
+                <td>${o.nama_pembeli}<br><small>${o.alamat_lengkap}</small></td>
+                <td><small>${JSON.stringify(o.daftar_item)}</small></td>
+                <td>Rp ${o.total_harga.toLocaleString()}</td>
+                <td><span class="status-badge">${o.status}</span></td>
                 <td>
-                    <button class="btn-success" onclick="updateStatusPesanan(${ord.id}, 'Diproses')">Proses</button>
-                    <button class="btn-danger" onclick="hapusOrder(${ord.id})">Hapus</button>
+                    <button class="btn-primary" onclick="updateStatusPesanan(${o.id}, 'Selesai')">Selesai</button>
                 </td>
             </tr>
         `;
     });
 }
+
+// Panggil fungsi ini saat halaman dimuat atau tab pesanan diklik
 
 // Fungsi update status
 async function updateStatusPesanan(id, status) {
