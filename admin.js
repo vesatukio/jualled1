@@ -219,3 +219,26 @@ function switchTab(tabId, btn) {
         muatPesananAdmin();
     }
 }
+function switchTab(tabId, btn) {
+    // 1. Sembunyikan semua panel
+    const sections = document.querySelectorAll('.panel-section');
+    sections.forEach(s => s.style.display = 'none');
+
+    // 2. Tampilkan panel yang dipilih
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+    }
+
+    // 3. Hapus class 'active' dari semua tombol tab
+    const btns = document.querySelectorAll('.tab-btn');
+    btns.forEach(b => b.classList.remove('active'));
+
+    // 4. Tambahkan class 'active' ke tombol yang diklik
+    btn.classList.add('active');
+
+    // 5. Muat data jika membuka tab pesanan
+    if (tabId === 'tab-pesanan') {
+        muatPesananAdmin();
+    }
+}
