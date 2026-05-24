@@ -68,54 +68,58 @@ async function muatDataKatalog() {
     }
 }
 
-async function simpanProduk() {
+async function simpanProduk(event) {
+    if (event) event.preventDefault(); // Pastikan event dipanggil jika dari form
+
     const prodId = document.getElementById("prod_id").value;
     
-    // 1. Ambil nilai input harga beli dengan benar
-    const hargaBeliInput = document.getElementById("prod_harga_beli")?.value || 0;
+    // 1. Ambil nilai dan pastikan tidak ada yang null/undefined
+    const nama = document.getElementById("prod_nama").value;
+    const harga = parseFloat(document.getElementById("prod_harga").value) || 0;
+    const stok = parseInt(document.getElementById("prod_stok").value) || 0;
+    const hargaBeli = parseFloat(document.getElementById("prod_harga_beli")?.value) || 0;
     
-    // 2. Susun objek dataForm
+    // 2. Validasi sederhana
+    if (!nama) {
+        alert("Nama produk wajib diisi!");
+        return;
+    }
+
+    // 3. Susun objek data
     const dataForm = {
-        nama: document.getElementById("prod_nama").value,
-        harga: parseFloat(document.getElementById("prod_harga").value) || 0,
-        stok: parseInt(document.getElementById("prod_stok").value) || 0,
-        
-        // Pastikan nama kunci ini 'harga_beli' sama dengan nama kolom di Supabase
-        harga_beli: parseFloat(hargaBeliInput) || 0, 
-        
+        nama: nama,
+        harga: harga,
+        stok: stok,
+        harga_beli: hargaBeli,
         gambar1: document.getElementById("prod_gambar1")?.value || "",
         gambar2: document.getElementById("prod_gambar2")?.value || "",
         gambar3: document.getElementById("prod_gambar3")?.value || "",
-        
         estimasi_untung: parseFloat(document.getElementById("prod_estimasi_untung_val")?.value) || 0,
-        pemilik: namaAdminAktif
+        pemilik: namaAdminAktif,
+        updated_at: new Date().toISOString()
     };
 
     try {
-        let error;
+        let response;
         if (prodId) {
-            // EDIT: Update produk berdasarkan ID
-            const { error: err } = await _supabase.from('produk').update(dataForm).eq('id', prodId);
-            error = err;
+            // EDIT
+            response = await _supabase.from('produk').update(dataForm).eq('id', prodId);
         } else {
-            // TAMBAH: Insert data baru
-            const { error: err } = await _supabase.from('produk').insert([dataForm]);
-            error = err;
+            // TAMBAH
+            dataForm.created_at = new Date().toISOString();
+            response = await _supabase.from('produk').insert([dataForm]);
         }
 
-        if (error) throw error;
+        if (response.error) throw response.error;
 
         alert("Data berhasil disimpan!");
         tutupForm();
-        
-        // Refresh otomatis agar tabel langsung update
-        await muatDataKatalog(); 
+        await muatDataKatalog(); // Refresh tabel
     } catch (e) {
         console.error("Error Detail:", e);
-        alert("Gagal simpan: " + e.message);
+        alert("Gagal simpan: " + e.message + "\nPastikan nama kolom di database sesuai dengan kode.");
     }
 }
-
 // 4. RENDER TABEL
 function renderTabel() {
     const tbody = document.getElementById("tabelProduk");
