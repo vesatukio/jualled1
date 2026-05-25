@@ -96,3 +96,32 @@ function renderDaftarProduk(filterKategori) {
         listContainer.insertAdjacentHTML('beforeend', itemHtml);
     });
 }
+function simpanDataDiri() {
+    const dataDiri = {
+        nama: document.getElementById('buyer-nama').value,
+        wa: document.getElementById('buyer-wa').value,
+        alamat: document.getElementById('buyer-alamat').value,
+        rt: document.getElementById('buyer-rt').value,
+        kodepos: document.getElementById('buyer-kodepos').value,
+        kec: document.getElementById('buyer-kec').value,
+        kab: document.getElementById('buyer-kab').value,
+        prov: document.getElementById('buyer-prov').value
+    };
+    localStorage.setItem('duta_data_pembeli', JSON.stringify(dataDiri));
+}
+
+// Memuat data saat halaman dibuka
+window.addEventListener('load', () => {
+    const saved = localStorage.getItem('duta_data_pembeli');
+    if (saved) {
+        const data = JSON.parse(saved);
+        if(document.getElementById('buyer-nama')) document.getElementById('buyer-nama').value = data.nama || '';
+        if(document.getElementById('buyer-wa')) document.getElementById('buyer-wa').value = data.wa || '';
+        if(document.getElementById('buyer-alamat')) document.getElementById('buyer-alamat').value = data.alamat || '';
+        if(document.getElementById('buyer-rt')) document.getElementById('buyer-rt').value = data.rt || '';
+        if(document.getElementById('buyer-kodepos')) document.getElementById('buyer-kodepos').value = data.kodepos || '';
+        if(document.getElementById('buyer-kec')) document.getElementById('buyer-kec').value = data.kec || '';
+        if(document.getElementById('buyer-kab')) document.getElementById('buyer-kab').value = data.kab || '';
+        if(document.getElementById('buyer-prov')) document.getElementById('buyer-prov').value = data.prov || '';
+    }
+});
