@@ -125,3 +125,16 @@ window.addEventListener('load', () => {
         if(document.getElementById('buyer-prov')) document.getElementById('buyer-prov').value = data.prov || '';
     }
 });
+async function kirimPesananKeAplikasi() {
+    // ... (kode ambil nilai input tetap sama)
+    
+    if (!nama || !alamat) {
+        alert("Harap isi Nama dan Alamat!");
+        return;
+    }
+
+    // SIMPAN DATA KE HP SETELAH KLIK KIRIM
+    simpanDataDiri(); 
+
+    // ... (sisa kode kirim ke Supabase tetap sama)
+}
