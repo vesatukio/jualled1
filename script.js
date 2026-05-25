@@ -204,6 +204,7 @@ function zoomGambar(src) {
     }
 }
 window.kirimKeDatabase = async function () {
+    // 1. Ambil data dari input form
     const nama = document.getElementById('buyer-nama').value.trim();
     const wa = document.getElementById('buyer-wa').value.trim();
     const alamat = document.getElementById('buyer-alamat').value.trim();
@@ -211,11 +212,39 @@ window.kirimKeDatabase = async function () {
     const kab = document.getElementById('buyer-kab').value.trim();
     const prov = document.getElementById('buyer-provinsi').value.trim();
 
+    // Validasi Wajib Isi
     if (!nama || !wa || !alamat || !kec || !kab || !prov) {
-        alert("Harap lengkapi semua data formulir!");
+        alert("Harap lengkapi semua data (Nama, WA, Alamat, Kec, Kab, Prov)!");
         return;
     }
 
+    // 2. Siapkan data item dan hitung total bayar dari objek 'keranjang'
+    let detailItems = [];
+    let totalBayar = 0;
+
+    for (const id in keranjang) {
+        const p = produkData.find(item => item.id == id);
+        if (p) {
+            const diskon = Number(p.diskon) || 0;
+            const hargaFinal = diskon > 0 ? p.harga * (1 - (diskon / 100)) : p.harga;
+            const subtotal = hargaFinal * keranjang[id];
+            
+            detailItems.push({
+                nama_produk: p.nama,
+                jumlah: keranjang[id],
+                subtotal: subtotal
+            });
+            
+            totalBayar += subtotal;
+        }
+    }
+
+    if (totalBayar === 0) {
+        alert("Keranjang masih kosong!");
+        return;
+    }
+
+    // 3. Kirim ke Supabase
     try {
         const { data, error } = await _supabase
             .from('orders')
@@ -227,7 +256,8 @@ window.kirimKeDatabase = async function () {
                     kecamatan: kec,
                     kabupaten: kab,
                     provinsi: prov,
-                    detail: JSON.stringify(keranjang)
+                    detail: detailItems, // Menyimpan daftar item
+                    total_bayar: totalBayar // Menyimpan total harga
                 }
             ]);
 
@@ -235,8 +265,9 @@ window.kirimKeDatabase = async function () {
 
         alert("Pesanan berhasil dikirim!");
         
-        // Bersihkan form
+        // Reset form
         resetKeranjang();
+        // (Bersihkan input lainnya seperti sebelumnya)
         document.getElementById('buyer-nama').value = '';
         document.getElementById('buyer-wa').value = '';
         document.getElementById('buyer-alamat').value = '';
