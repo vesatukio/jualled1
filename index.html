@@ -477,6 +477,42 @@
             });
         }
     }
+    window.kirimKeDatabase = async function () {
+
+    const nama = document.getElementById('buyer-nama').value.trim();
+    const alamat = document.getElementById('buyer-alamat').value.trim();
+
+    if (!nama || !alamat) {
+        alert("Harap isi nama dan alamat!");
+        return;
+    }
+
+    try {
+
+        const { data, error } = await _supabase
+            .from('orders')
+            .insert([
+                {
+                    nama_pembeli: nama,
+                    alamat: alamat
+                }
+            ]);
+
+        if (error) {
+            throw error;
+        }
+
+        alert("Pesanan berhasil dikirim!");
+
+        kirimKeWhatsApp();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Gagal kirim: " + err.message);
+    }
+}
 </script>
 </body>
 </html>
