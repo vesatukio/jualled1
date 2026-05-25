@@ -162,26 +162,41 @@ function hitungLabaAdminOtomatis() {
 // Fungsi untuk memuat pesanan
 async function muatPesananAdmin() {
     const tbody = document.getElementById('body-pesanan');
-    tbody.innerHTML = '<tr><td colspan="5">Memuat pesanan...</td></tr>';
+    if (!tbody) return; // Keamanan jika elemen tidak ditemukan
+    
+    tbody.innerHTML = '<tr><td colspan="5">Memuat semua pesanan...</td></tr>';
 
-    let { data: orders, error } = await _supabase
+    // Hapus atau komentari baris .eq() agar Supabase tidak melakukan filter
+    let query = _supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false });
 
+    // Baris ini dihapus agar tidak memfilter berdasarkan admin/pemilik:
+    // .eq('pemilik', namaAdminAktif) 
+
+    let { data: orders, error } = await query;
+
     if (error) {
-        console.error("Error:", error);
+        console.error("Error memuat pesanan:", error);
+        tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data.</td></tr>';
         return;
     }
 
+    // Render data
     tbody.innerHTML = '';
+    if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5">Belum ada pesanan.</td></tr>';
+        return;
+    }
+
     orders.forEach(o => {
         tbody.innerHTML += `
             <tr>
-                <td>${o.nama_pembeli}<br><small>${o.alamat_lengkap}</small></td>
-                <td><small>${JSON.stringify(o.daftar_item)}</small></td>
-                <td>Rp ${o.total_harga.toLocaleString()}</td>
-                <td><span class="status-badge">${o.status}</span></td>
+                <td>${o.nama_pembeli || '-'}<br><small>${o.alamat_lengkap || '-'}</small></td>
+                <td><small>${JSON.stringify(o.daftar_item || {})}</small></td>
+                <td>Rp ${Number(o.total_harga).toLocaleString()}</td>
+                <td><span class="status-badge">${o.status || 'Pending'}</span></td>
                 <td>
                     <button class="btn-primary" onclick="updateStatusPesanan(${o.id}, 'Selesai')">Selesai</button>
                 </td>
