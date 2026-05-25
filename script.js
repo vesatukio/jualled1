@@ -138,3 +138,15 @@ async function kirimPesananKeAplikasi() {
 
     // ... (sisa kode kirim ke Supabase tetap sama)
 }
+function pembaruanStrukRingkasan() {
+    const listWrap = document.getElementById('summary-items');
+    const panelKasir = document.getElementById('checkout-kasir');
+    
+    // ... (logic hitung total tetap sama) ...
+
+    if (adaBarang) {
+        panelKasir.classList.remove('hidden'); // Menampilkan panel
+    } else {
+        panelKasir.classList.add('hidden');    // Menyembunyikan panel
+    }
+}
