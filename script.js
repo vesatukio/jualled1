@@ -204,41 +204,48 @@ function zoomGambar(src) {
     }
 }
 window.kirimKeDatabase = async function () {
+    const nama = document.getElementById('buyer-nama').value.trim();
+    const wa = document.getElementById('buyer-wa').value.trim();
+    const alamat = document.getElementById('buyer-alamat').value.trim();
+    const kec = document.getElementById('buyer-kec').value.trim();
+    const kab = document.getElementById('buyer-kab').value.trim();
+    const prov = document.getElementById('buyer-provinsi').value.trim();
 
-    // 1. Ambil data dari input
-    const nama = document.getElementById('buyer-nama')?.value?.trim();
-    const alamat = document.getElementById('buyer-alamat')?.value?.trim();
-
-    if (!nama || !alamat) {
-        alert("Harap isi Nama dan Alamat!");
+    if (!nama || !wa || !alamat || !kec || !kab || !prov) {
+        alert("Harap lengkapi semua data formulir!");
         return;
     }
 
     try {
-
         const { data, error } = await _supabase
             .from('orders')
-            .insert([{
-                nama_pembeli: nama,
-                alamat: alamat
-            }]);
+            .insert([
+                {
+                    nama_pembeli: nama,
+                    no_wa: wa,
+                    alamat: alamat,
+                    kecamatan: kec,
+                    kabupaten: kab,
+                    provinsi: prov,
+                    detail: JSON.stringify(keranjang)
+                }
+            ]);
 
-        if (error) {
-            throw new Error(error.message || "Terjadi kesalahan saat menyimpan data.");
-        }
+        if (error) throw error;
 
         alert("Pesanan berhasil dikirim!");
-
-        resetKeranjang();
         
+        // Bersihkan form
+        resetKeranjang();
+        document.getElementById('buyer-nama').value = '';
+        document.getElementById('buyer-wa').value = '';
+        document.getElementById('buyer-alamat').value = '';
+        document.getElementById('buyer-kec').value = '';
+        document.getElementById('buyer-kab').value = '';
+        document.getElementById('buyer-provinsi').value = '';
 
     } catch (err) {
-
-        console.error("Detail Error:", err);
-
-        const pesanTampil =
-            err.message || "Terjadi kesalahan tidak dikenal.";
-
-        alert("Gagal mengirim ke database: " + pesanTampil);
+        console.error(err);
+        alert("Gagal kirim: " + err.message);
     }
 }
