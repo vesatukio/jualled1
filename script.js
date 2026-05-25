@@ -204,13 +204,20 @@ function zoomGambar(src) {
     }
 }
 async function kirimKeDatabase() {
-    const namaEl = document.getElementById('buyer-nama');
-    const alamatEl = document.getElementById('buyer-alamat');
+    // Debugging awal
+    console.log("Fungsi kirimKeDatabase berjalan!");
 
-    if (!namaEl || !alamatEl) {
-        alert("Error: Input tidak ditemukan!");
+    const nama = document.getElementById('buyer-nama')?.value.trim();
+    const alamat = document.getElementById('buyer-alamat')?.value.trim();
+
+    // Peringatan jika input kosong
+    if (!nama || !alamat) {
+        alert("PERHATIAN: Nama dan Alamat wajib diisi!");
         return;
     }
+    
+    // ... sisa kode pengiriman ke database (orders) ...
+}
 
     const nama = namaEl.value.trim();
     const alamat = alamatEl.value.trim();
@@ -245,3 +252,16 @@ async function kirimKeDatabase() {
         alert("Kesalahan: " + err.message);
     }
 }
+// Memastikan tombol terhubung setelah halaman siap
+document.addEventListener("DOMContentLoaded", () => {
+    const tombolKirim = document.getElementById('btn-submit');
+    
+    if (tombolKirim) {
+        tombolKirim.addEventListener('click', () => {
+            console.log("Tombol diklik, memanggil kirimKeDatabase...");
+            kirimKeDatabase();
+        });
+    } else {
+        console.error("Tombol ID 'btn-submit' tidak ditemukan di HTML!");
+    }
+});
