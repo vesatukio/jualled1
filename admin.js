@@ -162,9 +162,7 @@ function hitungLabaAdminOtomatis() {
 // Fungsi untuk memuat pesanan
 async function muatPesananAdmin() {
     const tbody = document.getElementById('body-pesanan');
-    if (!tbody) return; 
-    
-    tbody.innerHTML = '<tr><td colspan="5">Memuat semua pesanan...</td></tr>';
+    if (!tbody) return;
 
     try {
         let { data: orders, error } = await _supabase
@@ -174,40 +172,21 @@ async function muatPesananAdmin() {
 
         if (error) throw error;
 
-        tbody.innerHTML = '';
-        if (!orders || orders.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">Belum ada pesanan masuk.</td></tr>';
-            return;
-        }
-
-        orders.forEach(o => {
-            // Mengubah JSON detail menjadi teks yang bisa dibaca
-            let detailTeks = "";
-            try {
-                const items = typeof o.detail === 'string' ? JSON.parse(o.detail) : o.detail;
-                detailTeks = items.map(i => `${i.nama || i.nama_produk} (x${i.qty || i.jumlah})`).join(', ');
-            } catch (e) {
-                detailTeks = "Data item error";
-            }
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${o.nama_pembeli || '-'}<br><small>${o.alamat || '-'}</small></td>
-                    <td><small>${detailTeks}</small></td>
-                    <td>Rp ${Number(o.total_bayar || 0).toLocaleString()}</td>
-                    <td><span class="status-badge">${o.status || 'Pending'}</span></td>
-                    <td>
-                        <button class="btn-primary" onclick="updateStatusPesanan(${o.id}, 'Selesai')">Selesai</button>
-                    </td>
-                </tr>
-            `;
-        });
-    } catch (err) {
-        console.error("Error memuat pesanan:", err);
-        tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data: ${err.message}</td></tr>';
+        tbody.innerHTML = orders.length > 0 ? orders.map(o => `
+            <tr>
+                <td>${o.nama_pembeli}<br><small>${o.no_wa}</small></td>
+                <td><small>${JSON.stringify(o.item || {})}</small></td>
+                <td>Rp ${Number(o.total_bayar).toLocaleString()}</td>
+                <td>${o.status || 'Pending'}</td>
+                <td>
+                    <button onclick="updateStatusPesanan(${o.id}, 'Selesai')">Selesai</button>
+                </td>
+            </tr>
+        `).join('') : '<tr><td colspan="5">Belum ada pesanan.</td></tr>';
+    } catch (e) {
+        console.error("Gagal muat pesanan:", e);
     }
 }
-
 // Fungsi update status
 async function updateStatusPesanan(id, status) {
     await _supabase.from('orders').update({ status: status }).eq('id', id);
