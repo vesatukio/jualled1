@@ -204,21 +204,25 @@ document.addEventListener("DOMContentLoaded", () => {
     muatPesananAdmin(); 
 });
 function switchTab(tabId, btn) {
-    // Sembunyikan semua panel
-    document.querySelectorAll('.panel-section').forEach(s => s.style.display = 'none');
-    // Tampilkan panel yang dipilih
-    document.getElementById(tabId).style.display = 'block';
-    
-    // Hapus class active dari semua tombol
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    // Tambahkan class active ke tombol yang diklik
-    btn.classList.add('active');
+    // 1. Sembunyikan semua panel-section
+    const panels = document.querySelectorAll('.panel-section');
+    panels.forEach(p => p.style.display = 'none');
 
-    // Jika tab pesanan dibuka, muat datanya
+    // 2. Tampilkan panel yang dipilih
+    const selected = document.getElementById(tabId);
+    if (selected) {
+        selected.style.display = 'block';
+    }
+
+    // 3. Hapus class 'active' dari semua tombol
+    const btns = document.querySelectorAll('.tab-btn');
+    btns.forEach(b => b.classList.remove('active'));
+
+    // 4. Tambahkan class 'active' ke tombol yang ditekan
+    if (btn) btn.classList.add('active');
+
+    // 5. Trigger load data jika tab pesanan dibuka
     if (tabId === 'tab-pesanan') {
         muatPesananAdmin();
-    }
-}
-
     }
 }
