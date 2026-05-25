@@ -66,14 +66,15 @@
     <div class="checkout-panel" id="checkout-kasir">
     <div class="checkout-container">
         <div class="panel-left">
-            <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
-            <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Jalan, Perumahan, No Rumah"></textarea>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                <input type="text" id="buyer-kec" class="input-buyer" placeholder="Kecamatan">
-                <input type="text" id="buyer-kab" class="input-buyer" placeholder="Kabupaten/Kota">
-            </div>
-            <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
-        </div>
+    <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
+    <input type="tel" id="buyer-wa" class="input-buyer" placeholder="No. HP / WA">
+    <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Jalan, Perumahan, No Rumah"></textarea>
+    <input type="text" id="buyer-kec" class="input-buyer" placeholder="Kecamatan">
+    <input type="text" id="buyer-kab" class="input-buyer" placeholder="Kabupaten/Kota">
+    <input type="text" id="buyer-provinsi" class="input-buyer" placeholder="Provinsi">
+    
+    <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
+</div>
         <div class="panel-right">
             <div style="font-weight: 800; font-size: 11px; color: var(--primary);">📋 Ringkasan:</div>
             <ul id="summary-items" class="summary-list"></ul>
