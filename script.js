@@ -204,34 +204,43 @@ function zoomGambar(src) {
     }
 }
 async function kirimKeDatabase() {
-    // Debugging awal
     console.log("Fungsi kirimKeDatabase berjalan!");
 
-    const nama = document.getElementById('buyer-nama')?.value.trim();
-    const alamat = document.getElementById('buyer-alamat')?.value.trim();
+    const namaEl = document.getElementById('buyer-nama');
+    const alamatEl = document.getElementById('buyer-alamat');
 
-    // Peringatan jika input kosong
-    if (!nama || !alamat) {
-        alert("PERHATIAN: Nama dan Alamat wajib diisi!");
+    // 1. Cek apakah elemen input ada di HTML
+    if (!namaEl || !alamatEl) {
+        alert("Error: Input Nama atau Alamat tidak ditemukan di halaman!");
+        console.error("Elemen tidak ditemukan:", { namaEl, alamatEl });
         return;
     }
-    
-    // ... sisa kode pengiriman ke database (orders) ...
-}
 
     const nama = namaEl.value.trim();
     const alamat = alamatEl.value.trim();
 
-    // Pastikan fungsi ini ada (sudah Anda buat sebelumnya)
-    const total = hitungTotalKeranjang(); 
+    // 2. Validasi input kosong
+    if (!nama || !alamat) {
+        alert("PERHATIAN: Nama dan Alamat wajib diisi!");
+        return;
+    }
 
+    // 3. Validasi keranjang
+    if (Object.keys(keranjang).length === 0) {
+        alert("Keranjang kosong!");
+        return;
+    }
+
+    // 4. Proses kirim ke Supabase
     try {
+        const total = hitungTotalKeranjang();
         const rincian = Object.keys(keranjang).map(id => ({
             id_produk: id,
             jumlah: keranjang[id]
         }));
 
-        // PENTING: Tabel disesuaikan menjadi 'orders'
+        console.log("Mengirim data ke Supabase:", { nama, alamat, rincian, total });
+
         const { data, error } = await _supabase.from('orders').insert([
             {
                 nama_pembeli: nama,
@@ -249,9 +258,11 @@ async function kirimKeDatabase() {
             resetKeranjang();
         }
     } catch (err) {
-        alert("Kesalahan: " + err.message);
+        console.error("Error sistem:", err);
+        alert("Kesalahan sistem: " + err.message);
     }
 }
+
 // Memastikan tombol terhubung setelah halaman siap
 document.addEventListener("DOMContentLoaded", () => {
     const tombolKirim = document.getElementById('btn-submit');
