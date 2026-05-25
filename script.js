@@ -204,6 +204,8 @@ function zoomGambar(src) {
     }
 }
 window.kirimKeDatabase = async function () {
+    alert("TEST");
+}
 
     // 1. Ambil data dari input
     const nama = document.getElementById('buyer-nama')?.value?.trim();
