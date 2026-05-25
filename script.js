@@ -204,30 +204,19 @@ function zoomGambar(src) {
     }
 }
 async function kirimKeDatabase() {
-    console.log("Tombol diklik, memulai proses kirim..."); // CEK INI DI KONSOL
-
     const namaEl = document.getElementById('buyer-nama');
     const alamatEl = document.getElementById('buyer-alamat');
 
     if (!namaEl || !alamatEl) {
-        alert("Error: Elemen input (Nama/Alamat) tidak ditemukan di HTML!");
+        alert("Error: Input tidak ditemukan!");
         return;
     }
 
     const nama = namaEl.value.trim();
     const alamat = alamatEl.value.trim();
 
-    console.log("Data yang akan dikirim:", { nama, alamat, keranjang });
-
-    if (!nama || !alamat) {
-        alert("Harap isi Nama dan Alamat!");
-        return;
-    }
-
-    if (Object.keys(keranjang).length === 0) {
-        alert("Keranjang kosong!");
-        return;
-    }
+    // Pastikan fungsi ini ada (sudah Anda buat sebelumnya)
+    const total = hitungTotalKeranjang(); 
 
     try {
         const rincian = Object.keys(keranjang).map(id => ({
@@ -235,24 +224,24 @@ async function kirimKeDatabase() {
             jumlah: keranjang[id]
         }));
 
-        const { data, error } = await _supabase.from('pesanan').insert([
+        // PENTING: Tabel disesuaikan menjadi 'orders'
+        const { data, error } = await _supabase.from('orders').insert([
             {
                 nama_pembeli: nama,
                 alamat: alamat,
                 item: rincian,
-                total_bayar: hitungTotalKeranjang()
+                total_bayar: total
             }
         ]);
 
         if (error) {
-            console.error("Error dari Supabase:", error);
-            alert("Gagal kirim: " + error.message);
+            console.error("Error Supabase:", error);
+            alert("Gagal kirim ke database: " + error.message);
         } else {
-            alert("Pesanan berhasil dikirim!");
+            alert("Pesanan berhasil dikirim ke tabel orders!");
             resetKeranjang();
         }
     } catch (err) {
-        console.error("Error sistem:", err);
-        alert("Terjadi kesalahan sistem: " + err.message);
+        alert("Kesalahan: " + err.message);
     }
 }
