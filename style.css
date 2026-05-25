@@ -238,3 +238,31 @@ header {
 /* Floating PWA Install Button */
 .pwa-install-btn { display: none; position: fixed; right: calc(50% - 250px); top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; padding: 10px 6px; border-radius: 8px 0 0 8px; box-shadow: -2px 4px 10px rgba(0,0,0,0.15); z-index: 998; font-size: 10px; font-weight: bold; text-align: center; width: 45px; flex-direction: column; gap: 4px; cursor: pointer; }
 @media (max-width: 500px) { .pwa-install-btn { right: 0; border-radius: 8px 0 0 8px; } }
+/* Container pembungkus agar kolom bisa berdampingan */
+.checkout-wrapper {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+/* Panel Kanan dibuat Melayang (Sticky) */
+.panel-right {
+    flex: 1;
+    min-width: 300px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    
+    /* Agar melayang saat di-scroll */
+    position: sticky;
+    top: 20px; 
+}
+
+/* Sembunyikan jika tidak ada barang */
+.hidden {
+    display: none !important;
+}
