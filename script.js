@@ -118,24 +118,19 @@ async function muatProduk() {
         let { data: produk, error } = await _supabase
             .from('produk')
             .select('*')
-            .order('id', { ascending: false });
+            // Gunakan updated_at agar produk yang baru diedit muncul di depan
+            .order('updated_at', { ascending: false, nullsFirst: false }); 
 
         if (error) throw error;
 
         if (produk) {
             produkData = produk;
-            
-            // Ekstrak kategori unik untuk mengisi kategori bar
             const kategoriUnik = ['Semua', ...new Set(produk.map(p => p.kategori).filter(Boolean))];
             renderKategoriBar(kategoriUnik);
-            
-            // Tampilkan seluruh produk awal
             renderDaftarProduk('Semua');
         }
     } catch (err) {
         console.error("Gagal memuat produk:", err);
-        const listEl = document.getElementById('list');
-        if (listEl) listEl.innerHTML = `<p style="text-align:center; color:red; padding:20px;">Gagal memuat data produk: ${err.message}</p>`;
     }
 }
 
