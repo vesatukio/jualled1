@@ -204,7 +204,6 @@ function zoomGambar(src) {
     }
 }
 window.kirimKeDatabase = async function () {
-    // 1. Ambil data dari input form
     const nama = document.getElementById('buyer-nama').value.trim();
     const wa = document.getElementById('buyer-wa').value.trim();
     const alamat = document.getElementById('buyer-alamat').value.trim();
@@ -212,71 +211,44 @@ window.kirimKeDatabase = async function () {
     const kab = document.getElementById('buyer-kab').value.trim();
     const prov = document.getElementById('buyer-provinsi').value.trim();
 
-    // Validasi Wajib Isi
     if (!nama || !wa || !alamat || !kec || !kab || !prov) {
-        alert("Harap lengkapi semua data (Nama, WA, Alamat, Kec, Kab, Prov)!");
+        alert("Harap lengkapi semua data formulir!");
         return;
     }
 
-    // 2. Siapkan data item dan hitung total bayar dari objek 'keranjang'
+    // Persiapkan data
     let detailItems = [];
     let totalBayar = 0;
-
     for (const id in keranjang) {
         const p = produkData.find(item => item.id == id);
         if (p) {
             const diskon = Number(p.diskon) || 0;
             const hargaFinal = diskon > 0 ? p.harga * (1 - (diskon / 100)) : p.harga;
-            const subtotal = hargaFinal * keranjang[id];
-            
-            detailItems.push({
-                nama_produk: p.nama,
-                jumlah: keranjang[id],
-                subtotal: subtotal
-            });
-            
-            totalBayar += subtotal;
+            detailItems.push({ nama: p.nama, qty: keranjang[id], subtotal: hargaFinal * keranjang[id] });
+            totalBayar += (hargaFinal * keranjang[id]);
         }
     }
 
-    if (totalBayar === 0) {
-        alert("Keranjang masih kosong!");
-        return;
-    }
-
-    // 3. Kirim ke Supabase
     try {
-        const { data, error } = await _supabase
-            .from('orders')
-            .insert([
-                {
-                    nama_pembeli: nama,
-                    no_wa: wa,
-                    alamat: alamat,
-                    kecamatan: kec,
-                    kabupaten: kab,
-                    provinsi: prov,
-                    detail: detailItems, // Menyimpan daftar item
-                    total_bayar: totalBayar // Menyimpan total harga
-                }
-            ]);
+        const { error } = await _supabase.from('orders').insert([
+            {
+                nama_pembeli: nama,
+                no_wa: wa,
+                alamat: alamat,
+                kecamatan: kec,
+                kabupaten: kab,
+                provinsi: prov,
+                detail: detailItems,
+                total_bayar: totalBayar
+            }
+        ]);
 
         if (error) throw error;
 
         alert("Pesanan berhasil dikirim!");
-        
-        // Reset form
-        resetKeranjang();
-        // (Bersihkan input lainnya seperti sebelumnya)
-        document.getElementById('buyer-nama').value = '';
-        document.getElementById('buyer-wa').value = '';
-        document.getElementById('buyer-alamat').value = '';
-        document.getElementById('buyer-kec').value = '';
-        document.getElementById('buyer-kab').value = '';
-        document.getElementById('buyer-provinsi').value = '';
-
+        resetKeranjang(); // Bersihkan keranjang dan form
     } catch (err) {
         console.error(err);
-        alert("Gagal kirim: " + err.message);
+        alert("Gagal kirim ke database: " + err.message);
     }
 }
