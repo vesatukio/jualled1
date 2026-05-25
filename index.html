@@ -491,5 +491,23 @@
         }
     }
 </script>
+    <div class="checkout-wrapper">
+    <div class="panel-left" style="flex: 2;">
+        <h3>Data Pengiriman</h3>
+        <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan" oninput="simpanDataDiri()">
+        <button class="btn-reset" onclick="resetDataDiri()">Hapus Data</button>
+    </div>
+
+    <div id="checkout-kasir" class="panel-right hidden">
+        <h3>🛒 Ringkasan Pesanan</h3>
+        <ul id="summary-items"></ul>
+        <div style="font-weight: bold; font-size: 16px; margin: 15px 0;">
+            Total: <span id="summary-total">Rp 0</span>
+        </div>
+        <button onclick="kirimPesananKeAplikasi()" style="width: 100%; padding: 15px; background: #22c55e; color: white; border: none; border-radius: 8px;">
+            Kirim Pesanan
+        </button>
+    </div>
+</div>
 </body>
 </html>
