@@ -69,20 +69,20 @@
     </div>
 
    <div class="panel-left">
-    <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
-    <input type="text" id="buyer-wa" class="input-buyer" placeholder="Nomor WhatsApp (Contoh: 08123456789)">
-    <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Jalan, Nama Perumahan, No Rumah" style="resize:none; font-family:inherit;"></textarea>
+    <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan" oninput="simpanDataDiri()">
+    <input type="text" id="buyer-wa" class="input-buyer" placeholder="Nomor WhatsApp" oninput="simpanDataDiri()">
+    <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Jalan, Nama Perumahan, No Rumah" style="resize:none; font-family:inherit;" oninput="simpanDataDiri()"></textarea>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-        <input type="text" id="buyer-rt" class="input-buyer" placeholder="RT/RW">
-        <input type="text" id="buyer-kodepos" class="input-buyer" placeholder="Kode Pos">
+        <input type="text" id="buyer-rt" class="input-buyer" placeholder="RT/RW" oninput="simpanDataDiri()">
+        <input type="text" id="buyer-kodepos" class="input-buyer" placeholder="Kode Pos" oninput="simpanDataDiri()">
     </div>
     
-    <input type="text" id="buyer-kec" class="input-buyer" placeholder="Kecamatan">
-    <input type="text" id="buyer-kab" class="input-buyer" placeholder="Kabupaten/Kota">
-    <input type="text" id="buyer-prov" class="input-buyer" placeholder="Provinsi">
+    <input type="text" id="buyer-kec" class="input-buyer" placeholder="Kecamatan" oninput="simpanDataDiri()">
+    <input type="text" id="buyer-kab" class="input-buyer" placeholder="Kabupaten/Kota" oninput="simpanDataDiri()">
+    <input type="text" id="buyer-prov" class="input-buyer" placeholder="Provinsi" oninput="simpanDataDiri()">
     
-    <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan</button>
+    <button class="btn-reset" onclick="resetDataDiri()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan Data</button>
 </div>
     <!-- Navigasi Bawah Sticky -->
     <div class="nav-bottom">
