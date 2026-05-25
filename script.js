@@ -204,34 +204,25 @@ function zoomGambar(src) {
     }
 }
 async function kirimKeDatabase() {
-    console.log("Fungsi kirimKeDatabase berjalan!");
+    console.log("Memulai proses kirim...");
 
-    const namaEl = document.getElementById('buyer-nama');
-    const alamatEl = document.getElementById('buyer-alamat');
+    // Mengambil nilai dari semua input
+    const nama = document.getElementById('buyer-nama')?.value.trim();
+    const alamat = document.getElementById('buyer-alamat')?.value.trim();
+    const kec = document.getElementById('buyer-kec')?.value.trim();
+    const kab = document.getElementById('buyer-kab')?.value.trim();
 
-    // 1. Cek apakah elemen input ada di HTML
-    if (!namaEl || !alamatEl) {
-        alert("Error: Input Nama atau Alamat tidak ditemukan di halaman!");
-        console.error("Elemen tidak ditemukan:", { namaEl, alamatEl });
+    // Validasi
+    if (!nama || !alamat || !kec || !kab) {
+        alert("PERHATIAN: Harap isi Nama, Alamat, Kecamatan, dan Kabupaten!");
         return;
     }
 
-    const nama = namaEl.value.trim();
-    const alamat = alamatEl.value.trim();
-
-    // 2. Validasi input kosong
-    if (!nama || !alamat) {
-        alert("PERHATIAN: Nama dan Alamat wajib diisi!");
-        return;
-    }
-
-    // 3. Validasi keranjang
     if (Object.keys(keranjang).length === 0) {
         alert("Keranjang kosong!");
         return;
     }
 
-    // 4. Proses kirim ke Supabase
     try {
         const total = hitungTotalKeranjang();
         const rincian = Object.keys(keranjang).map(id => ({
@@ -239,12 +230,13 @@ async function kirimKeDatabase() {
             jumlah: keranjang[id]
         }));
 
-        console.log("Mengirim data ke Supabase:", { nama, alamat, rincian, total });
-
+        // Mengirim ke tabel 'orders'
         const { data, error } = await _supabase.from('orders').insert([
             {
                 nama_pembeli: nama,
                 alamat: alamat,
+                kecamatan: kec,     // Pastikan kolom ini ada di Supabase
+                kabupaten: kab,     // Pastikan kolom ini ada di Supabase
                 item: rincian,
                 total_bayar: total
             }
@@ -252,27 +244,13 @@ async function kirimKeDatabase() {
 
         if (error) {
             console.error("Error Supabase:", error);
-            alert("Gagal kirim ke database: " + error.message);
+            alert("Gagal kirim: " + error.message);
         } else {
-            alert("Pesanan berhasil dikirim ke tabel orders!");
+            alert("Pesanan berhasil dikirim!");
             resetKeranjang();
         }
     } catch (err) {
         console.error("Error sistem:", err);
-        alert("Kesalahan sistem: " + err.message);
+        alert("Terjadi kesalahan sistem: " + err.message);
     }
 }
-
-// Memastikan tombol terhubung setelah halaman siap
-document.addEventListener("DOMContentLoaded", () => {
-    const tombolKirim = document.getElementById('btn-submit');
-    
-    if (tombolKirim) {
-        tombolKirim.addEventListener('click', () => {
-            console.log("Tombol diklik, memanggil kirimKeDatabase...");
-            kirimKeDatabase();
-        });
-    } else {
-        console.error("Tombol ID 'btn-submit' tidak ditemukan di HTML!");
-    }
-});
