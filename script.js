@@ -203,3 +203,57 @@ function zoomGambar(src) {
         modal.style.display = 'flex';
     }
 }
+async function kirimKeDatabase() {
+    // 1. Ambil data dari input form (Pastikan ID input di HTML Anda sesuai)
+    const nama = document.getElementById('buyer-nama')?.value.trim();
+    const alamat = document.getElementById('buyer-alamat')?.value.trim();
+
+    if (!nama || !alamat) {
+        alert("Harap isi Nama dan Alamat!");
+        return;
+    }
+
+    if (Object.keys(keranjang).length === 0) {
+        alert("Keranjang kosong!");
+        return;
+    }
+
+    // 2. Siapkan data keranjang
+    const rincian = Object.keys(keranjang).map(id => ({
+        id_produk: id,
+        jumlah: keranjang[id]
+    }));
+
+    // 3. Kirim ke Supabase
+    try {
+        const { data, error } = await _supabase.from('pesanan').insert([
+            {
+                nama_pembeli: nama,
+                alamat: alamat,
+                item: rincian,
+                total_bayar: hitungTotalKeranjang() // Buat fungsi ini jika belum ada
+            }
+        ]);
+
+        if (error) throw error;
+        alert("Pesanan berhasil dikirim!");
+        resetKeranjang(); // Fungsi untuk membersihkan keranjang
+    } catch (err) {
+        console.error("Error:", err);
+        alert("Gagal kirim pesanan: " + err.message);
+    }
+}
+function hitungTotalKeranjang() {
+    let total = 0;
+    for (let id in keranjang) {
+        let p = produkData.find(item => item.id == id);
+        if (p) total += (p.harga * keranjang[id]);
+    }
+    return total;
+}
+
+function resetKeranjang() {
+    keranjang = {};
+    // Tambahkan logika untuk update tampilan UI keranjang di sini
+    alert("Keranjang telah dikosongkan.");
+}
