@@ -203,42 +203,41 @@ function zoomGambar(src) {
         modal.style.display = 'flex';
     }
 }
-async function kirimKeDatabase() {
+window.kirimKeDatabase = async function () {
+
     // 1. Ambil data dari input
     const nama = document.getElementById('buyer-nama')?.value?.trim();
     const alamat = document.getElementById('buyer-alamat')?.value?.trim();
-    // ... dst
 
-    // Pastikan DOM elemen ditemukan
     if (!nama || !alamat) {
         alert("Harap isi Nama dan Alamat!");
         return;
     }
 
     try {
-        // ... logika mapping rincian dan hitung total ...
 
-        // 4. Kirim ke Supabase
-        const { data, error } = await _supabase.from('orders').insert([{
-            nama_pembeli: nama,
-            // ... field lainnya
-        }]);
+        const { data, error } = await _supabase
+            .from('orders')
+            .insert([{
+                nama_pembeli: nama,
+            }]);
 
-        // Cek error secara eksplisit dari Supabase
         if (error) {
             throw new Error(error.message || "Terjadi kesalahan saat menyimpan data.");
         }
-        
+
         alert("Pesanan berhasil dikirim!");
+
         resetKeranjang();
-        kirimKeWhatsApp(); 
-        
+        kirimKeWhatsApp();
+
     } catch (err) {
-        // Log untuk debugging di console
+
         console.error("Detail Error:", err);
-        
-        // Pastikan pesan alert muncul dengan fallback
-        const pesanTampil = err.message || "Terjadi kesalahan tidak dikenal.";
+
+        const pesanTampil =
+            err.message || "Terjadi kesalahan tidak dikenal.";
+
         alert("Gagal mengirim ke database: " + pesanTampil);
     }
 }
