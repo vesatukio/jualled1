@@ -67,447 +67,61 @@
             <p style="text-align:center; grid-column: span 2; color:#64748b; font-size:13px; padding:20px;">Menyelaraskan etalase toko...</p>
         </div>
     </div>
-
-   <div class="panel-left">
-    <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan" oninput="simpanDataDiri()">
-    <input type="text" id="buyer-wa" class="input-buyer" placeholder="Nomor WhatsApp" oninput="simpanDataDiri()">
-    <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Jalan, Nama Perumahan, No Rumah" style="resize:none; font-family:inherit;" oninput="simpanDataDiri()"></textarea>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-        <input type="text" id="buyer-rt" class="input-buyer" placeholder="RT/RW" oninput="simpanDataDiri()">
-        <input type="text" id="buyer-kodepos" class="input-buyer" placeholder="Kode Pos" oninput="simpanDataDiri()">
+<div class="grid-produk" id="list">
+        <p style="text-align:center; grid-column: span 2; color:#64748b; font-size:13px; padding:20px;">Menyelaraskan etalase toko...</p>
     </div>
-    
-    <input type="text" id="buyer-kec" class="input-buyer" placeholder="Kecamatan" oninput="simpanDataDiri()">
-    <input type="text" id="buyer-kab" class="input-buyer" placeholder="Kabupaten/Kota" oninput="simpanDataDiri()">
-    <input type="text" id="buyer-prov" class="input-buyer" placeholder="Provinsi" oninput="simpanDataDiri()">
-    
-    <button class="btn-reset" onclick="resetDataDiri()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan Data</button>
-</div>
-    <!-- Navigasi Bawah Sticky -->
+
+    <div id="checkout-container" class="checkout-wrapper">
+        <div class="panel-left">
+            <h3>Data Pengiriman</h3>
+            <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan" oninput="simpanDataDiri()">
+            <input type="text" id="buyer-wa" class="input-buyer" placeholder="Nomor WhatsApp" oninput="simpanDataDiri()">
+            <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Alamat Lengkap" oninput="simpanDataDiri()"></textarea>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <input type="text" id="buyer-rt" class="input-buyer" placeholder="RT/RW" oninput="simpanDataDiri()">
+                <input type="text" id="buyer-kodepos" class="input-buyer" placeholder="Kode Pos" oninput="simpanDataDiri()">
+            </div>
+            <input type="text" id="buyer-kec" class="input-buyer" placeholder="Kecamatan" oninput="simpanDataDiri()">
+            <input type="text" id="buyer-kab" class="input-buyer" placeholder="Kabupaten/Kota" oninput="simpanDataDiri()">
+            <input type="text" id="buyer-prov" class="input-buyer" placeholder="Provinsi" oninput="simpanDataDiri()">
+            
+            <button class="btn-reset" onclick="resetDataDiri()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan Data</button>
+        </div>
+
+        <div id="checkout-kasir" class="panel-right hidden">
+            <h3>🛒 Ringkasan Pesanan</h3>
+            <ul id="summary-items"></ul>
+            <div style="font-weight: bold; font-size: 16px; margin: 15px 0;">
+                Total: <span id="summary-total">Rp 0</span>
+            </div>
+            <button onclick="kirimPesananKeAplikasi()" style="width: 100%; padding: 15px; background: #22c55e; color: white; border: none; border-radius: 8px;">
+                Kirim Pesanan
+            </button>
+        </div>
+    </div>
+
     <div class="nav-bottom">
         <button class="nav-item active" onclick="pindahTab('home')"><i class="fa-solid fa-house"></i>Home</button>
-        <button class="nav-item qris-jumbo" onclick="pindahTab('qris')"><i class="fa-solid fa-qrcode"></i>QRIS</button>
+        <button class="nav-item" onclick="pindahTab('qris')"><i class="fa-solid fa-qrcode"></i>QRIS</button>
         <button class="nav-item" onclick="pindahTab('panduan')"><i class="fa-solid fa-book-open"></i>Panduan</button>
     </div>
+</div> ```
 
-</div> 
+### Tambahan Fungsi JS (Agar `resetDataDiri` bekerja)
+Pastikan fungsi ini ada di dalam `<script>` Anda:
 
-<!-- Bagian Statistik PWA jika dibutuhkan -->
-<span id="app-stats" style="display: none;">0</span>
-
-<button class="pwa-install-btn" id="pwaBtn" onclick="installAplikasiPWA()">
-    <i class="fa-solid fa-cloud-arrow-down" style="font-size:14px;"></i><br>Ambil App
-</button>
-
-<div class="modal-zoom" id="zoomModal" onclick="this.style.display='none'">
-    <img id="imgZoom" src="" alt="Zoom">
-</div>
-
-<script>
-    const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8"; 
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let produkData = [];
-    let bannerData = [];
-    let keranjang = {}; 
-    let kategoriWarna = ['#e0f2fe', '#fef3c7', '#dcfce7', '#fce7f3', '#ffedd5', '#f3e8ff'];
-    let klikRahasiaCount = 0;
-    let defferredPrompt;
-    let kategoriTerpilih = 'Semua';
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        await muatPengaturanSistem();
-        await muatBannerBergilir();
-        await muatProdukDanOfflineCache();
+```javascript
+function resetDataDiri() {
+    // Daftar semua ID input
+    const fields = ['nama', 'wa', 'alamat', 'rt', 'kodepos', 'kec', 'kab', 'prov'];
+    fields.forEach(field => {
+        const el = document.getElementById(`buyer-${field}`);
+        if (el) el.value = '';
     });
-
-    async function muatPengaturanSistem() {
-        try {
-            let { data: settings, error } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
-            if (error) throw error;
-            if (settings) {
-                const runningTextEl = document.getElementById('text-promo-running');
-                const appStatsEl = document.getElementById('app-stats');
-                if (runningTextEl) runningTextEl.innerHTML = `${settings.running_text}`;
-                if (appStatsEl) appStatsEl.innerText = settings.total_terpasang;
-            }
-        } catch (err) { 
-            console.error("Gagal memuat pengaturan:", err); 
-            const runningTextEl = document.getElementById('text-promo-running');
-            if (runningTextEl) runningTextEl.innerText = "Selamat Datang di Dutakita LED!";
-        }
-    }
-
-    async function muatBannerBergilir() {
-        try {
-            let { data: banners } = await _supabase.from('banners').select('*').eq('aktif', true).order('urutan', { ascending: true });
-            if (banners && banners.length > 0) {
-                bannerData = banners;
-                renderBannerSlider();
-            }
-        } catch (e) { console.error(e); }
-    }
-
-    function renderBannerSlider() {
-        const slider = document.getElementById('banner-slider');
-        const dots = document.getElementById('banner-dots');
-        slider.innerHTML = ''; dots.innerHTML = '';
-
-        bannerData.forEach((b, idx) => {
-            const img = document.createElement('img');
-            img.src = b.image_url;
-            slider.appendChild(img);
-
-            const dot = document.createElement('div');
-            dot.className = idx === 0 ? 'dot active' : 'dot';
-            dot.onclick = () => geserSlide(idx);
-            dots.appendChild(dot);
-        });
-
-        let current = 0;
-        setInterval(() => {
-            if(bannerData.length > 0) {
-                current = (current + 1) % bannerData.length;
-                geserSlide(current);
-            }
-        }, 4000);
-    }
-
-    function geserSlide(idx) {
-        const slider = document.getElementById('banner-slider');
-        const dots = document.getElementById('banner-dots').children;
-        if(slider && dots.length > idx) {
-            slider.style.transform = `translateX(-${idx * 100}%)`;
-            for (let i = 0; i < dots.length; i++) {
-                dots[i].className = i === idx ? 'dot active' : 'dot';
-            }
-        }
-    }
-
-    async function muatProdukDanOfflineCache() {
-        try {
-            let { data: produk, error } = await _supabase.from('produk').select('*').order('id', { ascending: false });
-            if (produk && produk.length > 0) {
-                produkData = produk;
-                localStorage.setItem('duta_produk_cache', JSON.stringify(produk));
-            }
-        } catch (err) {
-            console.log("Mode offline aktif, membaca data internal...");
-        } finally {
-            if (!produkData || produkData.length === 0) {
-                const cacheData = localStorage.getItem('duta_produk_cache');
-                if (cacheData) produkData = JSON.parse(cacheData);
-            }
-            if (produkData) {
-                const urutanKategori = ['Semua', ...new Set(produkData.map(p => p.kategori).filter(Boolean))];
-                renderKategoriWarnaWarni(urutanKategori);
-                jalankanFilterDanSortir();
-            }
-        }
-    }
-
-    function renderKategoriWarnaWarni(katArr) {
-        const bar = document.getElementById('cat-bar');
-        bar.innerHTML = '';
-        katArr.forEach((kat, idx) => {
-            const btn = document.createElement('button');
-            btn.innerText = kat;
-            btn.className = 'cat-btn';
-            btn.style.background = kategoriWarna[idx % kategoriWarna.length];
-            btn.style.color = '#1e293b';
-            btn.style.border = idx === 0 ? '2px solid var(--primary)' : '2px solid transparent';
-            btn.onclick = () => {
-                document.querySelectorAll('.cat-btn').forEach(b => b.style.border = '2px solid transparent');
-                btn.style.border = '2px solid var(--primary)';
-                kategoriTerpilih = kat;
-                jalankanFilterDanSortir();
-            };
-            bar.appendChild(btn);
-        });
-    }
-
-    function jalankanFilterDanSortir() {
-        const kataKunci = document.getElementById('search-box').value.toLowerCase().trim();
-        const tipeSortir = document.getElementById('sort-box').value;
-        
-        let hasil = kategoriTerpilih === 'Semua' ? produkData : produkData.filter(p => p.kategori === kategoriTerpilih);
-
-        if (kataKunci !== '') {
-            hasil = hasil.filter(p => p.nama.toLowerCase().includes(kataKunci));
-        }
-
-        const dapatHargaFinal = (p) => {
-            const diskon = Number(p.diskon) || 0;
-            const asli = Number(p.harga) || 0;
-            return diskon > 0 ? asli * (1 - (diskon / 100)) : asli;
-        };
-
-        if (tipeSortir === 'termurah') {
-            hasil.sort((a, b) => dapatHargaFinal(a) - dapatHargaFinal(b));
-        } else if (tipeSortir === 'termahal') {
-            hasil.sort((a, b) => dapatHargaFinal(b) - dapatHargaFinal(a));
-        } else if (tipeSortir === 'terlaris') {
-            hasil.sort((a, b) => (b.stok || 0) - (a.stok || 0)); 
-        } else if (tipeSortir === 'terbaru') {
-            hasil.sort((a, b) => b.id - a.id);
-        }
-
-        renderDaftarProdukKeHTML(hasil);
-    }
-
-    function renderDaftarProdukKeHTML(filteredProducts) {
-        const container = document.getElementById('list');
-        container.innerHTML = '';
-        
-        if(!filteredProducts || filteredProducts.length === 0) {
-            container.innerHTML = `<p style="grid-column:span 2; text-align:center; color:#94a3b8; padding:30px; font-size:13px;">Produk tidak ditemukan.</p>`;
-            return;
-        }
-
-        filteredProducts.forEach(p => {
-            const qty = keranjang[p.id] || 0;
-            const diskon = Number(p.diskon) || 0;
-            const asli = Number(p.harga) || 0;
-            const final = diskon > 0 ? asli * (1 - (diskon / 100)) : asli;
-            
-            let galeriFoto = [];
-            if(p.gambar1) galeriFoto.push(p.gambar1);
-            if(p.gambar2) galeriFoto.push(p.gambar2);
-            if(p.gambar3) galeriFoto.push(p.gambar3);
-            if(galeriFoto.length === 0) galeriFoto.push('https://via.placeholder.com/150');
-
-            let htmlDots = '';
-            if(galeriFoto.length > 1) {
-                galeriFoto.forEach((_, fIdx) => {
-                    htmlDots += `<div class="g-dot ${fIdx === 0 ? 'active' : ''}" onclick="event.stopPropagation(); gantiFotoGaleri(${p.id}, ${fIdx})"></div>`;
-                });
-            }
-
-            const itemHtml = `
-                <div class="product-card">
-                    <div class="img-container">
-                        <button class="share-btn" onclick="shareKeMedsos('${p.nama}', ${final}, '${galeriFoto[0]}')"><i class="fa-solid fa-share-nodes"></i></button>
-                        ${diskon > 0 ? `<div class="discount-badge">-${diskon}%</div>` : ''}
-                        <div class="galeri-wrapper" id="galeri-${p.id}">
-                            ${galeriFoto.map(imgSrc => `<img src="${imgSrc}" class="prod-img" onclick="bukaZoom('${imgSrc}')">`).join('')}
-                        </div>
-                        <div class="galeri-dots" id="gdots-${p.id}">${htmlDots}</div>
-                    </div>
-                    <h4 style="margin:8px 0 2px; font-size:12px; font-weight:600; color:#222; line-height:1.3; height:32px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${p.nama}</h4>
-                    <p style="margin:0 0 4px; font-size:10px; color:#64748b;">Stok: ${p.stok || 0}</p>
-                    
-                    <div class="price-box">
-                        <span class="price-now">Rp ${final.toLocaleString('id-ID')}</span>
-                        ${diskon > 0 ? `<span class="price-was">Rp ${asli.toLocaleString('id-ID')}</span>` : ''}
-                    </div>
-
-                    <div class="order-control">
-                        <button class="btn-qty" onclick="ubahAngkaQty(${p.id}, -1)">-</button>
-                        <span class="qty-indicator" id="qty-val-${p.id}">${qty}</span>
-                        <button class="btn-qty" onclick="ubahAngkaQty(${p.id}, 1)">+</button>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', itemHtml);
-        });
-    }
-
-    function gantiFotoGaleri(prodId, targetIdx) {
-        const wrapper = document.getElementById(`galeri-${prodId}`);
-        const dots = document.getElementById(`gdots-${prodId}`).children;
-        if(wrapper) {
-            wrapper.style.transform = `translateX(-${targetIdx * 100}%)`;
-            for(let i=0; i<dots.length; i++) {
-                dots[i].className = i === targetIdx ? 'g-dot active' : 'g-dot';
-            }
-        }
-    }
-
-    function ubahAngkaQty(id, ubah) {
-        const item = produkData.find(p => p.id === id);
-        let qtySekarang = keranjang[id] || 0;
-        qtySekarang += ubah;
-
-        if (qtySekarang <= 0) {
-            qtySekarang = 0;
-            delete keranjang[id];
-        } else {
-            if (qtySekarang > item.stok) {
-                alert(`Stok hanya tersedia ${item.stok} pcs!`);
-                return;
-            }
-            keranjang[id] = qtySekarang;
-        }
-        
-        const elQty = document.getElementById(`qty-val-${id}`);
-        if(elQty) elQty.innerText = qtySekarang;
-        
-        pembaruanStrukRingkasan();
-    }
-
-    function pembaruanStrukRingkasan() {
-        const listWrap = document.getElementById('summary-items');
-        const totalWrap = document.getElementById('summary-total');
-        const panelKasir = document.getElementById('checkout-kasir');
-        listWrap.innerHTML = '';
-        
-        let notaTotal = 0;
-        let adaBarang = false;
-
-        for (const id in keranjang) {
-            const p = produkData.find(item => item.id == id);
-            if (p && keranjang[id] > 0) {
-                adaBarang = true;
-                const diskon = Number(p.diskon) || 0;
-                const hargaFinal = diskon > 0 ? p.harga * (1 - (diskon / 100)) : p.harga;
-                const sub = hargaFinal * keranjang[id];
-                notaTotal += sub;
-
-                listWrap.innerHTML += `<li>${p.nama.substring(0, 20)}... (x${keranjang[id]})</li>`;
-            }
-        }
-
-        if (adaBarang) {
-            panelKasir.classList.add('active');
-        } else {
-            panelKasir.classList.remove('active');
-        }
-        
-        totalWrap.innerText = `Rp ${notaTotal.toLocaleString('id-ID')}`;
-    }
-
-    function resetKeranjang() {
-        keranjang = {};
-        document.querySelectorAll('.qty-indicator').forEach(el => el.innerText = '0');
-        pembaruanStrukRingkasan();
-    }
-
-    function bukaZoom(src) {
-        const modal = document.getElementById('zoomModal');
-        const img = document.getElementById('imgZoom');
-        img.src = src;
-        modal.style.display = 'flex';
-    }
-
-    function shareKeMedsos(nama, harga, img) {
-        const isiTeks = `Cek ${nama} seharga Rp ${harga.toLocaleString('id-ID')} di Dutakita LED. Lihat spesifikasinya disini: ${img}`;
-        if (navigator.share) {
-            navigator.share({ title: nama, text: isiTeks, url: window.location.href });
-        } else {
-            navigator.clipboard.writeText(isiTeks);
-            alert("Informasi link gambar & harga disalin ke clipboard!");
-        }
-    }
-
-    async function kirimPesananKeAplikasi() {
-    const nama = document.getElementById('buyer-nama').value.trim();
-    const alamat = document.getElementById('buyer-alamat').value.trim();
-
-    if (!nama || !alamat) {
-        alert("Harap isi Nama dan Alamat!");
-        return;
-    }
-
-    // Siapkan data item dari keranjang
-    let listBelanja = [];
-    let hitungTotal = 0;
-
-    for (const id in keranjang) {
-        const p = produkData.find(item => item.id == id);
-        if (p) {
-            const diskon = Number(p.diskon) || 0;
-            const hargaFinal = diskon > 0 ? p.harga * (1 - (diskon / 100)) : p.harga;
-            const sub = hargaFinal * keranjang[id];
-            hitungTotal += sub;
-            
-            listBelanja.push({
-                id_produk: p.id,
-                nama_produk: p.nama,
-                qty: keranjang[id],
-                subtotal: sub
-            });
-        }
-    }
-
-    if (listBelanja.length === 0) return alert("Keranjang kosong!");
-
-    // Simpan ke Supabase
-    const { data, error } = await _supabase.from('orders').insert([
-        { 
-            nama_pembeli: nama, 
-            alamat_lengkap: alamat, 
-            daftar_item: listBelanja, 
-            total_harga: hitungTotal,
-            status: 'Baru'
-        }
-    ]);
-
-    if (!error) {
-        alert("✅ Pesanan Berhasil Terkirim!");
-        resetKeranjang();
-        document.getElementById('buyer-nama').value = '';
-        document.getElementById('buyer-alamat').value = '';
-    } else {
-        alert("Gagal mengirim pesanan: " + error.message);
-    }
+    localStorage.removeItem('duta_data_pembeli');
+    alert("Data berhasil dikosongkan!");
 }
-
-    function pindahTab(tujuan) {
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-        if (tujuan === 'home') {
-            alert("Kembali ke katalog.");
-        } else if (tujuan === 'qris') {
-            alert("--- FORM QRIS PEMBAYARAN JUMBO ---\n\nSilakan scan kode QRIS resmi toko kami.");
-        } else if (tujuan === 'panduan') {
-            alert("Halaman Panduan: Cara pemasangan spare part LED & perbaikan driver.");
-        }
-    }
-
-    function hitungKlikRahasia() {
-        klikRahasiaCount++;
-        if (klikRahasiaCount >= 5) {
-            klikRahasiaCount = 0;
-            window.location.href = "admin.html";
-        }
-    }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        defferredPrompt = e;
-        document.getElementById('pwaBtn').style.display = 'flex';
-    });
-
-    function installAplikasiPWA() {
-        if(defferredPrompt) {
-            defferredPrompt.prompt();
-            defferredPrompt.userChoice.then((choiceResult) => {
-                if(choiceResult.outcome === 'accepted') {
-                    document.getElementById('pwaBtn').style.display = 'none';
-                }
-                defferredPrompt = null;
-            });
-        }
-    }
-</script>
-    <div class="checkout-wrapper">
-    <div class="panel-left" style="flex: 2;">
-        <h3>Data Pengiriman</h3>
-        <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan" oninput="simpanDataDiri()">
-        <button class="btn-reset" onclick="resetDataDiri()">Hapus Data</button>
-    </div>
-
-    <div id="checkout-kasir" class="panel-right hidden">
-        <h3>🛒 Ringkasan Pesanan</h3>
-        <ul id="summary-items"></ul>
-        <div style="font-weight: bold; font-size: 16px; margin: 15px 0;">
-            Total: <span id="summary-total">Rp 0</span>
-        </div>
-        <button onclick="kirimPesananKeAplikasi()" style="width: 100%; padding: 15px; background: #22c55e; color: white; border: none; border-radius: 8px;">
-            Kirim Pesanan
-        </button>
-    </div>
-</div>
+   
 </body>
 </html>
