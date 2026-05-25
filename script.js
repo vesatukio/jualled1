@@ -199,6 +199,7 @@ function zoomGambar(src) {
     }
 }
 window.kirimKeDatabase = async function () {
+    // 1. Ambil data dengan benar
     const nama = document.getElementById('buyer-nama').value.trim();
     const wa = document.getElementById('buyer-wa').value.trim();
     const alamat = document.getElementById('buyer-alamat').value.trim();
@@ -206,24 +207,26 @@ window.kirimKeDatabase = async function () {
     const kab = document.getElementById('buyer-kab').value.trim();
     const prov = document.getElementById('buyer-provinsi').value.trim();
 
-    if (!nama || !wa || !alamat || !kec || !kab || !prov) {
-        alert("Harap lengkapi semua data formulir!");
+    // 2. Validasi (Jika kosong akan alert)
+    if (!nama || !wa || !alamat || !kab || !prov) {
+        alert("Harap lengkapi semua data (Nama, WA, Alamat, Kab, Prov)!");
         return;
     }
 
-    // Persiapkan data
-    let detailItems = [];
+    // 3. Proses Keranjang menjadi JSON yang benar
+    let itemData = [];
     let totalBayar = 0;
+
     for (const id in keranjang) {
         const p = produkData.find(item => item.id == id);
         if (p) {
-            const diskon = Number(p.diskon) || 0;
-            const hargaFinal = diskon > 0 ? p.harga * (1 - (diskon / 100)) : p.harga;
-            detailItems.push({ nama: p.nama, qty: keranjang[id], subtotal: hargaFinal * keranjang[id] });
-            totalBayar += (hargaFinal * keranjang[id]);
+            const subtotal = p.harga * keranjang[id];
+            itemData.push({ nama: p.nama, qty: keranjang[id], harga: p.harga });
+            totalBayar += subtotal;
         }
     }
 
+    // 4. Kirim ke Supabase
     try {
         const { error } = await _supabase.from('orders').insert([
             {
@@ -233,17 +236,16 @@ window.kirimKeDatabase = async function () {
                 kecamatan: kec,
                 kabupaten: kab,
                 provinsi: prov,
-                detail: detailItems,
-                total_bayar: totalBayar
+                item: itemData,      // Sesuai nama kolom di tabel Anda
+                total_bayar: totalBayar // Sesuai nama kolom di tabel Anda
             }
         ]);
 
         if (error) throw error;
-
-        alert("Pesanan berhasil dikirim!");
-        resetKeranjang(); // Bersihkan keranjang dan form
+        alert("Pesanan terkirim!");
+        resetKeranjang();
     } catch (err) {
-        console.error(err);
-        alert("Gagal kirim ke database: " + err.message);
+        console.error("Error Detail:", err);
+        alert("Gagal kirim: " + err.message);
     }
 }
