@@ -204,53 +204,56 @@ function zoomGambar(src) {
     }
 }
 async function kirimKeDatabase() {
-    console.log("Memulai proses kirim...");
+    // 1. Ambil data dari input
+    const nama = document.getElementById('buyer-nama').value.trim();
+    const alamat = document.getElementById('buyer-alamat').value.trim();
+    const kec = document.getElementById('buyer-kec').value.trim();
+    const kab = document.getElementById('buyer-kab').value.trim();
 
-    // Mengambil nilai dari semua input
-    const nama = document.getElementById('buyer-nama')?.value.trim();
-    const alamat = document.getElementById('buyer-alamat')?.value.trim();
-    const kec = document.getElementById('buyer-kec')?.value.trim();
-    const kab = document.getElementById('buyer-kab')?.value.trim();
-
-    // Validasi
+    // 2. Validasi Input
     if (!nama || !alamat || !kec || !kab) {
-        alert("PERHATIAN: Harap isi Nama, Alamat, Kecamatan, dan Kabupaten!");
+        alert("Harap isi Nama, Alamat, Kecamatan, dan Kabupaten!");
         return;
     }
 
     if (Object.keys(keranjang).length === 0) {
-        alert("Keranjang kosong!");
+        alert("Keranjang masih kosong!");
         return;
     }
 
     try {
-        const total = hitungTotalKeranjang();
+        // 3. Siapkan data produk untuk database
         const rincian = Object.keys(keranjang).map(id => ({
             id_produk: id,
             jumlah: keranjang[id]
         }));
+        
+        // Hitung total bayar
+        const total = Object.keys(keranjang).reduce((sum, id) => {
+            const p = produkData.find(item => item.id == id);
+            return sum + (p.harga * keranjang[id]);
+        }, 0);
 
-        // Mengirim ke tabel 'orders'
-        const { data, error } = await _supabase.from('orders').insert([
-            {
-                nama_pembeli: nama,
-                alamat: alamat,
-                kecamatan: kec,     // Pastikan kolom ini ada di Supabase
-                kabupaten: kab,     // Pastikan kolom ini ada di Supabase
-                item: rincian,
-                total_bayar: total
-            }
-        ]);
+        // 4. Kirim ke Supabase tabel 'orders'
+        const { error } = await _supabase.from('orders').insert([{
+            nama_pembeli: nama,
+            alamat: alamat,
+            kecamatan: kec,
+            kabupaten: kab,
+            item: rincian,
+            total_bayar: total
+        }]);
 
-        if (error) {
-            console.error("Error Supabase:", error);
-            alert("Gagal kirim: " + error.message);
-        } else {
-            alert("Pesanan berhasil dikirim!");
-            resetKeranjang();
-        }
+        if (error) throw error;
+        
+        alert("Pesanan berhasil dikirim!");
+        resetKeranjang();
+        
+        // Opsional: Kirim juga ke WA setelah masuk DB
+        kirimKeWhatsApp(); 
+        
     } catch (err) {
-        console.error("Error sistem:", err);
-        alert("Terjadi kesalahan sistem: " + err.message);
+        console.error("Error database:", err);
+        alert("Gagal mengirim ke database: " + err.message);
     }
 }
