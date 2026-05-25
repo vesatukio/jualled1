@@ -204,9 +204,20 @@ function zoomGambar(src) {
     }
 }
 async function kirimKeDatabase() {
-    // 1. Ambil data dari input form (Pastikan ID input di HTML Anda sesuai)
-    const nama = document.getElementById('buyer-nama')?.value.trim();
-    const alamat = document.getElementById('buyer-alamat')?.value.trim();
+    console.log("Tombol diklik, memulai proses kirim..."); // CEK INI DI KONSOL
+
+    const namaEl = document.getElementById('buyer-nama');
+    const alamatEl = document.getElementById('buyer-alamat');
+
+    if (!namaEl || !alamatEl) {
+        alert("Error: Elemen input (Nama/Alamat) tidak ditemukan di HTML!");
+        return;
+    }
+
+    const nama = namaEl.value.trim();
+    const alamat = alamatEl.value.trim();
+
+    console.log("Data yang akan dikirim:", { nama, alamat, keranjang });
 
     if (!nama || !alamat) {
         alert("Harap isi Nama dan Alamat!");
@@ -218,42 +229,30 @@ async function kirimKeDatabase() {
         return;
     }
 
-    // 2. Siapkan data keranjang
-    const rincian = Object.keys(keranjang).map(id => ({
-        id_produk: id,
-        jumlah: keranjang[id]
-    }));
-
-    // 3. Kirim ke Supabase
     try {
+        const rincian = Object.keys(keranjang).map(id => ({
+            id_produk: id,
+            jumlah: keranjang[id]
+        }));
+
         const { data, error } = await _supabase.from('pesanan').insert([
             {
                 nama_pembeli: nama,
                 alamat: alamat,
                 item: rincian,
-                total_bayar: hitungTotalKeranjang() // Buat fungsi ini jika belum ada
+                total_bayar: hitungTotalKeranjang()
             }
         ]);
 
-        if (error) throw error;
-        alert("Pesanan berhasil dikirim!");
-        resetKeranjang(); // Fungsi untuk membersihkan keranjang
+        if (error) {
+            console.error("Error dari Supabase:", error);
+            alert("Gagal kirim: " + error.message);
+        } else {
+            alert("Pesanan berhasil dikirim!");
+            resetKeranjang();
+        }
     } catch (err) {
-        console.error("Error:", err);
-        alert("Gagal kirim pesanan: " + err.message);
+        console.error("Error sistem:", err);
+        alert("Terjadi kesalahan sistem: " + err.message);
     }
-}
-function hitungTotalKeranjang() {
-    let total = 0;
-    for (let id in keranjang) {
-        let p = produkData.find(item => item.id == id);
-        if (p) total += (p.harga * keranjang[id]);
-    }
-    return total;
-}
-
-function resetKeranjang() {
-    keranjang = {};
-    // Tambahkan logika untuk update tampilan UI keranjang di sini
-    alert("Keranjang telah dikosongkan.");
 }
