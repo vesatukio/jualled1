@@ -68,28 +68,22 @@
         </div>
     </div>
 
-    <!-- Struk/Kasir Panel Belanja -->
-    <div class="checkout-panel" id="checkout-kasir">
-        <div class="checkout-container">
-            <div class="panel-left">
-                <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
-                <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Alamat Lengkap Pengiriman" style="resize:none; font-family:inherit;"></textarea>
-                <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan</button>
-            </div>
-            <div class="panel-right">
-                <div style="font-weight: 800; font-size: 11px; color: var(--primary); margin-bottom: 2px;">📋 Ringkasan Order:</div>
-                <ul id="summary-items" class="summary-list"></ul>
-                <div class="total-box">
-                    <span>Total:</span>
-                    <span id="summary-total" style="color: var(--pink);">Rp 0</span>
-                </div>
-                <button class="btn-wa" onclick="kirimPesananKeAplikasi()" style="background-color: var(--primary);">
-    <i class="fa-solid fa-paper-plane"></i> Kirim Pesanan
-</button>
-            </div>
-        </div>
+   <div class="panel-left">
+    <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
+    <input type="text" id="buyer-wa" class="input-buyer" placeholder="Nomor WhatsApp (Contoh: 08123456789)">
+    <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Jalan, Nama Perumahan, No Rumah" style="resize:none; font-family:inherit;"></textarea>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+        <input type="text" id="buyer-rt" class="input-buyer" placeholder="RT/RW">
+        <input type="text" id="buyer-kodepos" class="input-buyer" placeholder="Kode Pos">
     </div>
-
+    
+    <input type="text" id="buyer-kec" class="input-buyer" placeholder="Kecamatan">
+    <input type="text" id="buyer-kab" class="input-buyer" placeholder="Kabupaten/Kota">
+    <input type="text" id="buyer-prov" class="input-buyer" placeholder="Provinsi">
+    
+    <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan</button>
+</div>
     <!-- Navigasi Bawah Sticky -->
     <div class="nav-bottom">
         <button class="nav-item active" onclick="pindahTab('home')"><i class="fa-solid fa-house"></i>Home</button>
