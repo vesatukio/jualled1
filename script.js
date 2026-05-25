@@ -230,7 +230,7 @@ window.kirimKeDatabase = async function () {
         alert("Pesanan berhasil dikirim!");
 
         resetKeranjang();
-        kirimKeWhatsApp();
+        
 
     } catch (err) {
 
