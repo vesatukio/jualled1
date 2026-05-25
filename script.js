@@ -204,8 +204,6 @@ function zoomGambar(src) {
     }
 }
 window.kirimKeDatabase = async function () {
-    alert("TEST");
-}
 
     // 1. Ambil data dari input
     const nama = document.getElementById('buyer-nama')?.value?.trim();
@@ -222,6 +220,7 @@ window.kirimKeDatabase = async function () {
             .from('orders')
             .insert([{
                 nama_pembeli: nama,
+                alamat: alamat
             }]);
 
         if (error) {
