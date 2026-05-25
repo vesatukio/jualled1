@@ -162,50 +162,51 @@ function hitungLabaAdminOtomatis() {
 // Fungsi untuk memuat pesanan
 async function muatPesananAdmin() {
     const tbody = document.getElementById('body-pesanan');
-    if (!tbody) return; // Keamanan jika elemen tidak ditemukan
+    if (!tbody) return; 
     
     tbody.innerHTML = '<tr><td colspan="5">Memuat semua pesanan...</td></tr>';
 
-    // Hapus atau komentari baris .eq() agar Supabase tidak melakukan filter
-    let query = _supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
+    try {
+        let { data: orders, error } = await _supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-    // Baris ini dihapus agar tidak memfilter berdasarkan admin/pemilik:
-    // .eq('pemilik', namaAdminAktif) 
+        if (error) throw error;
 
-    let { data: orders, error } = await query;
+        tbody.innerHTML = '';
+        if (!orders || orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">Belum ada pesanan masuk.</td></tr>';
+            return;
+        }
 
-    if (error) {
-        console.error("Error memuat pesanan:", error);
-        tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data.</td></tr>';
-        return;
+        orders.forEach(o => {
+            // Mengubah JSON detail menjadi teks yang bisa dibaca
+            let detailTeks = "";
+            try {
+                const items = typeof o.detail === 'string' ? JSON.parse(o.detail) : o.detail;
+                detailTeks = items.map(i => `${i.nama || i.nama_produk} (x${i.qty || i.jumlah})`).join(', ');
+            } catch (e) {
+                detailTeks = "Data item error";
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${o.nama_pembeli || '-'}<br><small>${o.alamat || '-'}</small></td>
+                    <td><small>${detailTeks}</small></td>
+                    <td>Rp ${Number(o.total_bayar || 0).toLocaleString()}</td>
+                    <td><span class="status-badge">${o.status || 'Pending'}</span></td>
+                    <td>
+                        <button class="btn-primary" onclick="updateStatusPesanan(${o.id}, 'Selesai')">Selesai</button>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (err) {
+        console.error("Error memuat pesanan:", err);
+        tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data: ${err.message}</td></tr>';
     }
-
-    // Render data
-    tbody.innerHTML = '';
-    if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5">Belum ada pesanan.</td></tr>';
-        return;
-    }
-
-    orders.forEach(o => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${o.nama_pembeli || '-'}<br><small>${o.alamat_lengkap || '-'}</small></td>
-                <td><small>${JSON.stringify(o.daftar_item || {})}</small></td>
-                <td>Rp ${Number(o.total_harga).toLocaleString()}</td>
-                <td><span class="status-badge">${o.status || 'Pending'}</span></td>
-                <td>
-                    <button class="btn-primary" onclick="updateStatusPesanan(${o.id}, 'Selesai')">Selesai</button>
-                </td>
-            </tr>
-        `;
-    });
 }
-
-// Panggil fungsi ini saat halaman dimuat atau tab pesanan diklik
 
 // Fungsi update status
 async function updateStatusPesanan(id, status) {
