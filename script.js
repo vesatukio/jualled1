@@ -199,53 +199,77 @@ function zoomGambar(src) {
     }
 }
 window.kirimKeDatabase = async function () {
-    // 1. Ambil data dengan benar
+    // 1. Ambil data dari input form
     const nama = document.getElementById('buyer-nama').value.trim();
     const wa = document.getElementById('buyer-wa').value.trim();
     const alamat = document.getElementById('buyer-alamat').value.trim();
-    const kec = document.getElementById('buyer-kec').value.trim();
+    const kec = document.getElementById('buyer-kec').value.trim(); // Penting
     const kab = document.getElementById('buyer-kab').value.trim();
     const prov = document.getElementById('buyer-provinsi').value.trim();
 
-    // 2. Validasi (Jika kosong akan alert)
-    if (!nama || !wa || !alamat || !kab || !prov) {
-        alert("Harap lengkapi semua data (Nama, WA, Alamat, Kab, Prov)!");
+    // 2. Validasi Lengkap (Tambahkan 'kec' ke pengecekan)
+    if (!nama || !wa || !alamat || !kec || !kab || !prov) {
+        alert("Harap lengkapi semua data (Nama, WA, Alamat, Kec, Kab, Prov)!");
         return;
     }
 
-    // 3. Proses Keranjang menjadi JSON yang benar
+    // 3. Proses Keranjang
     let itemData = [];
     let totalBayar = 0;
 
     for (const id in keranjang) {
         const p = produkData.find(item => item.id == id);
         if (p) {
-            const subtotal = p.harga * keranjang[id];
-            itemData.push({ nama: p.nama, qty: keranjang[id], harga: p.harga });
+            const qty = keranjang[id];
+            const subtotal = p.harga * qty;
+            itemData.push({ 
+                id_produk: p.id, 
+                nama: p.nama, 
+                qty: qty, 
+                harga: p.harga 
+            });
             totalBayar += subtotal;
         }
     }
 
-    // 4. Kirim ke Supabase
+    // Cek jika keranjang kosong
+    if (itemData.length === 0) {
+        alert("Keranjang masih kosong!");
+        return;
+    }
+
+    // 4. Debugging: Cek data di Console sebelum kirim (Buka F12 untuk lihat)
+    const payload = {
+        nama_pembeli: nama,
+        no_wa: wa,
+        alamat: alamat,
+        kecamatan: kec,
+        kabupaten: kab,
+        provinsi: prov,
+        item: itemData,
+        total_bayar: totalBayar
+    };
+    console.log("Data yang akan dikirim ke Supabase:", payload);
+
+    // 5. Kirim ke Supabase
     try {
-        const { error } = await _supabase.from('orders').insert([
-            {
-                nama_pembeli: nama,
-                no_wa: wa,
-                alamat: alamat,
-                kecamatan: kec,
-                kabupaten: kab,
-                provinsi: prov,
-                item: itemData,      // Sesuai nama kolom di tabel Anda
-                total_bayar: totalBayar // Sesuai nama kolom di tabel Anda
-            }
-        ]);
+        const { error } = await _supabase.from('orders').insert([payload]);
 
         if (error) throw error;
-        alert("Pesanan terkirim!");
+        
+        alert("Pesanan berhasil dikirim!");
         resetKeranjang();
+        
+        // Reset manual input setelah sukses
+        document.getElementById('buyer-nama').value = '';
+        document.getElementById('buyer-wa').value = '';
+        document.getElementById('buyer-alamat').value = '';
+        document.getElementById('buyer-kec').value = '';
+        document.getElementById('buyer-kab').value = '';
+        document.getElementById('buyer-provinsi').value = '';
+        
     } catch (err) {
         console.error("Error Detail:", err);
-        alert("Gagal kirim: " + err.message);
+        alert("Gagal kirim ke database: " + err.message);
     }
 }
