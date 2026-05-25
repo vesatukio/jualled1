@@ -64,23 +64,29 @@
 
     <!-- Struk/Kasir Panel Belanja -->
     <div class="checkout-panel" id="checkout-kasir">
-        <div class="checkout-container">
-            <div class="panel-left">
-                <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
-                <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Alamat Lengkap Pengiriman" style="resize:none; font-family:inherit;"></textarea>
-                <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Kosongkan</button>
+    <div class="checkout-container">
+        <div class="panel-left">
+            <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
+            <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Jalan, Perumahan, No Rumah"></textarea>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <input type="text" id="buyer-kec" class="input-buyer" placeholder="Kecamatan">
+                <input type="text" id="buyer-kab" class="input-buyer" placeholder="Kabupaten/Kota">
             </div>
-            <div class="panel-right">
-                <div style="font-weight: 800; font-size: 11px; color: var(--primary); margin-bottom: 2px;">📋 Ringkasan Order:</div>
-                <ul id="summary-items" class="summary-list"></ul>
-                <div class="total-box">
-                    <span>Total:</span>
-                    <span id="summary-total" style="color: var(--pink);">Rp 0</span>
-                </div>
-                <button class="btn-wa" onclick="kirimKeWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Kirim WA</button>
+            <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
+        </div>
+        <div class="panel-right">
+            <div style="font-weight: 800; font-size: 11px; color: var(--primary);">📋 Ringkasan:</div>
+            <ul id="summary-items" class="summary-list"></ul>
+            <div class="total-box">
+                <span>Total:</span>
+                <span id="summary-total" style="color: var(--pink);">Rp 0</span>
             </div>
+            <button class="btn-wa" onclick="kirimPesananKeDatabase()" style="background:#22c55e;">
+                <i class="fa-solid fa-paper-plane"></i> Kirim Pesanan
+            </button>
         </div>
     </div>
+</div>
 
     <!-- Navigasi Bawah Sticky -->
     <div class="nav-bottom">
