@@ -405,43 +405,7 @@
         }
     }
 
-    function kirimKeWhatsApp() {
-        const nama = document.getElementById('buyer-nama').value.trim();
-        const alamat = document.getElementById('buyer-alamat').value.trim();
-
-        if (!nama || !alamat) {
-            alert("Harap isi Nama Pemesan dan Alamat Lengkap Pengiriman!");
-            return;
-        }
-
-        let teksBelanjaan = "";
-        let hitungTotal = 0;
-        let nomor = 1;
-
-        for (const id in keranjang) {
-            const p = produkData.find(item => item.id == id);
-            if (p) {
-                const diskon = Number(p.diskon) || 0;
-                const hargaFinal = diskon > 0 ? p.harga * (1 - (diskon / 100)) : p.harga;
-                const sub = hargaFinal * keranjang[id];
-                hitungTotal += sub;
-                teksBelanjaan += `${nomor}. ${p.nama} (x${keranjang[id]}) = Rp ${sub.toLocaleString('id-ID')}\n`;
-                nomor++;
-            }
-        }
-
-        const nomorTokoWA = "6283157925577"; 
-        const formatPesan = `*STRUK ORDERAN BARU - DUTAKITA LED*\n\n` +
-                            `👤 *Nama:* ${nama}\n` +
-                            `📍 *Alamat Lengkap:* ${alamat}\n\n` +
-                            `📦 *Rincian Produk:*\n${teksBelanjaan}\n` +
-                            `💰 *Total Tagihan:* *Rp ${hitungTotal.toLocaleString('id-ID')}*\n\n` +
-                            `Mohon dikonfirmasi kesediaannya Admin!`;
-
-        window.open(`https://api.whatsapp.com/send?phone=${nomorTokoWA}&text=${encodeURIComponent(formatPesan)}`, '_blank');
-    }
-
-    function pindahTab(tujuan) {
+   function pindahTab(tujuan) {
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
         if (tujuan === 'home') {
             alert("Kembali ke katalog.");
