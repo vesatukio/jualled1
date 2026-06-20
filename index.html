@@ -1,21 +1,120 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digibhub Store</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Duta Terang LED</title>
+
+<meta name="description" content="Duta Terang LED - Sparepart Lampu LED, Driver LED, Modul LED dan Aksesoris Lampu">
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 </head>
 <body>
 
-    <header>
-        <h1>Digibhub Store</h1>
-        <input type="text" id="search" placeholder="Cari produk..." onkeyup="filterProduk()">
-    </header>
+<header>
 
-    <div class="product-grid" id="product-container">
-        </div>
+<div class="logo">
+<i class="fa-solid fa-lightbulb"></i>
+<span>Duta Terang LED</span>
+</div>
 
-    <script src="app.js"></script>
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Cari produk...">
+<i class="fa fa-search"></i>
+</div>
+
+</header>
+
+<section class="hero">
+
+<div class="hero-content">
+<h1>Sparepart Lampu LED Lengkap</h1>
+<p>Driver LED, Modul LED, LED AC, PCB dan berbagai aksesoris lampu.</p>
+</div>
+
+</section>
+
+<section id="kategoriContainer" class="kategori"></section>
+
+<section class="produk-section">
+
+<div class="section-title">
+<h2>Daftar Produk</h2>
+</div>
+
+<div id="produkContainer" class="produk-grid">
+
+<div class="loading">
+Memuat Produk...
+</div>
+
+</div>
+
+</section>
+
+<!-- Modal Detail -->
+
+<div id="detailModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close">&times;</span>
+
+<div class="modal-body">
+
+<div class="modal-image">
+<img id="modalImage" src="">
+</div>
+
+<div class="modal-info">
+
+<h2 id="modalNama"></h2>
+
+<div id="modalHarga"></div>
+
+<div id="modalKategori"></div>
+
+<div id="modalStok"></div>
+
+<div class="qty-box">
+
+<button onclick="kurangQty()">-</button>
+
+<input type="number" value="1" min="1" id="qtyInput">
+
+<button onclick="tambahQty()">+</button>
+
+</div>
+
+<button id="orderBtn" class="order-btn">
+Pesan Sekarang
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+
+<p>
+© 2026 Duta Terang LED
+</p>
+
+</footer>
+
+<script src="app.js"></script>
+
 </body>
 </html>
