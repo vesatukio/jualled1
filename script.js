@@ -4,7 +4,6 @@
 
     // 2. STATE APLIKASI
     let produkData = [];
-    let keranjang = {};
 
     // 3. INISIALISASI
     document.addEventListener("DOMContentLoaded", async () => {
@@ -18,12 +17,12 @@
             const data = await res.json();
             if (data) {
                 produkData = data;
-                localStorage.setItem('duta_cache', JSON.stringify(data));
+                localStorage.setItem('digibhub_cache', JSON.stringify(data));
                 renderDaftarProduk(produkData);
             }
         } catch (e) {
             console.log("Mode Offline: Mengambil dari cache");
-            const cache = localStorage.getItem('duta_cache');
+            const cache = localStorage.getItem('digibhub_cache');
             if (cache) {
                 produkData = JSON.parse(cache);
                 renderDaftarProduk(produkData);
@@ -31,62 +30,56 @@
         }
     }
 
-    // 5. RENDER PRODUK KE LAYAR
+    // 5. RENDER PRODUK (Diselaraskan dengan Header: Barang, Harga, Stok, gambar1)
     function renderDaftarProduk(data) {
         const list = document.getElementById('list');
+        if (!list) return;
+
         list.innerHTML = data.map(p => `
             <div class="product-card">
-                <img src="${p.gambar1 || 'https://via.placeholder.com/150'}" class="prod-img">
-                <h4>${p.nama}</h4>
-                <p>Stok: ${p.stok || 0}</p>
+                <img src="${p.gambar1 || 'https://via.placeholder.com/150'}" class="prod-img" style="width:100%">
+                <h4>${p.Barang}</h4>
+                <p>Stok: ${p.Stok || 0}</p>
                 <div class="price-box">
-                    <span>Rp ${Number(p.harga).toLocaleString('id-ID')}</span>
-                    <button onclick="tambahKeKeranjang(${p.id})">+</button>
+                    <span>Rp ${Number(p.Harga).toLocaleString('id-ID')}</span>
+                    <button ${p.Stok <= 0 ? 'disabled' : ''} onclick="tambahKeKeranjang('${p.ID}')">
+                        ${p.Stok <= 0 ? 'Habis' : '+'}
+                    </button>
                 </div>
             </div>
         `).join('');
     }
 
-    // 6. FUNGSI KIRIM PESANAN KE GOOGLE SHEETS
+    // 6. FUNGSI KIRIM PESANAN
     window.kirimKeDatabase = async function () {
         const nama = document.getElementById('buyer-nama').value;
         const wa = document.getElementById('buyer-wa').value;
         const alamat = document.getElementById('buyer-alamat').value;
         
-        if (!nama || !alamat) return alert("Isi data pembeli!");
+        if (!nama || !alamat || !wa) return alert("Mohon lengkapi data pembeli!");
 
         const payload = {
             nama: nama,
             wa: wa,
             alamat: alamat,
-            total: document.getElementById('summary-total').innerText,
             waktu: new Date().toLocaleString()
         };
 
         try {
+            // Pastikan mode cors diaktifkan jika script sudah di set header origin-nya
             await fetch(GOOGLE_API_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            alert("Pesanan terkirim ke Sheets!");
-            resetKeranjang();
+            alert("Pesanan berhasil terkirim!");
         } catch (e) {
             alert("Gagal kirim: " + e.message);
         }
     };
 
-    // 7. FUNGSI PEMBANTU
     function tambahKeKeranjang(id) {
-        keranjang[id] = (keranjang[id] || 0) + 1;
-        alert("Produk ditambahkan!");
-        // Update UI ringkasan Anda di sini
-    }
-
-    function resetKeranjang() {
-        keranjang = {};
-        document.getElementById('buyer-nama').value = '';
-        document.getElementById('buyer-alamat').value = '';
+        alert("Produk ID: " + id + " ditambahkan ke keranjang!");
     }
 </script>
