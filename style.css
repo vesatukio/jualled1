@@ -288,3 +288,26 @@ header{
         font-size:13px;
     }
 }
+.category-filter {
+    display: flex;
+    gap: 10px;
+    padding: 10px 20px;
+    overflow-x: auto; /* Agar bisa di-scroll jika banyak */
+    background: white;
+    margin-bottom: 10px;
+}
+
+.category-filter button {
+    padding: 8px 16px;
+    border: 1px solid var(--green);
+    border-radius: 20px;
+    background: white;
+    color: var(--green);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.category-filter button.active {
+    background: var(--green);
+    color: white;
+}
