@@ -3,41 +3,51 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7
 
 // Memuat data saat website terbuka
 async function loadProduk() {
+    const container = document.getElementById('produk-container');
+    const url = "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
+    
     try {
-        const response = await fetch(API_URL);
-        const data = await response.json(); // Data dalam bentuk array
+        const res = await fetch(url);
+        const data = await res.json();
         
-        const grid = document.querySelector('.produk-grid');
-        grid.innerHTML = ''; // Kosongkan grid sebelum diisi
-
+        container.innerHTML = ''; 
         data.forEach(item => {
-            // Membuat elemen kartu
+            // Pastikan item.nama, item.harga, dll sesuai dengan header sheet Anda
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <div class="discount-badge">-5%</div>
-                <img src="${item.foto}" alt="${item.nama}">
+                <div class="card-container">
+                    <img src="${item.foto}" alt="Produk">
+                </div>
                 <div class="card-body">
-                    <p class="brand">Duta Terang LED</p>
-                    <h3 class="card-title">${item.nama}</h3>
-                    <div class="price-box">
-                        <span class="old-price">Rp ${item.harga_coret}</span>
-                        <span class="price">Rp ${item.harga}</span>
+                    <div class="card-title">${item.nama || 'Produk'}</div>
+                    <div class="price-container">
+                        <span class="final-price">Rp ${item.harga || '0'}</span>
                     </div>
-                    <div class="qty-group">
-                        <button onclick="ubahQty(this, -1)">-</button>
-                        <input type="number" value="0" class="qty-input" readonly>
-                        <button onclick="ubahQty(this, 1)">+</button>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                        <input type="text" class="qty-input" value="0" readonly data-harga="${item.harga.replace(/[^0-9]/g, '')}">
+                        <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
                     </div>
-                    <button class="order-btn">Klik Order</button>
                 </div>
             `;
-            grid.appendChild(card);
+            container.appendChild(card);
         });
-    } catch (error) {
-        console.error("Gagal mengambil data:", error);
-    }
+    } catch(e) { console.log("Error:", e); }
 }
 
-// Panggil fungsi
+function updateQty(btn, change) {
+    let input = btn.parentElement.querySelector('.qty-input');
+    let val = parseInt(input.value) + change;
+    input.value = val < 0 ? 0 : val;
+    
+    let total = 0;
+    document.querySelectorAll('.card').forEach(card => {
+        let harga = parseInt(card.querySelector('.qty-input').dataset.harga);
+        let qty = parseInt(card.querySelector('.qty-input').value);
+        total += (harga * qty);
+    });
+    document.getElementById('total-harga').innerText = 'Rp ' + total.toLocaleString('id-ID');
+}
+
 loadProduk();
