@@ -136,7 +136,7 @@ function resetCart() {
 }
 
 async function submitOrder() {
-    console.log("Tombol Kirim Ditekan"); // Jika muncul di console, berarti berhasil
+    if (cart.length === 0) return alert("Keranjang kosong!");
     
     const nama = document.getElementById('nama').value;
     const wa = document.getElementById('wa').value;
@@ -144,5 +144,43 @@ async function submitOrder() {
 
     if (!nama || !wa || !alamat) return alert("Lengkapi data Nama, WA, dan Alamat!");
 
-    // ... sisa kode fetch Anda tetap sama ...
+    // Kita kirim per item agar sesuai dengan logika Apps Script Anda
+    // Catatan: Jika ingin mengirim banyak produk sekaligus, 
+    // Apps Script Anda perlu diubah untuk looping.
+    // Untuk saat ini, kita kirim produk pertama sebagai contoh:
+    const item = cart[0]; 
+
+    const payload = {
+        action: "order", // WAJIB ADA karena dicek di if(data.action !== "order")
+        nama: nama,
+        wa: wa,
+        alamat: alamat,
+        produk: item.Barang,
+        harga: item.Harga,
+        qty: cart.length // Contoh jumlah qty
+    };
+
+    alert("Mengirim pesanan...");
+
+    try {
+        const response = await fetch(API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        if(result.success) {
+            alert("Pesanan berhasil dikirim!");
+            cart = [];
+            localStorage.removeItem("duta_cart");
+            updateCart();
+            document.getElementById('checkout-form').close();
+        } else {
+            alert("Gagal: " + result.message);
+        }
+    } catch (error) {
+        alert("Gagal mengirim, periksa koneksi.");
+        console.error(error);
+    }
 }
