@@ -1,37 +1,39 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
 
 async function loadProduk() {
-    const res = await fetch(API_URL);
-    const data = await res.json();
     const container = document.getElementById('produk-container');
-    
-    container.innerHTML = ''; 
-    data.forEach(item => {
-        // Jika data undefined, berikan nilai default
-        const nama = item.nama || "Produk";
-        const harga = item.harga || "0";
-        const hargaCoret = item.harga_coret || "";
-        const diskon = item.diskon || "-5%";
-        const foto = item.foto || "https://via.placeholder.com/150";
-
-        container.innerHTML += `
-            <div class="card">
-                <span class="discount-badge">${diskon}</span>
-                <img src="${foto}" alt="${nama}">
-                <div class="card-title">${nama}</div>
-                <div class="price-container">
-                    <span class="old-price">Rp ${hargaCoret}</span>
-                    <span class="final-price">Rp ${harga}</span>
+    try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Gagal ambil data");
+        const data = await res.json();
+        
+        container.innerHTML = ''; 
+        data.forEach(item => {
+            // Bersihkan harga dari titik agar bisa dihitung (contoh: 3.990 jadi 3990)
+            const hargaBersih = (item.harga || "0").toString().replace(/\./g, '').replace(/[^0-9]/g, '');
+            
+            container.innerHTML += `
+                <div class="card">
+                    <span class="discount-badge">${item.diskon || '-5%'}</span>
+                    <img src="${item.foto}" alt="${item.nama}" onerror="this.src='https://via.placeholder.com/150'">
+                    <div class="card-title">${item.nama || 'Produk'}</div>
+                    <div class="price-container">
+                        <span class="old-price">Rp ${item.harga_coret || ''}</span>
+                        <span class="final-price">Rp ${item.harga || '0'}</span>
+                    </div>
+                    <div class="qty-control">
+                        <button onclick="ubahQty(this, -1)">-</button>
+                        <input type="number" value="0" readonly class="qty-input" data-harga="${hargaBersih}">
+                        <button onclick="ubahQty(this, 1)">+</button>
+                    </div>
+                    <button class="btn-order">Klik Order</button>
                 </div>
-                <div class="qty-control">
-                    <button onclick="ubahQty(this, -1)">-</button>
-                    <input type="number" value="0" readonly class="qty-input" data-harga="${harga.replace(/\./g, '')}">
-                    <button onclick="ubahQty(this, 1)">+</button>
-                </div>
-                <button class="btn-order">Klik Order</button>
-            </div>
-        `;
-    });
+            `;
+        });
+    } catch(e) {
+        console.error("Error:", e);
+        container.innerHTML = "<p>Gagal memuat produk. Cek koneksi internet Anda.</p>";
+    }
 }
 
 function ubahQty(btn, change) {
@@ -41,7 +43,10 @@ function ubahQty(btn, change) {
     
     let total = 0;
     document.querySelectorAll('.qty-input').forEach(input => {
-        total += parseInt(input.dataset.harga || 0) * parseInt(input.value || 0);
+        // Ambil data-harga yang sudah bersih
+        let harga = parseInt(input.dataset.harga) || 0;
+        let qty = parseInt(input.value) || 0;
+        total += (harga * qty);
     });
     document.getElementById('total-harga').innerText = 'Rp ' + total.toLocaleString('id-ID');
 }
