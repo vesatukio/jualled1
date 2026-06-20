@@ -39,7 +39,6 @@ function renderProducts(data) {
                 <div class="badge">-${diskon}%</div>
                 <img class="slider" loading="lazy" src="${p.gambar1}">
                 <div class="nama">${p.Barang}</div>
-                <div class="kategori">${p.Kategori}</div>
                 <div class="price-old">Rp ${harga.toLocaleString("id-ID")}</div>
                 <div class="price">Rp ${Math.round(harga - (harga * diskon / 100)).toLocaleString("id-ID")}</div>
                 <div class="stock" style="color: ${isHabis ? 'red' : '#666'}">Stok : ${isHabis ? 'Habis' : stok}</div>
