@@ -133,3 +133,14 @@ if (saved) {
     cart = JSON.parse(saved);
     updateCart();
 }
+// Di dalam loop renderProducts:
+const stok = Number(p.Stok || p[" Stok"] || 0);
+const isHabis = stok <= 0;
+
+// ... pada bagian tombol:
+<button 
+    class="order-btn" 
+    onclick="addCart(${index})" 
+    ${isHabis ? 'disabled style="background:gray; cursor:not-allowed;"' : ''}>
+    ${isHabis ? 'Stok Habis' : '📞 Klik Order'}
+</button>
