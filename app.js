@@ -2,7 +2,7 @@ const API =
 "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
 
 const WA =
-"6283152925577";
+"6283157925577";
 
 let products=[];
 let cart=[];
