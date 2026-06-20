@@ -2,121 +2,45 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dutakita LED</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digibhub Store</title>
+    
+    <!-- Link ke file CSS -->
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Manifest untuk PWA -->
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
 </head>
 <body>
 
-<div class="app-container">
+    <!-- Header -->
     <header>
-        <div class="brand-title">Dutakita <span>LED</span></div>
-        <div class="counter-badge-admin" onclick="hitungKlikRahasia()">
-            <i class="fa-solid fa-download"></i> Terpasang: <span id="app-stats">0</span>
-        </div>
+        <h1>Digibhub Store</h1>
+        <input type="text" id="search" placeholder="Cari produk..." onkeyup="filterProduk()">
     </header>
 
-    <div class="marquee-container">
-        <i class="fa-solid fa-bullhorn"></i>
-        <marquee scrollamount="4" id="text-promo-running">Memuat informasi toko...</marquee>
+    <!-- Teks Berjalan -->
+    <marquee behavior="scroll" direction="left" class="marquee-text">
+        Selamat datang di Digibhub! Stok terbatas, segera order sebelum kehabisan!
+    </marquee>
+
+    <!-- Kontainer Produk -->
+    <div class="product-grid" id="product-container">
+        <!-- Produk akan muncul di sini secara otomatis dari app.js -->
+        <p>Memuat produk...</p>
     </div>
+
+    <!-- Script PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('Service Worker terdaftar'))
+                .catch(err => console.log('Gagal daftar:', err));
+        }
+    </script>
     
-    <div class="container">
-        <div class="banner-wrapper">
-            <div class="banner-slider" id="banner-slider"><p style="text-align:center; padding:20px;">Memuat promosi...</p></div>
-            <div class="banner-dots" id="banner-dots"></div>
-            <div class="search-container">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="search-box" class="search-input" placeholder="Cari sparepart..." oninput="jalankanFilterDanSortir()">
-            </div>
-        </div>
-        
-        <div class="cat-container" id="cat-bar"></div>
-
-        <div class="filter-container">
-            <select id="sort-box" class="filter-select" onchange="jalankanFilterDanSortir()">
-                <option value="terbaru">Terbaru</option>
-                <option value="termurah">Harga: Termurah</option>
-                <option value="termahal">Harga: Termahal</option>
-            </select>
-        </div>
-        
-        <div class="grid-produk" id="list">
-            <p style="text-align:center; grid-column: span 2; padding:20px;">Menyelaraskan etalase...</p>
-        </div>
-    </div>
-
-    <div class="checkout-panel" id="checkout-kasir">
-        <div class="checkout-container">
-            <div class="panel-left">
-                <input type="text" id="buyer-nama" class="input-buyer" placeholder="Nama Pemesan">
-                <input type="tel" id="buyer-wa" class="input-buyer" placeholder="No. WA">
-                <textarea id="buyer-alamat" class="input-buyer" rows="2" placeholder="Alamat lengkap"></textarea>
-                <button class="btn-reset" onclick="resetKeranjang()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
-            </div>
-            <div class="panel-right">
-                <ul id="summary-items" class="summary-list"></ul>
-                <div class="total-box"><span>Total:</span> <span id="summary-total">Rp 0</span></div>
-                <button class="btn-wa" onclick="kirimKeDatabase()">
-                    <i class="fa-solid fa-paper-plane"></i> Kirim Pesanan
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="nav-bottom">
-        <button class="nav-item active" onclick="pindahTab('home')"><i class="fa-solid fa-house"></i>Home</button>
-        <button class="nav-item qris-jumbo" onclick="pindahTab('qris')"><i class="fa-solid fa-qrcode"></i>QRIS</button>
-        <button class="nav-item" onclick="pindahTab('panduan')"><i class="fa-solid fa-book-open"></i>Panduan</button>
-    </div>
-</div>
-
-<script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
-    let produkData = [], keranjang = {}, kategoriTerpilih = 'Semua';
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        await muatDataToko();
-    });
-
-    async function muatDataToko() {
-        try {
-            const res = await fetch(API_URL);
-            const data = await res.json();
-            produkData = data;
-            localStorage.setItem('duta_cache', JSON.stringify(data));
-        } catch (e) {
-            produkData = JSON.parse(localStorage.getItem('duta_cache') || "[]");
-        }
-        jalankanFilterDanSortir();
-    }
-
-    // Fungsi jalankanFilterDanSortir, renderDaftarProdukKeHTML, dll 
-    // tetap gunakan logika Anda yang sebelumnya, namun pastikan 
-    // pemanggilan API menggunakan const API_URL di atas.
-
-    async function kirimKeDatabase() {
-        const payload = {
-            nama: document.getElementById('buyer-nama').value,
-            wa: document.getElementById('buyer-wa').value,
-            alamat: document.getElementById('buyer-alamat').value,
-            total: document.getElementById('summary-total').innerText
-        };
-
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(payload)
-            });
-            alert("Pesanan terkirim!");
-            resetKeranjang();
-        } catch (e) {
-            alert("Gagal terhubung ke server.");
-        }
-    }
-</script>
+    <!-- Link ke file JS -->
+    <script src="app.js"></script>
 </body>
 </html>
