@@ -1,54 +1,284 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
+const API =
+"https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
 
-async function loadProduk() {
-    const container = document.getElementById('produk-container');
-    try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error("Gagal ambil data");
-        const data = await res.json();
-        
-        container.innerHTML = ''; 
-        data.forEach(item => {
-            // Bersihkan harga dari titik agar bisa dihitung (contoh: 3.990 jadi 3990)
-            const hargaBersih = (item.harga || "0").toString().replace(/\./g, '').replace(/[^0-9]/g, '');
-            
-            container.innerHTML += `
-                <div class="card">
-                    <span class="discount-badge">${item.diskon || '-5%'}</span>
-                    <img src="${item.foto}" alt="${item.nama}" onerror="this.src='https://via.placeholder.com/150'">
-                    <div class="card-title">${item.nama || 'Produk'}</div>
-                    <div class="price-container">
-                        <span class="old-price">Rp ${item.harga_coret || ''}</span>
-                        <span class="final-price">Rp ${item.harga || '0'}</span>
-                    </div>
-                    <div class="qty-control">
-                        <button onclick="ubahQty(this, -1)">-</button>
-                        <input type="number" value="0" readonly class="qty-input" data-harga="${hargaBersih}">
-                        <button onclick="ubahQty(this, 1)">+</button>
-                    </div>
-                    <button class="btn-order">Klik Order</button>
-                </div>
-            `;
-        });
-    } catch(e) {
-        console.error("Error:", e);
-        container.innerHTML = "<p>Gagal memuat produk. Cek koneksi internet Anda.</p>";
-    }
+const WA =
+"6283152925577";
+
+let products=[];
+let cart=[];
+
+loadProducts();
+
+async function loadProducts(){
+
+const res = await fetch(API);
+
+products = await res.json();
+
+renderProducts(products);
+
 }
 
-function ubahQty(btn, change) {
-    let input = btn.parentElement.querySelector('.qty-input');
-    let val = parseInt(input.value) + change;
-    input.value = val < 0 ? 0 : val;
-    
-    let total = 0;
-    document.querySelectorAll('.qty-input').forEach(input => {
-        // Ambil data-harga yang sudah bersih
-        let harga = parseInt(input.dataset.harga) || 0;
-        let qty = parseInt(input.value) || 0;
-        total += (harga * qty);
-    });
-    document.getElementById('total-harga').innerText = 'Rp ' + total.toLocaleString('id-ID');
+function renderProducts(data){
+
+const container =
+document.getElementById("products");
+
+container.innerHTML="";
+
+data.forEach((p,index)=>{
+
+const harga =
+Number(p.Harga || p[" Harga"] || 0);
+
+const diskon =
+Number(p.Diskon || p[" Diskon"] || 0);
+
+const stok =
+p.Stok || p[" Stok"] || 0;
+
+const finalPrice =
+Math.round(
+harga - (harga*diskon/100)
+);
+
+container.innerHTML += `
+
+<div class="card">
+
+<div class="badge">
+-${diskon}%
+</div>
+
+<img
+class="slider"
+loading="lazy"
+src="${p.gambar1}">
+
+<div class="nama">
+${p.Barang}
+</div>
+
+<div class="kategori">
+${p.Kategori}
+</div>
+
+<div class="price-old">
+Rp ${harga.toLocaleString("id-ID")}
+</div>
+
+<div class="price">
+Rp ${finalPrice.toLocaleString("id-ID")}
+</div>
+
+<div class="stock">
+Stok : ${stok}
+</div>
+
+<div class="qty">
+
+<button onclick="minus(${index})">-</button>
+
+<input
+id="qty${index}"
+value="1">
+
+<button onclick="plus(${index})">+</button>
+
+</div>
+
+<button
+class="order-btn"
+onclick="addCart(${index})">
+
+📞 Klik Order
+
+</button>
+
+</div>
+
+`;
+
+});
+
 }
 
-loadProduk();
+function plus(id){
+
+let qty =
+document.getElementById(
+"qty"+id
+);
+
+qty.value =
+parseInt(qty.value)+1;
+
+}
+
+function minus(id){
+
+let qty =
+document.getElementById(
+"qty"+id
+);
+
+if(qty.value>1)
+qty.value--;
+
+}
+
+function addCart(index){
+
+const qty =
+parseInt(
+document.getElementById(
+"qty"+index
+).value
+);
+
+for(let i=0;i<qty;i++){
+
+cart.push(products[index]);
+
+}
+
+updateCart();
+
+localStorage.setItem(
+"duta_cart",
+JSON.stringify(cart)
+);
+
+}
+
+function updateCart(){
+
+let total=0;
+
+cart.forEach(item=>{
+
+const harga =
+Number(item.Harga);
+
+const diskon =
+Number(item.Diskon);
+
+total +=
+harga - (harga*diskon/100);
+
+});
+
+document.getElementById(
+"cartCount"
+).innerText =
+cart.length;
+
+document.getElementById(
+"total"
+).innerText =
+"Rp "+
+Math.round(total)
+.toLocaleString("id-ID");
+
+}
+
+function searchProduct(){
+
+const key =
+document.getElementById(
+"search"
+).value.toLowerCase();
+
+const result =
+products.filter(item=>
+
+(item.Barang || "")
+.toLowerCase()
+.includes(key)
+
+||
+
+(item.Kategori || "")
+.toLowerCase()
+.includes(key)
+
+);
+
+renderProducts(result);
+
+}
+
+function checkoutWA(){
+
+if(cart.length===0){
+
+alert("Keranjang kosong");
+
+return;
+
+}
+
+let pesan =
+"Halo Admin DUTAKITA ELECTRONIC%0A%0A";
+
+pesan +=
+"Pesanan Saya:%0A%0A";
+
+let total=0;
+
+cart.forEach((item,i)=>{
+
+const harga =
+Number(item.Harga);
+
+const diskon =
+Number(item.Diskon);
+
+const finalPrice =
+harga-(harga*diskon/100);
+
+total += finalPrice;
+
+pesan +=
+`${i+1}. ${item.Barang}%0A`;
+
+pesan +=
+`Rp ${finalPrice}%0A%0A`;
+
+});
+
+pesan +=
+`Total : Rp ${Math.round(total)}%0A%0A`;
+
+pesan +=
+`Nama : %0A`;
+
+pesan +=
+`Alamat :`;
+
+window.open(
+`https://wa.me/${WA}?text=${pesan}`
+);
+
+}
+
+const saved =
+localStorage.getItem(
+"duta_cart"
+);
+
+if(saved){
+
+cart =
+JSON.parse(saved);
+
+updateCart();
+
+}
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker
+.register("service-worker.js");
+
+}
