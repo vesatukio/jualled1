@@ -18,22 +18,37 @@ async function loadProducts() {
 function renderProducts(data) {
     const container = document.getElementById("products");
     container.innerHTML = "";
+    
     data.forEach((p, index) => {
+        const harga = Number(p.Harga || p[" Harga"] || 0);
+        const diskon = Number(p.Diskon || p[" Diskon"] || 0);
         const stok = Number(p.Stok || p[" Stok"] || 0);
-        const isOutOfStock = stok <= 0; // Cek apakah stok habis
+        const finalPrice = Math.round(harga - (harga * diskon / 100));
         
+        const isHabis = stok <= 0;
+
+        // Kita buat tombol sebagai variabel terpisah agar rapi
+        const buttonHTML = isHabis 
+            ? `<button class="order-btn" style="background:#999; cursor:not-allowed;" disabled>Stok Habis</button>`
+            : `<button class="order-btn" onclick="addCart(${index})">📞 Klik Order</button>`;
+
         container.innerHTML += `
             <div class="card">
-                <div class="badge">-${p.Diskon}%</div>
+                <div class="badge">-${diskon}%</div>
                 <img class="slider" loading="lazy" src="${p.gambar1}">
                 <div class="nama">${p.Barang}</div>
-                <div class="stock" style="color: ${isOutOfStock ? 'red' : '#666'}">
-                    Stok : ${isOutOfStock ? 'Habis' : stok}
+                <div class="kategori">${p.Kategori}</div>
+                <div class="price-old">Rp ${harga.toLocaleString("id-ID")}</div>
+                <div class="price">Rp ${finalPrice.toLocaleString("id-ID")}</div>
+                <div class="stock" style="color: ${isHabis ? 'red' : '#666'}">
+                    Stok : ${isHabis ? 'Habis' : stok}
                 </div>
-                ${isOutOfStock ? 
-                    `<button class="order-btn" style="background:#ccc; cursor:not-allowed;" disabled>Stok Habis</button>` : 
-                    `<button class="order-btn" onclick="addCart(${index})">📞 Klik Order</button>`
-                }
+                <div class="qty">
+                    <button onclick="minus(${index})">-</button>
+                    <input id="qty${index}" value="1" readonly>
+                    <button onclick="plus(${index})">+</button>
+                </div>
+                ${buttonHTML}
             </div>`;
     });
 }
