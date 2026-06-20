@@ -14,6 +14,10 @@ async function loadProducts() {
     try {
         const res = await fetch(API);
         products = await res.json();
+        
+        // Panggil fungsi untuk mengisi menu kategori
+        setupCategories(products); 
+        
         renderProducts(products);
     } catch (e) {
         console.error("Gagal memuat produk:", e);
@@ -126,10 +130,13 @@ async function submitOrder() {
 // Panggil fungsi ini setelah data berhasil dimuat di loadProducts()
 function setupCategories(data) {
     const container = document.getElementById("categoryFilter");
-    const categories = ["Semua", ...new Set(data.map(p => p.Kategori || "Lainnya"))];
+    if (!container) return; // Mencegah error jika div tidak ditemukan
+
+    // Mengambil kategori unik dan membersihkan spasi tambahan
+    const categories = ["Semua", ...new Set(data.map(p => (p.Kategori || "").trim() || "Lainnya"))];
     
     container.innerHTML = categories.map(cat => 
-        `<button onclick="filterProduct('${cat}')">${cat}</button>`
+        `<button onclick="filterProduct('${cat}')" class="${cat === 'Semua' ? 'active' : ''}">${cat}</button>`
     ).join("");
 }
 
@@ -137,11 +144,11 @@ function setupCategories(data) {
 function filterProduct(kategori) {
     const filtered = kategori === 'Semua' 
         ? products 
-        : products.filter(p => (p.Kategori || "Lainnya") === kategori);
+        : products.filter(p => (p.Kategori || "").trim() === kategori);
     
     renderProducts(filtered);
     
-    // Update active class pada tombol
+    // Update tombol aktif
     document.querySelectorAll('.category-filter button').forEach(btn => {
         btn.classList.toggle('active', btn.innerText === kategori);
     });
