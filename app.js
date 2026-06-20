@@ -125,3 +125,24 @@ if (saved) {
     cart = JSON.parse(saved);
     updateCart();
 }
+function resetCart() {
+    console.log("Tombol Reset Ditekan"); // Jika muncul di console, berarti berhasil
+    if (confirm('Hapus semua isi keranjang?')) {
+        cart = [];
+        localStorage.removeItem("duta_cart");
+        updateCart();
+        alert('Keranjang berhasil dikosongkan.');
+    }
+}
+
+async function submitOrder() {
+    console.log("Tombol Kirim Ditekan"); // Jika muncul di console, berarti berhasil
+    
+    const nama = document.getElementById('nama').value;
+    const wa = document.getElementById('wa').value;
+    const alamat = document.getElementById('alamat').value;
+
+    if (!nama || !wa || !alamat) return alert("Lengkapi data Nama, WA, dan Alamat!");
+
+    // ... sisa kode fetch Anda tetap sama ...
+}
