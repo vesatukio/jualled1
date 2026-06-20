@@ -4,43 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digibhub Store</title>
-    
-    <!-- Link ke file CSS -->
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Manifest untuk PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
 </head>
 <body>
 
-    <!-- Header -->
     <header>
         <h1>Digibhub Store</h1>
         <input type="text" id="search" placeholder="Cari produk..." onkeyup="filterProduk()">
     </header>
 
-    <!-- Teks Berjalan -->
-    <marquee behavior="scroll" direction="left" class="marquee-text">
-        Selamat datang di Digibhub! Stok terbatas, segera order sebelum kehabisan!
-    </marquee>
-
-    <!-- Kontainer Produk -->
     <div class="product-grid" id="product-container">
-        <!-- Produk akan muncul di sini secara otomatis dari app.js -->
-        <p>Memuat produk...</p>
-    </div>
+        </div>
 
-    <!-- Script PWA -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log('Service Worker terdaftar'))
-                .catch(err => console.log('Gagal daftar:', err));
-        }
-    </script>
-    
-    <!-- Link ke file JS -->
     <script src="app.js"></script>
 </body>
 </html>
