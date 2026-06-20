@@ -124,3 +124,26 @@ async function submitOrder() {
         alert("Gagal terhubung.");
     }
 }
+// Panggil fungsi ini setelah data berhasil dimuat di loadProducts()
+function setupCategories(data) {
+    const container = document.getElementById("categoryFilter");
+    const categories = ["Semua", ...new Set(data.map(p => p.Kategori || "Lainnya"))];
+    
+    container.innerHTML = categories.map(cat => 
+        `<button onclick="filterProduct('${cat}')">${cat}</button>`
+    ).join("");
+}
+
+// Fungsi untuk memfilter produk
+function filterProduct(kategori) {
+    const filtered = kategori === 'Semua' 
+        ? products 
+        : products.filter(p => (p.Kategori || "Lainnya") === kategori);
+    
+    renderProducts(filtered);
+    
+    // Update active class pada tombol
+    document.querySelectorAll('.category-filter button').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText === kategori);
+    });
+}
