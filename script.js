@@ -1,37 +1,43 @@
-function updateQty(btn, change) {
-    let input = btn.parentElement.querySelector('.qty-input');
-    let val = parseInt(input.value) + change;
-    if (val < 0) val = 0;
-    input.value = val;
-    hitungTotal();
+// URL data Anda
+const API_URL = "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
+
+// Memuat data saat website terbuka
+async function loadProduk() {
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json(); // Data dalam bentuk array
+        
+        const grid = document.querySelector('.produk-grid');
+        grid.innerHTML = ''; // Kosongkan grid sebelum diisi
+
+        data.forEach(item => {
+            // Membuat elemen kartu
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="discount-badge">-5%</div>
+                <img src="${item.foto}" alt="${item.nama}">
+                <div class="card-body">
+                    <p class="brand">Duta Terang LED</p>
+                    <h3 class="card-title">${item.nama}</h3>
+                    <div class="price-box">
+                        <span class="old-price">Rp ${item.harga_coret}</span>
+                        <span class="price">Rp ${item.harga}</span>
+                    </div>
+                    <div class="qty-group">
+                        <button onclick="ubahQty(this, -1)">-</button>
+                        <input type="number" value="0" class="qty-input" readonly>
+                        <button onclick="ubahQty(this, 1)">+</button>
+                    </div>
+                    <button class="order-btn">Klik Order</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    } catch (error) {
+        console.error("Gagal mengambil data:", error);
+    }
 }
 
-function hitungTotal() {
-    let total = 0;
-    document.querySelectorAll('.card').forEach(card => {
-        let harga = parseInt(card.querySelector('.final-price').innerText.replace(/[^0-9]/g, ''));
-        let qty = parseInt(card.querySelector('.qty-input').value);
-        total += (harga * qty);
-    });
-    document.getElementById('total-harga').innerText = 'Rp ' + total.toLocaleString('id-ID');
-}
-
-function sendToWhatsApp() {
-    let pesan = "Halo, saya ingin memesan:\n";
-    let adaBarang = false;
-    
-    document.querySelectorAll('.card').forEach(card => {
-        let qty = parseInt(card.querySelector('.qty-input').value);
-        if (qty > 0) {
-            let nama = card.querySelector('.card-title').innerText;
-            pesan += `- ${nama} (${qty}x)\n`;
-            adaBarang = true;
-        }
-    });
-
-    if (!adaBarang) return alert("Keranjang masih kosong!");
-    
-    pesan += "\nTotal: " + document.getElementById('total-harga').innerText;
-    let urlWA = "https://wa.me/6283157925577?text=" + encodeURIComponent(pesan);
-    window.open(urlWA, '_blank');
-}
+// Panggil fungsi
+loadProduk();
