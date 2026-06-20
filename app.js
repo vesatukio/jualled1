@@ -144,43 +144,36 @@ async function submitOrder() {
 
     if (!nama || !wa || !alamat) return alert("Lengkapi data Nama, WA, dan Alamat!");
 
-    // Kita kirim per item agar sesuai dengan logika Apps Script Anda
-    // Catatan: Jika ingin mengirim banyak produk sekaligus, 
-    // Apps Script Anda perlu diubah untuk looping.
-    // Untuk saat ini, kita kirim produk pertama sebagai contoh:
-    const item = cart[0]; 
-
+    // Menggabungkan data menjadi satu string agar mudah diproses Apps Script
     const payload = {
-        action: "order", // WAJIB ADA karena dicek di if(data.action !== "order")
+        action: "order",
         nama: nama,
         wa: wa,
         alamat: alamat,
-        produk: item.Barang,
-        harga: item.Harga,
-        qty: cart.length // Contoh jumlah qty
+        produk: cart.map(i => i.Barang).join(", "),
+        harga: cart.reduce((total, item) => total + Number(item.Harga), 0),
+        qty: cart.length
     };
 
     alert("Mengirim pesanan...");
 
     try {
-        const response = await fetch(API, {
+        // Menggunakan mode no-cors untuk memastikan permintaan keluar
+        await fetch(API, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            mode: "no-cors",
             body: JSON.stringify(payload)
         });
         
-        const result = await response.json();
-        if(result.success) {
-            alert("Pesanan berhasil dikirim!");
-            cart = [];
-            localStorage.removeItem("duta_cart");
-            updateCart();
-            document.getElementById('checkout-form').close();
-        } else {
-            alert("Gagal: " + result.message);
-        }
+        // Karena no-cors, kita tidak bisa membaca respon, 
+        // tapi kita asumsikan berhasil jika tidak ada error
+        alert("Pesanan berhasil dikirim!");
+        cart = [];
+        localStorage.removeItem("duta_cart");
+        updateCart();
+        document.getElementById('checkout-form').close();
     } catch (error) {
-        alert("Gagal mengirim, periksa koneksi.");
         console.error(error);
+        alert("Gagal terhubung ke server. Pastikan URL API benar.");
     }
 }
