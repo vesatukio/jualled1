@@ -255,18 +255,19 @@ header{
         font-size:11px;
     }
 
-    .qty{
-        gap:4px;
+    .qty {
+        gap: 8px; /* Ditingkatkan dari 4px agar tombol tidak terlalu rapat */
+        margin-top: 12px;
+    }
+    .qty button {
+        width: 40px;  /* Ditingkatkan dari 26px */
+        height: 40px; /* Ditingkatkan dari 26px */
+        font-size: 18px; /* Menambah ukuran simbol + dan - agar terlihat jelas */
     }
 
-    .qty button{
-        width:26px;
-        height:26px;
-    }
-
-    .qty input{
-        width:32px;
-        height:26px;
+    .qty input {
+        width: 45px;  /* Menyesuaikan agar proporsional dengan tombol */
+        height: 40px; /* Disesuaikan dengan tinggi tombol */
     }
 
     .order-btn{
