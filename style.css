@@ -1,268 +1,46 @@
+/* --- Tampilan Modern & Bersih --- */
 :root {
-    --primary: #00bcd4; 
-    --pink: #e91e63; 
-    --bg: #f5f6f8;
-    --text: #222;
-    --danger: #ff4d4d;
-    --success: #25D366;
+    --primary: #2563eb; /* Biru Profesional */
+    --pink: #db2777;
+    --bg: #f8fafc;
+    --text: #1e293b;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #e2e8f0; 
-    color: var(--text); 
-    margin: 0; 
-    padding: 0;
-    display: flex;
-    justify-content: center;
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; }
+
+/* --- Header & Banner --- */
+header { background: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+.brand-title { font-weight: 800; font-size: 18px; }
+.banner-wrapper { position: relative; overflow: hidden; margin: 10px; border-radius: 12px; height: 160px; }
+.banner-slider { display: flex; transition: transform 0.5s ease; height: 100%; }
+.banner-slider img { width: 100%; height: 100%; object-fit: cover; }
+
+/* --- Search & Filter --- */
+.search-container { position: absolute; bottom: 10px; left: 10px; right: 10px; background: white; border-radius: 20px; padding: 8px 15px; display: flex; align-items: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+.search-input { border: none; outline: none; width: 100%; margin-left: 10px; }
+
+/* --- Grid Produk --- */
+.grid-produk { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+.product-card { background: #fff; border-radius: 12px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.prod-img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+
+/* --- Panel Kasir (Sticky Bottom) --- */
+.checkout-panel { 
+    display: none; /* Sembunyi jika keranjang kosong */
+    position: fixed; bottom: 60px; left: 0; right: 0; 
+    background: #fff; padding: 15px; border-top: 2px solid var(--primary);
+    box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.1);
 }
+.checkout-panel.active { display: block; }
 
-/* CONTAINER UTAMA */
-.app-container {
-    width: 100%;
-    max-width: 500px;
-    background: var(--bg);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    padding-bottom: 280px; 
-    box-sizing: border-box;
+.input-buyer { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+.btn-wa { width: 100%; padding: 12px; background: #22c55e; color: white; border: none; border-radius: 8px; font-weight: bold; }
+
+/* --- Navigasi Bawah --- */
+.nav-bottom { 
+    position: fixed; bottom: 0; left: 0; right: 0; 
+    background: #fff; display: flex; justify-content: space-around; 
+    padding: 10px; border-top: 1px solid #e2e8f0; 
 }
-
-.container { 
-    padding: 8px; 
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* Gaya Navigasi Atas / Header Baru */
-header { 
-    background: #fff; 
-    padding: 12px 15px; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    border-bottom: 1px solid #e2e8f0;
-}
-.brand-title { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
-.brand-title span { color: var(--pink); }
-
-/* Gaya Kustomisasi Teks Berjalan Promo */
-.marquee-container {
-    background: #fff3f8;
-    border-bottom: 1px solid #fce7f3;
-    padding: 6px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--pink);
-    display: flex;
-    align-items: center;
-}
-.marquee-container marquee {
-    margin-left: 6px;
-}
-
-/* Banner Slider Bergilir + Kotak Pencarian di Tengah */
-.banner-wrapper { 
-    position: relative; 
-    width: 100%; 
-    overflow: hidden; 
-    border-radius: 12px; 
-    margin: 8px 0; 
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
-}
-.banner-slider { display: flex; transition: transform 0.5s ease-in-out; width: 100%; }
-.banner-slider img { width: 100%; flex-shrink: 0; aspect-ratio: 21 / 9; object-fit: cover; background: #fafafa; }
-.banner-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 5; }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
-.dot.active { background: #fff; width: 12px; border-radius: 4px; }
-
-/* KOTAK PENCARIAN DI TENGAH BANNER */
-.search-container {
-    position: absolute;
-    top: 20%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 95%;
-    z-index: 10;
-}
-.search-input {
-    width: 100%;
-    padding: 8px 12px 8px 35px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 20px;
-    font-size: 12px;
-    outline: none;
-    box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s;
-    font-weight: 500;
-}
-.search-input:focus {
-    border-color: var(--primary);
-    background: #ffffff;
-    box-shadow: 0 4px 20px rgba(0, 188, 212, 0.3);
-}
-.search-container i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #64748b;
-    font-size: 13px;
-}
-
-/* Kategori WARNA-WARNI KINI BISA DIGESER LEBIH RAPAT */
-.cat-container { 
-    display: flex; 
-    flex-wrap: nowrap;          /* Memaksa semua tombol tetap satu baris lurus ke kanan */
-    gap: 6px; 
-    overflow-x: auto;           /* Mengaktifkan scroll horizontal/geser kanan-kiri */
-    overflow-y: hidden;         /* Mengunci scroll vertikal agar tidak berantakan */
-    padding: 6px 4px 8px; 
-    background: transparent;
-    white-space: nowrap;
-    width: 100%;
-    box-sizing: border-box;
-    -webkit-overflow-scrolling: touch; /* Optimasi geser halus di HP (iOS & Android) */
-}
-
-/* Menyembunyikan scrollbar bawaan browser tapi fungsi geser tetap aktif */
-.cat-container::-webkit-scrollbar { 
-    display: none !important; 
-}
-.cat-container { 
-    -ms-overflow-style: none !important; 
-    scrollbar-width: none !important; 
-}
-
-.cat-btn { 
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 14px; 
-    border-radius: 20px; 
-    border: none; 
-    font-weight: bold; 
-    font-size: 11px; 
-    cursor: pointer; 
-    white-space: nowrap; 
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04); 
-    flex-shrink: 0 !important;  /* Mencegah tombol menyusut/mengkerut agar teks penuh terlihat dan bisa meluap untuk digeser */
-}
-
-/* TAMPILAN FILTER DROPDOWN */
-.filter-container {
-    display: flex;
-    justify-content: flex-end;
-    padding: 0 4px 8px;
-}
-.filter-select {
-    padding: 5px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background-color: white;
-    color: #475569;
-    outline: none;
-    cursor: pointer;
-}
-
-/* RESPONSIVE GRID */
-.grid-produk { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 4px; }
-
-/* Kartu Produk Rapi & Presisi */
-.product-card { 
-    background: #fff; border-radius: 10px; padding: 8px; border: 1px solid #eaeaea; 
-    position: relative; display: flex; flex-direction: column; justify-content: space-between; 
-    box-shadow: 0 1px 4px rgba(0,0,0,0.02); height: 100%; box-sizing: border-box;
-}
-
-/* Galeri Multi-Gambar Mini Dalam Card */
-.img-container { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; background: #fafafa; border: 1px solid #f1f5f9; }
-.galeri-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.3s ease; }
-.prod-img { width: 100%; height: 100%; object-fit: contain; flex-shrink: 0; cursor: zoom-in; }
-
-/* Titik Indikator Gambar Produk */
-.galeri-dots { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 3; }
-.g-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,0.15); cursor: pointer; }
-.g-dot.active { background: var(--primary); }
-
-/* Badges & Share */
-.discount-badge { position: absolute; top: 6px; right: 6px; background: var(--pink); color: white; font-size: 9px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 2; }
-.share-btn { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,0.85); border: none; width: 26px; height: 26px; border-radius: 50%; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); z-index: 2; }
-
-/* Detail Informasi */
-.price-box { margin: 4px 0 6px 0; }
-.price-now { font-weight: 800; color: var(--pink); font-size: 14px; display: block; }
-.price-was { font-size: 10px; color: #94a3b8; text-decoration: line-through; }
-
-/* Tombol Order + - Standby Sejak Awal */
-.order-control { margin-top: auto; display: flex; align-items: center; justify-content: space-between; width: 100%; height: 30px; background: #f1f5f9; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1; }
-.btn-qty { background: #cbd5e1; border: none; width: 32px; height: 100%; font-weight: bold; font-size: 16px; cursor: pointer; color: #1e293b; }
-.qty-indicator { font-weight: bold; font-size: 14px; color: var(--text); }
-
-/* Panel Kasir Belanja Bawah */
-.checkout-panel { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(150%); width: 100%; max-width: 500px; background: white; box-shadow: 0 -6px 25px rgba(0,0,0,0.12); border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 12px; z-index: 999; box-sizing: border-box; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
-.checkout-panel.active { transform: translateX(-50%) translateY(0); }
-.checkout-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 10px; }
-.panel-left, .panel-right { display: flex; flex-direction: column; gap: 6px; }
-.panel-right { border-left: 1px dashed #cbd5e1; padding-left: 10px; }
-
-.input-buyer { padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; background: #f8fafc; }
-.summary-list { max-height: 65px; overflow-y: auto; font-size: 11px; color: #475569; margin: 0; padding-left: 15px; }
-.total-box { font-size: 14px; font-weight: 800; display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: auto; }
-
-.btn-wa { background: var(--success); color: white; border: none; padding: 8px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-.btn-reset { background: var(--danger); color: white; border: none; padding: 6px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 11px; }
-
-/* Menu Navigasi Bawah Sticky */
-.nav-bottom { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; height: 60px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-.nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 500; cursor: pointer; background: none; border: none; flex: 1; }
+.nav-item { border: none; background: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; }
 .nav-item.active { color: var(--primary); }
-.nav-item i { font-size: 18px; margin-bottom: 2px; }
-
-/* Tombol QRIS Jumbo */
-.nav-item.qris-jumbo { background: linear-gradient(45deg, var(--pink), #ff477e); color: white; width: 55px; height: 55px; border-radius: 50%; justify-content: center; transform: translateY(-12px); box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3); border: 3px solid white; font-weight: bold; flex: none; }
-.nav-item.qris-jumbo i { font-size: 22px; margin: 0; }
-
-/* Modal Zoom Gambar */
-.modal-zoom { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
-.modal-zoom img { max-width: 90%; max-height: 80%; object-fit: contain; border-radius: 8px; }
-
-/* Floating PWA Install Button */
-.pwa-install-btn { display: none; position: fixed; right: calc(50% - 250px); top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; padding: 10px 6px; border-radius: 8px 0 0 8px; box-shadow: -2px 4px 10px rgba(0,0,0,0.15); z-index: 998; font-size: 10px; font-weight: bold; text-align: center; width: 45px; flex-direction: column; gap: 4px; cursor: pointer; }
-@media (max-width: 500px) { .pwa-install-btn { right: 0; border-radius: 8px 0 0 8px; } }
-/* Container pembungkus agar kolom bisa berdampingan */
-.checkout-wrapper {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-    flex-wrap: wrap;
-    align-items: flex-start;
-}
-
-/* Panel Kanan dibuat Melayang (Sticky) */
-.panel-right {
-    flex: 1;
-    min-width: 300px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-    
-    /* Agar melayang saat di-scroll */
-    position: sticky;
-    top: 20px; 
-}
-
-/* Sembunyikan jika tidak ada barang */
-.hidden {
-    display: none !important;
-}
