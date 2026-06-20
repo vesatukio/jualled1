@@ -1,120 +1,42 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Duta Terang LED</title>
-
-<meta name="description" content="Duta Terang LED - Sparepart Lampu LED, Driver LED, Modul LED dan Aksesoris Lampu">
-
-<link rel="stylesheet" href="style.css">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duta Terang LED</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
+    <div class="produk-grid">
+        <div class="card">
+            <div class="card-container">
+                <span class="discount-badge">-5%</span>
+                <img src="produk1.jpg" alt="Produk">
+            </div>
+            <div class="card-body">
+                <div class="card-title">LED AC FPL 5w D39.6</div>
+                <div class="price-container">
+                    <span class="old-price">Rp 4.200</span>
+                    <span class="final-price">Rp 3.990</span>
+                </div>
+                <div class="qty-control">
+                    <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                    <input type="text" class="qty-input" value="0" readonly>
+                    <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                </div>
+            </div>
+        </div>
+        </div>
 
-<div class="logo">
-<i class="fa-solid fa-lightbulb"></i>
-<span>Duta Terang LED</span>
-</div>
+    <div id="floating-cart">
+        <div>
+            <div style="font-size:12px; color:#666;">Total Belanja:</div>
+            <div id="total-harga" style="font-size:18px; font-weight:700; color:#ee4d2d;">Rp 0</div>
+        </div>
+        <button onclick="sendToWhatsApp()" class="checkout-btn">Checkout WA</button>
+    </div>
 
-<div class="search-box">
-<input type="text" id="searchInput" placeholder="Cari produk...">
-<i class="fa fa-search"></i>
-</div>
-
-</header>
-
-<section class="hero">
-
-<div class="hero-content">
-<h1>Sparepart Lampu LED Lengkap</h1>
-<p>Driver LED, Modul LED, LED AC, PCB dan berbagai aksesoris lampu.</p>
-</div>
-
-</section>
-
-<section id="kategoriContainer" class="kategori"></section>
-
-<section class="produk-section">
-
-<div class="section-title">
-<h2>Daftar Produk</h2>
-</div>
-
-<div id="produkContainer" class="produk-grid">
-
-<div class="loading">
-Memuat Produk...
-</div>
-
-</div>
-
-</section>
-
-<!-- Modal Detail -->
-
-<div id="detailModal" class="modal">
-
-<div class="modal-content">
-
-<span class="close">&times;</span>
-
-<div class="modal-body">
-
-<div class="modal-image">
-<img id="modalImage" src="">
-</div>
-
-<div class="modal-info">
-
-<h2 id="modalNama"></h2>
-
-<div id="modalHarga"></div>
-
-<div id="modalKategori"></div>
-
-<div id="modalStok"></div>
-
-<div class="qty-box">
-
-<button onclick="kurangQty()">-</button>
-
-<input type="number" value="1" min="1" id="qtyInput">
-
-<button onclick="tambahQty()">+</button>
-
-</div>
-
-<button id="orderBtn" class="order-btn">
-Pesan Sekarang
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<footer>
-
-<p>
-© 2026 Duta Terang LED
-</p>
-
-</footer>
-
-<script src="app.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
