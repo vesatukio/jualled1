@@ -282,3 +282,11 @@ navigator.serviceWorker
 .register("service-worker.js");
 
 }
+document.getElementById('reset-btn').addEventListener('click', () => {
+    if(confirm('Hapus semua isi keranjang?')) {
+        // Logika untuk menghapus data keranjang Anda
+        cart = {}; 
+        updateDisplay(); // Fungsi untuk update tampilan total dan summary
+        alert('Keranjang berhasil dikosongkan.');
+    }
+});
