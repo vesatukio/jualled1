@@ -83,7 +83,6 @@ function resetCart() {
     }
 }
 
-// Fungsi Checkout ke Google Sheets
 async function submitOrder() {
     if (cart.length === 0) return alert("Keranjang kosong!");
     
@@ -93,19 +92,32 @@ async function submitOrder() {
 
     if (!nama || !wa || !alamat) return alert("Lengkapi data Nama, WA, dan Alamat!");
 
+    // Mengelompokkan item yang sama: "Nama Produk (Jumlahx)"
+    const groupedOrders = cart.reduce((acc, item) => {
+        acc[item.Barang] = (acc[item.Barang] || 0) + 1;
+        return acc;
+    }, {});
+
+    const orderString = Object.entries(groupedOrders)
+        .map(([nama, jumlah]) => `${nama} (${jumlah}x)`)
+        .join(", ");
+
     const payload = {
-        nama, wa, alamat,
-        order: cart.map(i => i.Barang).join(", "),
-        total: document.getElementById("total").innerText
+        action: "order",
+        nama: nama,
+        wa: wa,
+        alamat: alamat,
+        produk: orderString,
+        harga: cart.reduce((total, item) => total + Number(item.Harga), 0),
+        qty: cart.length
     };
 
     alert("Mengirim pesanan...");
 
     try {
-        await fetch(API, { // Menggunakan API yang sama atau URL Web App Anda
+        await fetch(API, {
             method: "POST",
             mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
         
@@ -115,7 +127,8 @@ async function submitOrder() {
         updateCart();
         document.getElementById('checkout-form').close();
     } catch (error) {
-        alert("Gagal mengirim, periksa koneksi.");
+        console.error(error);
+        alert("Gagal terhubung ke server.");
     }
 }
 
@@ -124,56 +137,4 @@ const saved = localStorage.getItem("duta_cart");
 if (saved) {
     cart = JSON.parse(saved);
     updateCart();
-}
-function resetCart() {
-    console.log("Tombol Reset Ditekan"); // Jika muncul di console, berarti berhasil
-    if (confirm('Hapus semua isi keranjang?')) {
-        cart = [];
-        localStorage.removeItem("duta_cart");
-        updateCart();
-        alert('Keranjang berhasil dikosongkan.');
-    }
-}
-
-async function submitOrder() {
-    if (cart.length === 0) return alert("Keranjang kosong!");
-    
-    const nama = document.getElementById('nama').value;
-    const wa = document.getElementById('wa').value;
-    const alamat = document.getElementById('alamat').value;
-
-    if (!nama || !wa || !alamat) return alert("Lengkapi data Nama, WA, dan Alamat!");
-
-    // Menggabungkan data menjadi satu string agar mudah diproses Apps Script
-    const payload = {
-        action: "order",
-        nama: nama,
-        wa: wa,
-        alamat: alamat,
-        produk: cart.map(i => i.Barang).join(", "),
-        harga: cart.reduce((total, item) => total + Number(item.Harga), 0),
-        qty: cart.length
-    };
-
-    alert("Mengirim pesanan...");
-
-    try {
-        // Menggunakan mode no-cors untuk memastikan permintaan keluar
-        await fetch(API, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify(payload)
-        });
-        
-        // Karena no-cors, kita tidak bisa membaca respon, 
-        // tapi kita asumsikan berhasil jika tidak ada error
-        alert("Pesanan berhasil dikirim!");
-        cart = [];
-        localStorage.removeItem("duta_cart");
-        updateCart();
-        document.getElementById('checkout-form').close();
-    } catch (error) {
-        console.error(error);
-        alert("Gagal terhubung ke server. Pastikan URL API benar.");
-    }
 }
