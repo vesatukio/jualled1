@@ -14,7 +14,7 @@ async function loadProducts(){
 const res = await fetch(API);
 
 products = await res.json();
-
+console.log(products[0]);
 renderProducts(products);
 
 }
