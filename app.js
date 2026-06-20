@@ -284,9 +284,15 @@ navigator.serviceWorker
 }
 document.getElementById('reset-btn').addEventListener('click', () => {
     if(confirm('Hapus semua isi keranjang?')) {
-        // Logika untuk menghapus data keranjang Anda
-        cart = {}; 
-        updateDisplay(); // Fungsi untuk update tampilan total dan summary
+        // 1. Reset ke Array kosong (bukan Object {})
+        cart = []; 
+        
+        // 2. Bersihkan localStorage
+        localStorage.removeItem("duta_cart");
+        
+        // 3. Panggil fungsi updateCart yang sudah ada di script Anda
+        updateCart(); 
+        
         alert('Keranjang berhasil dikosongkan.');
     }
 });
