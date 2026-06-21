@@ -92,7 +92,7 @@ function resetCart() {
         updateCart();
     }
 }
-// 4. Submit Order (VERSI RAPI)
+// 4. Submit Order
 async function submitOrder() {
     if (cart.length === 0) return alert("Keranjang kosong!");
     const nama = document.getElementById('nama').value;
@@ -113,7 +113,7 @@ async function submitOrder() {
         return sum + (h - (h * d / 100));
     }, 0);
 
-    // Payload yang disesuaikan untuk kolom F (harga_satuan) dan H (total_belanja)
+    // Payload yang disesuaikan untuk Google Sheets
     const payload = {
         action: "order",
         nama, wa, alamat,
@@ -134,21 +134,11 @@ async function submitOrder() {
         cart = [];
         localStorage.removeItem("duta_cart");
         updateCart();
-        document.getElementById('checkout-form').close();
+        // Pastikan ID ini ada di HTML Anda
+        const form = document.getElementById('checkout-form');
+        if (form) form.close();
     } catch (e) {
-        alert("Gagal terhubung.");
-    }
-}
-    alert("Mengirim...");
-    try {
-        await fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-        alert("Pesanan berhasil!");
-        cart = [];
-        localStorage.removeItem("duta_cart");
-        updateCart();
-        document.getElementById('checkout-form').close();
-    } catch (e) {
-        alert("Gagal terhubung.");
+        alert("Gagal terhubung: " + e.message);
     }
 }
 // Panggil fungsi ini setelah data berhasil dimuat di loadProducts()
