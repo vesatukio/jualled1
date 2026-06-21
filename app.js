@@ -156,19 +156,15 @@ function filterProduct(kategori) {
 // app.js
 
 function searchProduct() {
-    // Ambil input dari user
+    // 1. Ambil kata kunci dari input
     let input = document.getElementById('search').value.toLowerCase();
     
-    // Ambil semua elemen produk (sesuaikan class-nya)
-    let productItems = document.querySelectorAll('.product-item');
-
-    productItems.forEach(item => {
-        let text = item.innerText.toLowerCase();
-        
-        if (text.includes(input)) {
-            item.style.display = ""; // Tampilkan produk
-        } else {
-            item.style.display = "none"; // Sembunyikan produk
-        }
+    // 2. Filter array 'products' yang sudah ada di memori
+    let filtered = products.filter(p => {
+        // Cek apakah nama barang mengandung kata kunci
+        return (p.Barang || "").toLowerCase().includes(input);
     });
+    
+    // 3. Render ulang tampilan berdasarkan hasil filter
+    renderProducts(filtered);
 }
