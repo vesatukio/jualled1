@@ -156,15 +156,22 @@ function filterProduct(kategori) {
 // app.js
 
 function searchProduct() {
-    // 1. Ambil kata kunci dari input
+    // 1. Ambil input
     let input = document.getElementById('search').value.toLowerCase();
     
-    // 2. Filter array 'products' yang sudah ada di memori
+    // 2. Filter data dari array 'products' yang sudah dimuat
     let filtered = products.filter(p => {
-        // Cek apakah nama barang mengandung kata kunci
-        return (p.Barang || "").toLowerCase().includes(input);
+        // Pastikan nama barang tidak null sebelum melakukan toLowerCase
+        const namaBarang = (p.Barang || "").toLowerCase();
+        return namaBarang.includes(input);
     });
     
-    // 3. Render ulang tampilan berdasarkan hasil filter
+    // 3. Render ulang tampilan dengan hasil filter
     renderProducts(filtered);
+    
+    // 4. (Opsional) Hapus class 'active' dari semua tombol kategori 
+    // agar tampilan bersih saat sedang mencari
+    document.querySelectorAll('.category-filter button').forEach(btn => {
+        btn.classList.remove('active');
+    });
 }
