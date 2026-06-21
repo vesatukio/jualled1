@@ -153,3 +153,22 @@ function filterProduct(kategori) {
         btn.classList.toggle('active', btn.innerText === kategori);
     });
 }
+// app.js
+
+function searchProduct() {
+    // Ambil input dari user
+    let input = document.getElementById('search').value.toLowerCase();
+    
+    // Ambil semua elemen produk (sesuaikan class-nya)
+    let productItems = document.querySelectorAll('.product-item');
+
+    productItems.forEach(item => {
+        let text = item.innerText.toLowerCase();
+        
+        if (text.includes(input)) {
+            item.style.display = ""; // Tampilkan produk
+        } else {
+            item.style.display = "none"; // Sembunyikan produk
+        }
+    });
+}
