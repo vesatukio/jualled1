@@ -111,7 +111,8 @@ async function submitOrder() {
         action: "order",
         nama, wa, alamat,
         produk: Object.entries(groupedOrders).map(([n, j]) => `${n} (${j}x)`).join(", "),
-        harga: document.getElementById("total").innerText,
+        // Ubah bagian harga di payload
+        harga: document.getElementById("total").innerText.replace(/[^0-9]/g, ""),
         qty: cart.length
     };
 
