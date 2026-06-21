@@ -92,6 +92,7 @@ function resetCart() {
         updateCart();
     }
 }
+// 4. Submit Order (VERSI RAPI)
 async function submitOrder() {
     if (cart.length === 0) return alert("Keranjang kosong!");
     const nama = document.getElementById('nama').value;
@@ -105,20 +106,20 @@ async function submitOrder() {
         return acc;
     }, {});
 
-    // 1. Hitung total belanjaan murni (angka)
+    // Hitung total belanjaan murni (angka)
     const totalBelanja = cart.reduce((sum, item) => {
         const h = Number(item.Harga || item["Harga"] || 0);
         const d = Number(item.Diskon || item["Diskon"] || 0);
         return sum + (h - (h * d / 100));
     }, 0);
 
-    // 2. Payload yang disesuaikan untuk kolom F dan H
+    // Payload yang disesuaikan untuk kolom F (harga_satuan) dan H (total_belanja)
     const payload = {
         action: "order",
         nama, wa, alamat,
         produk: Object.entries(groupedOrders).map(([n, j]) => `${n} (${j}x)`).join(", "),
-        harga_satuan: document.getElementById("total").innerText.replace(/[^0-9]/g, ""), // Kolom F
-        total_belanja: Math.round(totalBelanja), // Kolom H
+        harga_satuan: document.getElementById("total").innerText.replace(/[^0-9]/g, ""), 
+        total_belanja: Math.round(totalBelanja), 
         qty: cart.length
     };
 
@@ -130,7 +131,10 @@ async function submitOrder() {
             body: JSON.stringify(payload) 
         });
         alert("Pesanan berhasil!");
-        // ... (sisanya tetap sama)
+        cart = [];
+        localStorage.removeItem("duta_cart");
+        updateCart();
+        document.getElementById('checkout-form').close();
     } catch (e) {
         alert("Gagal terhubung.");
     }
