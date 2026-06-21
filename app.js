@@ -92,8 +92,6 @@ function resetCart() {
         updateCart();
     }
 }
-
-// 4. Submit Order
 async function submitOrder() {
     if (cart.length === 0) return alert("Keranjang kosong!");
     const nama = document.getElementById('nama').value;
@@ -107,15 +105,36 @@ async function submitOrder() {
         return acc;
     }, {});
 
+    // 1. Hitung total belanjaan murni (angka)
+    const totalBelanja = cart.reduce((sum, item) => {
+        const h = Number(item.Harga || item["Harga"] || 0);
+        const d = Number(item.Diskon || item["Diskon"] || 0);
+        return sum + (h - (h * d / 100));
+    }, 0);
+
+    // 2. Payload yang disesuaikan untuk kolom F dan H
     const payload = {
         action: "order",
         nama, wa, alamat,
         produk: Object.entries(groupedOrders).map(([n, j]) => `${n} (${j}x)`).join(", "),
-        // Ubah bagian harga di payload
-        harga: document.getElementById("total").innerText.replace(/[^0-9]/g, ""),
+        harga_satuan: document.getElementById("total").innerText.replace(/[^0-9]/g, ""), // Kolom F
+        total_belanja: Math.round(totalBelanja), // Kolom H
         qty: cart.length
     };
 
+    alert("Mengirim...");
+    try {
+        await fetch(API, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify(payload) 
+        });
+        alert("Pesanan berhasil!");
+        // ... (sisanya tetap sama)
+    } catch (e) {
+        alert("Gagal terhubung.");
+    }
+}
     alert("Mengirim...");
     try {
         await fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
