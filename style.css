@@ -314,3 +314,27 @@ header{
     background: var(--green);
     color: white;
 }
+/* Sembunyikan banner PWA bawaan saat di HP (agar tidak menutupi layar) */
+@media (max-width: 768px) {
+    #pwa-install-banner { display: none !important; }
+}
+
+/* Tombol Instal Khusus Mobile */
+#btn-install-mobile {
+    display: none; /* Default sembunyi di Desktop */
+    position: fixed;
+    bottom: 80px; 
+    right: 20px;
+    z-index: 9999;
+    padding: 12px 20px;
+    background: #1B8F50;
+    color: white;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #btn-install-mobile { display: block; } /* Munculkan di HP */
+}
