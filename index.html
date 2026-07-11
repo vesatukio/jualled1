@@ -91,29 +91,6 @@ Duta LED: Kebutuhan Lampu Anda.
         <button onclick="submitOrder()" style="flex:1; padding: 10px; border-radius: 20px; border: none; background: var(--green); color: white;">Kirim Order</button>
     </div>
 </dialog>
-  <script src="app.js">
-      // Contoh fungsi di file HTML/Script Anda
-function handleUpdateStok(index, stokLama) {
-    // 1. Ambil input dari user (ganti prompt jika perlu)
-    let val = prompt("Masukkan jumlah stok baru:", stokLama);
-    
-    if (val !== null && val !== "") {
-        // 2. Tampilkan status loading jika perlu
-        console.log("Menyimpan ke server...");
-        
-        // 3. Panggil fungsi di Apps Script
-        google.script.run
-            .withSuccessHandler(function() {
-                alert("Stok berhasil diupdate!");
-                // PENTING: Refresh data agar tampilan di browser sinkron dengan sheet
-                loadDataFromSheet(); 
-            })
-            .withFailureHandler(function(err) {
-                alert("Gagal update: " + err);
-            })
-            .updateStokManual(index, parseInt(val));
-    }
-}
-  </script>
+  <script src="app.js"> </script>
 </body>
 </html>
