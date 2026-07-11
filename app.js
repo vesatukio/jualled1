@@ -156,3 +156,51 @@ function searchProduct() {
     const val = document.getElementById('search').value.toLowerCase();
     renderProducts(products.filter(p => (p.Barang || "").toLowerCase().includes(val)));
 }
+// Pastikan variabel isAdmin sudah didefinisikan di atas
+const urlParams = new URLSearchParams(window.location.search);
+const isAdmin = urlParams.get('admin') === 'true';
+
+function renderProducts(data) {
+    const container = document.getElementById("products");
+    container.innerHTML = data.map((p, index) => {
+        // Data dasar
+        const hargaJual = Math.round(Number(p.Harga) - (Number(p.Harga) * Number(p.Diskon) / 100));
+        
+        // Data Admin (Hanya muncul jika ?admin=true)
+        const modal = Number(p.HargaPokok || 0) + Number(p.HargaTambahan || 0);
+        const margin = hargaJual - modal;
+        
+        const adminSection = isAdmin ? `
+            <div style="background:#fff3cd; padding:8px; font-size:11px; border:1px solid #ffeeba; margin-bottom:5px;">
+                <strong>Admin:</strong> Modal Rp${modal.toLocaleString()} | 
+                <span style="color:${margin > 0 ? 'green' : 'red'}">Margin Rp${margin.toLocaleString()}</span>
+            </div>` : '';
+
+        return `
+            <div class="card">
+                ${adminSection}
+                <img src="${p.gambar1}">
+                <div class="nama">${p.Barang}</div>
+                <div class="price">Rp ${hargaJual.toLocaleString()}</div>
+                <button class="order-btn" onclick="addCart(${index})">📞 Order</button>
+            </div>`;
+    }).join("");
+}
+function showAdminDashboard() {
+    const totalOmzet = cart.reduce((sum, item) => {
+        const h = Number(item.Harga);
+        const d = Number(item.Diskon);
+        return sum + (h - (h * d / 100));
+    }, 0);
+
+    const totalModal = cart.reduce((sum, item) => {
+        return sum + (Number(item.HargaPokok || 0) + Number(item.HargaTambahan || 0));
+    }, 0);
+
+    alert(`📊 REKAP KEUNTUNGAN
+    -----------------------
+    Total Omzet : Rp ${totalOmzet.toLocaleString()}
+    Total Modal : Rp ${totalModal.toLocaleString()}
+    -----------------------
+    Bersih      : Rp ${(totalOmzet - totalModal).toLocaleString()}`);
+}
