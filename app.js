@@ -119,35 +119,25 @@ function renderProducts(data) {
         // Dapatkan kalkulasi harga terpadu
         const infoHarga = calculateProductPrice(p);
 
-        // Render Tampilan Admin khusus jika link mengandung ?admin=true
+        // Tampilan Admin (Hanya muncul jika ?admin=true)
         const adminSection = isAdmin ? `
-            <div style="background:#fff3cd; padding:6px; font-size:11px; border:1px solid #ffeeba; margin-bottom:8px; border-radius:5px; text-align:left; color:#333;">
-                <strong>Admin Info:</strong><br>
+            <div style="background:#fff3cd; padding:8px; border:1px solid #ffeeba; margin-bottom:8px; border-radius:5px; text-align:center; font-size:12px;">
+                <strong style="display:block; margin-bottom:5px;">Admin: Info Harga</strong>
                 • Modal: Rp ${infoHarga.modalTotal.toLocaleString("id-ID")}<br>
-                • Untung Bersih: <span style="color:${infoHarga.hargaFinal - infoHarga.modalTotal > 0 ? 'green' : 'red'}; font-weight:bold;">
+                • Untung: <span style="color:${infoHarga.hargaFinal - infoHarga.modalTotal > 0 ? 'green' : 'red'}; font-weight:bold;">
                     Rp ${(infoHarga.hargaFinal - infoHarga.modalTotal).toLocaleString("id-ID")}
                 </span>
+                <hr style="margin:8px 0;">
+                <div style="font-weight:bold; margin-bottom:5px;">Stok: ${stok}</div>
+                <button onclick="updateStokManual(${index}, -1)" style="padding:5px 12px; margin:2px; background:#d9534f; color:white; border:none; border-radius:3px; cursor:pointer;">-1</button>
+                <button onclick="updateStokManual(${index}, 1)" style="padding:5px 12px; margin:2px; background:#5cb85c; color:white; border:none; border-radius:3px; cursor:pointer;">+1</button>
+                <button onclick="updateStok(${index})" style="padding:5px 8px; margin:2px; background:#337ab7; color:white; border:none; border-radius:3px; cursor:pointer;">Set</button>
             </div>` : '';
-        // Di dalam renderProducts, bagian adminSection
-    <div style="background:#fff3cd; padding:8px; border:1px solid #ffeeba; margin-bottom:5px; border-radius:5px; text-align:center;">
-        <strong style="display:block; margin-bottom:5px;">Admin: ${p.Barang}</strong>
-        <div style="font-size:14px; font-weight:bold; margin-bottom:5px;">
-            Stok Sekarang: ${p.Stok}
-        </div>
-        <button onclick="updateStokManual(${index}, -1)" style="padding:5px 15px; margin:2px; background:#d9534f; color:white; border:none; border-radius:3px; cursor:pointer;">-1</button>
-        <button onclick="updateStokManual(${index}, 1)" style="padding:5px 15px; margin:2px; background:#5cb85c; color:white; border:none; border-radius:3px; cursor:pointer;">+1</button>
-        <button onclick="updateStok(${index})" style="padding:5px 10px; margin:2px; background:#337ab7; color:white; border:none; border-radius:3px; cursor:pointer;">Set Manual</button>
-    </div>` : '';
 
-        // Tampilan label diskon jika ada diskon
         const diskonBadge = infoHarga.diskon > 0 ? `<div class="badge">-${infoHarga.diskon}%</div>` : '';
-        
-        // Tampilan harga coret (lama) jika ada diskon
         const oldPriceDisplay = infoHarga.diskon > 0 ? `<div class="price-old">Rp ${infoHarga.hargaDasar.toLocaleString("id-ID")}</div>` : '';
-
-        // Proteksi peringatan teks jika set harga rugi/di bawah modal
         const priceDisplay = infoHarga.isRugi 
-            ? `<div style="color:red; font-weight:bold; font-size:14px; margin: 4px 0;">⚠️ HARGA RUGI: Rp ${infoHarga.hargaFinal.toLocaleString("id-ID")}</div>`
+            ? `<div style="color:red; font-weight:bold; font-size:14px; margin: 4px 0;">⚠️ RUGI: Rp ${infoHarga.hargaFinal.toLocaleString("id-ID")}</div>`
             : `<div class="price">Rp ${infoHarga.hargaFinal.toLocaleString("id-ID")}</div>`;
 
         return `
@@ -173,7 +163,6 @@ function renderProducts(data) {
             </div>`;
     }).join("");
 }
-
 function changeQty(index, delta) {
     let input = document.getElementById("qty" + index);
     if (input) {
