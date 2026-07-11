@@ -5,6 +5,46 @@ if ('serviceWorker' in navigator) {
       .catch((err) => console.log('Service Worker gagal', err));
   });
 }
+
+let deferredPrompt;
+const banner = document.getElementById('pwa-install-banner');
+const btnInstall = document.getElementById('btnInstall');
+const btnClose = document.getElementById('btnClose');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Cek apakah user sudah pernah menekan tombol tutup
+    if (localStorage.getItem('pwa-install-closed') !== 'true') {
+        banner.style.display = 'block';
+    }
+});
+
+// Aksi klik Install
+btnInstall.addEventListener('click', () => {
+    banner.style.display = 'none';
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            console.log('User menerima instalasi');
+        }
+        deferredPrompt = null;
+    });
+});
+
+// Aksi klik Tutup (Sembunyikan selama sesi ini)
+btnClose.addEventListener('click', () => {
+    banner.style.display = 'none';
+    // Simpan ke local storage agar tidak muncul lagi setelah ditutup
+    localStorage.setItem('pwa-install-closed', 'true');
+});
+
+// Optional: Jika ingin memunculkan kembali tombol saat tombol "Cek Update/Install" di-klik
+function resetInstallPrompt() {
+    localStorage.removeItem('pwa-install-closed');
+    location.reload(); // Refresh untuk memicu kembali event 'beforeinstallprompt'
+}
 const API = "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
 let products = [];
 let cart = [];
