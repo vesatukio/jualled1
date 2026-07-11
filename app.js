@@ -400,3 +400,21 @@ function updateStok(index) {
         alert("Mohon masukkan angka yang valid!");
     }
 }
+// Di dalam file app.js Anda
+function handleUpdateStok(index, stokLama) {
+    let val = prompt("Masukkan jumlah stok baru:", stokLama);
+    
+    if (val !== null && val !== "") {
+        console.log("Menyimpan ke server...");
+        google.script.run
+            .withSuccessHandler(function() {
+                alert("Stok berhasil diupdate!");
+                // Pastikan fungsi ini ada di app.js untuk refresh data
+                loadDataFromSheet(); 
+            })
+            .withFailureHandler(function(err) {
+                alert("Gagal update: " + err);
+            })
+            .updateStokManual(index, parseInt(val));
+    }
+}
