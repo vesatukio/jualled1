@@ -1,12 +1,13 @@
-// --- 1. SERVICE WORKER & PWA INSTALL ---
+// 1. Registrasi Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW terdaftar'))
+            .then(reg => console.log('SW terdaftar:', reg.scope))
             .catch(err => console.log('SW gagal:', err));
     });
 }
 
+// 2. Logika PWA Install dengan proteksi elemen
 let deferredPrompt;
 const banner = document.getElementById('pwa-install-banner');
 const btnInstall = document.getElementById('btnInstall');
@@ -15,16 +16,22 @@ const btnClose = document.getElementById('btnClose');
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    if (localStorage.getItem('pwa-install-closed') !== 'true' && banner) {
+    
+    // Cek apakah banner ada sebelum mengubah display
+    if (banner && localStorage.getItem('pwa-install-closed') !== 'true') {
         banner.style.display = 'block';
     }
 });
 
+// Aksi klik Install dengan proteksi
 if (btnInstall) {
     btnInstall.addEventListener('click', () => {
         if (deferredPrompt) {
             deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(() => {
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User menerima instalasi');
+                }
                 deferredPrompt = null;
                 if (banner) banner.style.display = 'none';
             });
@@ -32,6 +39,7 @@ if (btnInstall) {
     });
 }
 
+// Aksi klik Tutup dengan proteksi
 if (btnClose) {
     btnClose.addEventListener('click', () => {
         if (banner) banner.style.display = 'none';
