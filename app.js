@@ -128,6 +128,16 @@ function renderProducts(data) {
                     Rp ${(infoHarga.hargaFinal - infoHarga.modalTotal).toLocaleString("id-ID")}
                 </span>
             </div>` : '';
+        // Di dalam renderProducts, bagian adminSection
+    <div style="background:#fff3cd; padding:8px; border:1px solid #ffeeba; margin-bottom:5px; border-radius:5px; text-align:center;">
+        <strong style="display:block; margin-bottom:5px;">Admin: ${p.Barang}</strong>
+        <div style="font-size:14px; font-weight:bold; margin-bottom:5px;">
+            Stok Sekarang: ${p.Stok}
+        </div>
+        <button onclick="updateStokManual(${index}, -1)" style="padding:5px 15px; margin:2px; background:#d9534f; color:white; border:none; border-radius:3px; cursor:pointer;">-1</button>
+        <button onclick="updateStokManual(${index}, 1)" style="padding:5px 15px; margin:2px; background:#5cb85c; color:white; border:none; border-radius:3px; cursor:pointer;">+1</button>
+        <button onclick="updateStok(${index})" style="padding:5px 10px; margin:2px; background:#337ab7; color:white; border:none; border-radius:3px; cursor:pointer;">Set Manual</button>
+    </div>` : '';
 
         // Tampilan label diskon jika ada diskon
         const diskonBadge = infoHarga.diskon > 0 ? `<div class="badge">-${infoHarga.diskon}%</div>` : '';
