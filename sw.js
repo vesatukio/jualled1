@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dutakita-v1';
+const CACHE_NAME = 'dutakita-v2';
 const assets = [
   '/',
   '/index.html',
