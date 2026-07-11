@@ -381,3 +381,28 @@ function updateStokManual(index, change) {
         });
     }
 }
+// Fungsi untuk Update Stok Manual (Input Angka Langsung)
+function updateStok(index) {
+    const p = products[index];
+    const newStok = prompt(`Masukkan jumlah stok baru untuk ${p.Barang}:`, p.Stok);
+    
+    if (newStok !== null && !isNaN(newStok)) {
+        const payload = {
+            action: "updateStok",
+            ID: p.ID,
+            Stok: Number(newStok)
+        };
+
+        fetch(API, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        }).then(() => {
+            alert("Stok berhasil diupdate ke " + newStok);
+            location.reload(); // Refresh halaman agar data baru muncul
+        }).catch(err => {
+            alert("Gagal update, silakan coba lagi.");
+        });
+    } else if (newStok !== null) {
+        alert("Mohon masukkan angka yang valid!");
+    }
+}
