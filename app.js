@@ -71,38 +71,24 @@ async function loadProducts() {
 }
 
 function calculateProductPrice(p) {
-    // Kita cek semua variasi penulisan yang mungkin ada di data JSON Anda
-    const pokok = Number(
-        p.HargaPokok || 
-        p["HargaPokok"] || 
-        p["harga pokok"] || 
-        p["Harga Pokok"] || 0
-    );
-
-    const tambahan = Number(
-        p.HargaTambahan || 
-        p["HargaTambahan"] || 
-        p["harga tambahan"] || 
-        p["Harga Tambahan"] || 0
-    );
-
-    const diskon = Number(p.Diskon || p[" Diskon"] || p["Diskon"] || 0);
-    const modalTotal = pokok + tambahan;
-
-    // Debugging: Buka Inspect Element > Console untuk melihat apa yang terbaca
-    console.log("Barang:", p.Barang, "| Pokok Terbaca:", pokok, "| Tambahan Terbaca:", tambahan);
-
-    let hargaDasar = Number(p.Harga || p[" Harga"] || p["Harga"] || 0);
+    // LANGSUNG ambil dari kolom D (HargaJual) di Spreadsheet
+    const hargaJual = Number(p.HargaJual || p.Harga || 0); 
     
-    // RUMUS OTOMATIS: Gunakan modal jika tersedia
-    if (modalTotal > 0) {
-        hargaDasar = modalTotal * 1.20; 
-    }
+    // Ambil HargaPokok (Kolom G) untuk info modal
+    const modalTotal = Number(p.HargaPokok || 0);
+    
+    // Ambil Diskon (Kolom E)
+    const diskon = Number(p.Diskon || 0);
 
-    const hargaFinal = Math.round(hargaDasar - (hargaDasar * diskon / 100));
-    const isRugi = modalTotal > 0 && hargaFinal < modalTotal;
+    // Hitung harga setelah diskon
+    const hargaFinal = Math.round(hargaJual - (hargaJual * diskon / 100));
 
-    return { hargaDasar, hargaFinal, modalTotal, diskon, isRugi };
+    return { 
+        hargaDasar: hargaJual, 
+        hargaFinal: hargaFinal, 
+        modalTotal: modalTotal, 
+        diskon: diskon 
+    };
 }
 
 // ==========================================
