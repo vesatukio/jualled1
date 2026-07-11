@@ -343,3 +343,14 @@ function searchProduct() {
     const val = document.getElementById('search').value.toLowerCase();
     renderProducts(products.filter(p => (p.Barang || "").toLowerCase().includes(val)));
 }
+// Tambahkan fungsi ini di app.js untuk mengatur tombol saat mode admin aktif
+window.addEventListener('load', () => {
+    const btnAdmin = document.getElementById('btn-admin-login');
+    if (isAdmin && btnAdmin) {
+        btnAdmin.innerText = "❌ Keluar Admin";
+        btnAdmin.style.background = "#d9534f";
+        btnAdmin.onclick = () => {
+            window.location.href = window.location.pathname; // Kembali ke tampilan biasa
+        };
+    }
+});
