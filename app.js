@@ -354,3 +354,31 @@ window.addEventListener('load', () => {
         };
     }
 });
+function updateStokManual(index, change) {
+    const p = products[index];
+    const currentStok = Number(p.Stok || 0);
+    const newStok = currentStok + change;
+    
+    if (newStok < 0) {
+        alert("Stok tidak bisa kurang dari 0!");
+        return;
+    }
+
+    if (confirm(`Update stok ${p.Barang}?\nStok: ${currentStok} ${change > 0 ? '+' : ''}${change} = ${newStok}`)) {
+        const payload = {
+            action: "updateStok",
+            ID: p.ID,
+            Stok: newStok
+        };
+
+        fetch(API, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        }).then(() => {
+            alert("Stok berhasil diupdate!");
+            location.reload(); // Refresh untuk melihat perubahan
+        }).catch(err => {
+            alert("Gagal update, silakan coba lagi.");
+        });
+    }
+}
