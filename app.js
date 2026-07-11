@@ -70,18 +70,31 @@ async function loadProducts() {
     }
 }
 
-// ==========================================
-// 3. FUNGSI UTAMA PERHITUNGAN HARGA (KONSISTEN)
-// ==========================================
 function calculateProductPrice(p) {
-    const pokok = Number(p.HargaPokok || p["HargaPokok"] || 0);
-    const tambahan = Number(p.HargaTambahan || p["HargaTambahan"] || 0);
+    // Kita cek semua variasi penulisan yang mungkin ada di data JSON Anda
+    const pokok = Number(
+        p.HargaPokok || 
+        p["HargaPokok"] || 
+        p["harga pokok"] || 
+        p["Harga Pokok"] || 0
+    );
+
+    const tambahan = Number(
+        p.HargaTambahan || 
+        p["HargaTambahan"] || 
+        p["harga tambahan"] || 
+        p["Harga Tambahan"] || 0
+    );
+
     const diskon = Number(p.Diskon || p[" Diskon"] || p["Diskon"] || 0);
     const modalTotal = pokok + tambahan;
 
+    // Debugging: Buka Inspect Element > Console untuk melihat apa yang terbaca
+    console.log("Barang:", p.Barang, "| Pokok Terbaca:", pokok, "| Tambahan Terbaca:", tambahan);
+
     let hargaDasar = Number(p.Harga || p[" Harga"] || p["Harga"] || 0);
     
-    // RUMUS OTOMATIS: Jika kolom HargaPokok diisi di Sheets, gunakan Modal + 20% Keuntungan
+    // RUMUS OTOMATIS: Gunakan modal jika tersedia
     if (modalTotal > 0) {
         hargaDasar = modalTotal * 1.20; 
     }
@@ -293,7 +306,7 @@ async function submitOrder() {
     }
 
     // Direct langsung lempar otomatis buka aplikasi WhatsApp
-    const nomorToko = "628123456789"; // Ganti dengan nomor WhatsApp aktif toko Anda (Gunakan kode negara 62 di depan)
+    const nomorToko = "6283157925577"; // Ganti dengan nomor WhatsApp aktif toko Anda (Gunakan kode negara 62 di depan)
     const urlWA = `https://api.whatsapp.com/send?phone=${nomorToko}&text=${encodeURIComponent(textMessage)}`;
     
     // Reset status aplikasi dan bersihkan keranjang setelah checkout sukses
