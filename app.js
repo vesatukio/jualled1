@@ -364,43 +364,37 @@ function updateStokManual(index, change) {
     }
 
     if (confirm(`Update stok ${p.Barang}?\nStok: ${currentStok} ${change > 0 ? '+' : ''}${change} = ${newStok}`)) {
-        const payload = {
-            action: "updateStok",
-            ID: p.ID,
-            Stok: newStok
-        };
-
+        // 1. Update data di array lokal agar tampilan langsung berubah
+        products[index].Stok = newStok;
+        renderProducts(products); // Render ulang daftar produk
+        
+        // 2. Kirim ke Google Sheets di background
         fetch(API, {
             method: "POST",
-            body: JSON.stringify(payload)
-        }).then(() => {
-            alert("Stok berhasil diupdate!");
-            location.reload(); // Refresh untuk melihat perubahan
+            body: JSON.stringify({ action: "updateStok", ID: p.ID, Stok: newStok })
         }).catch(err => {
-            alert("Gagal update, silakan coba lagi.");
+            alert("Gagal sync ke server, cek koneksi!");
+            location.reload(); // Refresh hanya jika gagal
         });
     }
 }
-// Fungsi untuk Update Stok Manual (Input Angka Langsung)
+
 function updateStok(index) {
     const p = products[index];
     const newStok = prompt(`Masukkan jumlah stok baru untuk ${p.Barang}:`, p.Stok);
     
     if (newStok !== null && !isNaN(newStok)) {
-        const payload = {
-            action: "updateStok",
-            ID: p.ID,
-            Stok: Number(newStok)
-        };
-
+        // 1. Update data di array lokal
+        products[index].Stok = Number(newStok);
+        renderProducts(products);
+        
+        // 2. Kirim ke Google Sheets di background
         fetch(API, {
             method: "POST",
-            body: JSON.stringify(payload)
-        }).then(() => {
-            alert("Stok berhasil diupdate ke " + newStok);
-            location.reload(); // Refresh halaman agar data baru muncul
+            body: JSON.stringify({ action: "updateStok", ID: p.ID, Stok: Number(newStok) })
         }).catch(err => {
-            alert("Gagal update, silakan coba lagi.");
+            alert("Gagal sync ke server!");
+            location.reload(); 
         });
     } else if (newStok !== null) {
         alert("Mohon masukkan angka yang valid!");
