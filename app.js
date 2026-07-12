@@ -45,9 +45,14 @@ if (btnClose) {
 }
 
 // ==========================================
-// 2. KONFIGURASI DATA & MODUL UTAMA
+// 2. KONFIGURASI DATA & MODUL UTAMA (SUPABASE)
 // ==========================================
-const API = "https://script.google.com/macros/s/AKfycbxO1ItQclyBRHKSRso9yDL7WMLowhP1cJHXNtXXEiA8uiBrZnBVYW_fq__nGCcCSES4/exec";
+// Pastikan script supabase-js sudah dimuat di HTML Anda
+const supabase = supabase.createClient(
+    'https://opgeeqnucxrdqcgwcuge.supabase.co', 
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8' // Ganti dengan anon key dari Project Settings > API
+);
+
 let products = [];
 let cart = JSON.parse(localStorage.getItem("duta_cart") || "[]");
 
@@ -61,12 +66,18 @@ updateCart();
 
 async function loadProducts() {
     try {
-        const res = await fetch(API);
-        products = await res.json();
+        // 'products' adalah nama tabel Anda di Supabase
+        const { data, error } = await supabase
+            .from('products')
+            .select('*'); 
+
+        if (error) throw error;
+
+        products = data;
         setupCategories(products);
         renderProducts(products);
     } catch (e) {
-        console.error("Gagal memuat data produk:", e);
+        console.error("Gagal memuat dari Supabase:", e);
     }
 }
 
@@ -339,29 +350,19 @@ window.addEventListener('load', () => {
         };
     }
 });
-function updateStokManual(index, change) {
-    const p = products[index];
-    const currentStok = Number(p.Stok || 0);
-    const newStok = currentStok + change;
-    
-    if (newStok < 0) {
-        alert("Stok tidak bisa kurang dari 0!");
-        return;
-    }
+async function updateStokSupabase(id, newStok) {
+    const { data, error } = await supabase
+        .from('products')
+        .update({ Stok: newStok })
+        .eq('ID', id); // Pastikan kolom di Supabase bernama 'ID'
 
-    if (confirm(`Update stok ${p.Barang}?\nStok: ${currentStok} ${change > 0 ? '+' : ''}${change} = ${newStok}`)) {
-        // 1. Update data di array lokal agar tampilan langsung berubah
-        products[index].Stok = newStok;
-        renderProducts(products); // Render ulang daftar produk
-        
-        // 2. Kirim ke Google Sheets di background
-        fetch(API, {
-            method: "POST",
-            body: JSON.stringify({ action: "updateStok", ID: p.ID, Stok: newStok })
-        }).catch(err => {
-            alert("Gagal sync ke server, cek koneksi!");
-            location.reload(); // Refresh hanya jika gagal
-        });
+    if (error) {
+        console.error("Error:", error);
+        alert("Gagal update ke database!");
+    } else {
+        // Refresh data setelah berhasil
+        await loadProducts();
+        alert("Stok berhasil diupdate!");
     }
 }
 
