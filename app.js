@@ -45,3 +45,23 @@ async function updateStokSupabase(id, newStok) {
         alert("Stok berhasil diperbarui!");
     }
 }
+async function tambahProdukBaru(namaBarang, kategori, harga, stok, hargaPokok) {
+    const { data, error } = await supabase
+        .from('datadutaled')
+        .insert([
+            { 
+                Barang: namaBarang, 
+                Kategori: kategori, 
+                HargaJual: harga, 
+                Stok: stok, 
+                HargaPokok: hargaPokok 
+            }
+        ]);
+
+    if (error) {
+        alert("Gagal menambah produk: " + error.message);
+    } else {
+        alert("Produk berhasil ditambahkan!");
+        loadProducts(); // Refresh tampilan katalog
+    }
+}
