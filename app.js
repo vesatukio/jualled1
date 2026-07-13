@@ -34,14 +34,13 @@ async function loadProducts() {
 }
 
 // ==========================================
-// 3. RENDERING (Admin Tools ada di dalam sini)
+// 3. RENDERING
 // ==========================================
 function renderProducts(data) {
     const container = document.getElementById("products");
     if (!container) return;
 
     container.innerHTML = data.map((p, index) => {
-        // Logika Admin
         const adminSection = isAdmin ? `
             <div style="background:#fff3cd; padding:8px; border:1px solid #ffeeba; margin-bottom:8px; border-radius:5px; text-align:center; font-size:12px;">
                 <strong>Admin Tools</strong><br>
@@ -49,11 +48,12 @@ function renderProducts(data) {
                 <button onclick="updateStokManual(${index}, 1)">+1 Stok</button>
             </div>` : '';
 
-        // Tampilkan Gambar (Jika ada URL)
+        // Tampilkan Gambar (Pastikan URL di database sudah benar)
         const gambar = p.Gambar ? `<img src="${p.Gambar}" alt="${p.Barang}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">` : '';
 
-        // Tampilkan Diskon (Jika ada nilai Diskon)
-        const diskon = p.Diskon && p.Diskon > 0 ? `<div style="text-decoration:line-through; color:red; font-size:12px;">Rp ${Number(p.Diskon).toLocaleString()}</div>` : '';
+        // Tampilkan Diskon
+        const hargaDiskon = p.Diskon ? Number(p.Diskon) : 0;
+        const diskon = hargaDiskon > 0 ? `<div style="text-decoration:line-through; color:red; font-size:12px;">Rp ${hargaDiskon.toLocaleString()}</div>` : '';
 
         return `
             <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; border-radius:8px;">
@@ -67,6 +67,7 @@ function renderProducts(data) {
             </div>`;
     }).join("");
 }
+
 // ==========================================
 // 4. FUNGSI ADMIN & DATABASE
 // ==========================================
@@ -77,23 +78,6 @@ async function updateStokManual(index, change) {
     const { error } = await sbClient.from('datadutaled').update({ Stok: newStok }).eq('ID', p.ID);
     if (error) alert("Gagal: " + error.message);
     else loadProducts();
-}
-
-async function bukaFormTambahProduk() {
-    const nama = prompt("Nama Barang Baru:");
-    if (!nama) return;
-    const harga = prompt("Harga Jual:");
-    const stok = prompt("Stok Awal:");
-    
-    if (nama && harga && stok) {
-        const { error } = await sbClient.from('datadutaled').insert([{ 
-            Barang: nama, 
-            HargaJual: Number(harga), 
-            Stok: Number(stok) 
-        }]);
-        if (error) alert("Gagal: " + error.message);
-        else { alert("Berhasil!"); loadProducts(); }
-    }
 }
 
 function updateCart() {
