@@ -10,7 +10,7 @@ if ('serviceWorker' in navigator) {
 // ==========================================
 // 2. KONFIGURASI SUPABASE
 // ==========================================
-const sbClient = supabase.createClient(
+const supabase = supabase.createClient(
     'https://opgeeqnucxrdqcgwcuge.supabase.co', 
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8'
 );
