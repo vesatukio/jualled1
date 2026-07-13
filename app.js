@@ -10,7 +10,7 @@ if ('serviceWorker' in navigator) {
 // ==========================================
 // 2. KONFIGURASI SUPABASE
 // ==========================================
-const supabase = supabase.createClient(
+const sbClient = supabase.createClient(
     'https://opgeeqnucxrdqcgwcuge.supabase.co', 
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZ2VlcW51Y3hyZHFjZ3djdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTgzODAsImV4cCI6MjA5NDU5NDM4MH0.yT10QOFErxHbTL8X-QOUQ8EydcJuLpStCbd8ucfTJr8'
 );
@@ -24,7 +24,7 @@ loadProducts();
 updateCart();
 
 async function loadProducts() {
-    const { data, error } = await supabase.from('datadutaled').select('*');
+    const { data, error } = await sbClient.from('datadutaled').select('*');
     if (error) {
         console.error("Gagal memuat:", error);
     } else {
@@ -67,7 +67,7 @@ async function updateStokManual(index, change) {
     const p = products[index];
     const newStok = Number(p.Stok) + change;
     
-    const { error } = await supabase.from('datadutaled').update({ Stok: newStok }).eq('ID', p.ID);
+    const { error } = await sbClient.from('datadutaled').update({ Stok: newStok }).eq('ID', p.ID);
     if (error) alert("Gagal: " + error.message);
     else loadProducts();
 }
@@ -79,7 +79,7 @@ async function bukaFormTambahProduk() {
     const stok = prompt("Stok Awal:");
     
     if (nama && harga && stok) {
-        const { error } = await supabase.from('datadutaled').insert([{ 
+        const { error } = await sbClient.from('datadutaled').insert([{ 
             Barang: nama, 
             HargaJual: Number(harga), 
             Stok: Number(stok) 
