@@ -48,7 +48,7 @@ function renderProducts(data) {
             badgeDiskon = `<div class="diskon-badge">${persen}%</div>`;
         }
 
-        const gambar = p.gambar ? `<img src="${p.gambar1}" alt="${p.Barang}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">` : '';
+        const gambar = p.gambar1 ? `<img src="${p.gambar1}" alt="${p.Barang}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">` : '';
 
         return `
             <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; border-radius:8px; position:relative;">
