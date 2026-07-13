@@ -41,33 +41,28 @@ function renderProducts(data) {
     if (!container) return;
 
     container.innerHTML = data.map((p, index) => {
-        const adminSection = isAdmin ? `
-            <div style="background:#fff3cd; padding:8px; border:1px solid #ffeeba; margin-bottom:8px; border-radius:5px; text-align:center; font-size:12px;">
-                <strong>Admin Tools</strong><br>
-                <button onclick="updateStokManual(${index}, -1)">-1 Stok</button>
-                <button onclick="updateStokManual(${index}, 1)">+1 Stok</button>
-            </div>` : '';
+        // Logika Menghitung Persen
+        let badgeDiskon = '';
+        if (p.Diskon && Number(p.Diskon) > Number(p.HargaJual)) {
+            const persen = Math.round(((p.Diskon - p.HargaJual) / p.Diskon) * 100);
+            badgeDiskon = `<div class="diskon-badge">${persen}%</div>`;
+        }
 
-        // Tampilkan Gambar (Pastikan URL di database sudah benar)
         const gambar = p.Gambar ? `<img src="${p.Gambar}" alt="${p.Barang}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">` : '';
 
-        // Tampilkan Diskon
-        const hargaDiskon = p.Diskon ? Number(p.Diskon) : 0;
-        const diskon = hargaDiskon > 0 ? `<div style="text-decoration:line-through; color:red; font-size:12px;">Rp ${hargaDiskon.toLocaleString()}</div>` : '';
-
         return `
-            <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; border-radius:8px;">
-                ${adminSection}
+            <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; border-radius:8px; position:relative;">
+                ${badgeDiskon} 
                 ${gambar}
                 <div class="nama" style="font-weight:bold; margin-top:5px;">${p.Barang}</div>
-                ${diskon}
+                <div style="text-decoration:line-through; color:gray; font-size:12px;">
+                    ${p.Diskon ? 'Rp ' + Number(p.Diskon).toLocaleString() : ''}
+                </div>
                 <div class="price">Rp ${Number(p.HargaJual).toLocaleString()}</div>
-                <div class="stock">Stok: ${p.Stok}</div>
                 <button class="order-btn" onclick="addCart(${index})">Pesan</button>
             </div>`;
     }).join("");
 }
-
 // ==========================================
 // 4. FUNGSI ADMIN & DATABASE
 // ==========================================
