@@ -41,23 +41,32 @@ function renderProducts(data) {
     if (!container) return;
 
     container.innerHTML = data.map((p, index) => {
-    // Menangani tampilan gambar (pastikan p.Gambar berisi URL)
-    const gambar = p.Gambar ? `<img src="${p.Gambar}" alt="${p.Barang}" style="width:100%; height:150px; object-fit:cover;">` : '<div style="height:150px; background:#eee;">No Image</div>';
-    
-    // Menangani tampilan diskon jika ada
-    const hargaCoret = p.Diskon ? `<div class="old-price" style="text-decoration:line-through; font-size:12px; color:gray;">Rp ${Number(p.Diskon).toLocaleString()}</div>` : '';
+        // Logika Admin
+        const adminSection = isAdmin ? `
+            <div style="background:#fff3cd; padding:8px; border:1px solid #ffeeba; margin-bottom:8px; border-radius:5px; text-align:center; font-size:12px;">
+                <strong>Admin Tools</strong><br>
+                <button onclick="updateStokManual(${index}, -1)">-1 Stok</button>
+                <button onclick="updateStokManual(${index}, 1)">+1 Stok</button>
+            </div>` : '';
 
-    return `
-        <div class="card">
-            ${gambar}
-            <div class="nama">${p.Barang}</div>
-            ${hargaCoret}
-            <div class="price">Rp ${Number(p.HargaJual).toLocaleString()}</div>
-            <div class="stock">Stok: ${p.Stok}</div>
-            <button class="order-btn" onclick="addCart(${index})">Pesan</button>
-        </div>`;
-}).join("");
+        // Tampilkan Gambar (Jika ada URL)
+        const gambar = p.Gambar ? `<img src="${p.Gambar}" alt="${p.Barang}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">` : '';
 
+        // Tampilkan Diskon (Jika ada nilai Diskon)
+        const diskon = p.Diskon && p.Diskon > 0 ? `<div style="text-decoration:line-through; color:red; font-size:12px;">Rp ${Number(p.Diskon).toLocaleString()}</div>` : '';
+
+        return `
+            <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; border-radius:8px;">
+                ${adminSection}
+                ${gambar}
+                <div class="nama" style="font-weight:bold; margin-top:5px;">${p.Barang}</div>
+                ${diskon}
+                <div class="price">Rp ${Number(p.HargaJual).toLocaleString()}</div>
+                <div class="stock">Stok: ${p.Stok}</div>
+                <button class="order-btn" onclick="addCart(${index})">Pesan</button>
+            </div>`;
+    }).join("");
+}
 // ==========================================
 // 4. FUNGSI ADMIN & DATABASE
 // ==========================================
