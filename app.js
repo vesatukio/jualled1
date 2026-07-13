@@ -41,24 +41,22 @@ function renderProducts(data) {
     if (!container) return;
 
     container.innerHTML = data.map((p, index) => {
-        // Bagian Admin
-        const adminSection = isAdmin ? `
-            <div style="background:#fff3cd; padding:8px; border:1px solid #ffeeba; margin-bottom:8px; border-radius:5px; text-align:center; font-size:12px;">
-                <strong>Admin Tools</strong><br>
-                <button onclick="updateStokManual(${index}, -1)" style="background:#d9534f; color:white; border:none; padding:5px; cursor:pointer;">-1 Stok</button>
-                <button onclick="updateStokManual(${index}, 1)" style="background:#5cb85c; color:white; border:none; padding:5px; cursor:pointer;">+1 Stok</button>
-            </div>` : '';
+    // Menangani tampilan gambar (pastikan p.Gambar berisi URL)
+    const gambar = p.Gambar ? `<img src="${p.Gambar}" alt="${p.Barang}" style="width:100%; height:150px; object-fit:cover;">` : '<div style="height:150px; background:#eee;">No Image</div>';
+    
+    // Menangani tampilan diskon jika ada
+    const hargaCoret = p.Diskon ? `<div class="old-price" style="text-decoration:line-through; font-size:12px; color:gray;">Rp ${Number(p.Diskon).toLocaleString()}</div>` : '';
 
-        return `
-            <div class="card">
-                ${adminSection}
-                <div class="nama">${p.Barang}</div>
-                <div class="price">Rp ${Number(p.HargaJual).toLocaleString()}</div>
-                <div class="stock">Stok: ${p.Stok}</div>
-                <button class="order-btn" onclick="addCart(${index})">Pesan</button>
-            </div>`;
-    }).join("");
-}
+    return `
+        <div class="card">
+            ${gambar}
+            <div class="nama">${p.Barang}</div>
+            ${hargaCoret}
+            <div class="price">Rp ${Number(p.HargaJual).toLocaleString()}</div>
+            <div class="stock">Stok: ${p.Stok}</div>
+            <button class="order-btn" onclick="addCart(${index})">Pesan</button>
+        </div>`;
+}).join("");
 
 // ==========================================
 // 4. FUNGSI ADMIN & DATABASE
