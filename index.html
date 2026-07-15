@@ -3,25 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DUTAKITA ELECTRONIC | Sparepart Elektronik Terlengkap</title>
+    <title>DUTAKITA ELECTRONIC</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <header>
         <div class="logo">DUTAKITA ELECTRONIC</div>
-        <input type="text" id="search" placeholder="Cari sparepart...">
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Cari sparepart...">
+        </div>
         <div class="cart-icon">🛒 <span id="cart-count">0</span></div>
     </header>
 
-    <section class="banner">
-        <img src="assets/banner.jpg" alt="Promo">
+    <!-- Slider Promosi -->
+    <section class="slider-container">
+        <div class="slides">
+            <img src="assets/banner.jpg" alt="Banner 1">
+        </div>
     </section>
 
-    <nav class="kategori">
+    <!-- Kategori Scroll Horizontal -->
+    <nav class="kategori-scroll">
         <button onclick="filterProduk('Semua')">Semua</button>
         <button onclick="filterProduk('LED')">LED</button>
         <button onclick="filterProduk('Mesin Cuci')">Mesin Cuci</button>
+        <button onclick="filterProduk('Kulkas')">Kulkas</button>
     </nav>
 
     <main id="product-list" class="product-grid"></main>
