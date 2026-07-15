@@ -8,10 +8,15 @@
 </head>
 <body>
     <header class="main-header">
-        <input type="text" id="search" placeholder="Cari sparepart...">
-    </header>
+    <div class="logo-admin" onclick="aksesAdmin()">⚙️</div>
+    <input type="text" id="search" placeholder="Cari sparepart...">
+    <div class="cart-icon">🛒<span id="cart-count">0</span></div>
+</header>
 
-    <main id="product-list" class="product-grid"></main>
+<nav class="kategori-container" id="kategori-list">
+    </nav>
+
+<main id="product-list" class="product-grid"></main>
 
     <nav class="bottom-nav">
         <div class="nav-item">🏠<span>Home</span></div>
