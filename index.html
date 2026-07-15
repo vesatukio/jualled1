@@ -7,42 +7,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="main-header">
-        <div class="search-box">
-            <input type="text" id="search" placeholder="Cari sparepart...">
-        </div>
+        <input type="text" id="search" placeholder="Cari sparepart...">
     </header>
-
-    <!-- Banner -->
-    <section class="banner">
-        <img src="assets/banner.jpg" alt="Promo">
-    </section>
-
-    <!-- Menu Kategori Bulat -->
-    <div class="kategori-container">
-        <div class="kategori-item" onclick="filterProduk('LED')">
-            <div class="circle">💡</div><span>LED</span>
-        </div>
-        <!-- Tambahkan item lainnya -->
-    </div>
 
     <main id="product-list" class="product-grid"></main>
 
-    <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-    <div class="nav-item" style="color: #ee4d2d;">
-        🏠<span>Home</span>
-    </div>
-    <div class="nav-item">
-        📋<span>Kategori</span>
-    </div>
-    <div class="nav-item" onclick="window.location.href='keranjang.html'">
-        🛒<span id="cart-count">0</span>
-    </div>
-    <div class="nav-item">
-        👤<span>Akun</span>
-    </div>
-</nav>
+        <div class="nav-item">🏠<span>Home</span></div>
+        <div class="nav-item" onclick="toggleModal(true)">📋<span>Kategori</span></div>
+        <div class="nav-item">🛒<span id="cart-count">0</span></div>
+    </nav>
+
+    <script src="app.js"></script>
 </body>
 </html>
