@@ -20,7 +20,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     };
 
     try {
-        await fetch("URL_SCRIPT_ANDA", {
+        await fetch("https://script.google.com/macros/s/AKfycbwLtAJsbkYAKsx9M1fUJu-eXR2-hMTp7cl2SZrprvGJ0_ql6BWkm9pM-9EBNHXDABGblA/exec", {
             method: "POST",
             mode: 'no-cors', // Penting agar tidak kena blokir CORS
             body: JSON.stringify(data)
