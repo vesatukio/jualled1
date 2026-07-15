@@ -1,14 +1,12 @@
-const cart = JSON.parse(localStorage.getItem('cart')) || {};
-
-// 1. Pastikan data produk ada, jika tidak, coba ambil dari localStorage atau set default []
+// 1. Inisialisasi Data
 const cart = JSON.parse(localStorage.getItem('cart')) || {};
 const allProducts = JSON.parse(localStorage.getItem('allProducts')) || [];
 
+// 2. Render Keranjang
 function renderKeranjang() {
     const list = document.getElementById('cart-list');
     if (!list) return;
 
-    // Cek apakah ada barang di keranjang
     if (Object.keys(cart).length === 0) {
         list.innerHTML = "<p>Keranjang Anda kosong. Yuk, belanja dulu!</p>";
         return;
@@ -18,7 +16,6 @@ function renderKeranjang() {
     let html = `<h4>Ringkasan Pesanan:</h4>`;
 
     for(let id in cart) {
-        // Tambahkan konversi string ke number jika perlu agar .find cocok
         const produk = allProducts.find(p => String(p.id) === String(id));
         
         if (produk) {
@@ -45,8 +42,21 @@ function renderKeranjang() {
     list.innerHTML = html;
 }
 
-// ... sisanya (updateCart, hapusItem, dan submit listener) sama dengan kode Anda sebelumnya.
+// 3. Fungsi Aksi
+function updateCart(id, delta) {
+    cart[id] = (cart[id] || 0) + delta;
+    if (cart[id] <= 0) delete cart[id];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    renderKeranjang();
+}
 
+function hapusItem(id) {
+    delete cart[id];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    renderKeranjang();
+}
+
+// 4. Proses Checkout
 document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = {
@@ -69,4 +79,5 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     } catch (err) { alert("Gagal mengirim"); }
 });
 
+// 5. Inisialisasi
 renderKeranjang();
