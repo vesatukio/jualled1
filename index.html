@@ -4,68 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DUTAKITA ELECTRONIC | Sparepart Elektronik Terlengkap</title>
-    <meta name="description" content="Toko sparepart elektronik terlengkap: LED, Mesin Cuci, Kulkas, Kipas Angin. Harga terbaik dan kualitas terjamin.">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="DUTAKITA ELECTRONIC">
-    <meta property="og:description" content="Pusat sparepart elektronik murah dan berkualitas.">
-    
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="assets/logo.png">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
-
-    <!-- HEADER -->
     <header>
-        <nav>
-            <div class="logo">DUTAKITA ELECTRONIC</div>
-            <div class="nav-icons">
-                <button id="cart-btn">🛒</button>
-                <button id="wa-btn">💬</button>
-            </div>
-        </nav>
+        <div class="logo">DUTAKITA ELECTRONIC</div>
         <input type="text" id="search" placeholder="Cari sparepart...">
+        <div class="cart-icon">🛒 <span id="cart-count">0</span></div>
     </header>
 
-    <!-- BANNER -->
     <section class="banner">
-        <div class="slider">
-            <img src="assets/banner.jpg" alt="Promo Diskon">
-        </div>
+        <img src="assets/banner.jpg" alt="Promo">
     </section>
 
-    <!-- KATEGORI -->
-    <section class="kategori">
+    <nav class="kategori">
+        <button onclick="filterProduk('Semua')">Semua</button>
         <button onclick="filterProduk('LED')">LED</button>
         <button onclick="filterProduk('Mesin Cuci')">Mesin Cuci</button>
-        <button onclick="filterProduk('Kulkas')">Kulkas</button>
-        <button onclick="filterProduk('Kipas')">Kipas</button>
-        <button onclick="filterProduk('Semua')">Semua</button>
-    </section>
+    </nav>
 
-    <!-- PRODUK -->
-    <main id="product-list" class="product-grid">
-        <!-- Produk akan di-render oleh app.js -->
-    </main>
-
-    <!-- SCHEMA JSON-LD -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org/",
-      "@type": "Store",
-      "name": "DUTAKITA ELECTRONIC",
-      "description": "Toko sparepart elektronik terlengkap."
-    }
-    </script>
+    <main id="product-list" class="product-grid"></main>
 
     <script src="app.js"></script>
-    <script>
-        // Register Service Worker untuk PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js');
-        }
-    </script>
 </body>
 </html>
