@@ -3,42 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DUTA TERANG - Katalog Sparepart</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/public.css">
+    <title>DUTAKITA ELECTRONIC | Sparepart Elektronik Terlengkap</title>
+    <meta name="description" content="Toko sparepart elektronik terlengkap: LED, Mesin Cuci, Kulkas, Kipas Angin. Harga terbaik dan kualitas terjamin.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="DUTAKITA ELECTRONIC">
+    <meta property="og:description" content="Pusat sparepart elektronik murah dan berkualitas.">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/logo.png">
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="navbar">
-        <div class="logo">DUTA TERANG</div>
-        <input type="text" id="searchPublic" placeholder="Cari barang..." onkeyup="Public.cari()">
+    <!-- HEADER -->
+    <header>
+        <nav>
+            <div class="logo">DUTAKITA ELECTRONIC</div>
+            <div class="nav-icons">
+                <button id="cart-btn">🛒</button>
+                <button id="wa-btn">💬</button>
+            </div>
+        </nav>
+        <input type="text" id="search" placeholder="Cari sparepart...">
     </header>
 
-    <!-- Kategori -->
-    <div class="kategori-scroll">
-        <button onclick="Public.filter('Semua')">Semua</button>
-        <button onclick="Public.filter('LED')">LED</button>
-        <button onclick="Public.filter('Audio')">Audio</button>
-    </div>
+    <!-- BANNER -->
+    <section class="banner">
+        <div class="slider">
+            <img src="assets/banner.jpg" alt="Promo Diskon">
+        </div>
+    </section>
 
-    <!-- Grid Produk -->
-    <main id="productGrid" class="product-grid">
-        <p>Memuat produk...</p>
+    <!-- KATEGORI -->
+    <section class="kategori">
+        <button onclick="filterProduk('LED')">LED</button>
+        <button onclick="filterProduk('Mesin Cuci')">Mesin Cuci</button>
+        <button onclick="filterProduk('Kulkas')">Kulkas</button>
+        <button onclick="filterProduk('Kipas')">Kipas</button>
+        <button onclick="filterProduk('Semua')">Semua</button>
+    </section>
+
+    <!-- PRODUK -->
+    <main id="product-list" class="product-grid">
+        <!-- Produk akan di-render oleh app.js -->
     </main>
 
-    <!-- Tombol Admin Rahasia -->
-    <footer style="text-align: center; padding: 20px;">
-        <button onclick="bukaAdmin()" style="background:none; border:none; color:#ccc;">.</button>
-    </footer>
+    <!-- SCHEMA JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Store",
+      "name": "DUTAKITA ELECTRONIC",
+      "description": "Toko sparepart elektronik terlengkap."
+    }
+    </script>
 
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/public.js"></script>
+    <script src="app.js"></script>
     <script>
-        function bukaAdmin() {
-            const pass = prompt("Password Admin:");
-            if (pass === "admin123") window.location.href = "dashboard.html";
+        // Register Service Worker untuk PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
         }
     </script>
 </body>
