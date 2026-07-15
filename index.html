@@ -7,14 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="main-header">
+<header class="main-header">
     <div class="logo-admin" onclick="aksesAdmin()">⚙️</div>
     <input type="text" id="search" placeholder="Cari sparepart...">
-    <div class="cart-icon">🛒<span id="cart-count">0</span></div>
+    <div class="cart-icon" onclick="window.location.href='keranjang.html'">🛒<span id="cart-count">0</span></div>
 </header>
 
-<nav class="kategori-container" id="kategori-list">
-    </nav>
+<div class="kategori-container" id="kategori-list"></div>
 
 <main id="product-list" class="product-grid"></main>
 
