@@ -5,34 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DUTAKITA ELECTRONIC</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <header>
-        <div class="logo">DUTAKITA ELECTRONIC</div>
+    <!-- Header -->
+    <header class="main-header">
         <div class="search-box">
             <input type="text" id="search" placeholder="Cari sparepart...">
         </div>
-        <div class="cart-icon">🛒 <span id="cart-count">0</span></div>
     </header>
 
-    <!-- Slider Promosi -->
-    <section class="slider-container">
-        <div class="slides">
-            <img src="assets/banner.jpg" alt="Banner 1">
-        </div>
+    <!-- Banner -->
+    <section class="banner">
+        <img src="assets/banner.jpg" alt="Promo">
     </section>
 
-    <!-- Kategori Scroll Horizontal -->
-    <nav class="kategori-scroll">
-        <button onclick="filterProduk('Semua')">Semua</button>
-        <button onclick="filterProduk('LED')">LED</button>
-        <button onclick="filterProduk('Mesin Cuci')">Mesin Cuci</button>
-        <button onclick="filterProduk('Kulkas')">Kulkas</button>
-    </nav>
+    <!-- Menu Kategori Bulat -->
+    <div class="kategori-container">
+        <div class="kategori-item" onclick="filterProduk('LED')">
+            <div class="circle">💡</div><span>LED</span>
+        </div>
+        <!-- Tambahkan item lainnya -->
+    </div>
 
     <main id="product-list" class="product-grid"></main>
 
-    <script src="app.js"></script>
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item">🏠<span>Home</span></div>
+        <div class="nav-item">📂<span>Kategori</span></div>
+        <div class="nav-item" onclick="window.location.href='keranjang.html'">🛒<span id="cart-count">0</span></div>
+        <div class="nav-item">👤<span>Akun</span></div>
+    </nav>
 </body>
 </html>
