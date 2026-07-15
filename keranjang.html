@@ -1,26 +1,32 @@
-<form id="checkoutForm">
-    <input type="text" id="nama" placeholder="Nama Lengkap" required>
-    <input type="text" id="wa" placeholder="No. WA/HP" required>
-    <textarea id="alamat" placeholder="Alamat Lengkap" required></textarea>
-    <button type="submit">Kirim Pesanan</button>
-</form>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Keranjang Belanja - DUTAKITA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <button onclick="window.location.href='index.html'">← Kembali</button>
+        <h3>Ringkasan Pesanan</h3>
+    </header>
 
-<script>
-document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = {
-        nama: document.getElementById('nama').value,
-        wa: document.getElementById('wa').value,
-        alamat: document.getElementById('alamat').value,
-        pesanan: localStorage.getItem('cart'), // Data keranjang
-        tanggal: new Date().toLocaleString()
-    };
+    <div id="cart-list" style="padding: 15px;"></div>
 
-    // Kirim ke Google Script
-    const response = await fetch("URL_SCRIPT_ANDA", {
-        method: "POST",
-        body: JSON.stringify(data)
-    });
-    alert("Pesanan berhasil dikirim!");
-});
-</script>
+    <form id="checkoutForm" style="padding: 15px; border-top: 2px solid #eee;">
+        <input type="text" id="nama" placeholder="Nama Lengkap" required style="width:100%; padding:10px; margin-bottom:10px;">
+        <input type="text" id="wa" placeholder="No. WA/HP" required style="width:100%; padding:10px; margin-bottom:10px;">
+        <textarea id="alamat" placeholder="Alamat Lengkap" required style="width:100%; padding:10px; margin-bottom:10px;"></textarea>
+        
+        <button type="submit" style="width:100%; padding:12px; background:#ee4d2d; color:white; border:none; border-radius:4px;">
+            Kirim Pesanan
+        </button>
+    </form>
+    
+    <button onclick="window.location.href='index.html'" style="width:90%; margin:10px 5%; padding:10px; background:#ddd; border:none;">
+        Tambah Produk Lain
+    </button>
+
+    <script src="cart.js"></script>
+</body>
+</html>
