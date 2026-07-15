@@ -1,0 +1,24 @@
+/* Styling Navbar */
+.navbar { background: #1B8F50; padding: 15px; display: flex; align-items: center; color: white; position: sticky; top: 0; }
+#searchPublic { flex-grow: 1; margin-left: 15px; padding: 8px; border: none; border-radius: 4px; }
+
+/* Grid ala Marketplace */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 10px;
+    background: #F6F7FB;
+}
+
+.card-produk {
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.card-produk:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+
+.harga-promo { color: #E53935; font-weight: bold; font-size: 1.1rem; }
