@@ -1,24 +1,92 @@
-/* Styling Navbar */
-.navbar { background: #1B8F50; padding: 15px; display: flex; align-items: center; color: white; position: sticky; top: 0; }
-#searchPublic { flex-grow: 1; margin-left: 15px; padding: 8px; border: none; border-radius: 4px; }
-
-/* Grid ala Marketplace */
+/* Container Grid */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 12px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Card Produk */
+.card-produk {
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-produk:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Gambar Produk */
+.card-produk img {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Menjamin gambar selalu kotak */
+    object-fit: cover;
+}
+
+/* Informasi Produk */
+.nama {
+    padding: 8px 8px 0 8px;
+    font-size: 0.9rem;
+    height: 3em; /* Menjaga tinggi teks tetap rata */
+    overflow: hidden;
+    color: #333;
+}
+
+.harga {
+    padding: 4px 8px;
+    font-weight: bold;
+    color: #1B8F50; /* Hijau Utama */
+}
+
+/* Badge Diskon */
+.badge-diskon {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #E53935;
+    color: white;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+/* Tombol WhatsApp */
+.btn-wa {
+    margin: 8px;
+    background: #25D366;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Kategori Scroll */
+.kategori-scroll {
+    display: flex;
     gap: 10px;
     padding: 10px;
-    background: #F6F7FB;
-}
-
-.card-produk {
+    overflow-x: auto;
     background: white;
-    padding: 10px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: 0.2s;
 }
 
-.card-produk:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-
-.harga-promo { color: #E53935; font-weight: bold; font-size: 1.1rem; }
+.kategori-scroll button {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background: white;
+    white-space: nowrap;
+}
