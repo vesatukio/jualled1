@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwLtAJsbkYAKsx9M1fUJu-eXR2-hMTp7cl2SZrprvGJ0_ql6BWkm9pM-9EBNHXDABGblA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwdl_o7WZyyPaZHekAwqUYnoA1h29SGc_jLN-m9o2LV4jQVNXsUXO4Wi3aVymH1pj7G/exec";
 let dataGlobal = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || {};
 
