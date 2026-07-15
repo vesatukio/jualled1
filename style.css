@@ -1,12 +1,41 @@
 :root { --primary-color: #ee4d2d; } /* Warna Shopee */
 
-/* Bottom Nav */
+/* Bottom Navigation Bar */
 .bottom-nav {
-    position: fixed; bottom: 0; width: 100%; display: flex;
-    justify-content: space-around; background: white;
-    padding: 10px; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); z-index: 1000;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.08); /* Bayangan lembut */
+    z-index: 1000;
 }
 
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px; /* Ukuran icon */
+    color: #555;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.nav-item span {
+    font-size: 10px; /* Ukuran teks kecil di bawah icon */
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* Efek saat ikon aktif/ditekan */
+.nav-item:active {
+    color: #ee4d2d; /* Warna Orange Shopee */
+}
 /* Kategori Bulat */
 .kategori-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; }
 .circle { 
