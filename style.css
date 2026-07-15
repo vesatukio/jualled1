@@ -1,14 +1,48 @@
+/* --- Base & Global --- */
 body { font-family: sans-serif; background: #f5f5f5; margin: 0; padding-bottom: 70px; }
-.main-header { background: #ee4d2d; padding: 10px; }
-#search { width: 90%; padding: 8px; border-radius: 4px; border: none; }
 
-.product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+/* --- Header & Admin --- */
+.main-header { 
+    display: flex; align-items: center; gap: 10px; padding: 10px; 
+    background: #ee4d2d; position: sticky; top: 0; z-index: 1000;
+}
+.logo-admin { cursor: pointer; color: white; font-size: 20px; font-weight: bold; }
+#search { flex-grow: 1; padding: 8px; border-radius: 4px; border: none; }
+.cart-icon { color: white; font-weight: bold; }
+
+/* --- Kategori --- */
+.kategori-container { display: flex; gap: 10px; padding: 10px; overflow-x: auto; background: white; }
+.kategori-container button { padding: 5px 15px; border-radius: 20px; border: 1px solid #ee4d2d; background: white; color: #ee4d2d; }
+
+/* --- Grid Produk (Responsif) --- */
+.product-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 10px; padding: 10px; 
+}
+@media (min-width: 768px) { 
+    .product-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; } 
+}
+
+/* --- Card Produk --- */
 .card { background: white; border-radius: 4px; padding: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px; }
 .card h4 { font-size: 13px; margin: 8px 0; height: 35px; overflow: hidden; }
-.card p { color: #ee4d2d; font-weight: bold; font-size: 14px; }
 
-.qty-control { display: flex; align-items: center; justify-content: space-between; border: 1px solid #ee4d2d; border-radius: 4px; padding: 2px; }
-.qty-control button { background: #ee4d2d; color: white; border: none; padding: 5px 12px; border-radius: 2px; }
+/* Harga */
+.harga-asli { font-size: 11px; color: #999; text-decoration: line-through; display: block; }
+.harga-diskon { color: #ee4d2d; font-weight: bold; font-size: 14px; margin-bottom: 8px; display: block; }
 
-.bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; }
+/* Qty Control */
+.qty-control { 
+    display: flex; align-items: center; justify-content: space-between; 
+    border: 1px solid #ee4d2d; border-radius: 4px; padding: 2px; 
+}
+.qty-control button { background: #ee4d2d; color: white; border: none; padding: 5px 12px; cursor: pointer; }
+
+/* --- Bottom Nav --- */
+.bottom-nav { 
+    position: fixed; bottom: 0; width: 100%; background: white; 
+    display: flex; justify-content: space-around; padding: 10px 0; 
+    border-top: 1px solid #ddd; z-index: 1000;
+}
