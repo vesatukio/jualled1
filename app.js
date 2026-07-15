@@ -84,6 +84,6 @@ document.getElementById('search').addEventListener('input', (e) => {
 function aksesAdmin() {
     const password = prompt("Masukkan Password Admin:");
     if (password === "admin123") {
-        window.location.href = "https://docs.google.com/spreadsheets/d/1234567890/edit";
+        window.location.href = "admin.html"; // Mengarah ke halaman admin lokal
     }
 }
