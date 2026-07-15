@@ -2,26 +2,34 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwLtAJsbkYAKsx9M1fUJu-e
 let dataGlobal = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || {};
 
-// 1. Load Data
+// 1. Inisialisasi
+document.addEventListener('DOMContentLoaded', () => {
+    loadProduk();
+    updateCartCount();
+});
+
+// 2. Load Data Utama
 async function loadProduk() {
     try {
         const res = await fetch(API_URL);
         dataGlobal = await res.json();
         renderProduk(dataGlobal);
-        loadKategori(); // Panggil kategori setelah data ada
-    } catch (err) { console.error("Error:", err); }
+        loadKategori(); 
+    } catch (err) { console.error("Error memuat data:", err); }
 }
 
-// 2. Render Produk (Versi Harga Coret)
+// 3. Render Produk
 function renderProduk(items) {
     const container = document.getElementById('product-list');
+    if (!container) return;
+
     container.innerHTML = items.map(p => `
         <div class="card">
             <img src="${p.gambar1}" loading="lazy">
             <div class="card-body">
                 <h4>${p.nama}</h4>
-                <span class="harga-asli">Rp ${p.hargaJual.toLocaleString()}</span>
-                <span class="harga-diskon">Rp ${p.hargaSetelahDiskon.toLocaleString()}</span>
+                <span class="harga-asli">Rp ${parseInt(p.hargaJual).toLocaleString()}</span>
+                <span class="harga-diskon">Rp ${parseInt(p.hargaSetelahDiskon).toLocaleString()}</span>
                 <div class="qty-control">
                     <button onclick="updateQty('${p.id}', -1)">-</button>
                     <span>${cart[p.id] || 0}</span>
@@ -32,7 +40,17 @@ function renderProduk(items) {
     `).join('');
 }
 
-// 3. Update Kuantitas
+// 4. Load Kategori (Fix: pastikan ID 'kategori-list' ada di HTML)
+function loadKategori() {
+    const container = document.getElementById('kategori-list');
+    if (!container) return;
+
+    const kategoriList = [...new Set(dataGlobal.map(p => p.kategori))];
+    container.innerHTML = `<button onclick="renderProduk(dataGlobal)">Semua</button>` + 
+        kategoriList.map(k => `<button onclick="filterProduk('${k}')">${k}</button>`).join('');
+}
+
+// 5. Update Keranjang
 function updateQty(id, delta) {
     cart[id] = (cart[id] || 0) + delta;
     if (cart[id] <= 0) delete cart[id];
@@ -41,20 +59,9 @@ function updateQty(id, delta) {
     renderProduk(dataGlobal);
 }
 
-// 4. Update Angka di Keranjang
 function updateCartCount() {
-    const count = Object.values(cart).reduce((a, b) => a + b, 0);
-    document.getElementById('cart-count').innerText = count;
-}
-
-// 5. Load Kategori
-function loadKategori() {
-    const kategori = [...new Set(dataGlobal.map(p => p.kategori))];
-    const container = document.getElementById('kategori-list');
-    if(!container) return;
-    container.innerHTML = kategori.map(k => 
-        `<button onclick="filterProduk('${k}')">${k}</button>`
-    ).join('');
+    const el = document.getElementById('cart-count');
+    if (el) el.innerText = Object.values(cart).reduce((a, b) => a + b, 0);
 }
 
 // 6. Filter & Search
@@ -64,18 +71,15 @@ function filterProduk(kategori) {
 }
 
 document.getElementById('search').addEventListener('input', (e) => {
-    const filtered = dataGlobal.filter(p => p.nama.toLowerCase().includes(e.target.value.toLowerCase()));
+    const keyword = e.target.value.toLowerCase();
+    const filtered = dataGlobal.filter(p => p.nama.toLowerCase().includes(keyword));
     renderProduk(filtered);
 });
 
-// Admin Akses
+// Admin
 function aksesAdmin() {
     const password = prompt("Masukkan Password Admin:");
     if (password === "admin123") {
-        window.location.href = "https://docs.google.com/spreadsheets/d/1234567890/edit"; // Ganti ID
+        window.location.href = "https://docs.google.com/spreadsheets/d/1234567890/edit";
     }
 }
-
-// Jalankan
-loadProduk();
-updateCartCount();
