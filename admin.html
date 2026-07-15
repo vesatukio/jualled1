@@ -1,0 +1,27 @@
+<h3>Panel Admin - Kelola Barang</h3>
+<div id="admin-product-list"></div>
+
+<script>
+let products = JSON.parse(localStorage.getItem('allProducts')) || [];
+
+function renderAdmin() {
+    const list = document.getElementById('admin-product-list');
+    list.innerHTML = products.map(p => `
+        <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+            <h4>${p.nama}</h4>
+            Modal: <input type="number" value="${p.hargaModal || 0}" onchange="updateBarang('${p.id}', 'hargaModal', this.value)">
+            Jual: <input type="number" value="${p.hargaJual}" onchange="updateBarang('${p.id}', 'hargaJual', this.value)">
+            Stok: <input type="number" value="${p.stok}" onchange="updateBarang('${p.id}', 'stok', this.value)">
+            <button onclick="hapusBarang('${p.id}')">Hapus</button>
+        </div>
+    `).join('');
+}
+
+function updateBarang(id, field, value) {
+    const index = products.findIndex(p => p.id == id);
+    products[index][field] = value;
+    localStorage.setItem('allProducts', JSON.stringify(products));
+    alert("Data diupdate!");
+}
+renderAdmin();
+</script>
