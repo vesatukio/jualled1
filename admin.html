@@ -1,34 +1,31 @@
 <h3>Panel Admin - Kelola Barang</h3>
-<a href="/" style="text-decoration:none; color:blue;">&larr; Kembali ke Home</a>
+<a href="/" style="display:inline-block; margin-bottom:15px; text-decoration:none; color:blue;">&larr; Kembali ke Home</a>
 
-<div id="admin-product-list" style="margin-top: 20px;"></div>
+<div style="background: #eee; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <h4>Tambah Produk Baru</h4>
+    <input type="text" id="new-nama" placeholder="Nama Barang">
+    <input type="number" id="new-modal" placeholder="Modal">
+    <input type="number" id="new-jual" placeholder="Harga Jual">
+    <input type="number" id="new-stok" placeholder="Stok">
+    <button onclick="tambahBarang()" style="background:green; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Simpan</button>
+</div>
 
-<style>
-    .product-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 10px;
-        background: #f9f9f9;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 10px;
-        align-items: center;
-    }
-    .product-card h4 { margin: 0; grid-column: 1 / -1; color: #333; }
-    input { padding: 5px; border: 1px solid #ccc; border-radius: 4px; width: 90%; }
-    button { background: #ff4d4d; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; }
-</style>
+<div id="admin-product-list"></div>
 
 <script>
-let products = JSON.parse(localStorage.getItem('allProducts')) || [];
+// Fungsi untuk memuat ulang data dari localStorage
+function getProducts() {
+    return JSON.parse(localStorage.getItem('allProducts')) || [];
+}
 
 function renderAdmin() {
+    const products = getProducts(); // Selalu ambil data terbaru
     const list = document.getElementById('admin-product-list');
+    
     list.innerHTML = products.map(p => {
         const modal = parseFloat(p.hargaModal) || 0;
         const jual = parseFloat(p.hargaJual) || 0;
-        const diskon = parseFloat(p.diskon) || 0; // dalam persen
+        const diskon = parseFloat(p.diskon) || 0;
         const hargaSetelahDiskon = jual - (jual * (diskon / 100));
 
         return `
@@ -37,7 +34,7 @@ function renderAdmin() {
             <label>Modal: <input type="number" value="${modal}" onchange="updateBarang('${p.id}', 'hargaModal', this.value)"></label>
             <label>Jual: <input type="number" value="${jual}" onchange="updateBarang('${p.id}', 'hargaJual', this.value)"></label>
             <label>Diskon (%): <input type="number" value="${diskon}" onchange="updateBarang('${p.id}', 'diskon', this.value)"></label>
-            <label>Setelah Diskon: <br> <strong>Rp ${hargaSetelahDiskon.toLocaleString()}</strong></label>
+            <label>Net: <strong>Rp ${hargaSetelahDiskon.toLocaleString()}</strong></label>
             <label>Stok: <input type="number" value="${p.stok}" onchange="updateBarang('${p.id}', 'stok', this.value)"></label>
             <button onclick="hapusBarang('${p.id}')">Hapus</button>
         </div>
@@ -45,20 +42,42 @@ function renderAdmin() {
     }).join('');
 }
 
+function tambahBarang() {
+    let products = getProducts();
+    const newBarang = {
+        id: Date.now().toString(), // ID unik berdasarkan waktu
+        nama: document.getElementById('new-nama').value,
+        hargaModal: document.getElementById('new-modal').value,
+        hargaJual: document.getElementById('new-jual').value,
+        stok: document.getElementById('new-stok').value,
+        diskon: 0
+    };
+    
+    if(!newBarang.nama) return alert("Nama barang wajib diisi!");
+    
+    products.push(newBarang);
+    localStorage.setItem('allProducts', JSON.stringify(products));
+    renderAdmin(); // Refresh tampilan
+    alert("Produk berhasil ditambahkan!");
+}
+
 function updateBarang(id, field, value) {
+    let products = getProducts();
     const index = products.findIndex(p => p.id == id);
     products[index][field] = value;
     localStorage.setItem('allProducts', JSON.stringify(products));
-    renderAdmin(); // Re-render agar harga setelah diskon update otomatis
+    renderAdmin(); 
 }
 
 function hapusBarang(id) {
     if(confirm('Yakin ingin menghapus barang ini?')) {
+        let products = getProducts();
         products = products.filter(p => p.id != id);
         localStorage.setItem('allProducts', JSON.stringify(products));
         renderAdmin();
     }
 }
 
+// Inisialisasi
 renderAdmin();
 </script>
