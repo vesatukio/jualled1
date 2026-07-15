@@ -1,98 +1,21 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>DUTAKITA ELECTRONIC</title>
-
-<meta name="theme-color" content="#1B8F50">
-<meta name="description" content="Sparepart Lampu LED, Mesin Cuci, Kulkas dan Elektronik">
-
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DUTA LED</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-
-<header>
-<button id="btn-admin-login" onclick="loginAdmin()" style="background:#ff9800; color:white; padding:10px; border-radius:5px; border:none; cursor:pointer;">
-    🔑 Mode Admin
-</button>
-<button onclick="bukaFormTambahProduk()" style="background:blue; color:white; padding:10px;">+ Tambah Barang Baru</button>
-<script>
-    function loginAdmin() {
-        const password = prompt("Masukkan Password Admin:");
-        if (password === "duta123") { // Ganti "duta123" dengan password pilihan Anda
-            window.location.href = window.location.pathname + "?admin=true";
-        } else {
-            alert("Password salah!");
-        }
-    }
-</script>
-
-    
-<div id="pwa-install-banner" style="display:none; position:fixed; top:50%; left:10px; transform:translateY(-50%); z-index:9999; background:white; padding:15px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2); border-left: 5px solid var(--green);">
-    <p style="margin:0 0 10px 0; font-size:14px; font-weight:bold;">Ingin kemudahan akses?</p>
-    <button id="btnInstall" style="background:var(--green); color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; width:100%;">Install App</button>
-    <button id="btnClose" style="background:none; border:none; color:#888; font-size:12px; margin-top:10px; width:100%; cursor:pointer;">Tutup</button>
-</div>
-  
-<div class="logo-wrap">
-  <img src="https://raw.githubusercontent.com/vesatukio/jualled1/main/icon-192.png" class="logo" alt="DutaKita Icon">
-</div>
-
-<div class="search-wrap">
-<input
-type="text"
-id="search"
-placeholder="Cari produk..."
-onkeyup="searchProduct()">
-</div>
-
-<div class="cart-header">
-🛒 <span id="cartCount">0</span>
-</div>
-
-</header>
-<div class="category-filter" id="categoryFilter">
-    <button onclick="filterProduct('Semua')" class="active">Semua</button>
+<body class="login-bg">
+    <div class="login-container">
+        <h2>DUTA LED ADMIN</h2>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">LOGIN</button>
+        </form>
     </div>
-<div class="tagline">
-Duta LED: Kebutuhan Lampu Anda.
-</div>
-
-<div id="products" class="products"></div>
-
-<div class="checkout-bar">
-    <div style="flex:1">
-        <div class="checkout-title">Total</div>
-        <div id="total">Rp 0</div>
-    </div>
-    <div id="btn-install-mobile">
-    📱 Install App
-</div>
-    <div style="display: flex; gap: 8px;">
-        <button type="button" onclick="resetCart()" style="background:#E53935; border:none; color:white; padding:10px 15px; border-radius:20px; font-size:12px;">Reset</button>
-        
-        <button type="button" onclick="document.getElementById('checkout-form').showModal()" style="background:var(--green); border:none; color:white; padding:10px 15px; border-radius:20px; font-size:12px;">Checkout</button>
-    </div>
-</div>
-
-<dialog id="checkout-form" style="border-radius: 15px; border: none; padding: 20px; width: 90%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-    <h3 style="margin-bottom: 15px; color: var(--green);">Data Pembeli</h3>
-    <input type="text" id="nama" placeholder="Nama Lengkap" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px;">
-    <input type="number" id="wa" placeholder="Nomor WhatsApp (Contoh: 083157925577)" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px;">
-    <textarea id="alamat" placeholder="Alamat Lengkap" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px;"></textarea>
-    
-    <div style="display: flex; gap: 10px;">
-        <button onclick="document.getElementById('checkout-form').close()" style="flex:1; padding: 10px; border-radius: 20px; border: 1px solid #ccc; background: white;">Batal</button>
-        <button onclick="submitOrder()" style="flex:1; padding: 10px; border-radius: 20px; border: none; background: var(--green); color: white;">Kirim Order</button>
-    </div>
-</dialog>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
-
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>
