@@ -24,5 +24,24 @@
     </nav>
 
     <script src="app.js"></script>
+    <script>
+    // Pastikan kode ini berjalan segera setelah halaman dimuat
+    document.addEventListener("DOMContentLoaded", function() {
+        const products = JSON.parse(localStorage.getItem('allProducts')) || [];
+        const container = document.getElementById('product-list'); // Sesuaikan ID dengan elemen di index.html Anda
+
+        if (products.length === 0) {
+            container.innerHTML = "<p>Belum ada produk yang tersedia.</p>";
+        } else {
+            container.innerHTML = products.map(p => `
+                <div class="card">
+                    <h4>${p.nama}</h4>
+                    <p>Harga: Rp ${parseInt(p.hargaJual).toLocaleString()}</p>
+                    <p>Stok: ${p.stok}</p>
+                </div>
+            `).join('');
+        }
+    });
+</script>
 </body>
 </html>
