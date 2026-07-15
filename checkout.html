@@ -1,0 +1,38 @@
+<form id="checkoutForm" style="padding: 20px;">
+    <input type="text" id="nama" placeholder="Nama Lengkap" required style="width:100%; margin-bottom:10px; padding:8px;">
+    <input type="text" id="wa" placeholder="No. HP / WA" required style="width:100%; margin-bottom:10px; padding:8px;">
+    <textarea id="alamat" placeholder="Alamat Lengkap" required style="width:100%; margin-bottom:10px; padding:8px;"></textarea>
+    <button type="submit" style="width:100%; padding:10px; background:#ee4d2d; color:white; border:none;">Kirim Pesanan</button>
+</form>
+
+<script>
+document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.innerText = "Mengirim...";
+
+    const data = {
+        nama: document.getElementById('nama').value,
+        wa: document.getElementById('wa').value,
+        alamat: document.getElementById('alamat').value,
+        pesanan: localStorage.getItem('cart'),
+        tanggal: new Date().toLocaleString()
+    };
+
+    try {
+        await fetch("URL_SCRIPT_ANDA", {
+            method: "POST",
+            mode: 'no-cors', // Penting agar tidak kena blokir CORS
+            body: JSON.stringify(data)
+        });
+        
+        // Hapus Keranjang
+        localStorage.removeItem('cart');
+        alert("Pesanan berhasil dikirim!");
+        window.location.href = "index.html";
+    } catch (err) {
+        alert("Gagal mengirim pesanan");
+        btn.innerText = "Kirim Pesanan";
+    }
+});
+</script>
