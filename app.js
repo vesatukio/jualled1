@@ -13,6 +13,10 @@ async function loadProduk() {
     try {
         const res = await fetch(API_URL);
         dataGlobal = await res.json();
+        
+        // Simpan ke localStorage agar bisa dibaca oleh halaman keranjang
+        localStorage.setItem('allProducts', JSON.stringify(dataGlobal)); 
+        
         renderProduk(dataGlobal);
         loadKategori(); 
     } catch (err) { console.error("Error memuat data:", err); }
@@ -28,8 +32,8 @@ function renderProduk(items) {
             <img src="${p.gambar1}" loading="lazy">
             <div class="card-body">
                 <h4>${p.nama}</h4>
-                <span class="harga-asli">Rp ${parseInt(p.hargaJual).toLocaleString()}</span>
-                <span class="harga-diskon">Rp ${parseInt(p.hargaSetelahDiskon).toLocaleString()}</span>
+                <span class="harga-asli">Rp ${parseInt(p.hargaJual || 0).toLocaleString()}</span>
+                <span class="harga-diskon">Rp ${parseInt(p.hargaSetelahDiskon || 0).toLocaleString()}</span>
                 <div class="qty-control">
                     <button onclick="updateQty('${p.id}', -1)">-</button>
                     <span>${cart[p.id] || 0}</span>
@@ -40,7 +44,7 @@ function renderProduk(items) {
     `).join('');
 }
 
-// 4. Load Kategori (Fix: pastikan ID 'kategori-list' ada di HTML)
+// 4. Load Kategori
 function loadKategori() {
     const container = document.getElementById('kategori-list');
     if (!container) return;
@@ -82,17 +86,4 @@ function aksesAdmin() {
     if (password === "admin123") {
         window.location.href = "https://docs.google.com/spreadsheets/d/1234567890/edit";
     }
-}
-async function loadProduk() {
-    try {
-        const res = await fetch(https://script.google.com/macros/s/AKfycbwLtAJsbkYAKsx9M1fUJu-eXR2-hMTp7cl2SZrprvGJ0_ql6BWkm9pM-9EBNHXDABGblA/exec);
-        dataGlobal = await res.json();
-        
-        // --- TAMBAHKAN BARIS INI ---
-        localStorage.setItem('allProducts', JSON.stringify(dataGlobal)); 
-        // ---------------------------
-        
-        renderProduk(dataGlobal);
-        loadKategori();
-    } catch (err) { console.error("Error:", err); }
 }
