@@ -23,13 +23,20 @@ async function loadProduk() {
 }
 
 // 3. Render Produk
+// Di dalam app.js, pastikan fungsi ini seperti ini:
 function renderProduk(items) {
     const container = document.getElementById('product-list');
     if (!container) return;
 
+    // Tambahkan kondisi jika array kosong
+    if (!items || items.length === 0) {
+        container.innerHTML = "<p>Sedang memuat data atau belum ada produk tersedia.</p>";
+        return;
+    }
+
     container.innerHTML = items.map(p => `
         <div class="card">
-            <img src="${p.gambar1}" loading="lazy">
+            <img src="${p.gambar1 || 'placeholder.jpg'}" loading="lazy">
             <div class="card-body">
                 <h4>${p.nama}</h4>
                 <span class="harga-asli">Rp ${parseInt(p.hargaJual || 0).toLocaleString()}</span>
@@ -43,7 +50,6 @@ function renderProduk(items) {
         </div>
     `).join('');
 }
-
 // 4. Load Kategori
 function loadKategori() {
     const container = document.getElementById('kategori-list');
