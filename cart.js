@@ -1,18 +1,51 @@
 const cart = JSON.parse(localStorage.getItem('cart')) || {};
 
+// 1. Pastikan data produk ada, jika tidak, coba ambil dari localStorage atau set default []
+const cart = JSON.parse(localStorage.getItem('cart')) || {};
+const allProducts = JSON.parse(localStorage.getItem('allProducts')) || [];
+
 function renderKeranjang() {
     const list = document.getElementById('cart-list');
-    // Anda perlu mencocokkan ID di cart dengan data produk (asumsi dataGlobal tersimpan di localStorage atau fetch ulang)
-    // Jika dataGlobal tidak ada, kita tampilkan ID-nya saja sementara
-    let html = `<h4>Produk Anda:</h4>`;
-    for(let id in cart) {
-        html += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <span>Produk ID: ${id}</span>
-                    <span>Jumlah: ${cart[id]}</span>
-                 </div>`;
+    if (!list) return;
+
+    // Cek apakah ada barang di keranjang
+    if (Object.keys(cart).length === 0) {
+        list.innerHTML = "<p>Keranjang Anda kosong. Yuk, belanja dulu!</p>";
+        return;
     }
+
+    let totalBelanja = 0;
+    let html = `<h4>Ringkasan Pesanan:</h4>`;
+
+    for(let id in cart) {
+        // Tambahkan konversi string ke number jika perlu agar .find cocok
+        const produk = allProducts.find(p => String(p.id) === String(id));
+        
+        if (produk) {
+            const subtotal = produk.hargaSetelahDiskon * cart[id];
+            totalBelanja += subtotal;
+            html += `
+                <div class="cart-item" style="display:flex; align-items:center; border-bottom:1px solid #ddd; padding:10px 0;">
+                    <img src="${produk.gambar1}" style="width:50px; height:50px; object-fit:cover; margin-right:10px;">
+                    <div style="flex-grow:1;">
+                        <strong>${produk.nama}</strong><br>
+                        <span>Rp ${parseInt(produk.hargaSetelahDiskon).toLocaleString()}</span>
+                    </div>
+                    <div class="qty-control">
+                        <button onclick="updateCart('${id}', -1)" style="padding: 2px 8px;">-</button>
+                        <span style="margin: 0 10px;">${cart[id]}</span>
+                        <button onclick="updateCart('${id}', 1)" style="padding: 2px 8px;">+</button>
+                        <button onclick="hapusItem('${id}')" style="background:red; color:white; border:none; margin-left:10px; padding:2px 8px;">X</button>
+                    </div>
+                </div>`;
+        }
+    }
+    
+    html += `<h3 style="text-align:right;">Total: Rp ${totalBelanja.toLocaleString()}</h3>`;
     list.innerHTML = html;
 }
+
+// ... sisanya (updateCart, hapusItem, dan submit listener) sama dengan kode Anda sebelumnya.
 
 document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
     e.preventDefault();
