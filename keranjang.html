@@ -1,13 +1,26 @@
-<main id="cart-items"></main>
-<div id="cart-summary">
-    <h3>Total Belanja: <span id="total-harga">0</span></h3>
-    <button onclick="checkoutWhatsApp()">Checkout via WA</button>
-</div>
+<form id="checkoutForm">
+    <input type="text" id="nama" placeholder="Nama Lengkap" required>
+    <input type="text" id="wa" placeholder="No. WA/HP" required>
+    <textarea id="alamat" placeholder="Alamat Lengkap" required></textarea>
+    <button type="submit">Kirim Pesanan</button>
+</form>
 
 <script>
-    function renderKeranjang() {
-        // Ambil data dari localStorage dan tampilkan di #cart-items
-        // Hitung total harga dan masukkan ke #total-harga
-    }
-    renderKeranjang();
+document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+        nama: document.getElementById('nama').value,
+        wa: document.getElementById('wa').value,
+        alamat: document.getElementById('alamat').value,
+        pesanan: localStorage.getItem('cart'), // Data keranjang
+        tanggal: new Date().toLocaleString()
+    };
+
+    // Kirim ke Google Script
+    const response = await fetch("URL_SCRIPT_ANDA", {
+        method: "POST",
+        body: JSON.stringify(data)
+    });
+    alert("Pesanan berhasil dikirim!");
+});
 </script>
