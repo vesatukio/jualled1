@@ -83,3 +83,16 @@ function aksesAdmin() {
         window.location.href = "https://docs.google.com/spreadsheets/d/1234567890/edit";
     }
 }
+async function loadProduk() {
+    try {
+        const res = await fetch(https://script.google.com/macros/s/AKfycbwLtAJsbkYAKsx9M1fUJu-eXR2-hMTp7cl2SZrprvGJ0_ql6BWkm9pM-9EBNHXDABGblA/exec);
+        dataGlobal = await res.json();
+        
+        // --- TAMBAHKAN BARIS INI ---
+        localStorage.setItem('allProducts', JSON.stringify(dataGlobal)); 
+        // ---------------------------
+        
+        renderProduk(dataGlobal);
+        loadKategori();
+    } catch (err) { console.error("Error:", err); }
+}
