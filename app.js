@@ -3,7 +3,7 @@ let dataGlobal = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || {};
 
 // 2. Fetch Data dari Google Sheet (https://script.google.com/macros/s/AKfycbwLtAJsbkYAKsx9M1fUJu-eXR2-hMTp7cl2SZrprvGJ0_ql6BWkm9pM-9EBNHXDABGblA/exec)
-const API_URL = "URL_APPS_SCRIPT_ANDA"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbwLtAJsbkYAKsx9M1fUJu-eXR2-hMTp7cl2SZrprvGJ0_ql6BWkm9pM-9EBNHXDABGblA/exec"; 
 
 async function loadProduk() {
     try {
