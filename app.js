@@ -34,22 +34,17 @@ function renderProduk(items) {
         return;
     }
 
-    container.innerHTML = items.map(p => `
-        <div class="card">
-            <img src="${p.gambar1 || 'placeholder.jpg'}" loading="lazy">
-            <div class="card-body">
-                <h4>${p.nama}</h4>
-                <span class="harga-asli">Rp ${parseInt(p.hargaJual || 0).toLocaleString()}</span>
-                <span class="harga-diskon">Rp ${parseInt(p.hargaSetelahDiskon || 0).toLocaleString()}</span>
-                <div class="qty-control">
-                    <button onclick="updateQty('${p.id}', -1)">-</button>
-                    <span>${cart[p.id] || 0}</span>
-                    <button onclick="updateQty('${p.id}', 1)">+</button>
-                </div>
-            </div>
+    // Di fungsi renderProduk
+container.innerHTML = items.map(p => `
+    <div class="card">
+        <img src="${p.gambar1 || 'placeholder.jpg'}">
+        <div class="card-body">
+            <h4>${p.nama}</h4>
+            <p>Harga: Rp ${parseInt(p.hargaSetelahDiskon || 0).toLocaleString()}</p>
+            <p>Stok: ${p.stok} ${p.satuan}</p>
         </div>
-    `).join('');
-}
+    </div>
+`).join('');
 // 4. Load Kategori
 function loadKategori() {
     const container = document.getElementById('kategori-list');
