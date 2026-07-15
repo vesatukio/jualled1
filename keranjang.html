@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keranjang Belanja - DUTAKITA</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .keranjang-item { display: flex; padding: 15px; border-bottom: 1px solid #eee; align-items: center; }
+        .keranjang-item img { width: 60px; height: 60px; object-fit: cover; margin-right: 15px; }
+        .total-area { padding: 20px; background: white; position: sticky; bottom: 60px; border-top: 2px solid #ee4d2d; }
+        .btn-checkout { width: 100%; padding: 12px; background: #ee4d2d; color: white; border: none; border-radius: 4px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header style="background: #ee4d2d; padding: 15px; color: white;">
+        <h3 style="margin:0;">Keranjang Saya</h3>
+    </header>
+
+    <div id="cart-list"></div>
+
+    <div class="total-area">
+        <p>Total: <strong id="total-price">Rp 0</strong></p>
+        <button class="btn-checkout" onclick="checkout()">Checkout Sekarang</button>
+    </div>
+
+    <!-- Bottom Nav Sama Dengan Index -->
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="window.location.href='index.html'">🏠<span>Home</span></div>
+        <div class="nav-item">📋<span>Kategori</span></div>
+        <div class="nav-item" style="color: #ee4d2d;">🛒<span>Keranjang</span></div>
+        <div class="nav-item">👤<span>Akun</span></div>
+    </nav>
+
+    <script>
+        // Logika untuk menampilkan data keranjang
+        const cart = JSON.parse(localStorage.getItem('cart')) || {};
+        const container = document.getElementById('cart-list');
+        
+        // Catatan: Anda perlu akses ke dataGlobal dari app.js
+        // Pastikan Anda memuat data produk terlebih dahulu agar bisa menampilkan nama/harga
+        
+        function tampilkanKeranjang() {
+            // Logika render list keranjang berdasarkan cart di localStorage
+        }
+        
+        function checkout() {
+            // Logika format pesan WhatsApp
+            alert("Mengalihkan ke WhatsApp...");
+        }
+    </script>
+</body>
+</html>
