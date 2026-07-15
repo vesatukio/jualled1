@@ -28,3 +28,40 @@ function hubungiWA(nama) {
 }
 
 loadProduk();
+let cart = JSON.parse(localStorage.getItem('cart')) || {};
+
+function renderProduk(items) {
+    const container = document.getElementById('product-list');
+    container.innerHTML = items.map(p => {
+        let count = cart[p.id] || 0;
+        return `
+            <div class="card">
+                <img src="${p.gambar1}" alt="${p.nama}">
+                <h4>${p.nama}</h4>
+                <p>Rp ${p.hargaSetelahDiskon.toLocaleString()}</p>
+                <div class="qty-control">
+                    <button onclick="updateQty('${p.id}', -1)">-</button>
+                    <span>${count}</span>
+                    <button onclick="updateQty('${p.id}', 1)">+</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateQty(id, delta) {
+    cart[id] = (cart[id] || 0) + delta;
+    if (cart[id] <= 0) delete cart[id];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    // Re-render hanya list produk
+    loadProduk(); 
+}
+
+function updateCartCount() {
+    const count = Object.values(cart).reduce((a, b) => a + b, 0);
+    document.getElementById('cart-count').innerText = count;
+}
+
+// Inisialisasi awal
+updateCartCount();
