@@ -1,5 +1,17 @@
-:root { --primary: #1B8F50; --bg: #F6F7FB; }
-body { background: var(--bg); font-family: sans-serif; }
-.login-container { max-width: 400px; margin: 100px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; }
-button { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; cursor: pointer; }
+:root { --hijau: #28a745; --orange: #fd7e14; }
+body { font-family: sans-serif; margin: 0; background: #f4f4f4; }
+
+/* Grid 2 kolom HP, 4 kolom PC */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+@media (min-width: 768px) {
+    .product-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+}
+
+.card { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.card img { width: 100%; height: auto; border-radius: 4px; }
+.btn-wa { background: var(--hijau); color: white; border: none; padding: 8px; width: 100%; cursor: pointer; }
