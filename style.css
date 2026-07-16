@@ -1,3 +1,4 @@
+css_content = """
 body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding-bottom: 60px; }
 header { background-color: #ff9800; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
 .logo { font-weight: bold; font-size: 1.2em; color: white; }
@@ -10,5 +11,4 @@ header { background-color: #ff9800; padding: 15px; display: flex; justify-conten
 .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #ff9800; display: flex; justify-content: space-around; padding: 10px 0; }
 .bottom-nav a { color: white; text-decoration: none; }
 #cart-box { position: fixed; top: 60px; right: 10px; background: white; padding: 20px; border: 1px solid #ddd; display: none; }
-style.css
-Menampilkan style.css.
+"""
