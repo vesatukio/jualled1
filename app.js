@@ -99,20 +99,14 @@ async function saveStock() {
     const nama = document.getElementById('edit-nama-produk').innerText;
     const stokBaru = document.getElementById('input-stok-baru').value;
     
-    // Pastikan URL API Anda sudah benar dan diakhiri dengan /exec
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Penting agar tidak diblokir browser
-            cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'updateStok', nama: nama, stokBaru: stokBaru })
-        });
-        
-        alert("Permintaan update stok dikirim!");
-        location.reload(); 
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Gagal menghubungi server.");
-    }
+    // Pastikan API_URL Anda benar-benar URL Web App dari GAS
+    await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Mencegah error CORS
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateStok', nama: nama, stokBaru: stokBaru })
+    });
+    
+    alert("Data terkirim ke server!");
+    location.reload(); 
 }
