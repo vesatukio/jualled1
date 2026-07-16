@@ -1,29 +1,39 @@
+/**
+ * KONFIGURASI
+ */
 const API_URL = "https://script.google.com/macros/s/AKfycbwdl_o7WZyyPaZHekAwqUYnoA1h29SGc_jLN-m9o2LV4jQVNXsUXO4Wi3aVymH1pj7G/exec";
 let dataGlobal = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || {};
 
-// 1. Inisialisasi Saat Halaman Dimuat
+/**
+ * INISIALISASI
+ */
 document.addEventListener('DOMContentLoaded', () => {
     loadProduk();
     updateCartCount();
 });
 
-// 2. Mengambil Data dari Google Sheet
+/**
+ * DATA FETCHING
+ */
 async function loadProduk() {
     try {
         const res = await fetch(API_URL);
         dataGlobal = await res.json();
-        localStorage.setItem('allProducts', JSON.stringify(dataGlobal)); 
+        
+        localStorage.setItem('allProducts', JSON.stringify(dataGlobal));
         renderProduk(dataGlobal);
-        loadKategori(); 
-    } catch (err) { 
-        console.error("Error memuat data:", err); 
+        loadKategori();
+    } catch (err) {
+        console.error("Error memuat data:", err);
         const container = document.getElementById('product-list');
-        if (container) container.innerHTML = "<p>Gagal memuat produk. Periksa koneksi atau URL API.</p>";
+        if (container) container.innerHTML = "<p>Gagal memuat produk. Periksa koneksi.</p>";
     }
 }
 
-// 3. Menampilkan Produk ke Layar
+/**
+ * RENDERING UI
+ */
 function renderProduk(items) {
     const container = document.getElementById('product-list');
     if (!container) return;
@@ -50,17 +60,18 @@ function renderProduk(items) {
     `).join('');
 }
 
-// 4. Memuat Tombol Kategori
 function loadKategori() {
     const container = document.getElementById('kategori-list');
     if (!container) return;
 
     const kategoriList = [...new Set(dataGlobal.map(p => p['Kategori']))];
-    container.innerHTML = `<button onclick="renderProduk(dataGlobal)">Semua</button>` + 
+    container.innerHTML = `<button onclick="renderProduk(dataGlobal)">Semua</button>` +
         kategoriList.map(k => `<button onclick="filterProduk('${k}')">${k}</button>`).join('');
 }
 
-// 5. Fungsi Keranjang Belanja
+/**
+ * LOGIKA KERANJANG
+ */
 function updateQty(id, delta) {
     cart[id] = (cart[id] || 0) + delta;
     if (cart[id] <= 0) delete cart[id];
@@ -70,29 +81,30 @@ function updateQty(id, delta) {
 }
 
 function updateCartCount() {
-    const els = document.querySelectorAll('#cart-count');
     const total = Object.values(cart).reduce((a, b) => a + b, 0);
-    els.forEach(el => el.innerText = total);
+    document.querySelectorAll('#cart-count').forEach(el => el.innerText = total);
 }
 
-// 6. Pencarian & Filter
+/**
+ * FILTER & PENCARIAN
+ */
 function filterProduk(kategori) {
-    const filtered = dataGlobal.filter(p => p['Kategori'] === kategori);
-    renderProduk(filtered);
+    renderProduk(dataGlobal.filter(p => p['Kategori'] === kategori));
 }
 
 const searchInput = document.getElementById('search');
 if (searchInput) {
     searchInput.addEventListener('input', (e) => {
         const keyword = e.target.value.toLowerCase();
-        const filtered = dataGlobal.filter(p => 
+        renderProduk(dataGlobal.filter(p => 
             p['Nama Barang'].toLowerCase().includes(keyword)
-        );
-        renderProduk(filtered);
+        ));
     });
 }
 
-// 7. Akses Admin
+/**
+ * ADMIN UTILITIES
+ */
 function aksesAdmin() {
     const password = prompt("Masukkan Password Admin:");
     if (password === "admin123") {
