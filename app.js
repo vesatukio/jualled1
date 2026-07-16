@@ -62,7 +62,7 @@ function filterCategory(kategori) {
 // 3. FUNGSI UTAMA FETCH
 async function fetchProducts() {
     try {
-        const res = await fetch(API_URL);
+        const res = await fetch(`${API_URL}?role=${isAdmin ? 'admin' : 'user'}`);
         const data = await res.json();
 
         console.log(data);
@@ -176,3 +176,8 @@ function openModal(nama) {
 function closeModal() {
     document.getElementById("adminModal").classList.add("hidden");
 }
+function renderProducts(products) {
+    console.log("ADMIN:", isAdmin);
+    console.log("DATA PRODUK:", products[0]);
+
+    const grid = document.getElementById('product-grid');
