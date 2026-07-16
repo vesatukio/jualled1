@@ -3,42 +3,32 @@ const isAdmin = new URLSearchParams(window.location.search).get('role') === 'adm
 let cart = {}; 
 let allProducts = [];
 
+let allProducts = [];
+
 async function fetchProducts() {
     const res = await fetch(`${API_URL}?role=${isAdmin ? 'admin' : 'user'}`);
     allProducts = await res.json();
+    renderCategories(); // Panggil fungsi buat tombol kategori
     renderProducts(allProducts);
 }
 
-function renderProducts(products) {
-    const grid = document.getElementById('product-grid');
-    grid.innerHTML = products.map(p => `
-        <div class="product-card">
-            ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
-            <img src="${p.Gambar}" style="width:100%">
-            <h4>${p.Nama}</h4>
-            
-            ${isAdmin ? `
-                <div class="admin-panel" style="background:#fff3e0; padding:5px; font-size:12px;">
-                    <p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>
-                    <p>Stok: <b>${p.Stok}</b> 
-                       <button onclick="openModal('${p.Nama}')" style="cursor:pointer;">Edit Stok</button>
-                    </p>
-                </div>
-            ` : `
-                <div class="price-old">Rp ${p.HargaCoret ? p.HargaCoret.toLocaleString() : '0'}</div>
-                <div class="price-final">Rp ${p.HargaFinal ? p.HargaFinal.toLocaleString() : '0'}</div>
-                <p>Stok: <span id="stok-${p.Nama}">${p.Stok}</span></p>
-            `}
-            
-            ${!isAdmin ? `
-                <div class="controls">
-                    <button onclick="updateOrder('${p.Nama}', -1)">-</button>
-                    <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
-                    <button onclick="updateOrder('${p.Nama}', 1)">+</button>
-                </div>
-            ` : ''}
-        </div>
+function renderCategories() {
+    const container = document.getElementById('category-container');
+    // Ambil kategori unik dari data produk
+    const categories = ['Semua', ...new Set(allProducts.map(p => p.Kategori))];
+    
+    container.innerHTML = categories.map(cat => `
+        <button class="cat-btn" onclick="filterCategory('${cat}')">${cat}</button>
     `).join('');
+}
+
+function filterCategory(kategori) {
+    if (kategori === 'Semua') {
+        renderProducts(allProducts);
+    } else {
+        const filtered = allProducts.filter(p => p.Kategori === kategori);
+        renderProducts(filtered);
+    }
 }
 function updateOrder(nama, change) {
     if (!cart[nama]) cart[nama] = 0;
