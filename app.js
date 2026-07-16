@@ -1,4 +1,5 @@
-const products = [{"ID":1,"SKU":"JS5W","Nama_Barang":"LED AC JS 5W","Harga_Asli":3000,"Diskon_Persen":2,"Harga_Final":2940,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":2,"SKU":"FPL5W","Nama_Barang":"LED AC FPL 5W","Harga_Asli":3480,"Diskon_Persen":2,"Harga_Final":3410,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":3,"SKU":"FPL7W","Nama_Barang":"LED AC FPL 7W","Harga_Asli":4200,"Diskon_Persen":2,"Harga_Final":4116,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":4,"SKU":"FPL9W","Nama_Barang":"LED AC FPL 9W","Harga_Asli":5400,"Diskon_Persen":2,"Harga_Final":5292,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":5,"SKU":"FPL12W","Nama_Barang":"LED AC FPL 12W","Harga_Asli":6720,"Diskon_Persen":2,"Harga_Final":6588,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":6,"SKU":"FPL15W","Nama_Barang":"LED AC FPL 15W","Harga_Asli":8760,"Diskon_Persen":2,"Harga_Final":8585,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":7,"SKU":"FPL18W","Nama_Barang":"LED AC FPL 18W","Harga_Asli":10200,"Diskon_Persen":2,"Harga_Final":9996,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":8,"SKU":"FPL24W","Nama_Barang":"LED AC FPL 24W","Harga_Asli":10560,"Diskon_Persen":2,"Harga_Final":10349,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":9,"SKU":"FPL30W","Nama_Barang":"LED AC FPL 30W","Harga_Asli":18000,"Diskon_Persen":2,"Harga_Final":17640,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":10,"SKU":"FPL40W","Nama_Barang":"LED AC FPL 40W","Harga_Asli":19200,"Diskon_Persen":2,"Harga_Final":18816,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"},{"ID":11,"SKU":"FPL50W","Nama_Barang":"LED AC FPL 50W","Harga_Asli":22800,"Diskon_Persen":2,"Harga_Final":22344,"Gambar":"https:\/\/png.pngtree.com\/png-vector\/20230831\/ourmid\/pngtree-light-bulb-clipart-png-image_9230588.png"}];
+js_content = """
+const products = """ + df.to_json(orient='records') + """;
 const cart = {};
 
 function renderProducts() {
@@ -31,3 +32,9 @@ function toggleCart() {
 }
 
 renderProducts();
+"""
+
+# Save to files
+with open("index.html", "w") as f: f.write(html_content)
+with open("style.css", "w") as f: f.write(css_content)
+with open("app.js", "w") as f: f.write(js_content)
