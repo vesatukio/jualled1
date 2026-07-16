@@ -103,20 +103,34 @@ function updateCartUI() {
     if (cartCount) cartCount.innerText = count;
 }
 
-function saveStock() {
+async function saveStock() {
     const nama = document.getElementById('edit-nama-produk').innerText;
     const stokBaru = document.getElementById('input-stok-baru').value;
-    fetch(API_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'updateStok', nama: nama, stokBaru: stokBaru })
-    }).then(() => { alert("Stok berhasil diupdate!"); location.reload(); });
+
+    if (!stokBaru) {
+        alert("Masukkan angka stok!");
+        return;
+    }
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'updateStok', nama: nama, stokBaru: stokBaru })
+        });
+
+        // Cek apakah server merespon dengan benar
+        if (response.ok) {
+            const result = await response.text();
+            console.log("Respon Server:", result); // Lihat di F12 > Console
+            alert("Berhasil: " + result);
+            location.reload(); 
+        } else {
+            throw new Error('Server merespon dengan status ' + response.status);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Gagal update stok. Cek Console (F12) untuk detailnya.");
+    }
 }
-
-function openModal(nama) { document.getElementById('edit-nama-produk').innerText = nama; document.getElementById('adminModal').classList.remove('hidden'); }
-function closeModal() { document.getElementById('adminModal').classList.add('hidden'); }
-function toggleCart() { document.getElementById('cart-box').classList.toggle('hidden'); }
-
-// 5. JALANKAN SAAT LOAD
-fetchProducts();
