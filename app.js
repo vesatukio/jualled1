@@ -176,8 +176,4 @@ function openModal(nama) {
 function closeModal() {
     document.getElementById("adminModal").classList.add("hidden");
 }
-function renderProducts(products) {
-    console.log("ADMIN:", isAdmin);
-    console.log("DATA PRODUK:", products[0]);
 
-    const grid = document.getElementById('product-grid');
