@@ -62,19 +62,20 @@ function filterCategory(kategori) {
 // 3. FUNGSI UTAMA FETCH
 async function fetchProducts() {
     try {
-        const res = await fetch(`${API_URL}?role=${isAdmin ? 'admin' : 'user'}`);
+        const res = await fetch(API_URL);
         const data = await res.json();
-        
-        console.log("Data diterima dari server:", data); // CEK DI F12 CONSOLE
-        
-        // Filter agar hanya data yang punya Nama yang masuk
-        allProducts = data.filter(p => p && p.Nama);
-        
+
+        console.log(data);
+
+        allProducts = data;
+
+        console.log("Jumlah produk:", allProducts.length);
+
         renderCategories();
         renderProducts(allProducts);
-    } catch (e) {
-        console.error("Gagal ambil data. Pastikan Web App sudah di-deploy:", e);
-        document.getElementById('product-grid').innerHTML = '<p>Gagal memuat produk. Cek koneksi.</p>';
+
+    } catch (err) {
+        console.error(err);
     }
 }
 // 4. FUNGSI KERANJANG & MODAL (Sama seperti punya Anda)
