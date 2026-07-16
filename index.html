@@ -26,5 +26,13 @@
         <a href="#">Home</a><a href="#">Kategori</a><a href="#">Chat</a>
     </nav>
     <script src="app.js"></script>
+    <script>
+    document.getElementById('admin-trigger').addEventListener('click', () => {
+        const password = prompt("Masukkan Password Admin:");
+        if (password === "admin123") { // Ganti password sesuai keinginan Anda
+            window.location.href = window.location.pathname + "?role=admin";
+        }
+    });
+</script>
 </body>
 </html>
