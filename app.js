@@ -16,20 +16,30 @@ function renderProducts(products) {
             ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
             <img src="${p.Gambar}" style="width:100%">
             <h4>${p.Nama}</h4>
-            ${isAdmin ? `<p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>` : `
+            
+            ${isAdmin ? `
+                <div class="admin-panel" style="background:#fff3e0; padding:5px; font-size:12px;">
+                    <p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>
+                    <p>Stok: <b>${p.Stok}</b> 
+                       <button onclick="openModal('${p.Nama}')" style="cursor:pointer;">Edit Stok</button>
+                    </p>
+                </div>
+            ` : `
                 <div class="price-old">Rp ${p.HargaCoret ? p.HargaCoret.toLocaleString() : '0'}</div>
                 <div class="price-final">Rp ${p.HargaFinal ? p.HargaFinal.toLocaleString() : '0'}</div>
+                <p>Stok: <span id="stok-${p.Nama}">${p.Stok}</span></p>
             `}
-            <p>Stok: <span id="stok-${p.Nama}">${p.Stok}</span></p>
-            <div class="controls">
-                <button onclick="updateOrder('${p.Nama}', -1)">-</button>
-                <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
-                <button onclick="updateOrder('${p.Nama}', 1)">+</button>
-            </div>
+            
+            ${!isAdmin ? `
+                <div class="controls">
+                    <button onclick="updateOrder('${p.Nama}', -1)">-</button>
+                    <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
+                    <button onclick="updateOrder('${p.Nama}', 1)">+</button>
+                </div>
+            ` : ''}
         </div>
     `).join('');
 }
-
 function updateOrder(nama, change) {
     if (!cart[nama]) cart[nama] = 0;
     cart[nama] += change;
