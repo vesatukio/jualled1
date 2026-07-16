@@ -16,7 +16,7 @@ function renderProducts(products) {
     grid.innerHTML = products.map(p => `
         <div class="product-card">
             ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
-            <img src="${p.Gambar}" style="width:100%">
+            <img src="${p.Gambar || 'https://via.placeholder.com/300'}" style="width:100%">
             <h4>${p.Nama}</h4>
             ${isAdmin ? `
                 <div class="admin-panel" style="background:#fff3e0; padding:5px; font-size:12px;">
