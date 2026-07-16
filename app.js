@@ -6,24 +6,23 @@ async function fetchProducts() {
     const data = await res.json();
     const grid = document.getElementById('product-grid');
     
-    // Contoh cuplikan bagian render di app.js
-grid.innerHTML = data.map(p => `
-    <div class="product-card">
-        ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
-        <img src="${p.Gambar}" style="width:100%">
-        <h4>${p.Nama}</h4>
-        
-        // Pastikan penulisan p.HargaCoret sesuai dengan di GAS
-${isAdmin ? `
-    <p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>
-` : `
-    <div class="price-old">Rp ${p.HargaCoret ? p.HargaCoret.toLocaleString('id-ID') : '0'}</div>
-    <div class="price-final">Rp ${p.HargaFinal ? p.HargaFinal.toLocaleString('id-ID') : '0'}</div>
-`}
-        
-        <p>Stok: ${p.Stok}</p>
-        ${p.Stok > 0 ? `<button>+</button> <span>0</span> <button>-</button>` : '<button disabled>Stok Kosong</button>'}
-    </div>
-`).join('');
+    grid.innerHTML = data.map(p => `
+        <div class="product-card">
+            ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
+            <img src="${p.Gambar}" style="width:100%">
+            <h4>${p.Nama}</h4>
+            
+            ${isAdmin ? `
+                <p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>
+            ` : `
+                <div class="price-old">Rp ${p.HargaCoret ? p.HargaCoret.toLocaleString('id-ID') : '0'}</div>
+                <div class="price-final">Rp ${p.HargaFinal ? p.HargaFinal.toLocaleString('id-ID') : '0'}</div>
+            `}
+            
+            <p>Stok: ${p.Stok}</p>
+            ${p.Stok > 0 ? `<button>+</button> <span>0</span> <button>-</button>` : '<button disabled>Stok Kosong</button>'}
+        </div>
+    `).join('');
+}
 
 fetchProducts();
