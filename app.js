@@ -108,29 +108,26 @@ async function saveStock() {
     const stokBaru = document.getElementById('input-stok-baru').value;
 
     if (!stokBaru) {
-        alert("Masukkan angka stok!");
+        alert("Isi jumlah stok!");
         return;
     }
 
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            mode: 'cors',
+            mode: 'cors', // Harus 'cors'
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'updateStok', nama: nama, stokBaru: stokBaru })
+            body: JSON.stringify({ 
+                action: 'updateStok', 
+                nama: nama, 
+                stokBaru: stokBaru 
+            })
         });
 
-        // Cek apakah server merespon dengan benar
-        if (response.ok) {
-            const result = await response.text();
-            console.log("Respon Server:", result); // Lihat di F12 > Console
-            alert("Berhasil: " + result);
-            location.reload(); 
-        } else {
-            throw new Error('Server merespon dengan status ' + response.status);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Gagal update stok. Cek Console (F12) untuk detailnya.");
+        const result = await response.text();
+        alert("Respon Server: " + result); 
+        location.reload(); 
+    } catch (err) {
+        alert("Gagal koneksi: " + err);
     }
 }
