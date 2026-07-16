@@ -1,7 +1,7 @@
 /**
  * KONFIGURASI
  */
-const API_URL = "https://script.google.com/macros/s/AKfycbwdl_o7WZyyPaZHekAwqUYnoA1h29SGc_jLN-m9o2LV4jQVNXsUXO4Wi3aVymH1pj7G/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzow1xcIduyHnwMA0WmlCvkz_s81IBu0ALbZ70fxPoXqEsYwtESEMm-S8mg6TZSuw95/exec";
 let dataGlobal = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || {};
 
