@@ -143,3 +143,23 @@ async function saveStock() {
         alert("Gagal koneksi ke server: " + err.message);
     }
 }
+// =====================
+// START APP
+// =====================
+document.addEventListener("DOMContentLoaded", () => {
+    fetchProducts();
+
+    const search = document.getElementById("search");
+
+    if (search) {
+        search.addEventListener("input", function () {
+            const keyword = this.value.toLowerCase();
+
+            renderProducts(
+                allProducts.filter(p =>
+                    p.Nama.toLowerCase().includes(keyword)
+                )
+            );
+        });
+    }
+});
