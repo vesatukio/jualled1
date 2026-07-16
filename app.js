@@ -20,10 +20,24 @@ function renderProducts(products) {
             <h4>${p.Nama}</h4>
             ${isAdmin ? `
                 <div class="admin-panel" style="background:#fff3e0; padding:5px; font-size:12px;">
-                    <p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>
-                    <p>Stok: <b>${p.Stok}</b> 
-                       <button onclick="openModal('${p.Nama}')">Edit Stok</button>
-                    </p>
+                    <p>
+    Modal: Rp ${Number(p.HargaModal).toLocaleString()} 
+    | Untung: Rp ${Number(p.Untung).toLocaleString()}
+</p>
+
+<p>
+    Total Modal: 
+    <b>
+    Rp ${(Number(p.HargaModal) * Number(p.Stok)).toLocaleString()}
+    </b>
+</p>
+
+<p>
+    Stok: <b>${p.Stok}</b>
+    <button onclick="openModal('${p.Nama}')">
+        Edit Stok
+    </button>
+</p>
                 </div>
             ` : `
                 <div class="price-old">Rp ${p.HargaCoret?.toLocaleString() || '0'}</div>
