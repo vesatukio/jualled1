@@ -119,19 +119,26 @@ async function saveStock() {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            mode: 'cors', // Harus 'cors'
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: 'updateStok', 
-                nama: nama, 
-                stokBaru: stokBaru 
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify({
+                action: 'updateStok',
+                nama: nama,
+                stokBaru: Number(stokBaru)
             })
         });
 
         const result = await response.text();
-        alert("Respon Server: " + result); 
-        location.reload(); 
+
+        alert(result);
+
+        if (result.includes("Berhasil")) {
+            location.reload();
+        }
+
     } catch (err) {
-        alert("Gagal koneksi: " + err);
+        console.error(err);
+        alert("Gagal koneksi ke server: " + err.message);
     }
 }
