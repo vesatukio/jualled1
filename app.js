@@ -2,20 +2,50 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzow1xcIduyHnwMA0WmlCvk
 const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
 let cart = {}; 
 let allProducts = [];
-async function fetchProducts() {
-    const res = await fetch(`${API_URL}?role=${isAdmin ? 'admin' : 'user'}`);
-    allProducts = await res.json();
-    renderCategories(); // Panggil fungsi buat tombol kategori
-    renderProducts(allProducts);
+
+// 1. FUNGSI RENDER PRODUK (Diletakkan paling atas agar tidak ReferenceError)
+function renderProducts(products) {
+    const grid = document.getElementById('product-grid');
+    if (!grid) return;
+
+    if (!products || products.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;">Produk tidak ditemukan.</p>';
+        return;
+    }
+
+    grid.innerHTML = products.map(p => `
+        <div class="product-card">
+            ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
+            <img src="${p.Gambar}" style="width:100%">
+            <h4>${p.Nama}</h4>
+            ${isAdmin ? `
+                <div class="admin-panel" style="background:#fff3e0; padding:5px; font-size:12px;">
+                    <p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>
+                    <p>Stok: <b>${p.Stok}</b> 
+                       <button onclick="openModal('${p.Nama}')">Edit Stok</button>
+                    </p>
+                </div>
+            ` : `
+                <div class="price-old">Rp ${p.HargaCoret?.toLocaleString() || '0'}</div>
+                <div class="price-final">Rp ${p.HargaFinal?.toLocaleString() || '0'}</div>
+                <p>Stok: <span id="stok-${p.Nama}">${p.Stok}</span></p>
+            `}
+            ${!isAdmin ? `
+                <div class="controls">
+                    <button onclick="updateOrder('${p.Nama}', -1)">-</button>
+                    <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
+                    <button onclick="updateOrder('${p.Nama}', 1)">+</button>
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
 }
 
+// 2. FUNGSI KATEGORI
 function renderCategories() {
     const container = document.getElementById('category-container');
-    if (!container) return; // Mencegah error jika div tidak ditemukan
-
-    // .filter(Boolean) akan membuang data yang kosong/null/undefined
+    if (!container) return;
     const categories = ['Semua', ...new Set(allProducts.map(p => p.Kategori).filter(Boolean))];
-    
     container.innerHTML = categories.map(cat => `
         <button class="cat-btn" onclick="filterCategory('${cat}')">${cat}</button>
     `).join('');
@@ -25,29 +55,38 @@ function filterCategory(kategori) {
     if (kategori === 'Semua') {
         renderProducts(allProducts);
     } else {
-        const filtered = allProducts.filter(p => p.Kategori === kategori);
-        renderProducts(filtered);
+        renderProducts(allProducts.filter(p => p.Kategori === kategori));
     }
 }
+
+// 3. FUNGSI UTAMA FETCH
+async function fetchProducts() {
+    try {
+        const res = await fetch(`${API_URL}?role=${isAdmin ? 'admin' : 'user'}`);
+        const data = await res.json();
+        // Bersihkan data dari baris kosong
+        allProducts = data.filter(p => p.Nama && p.Nama.trim() !== "");
+        renderCategories();
+        renderProducts(allProducts);
+    } catch (e) {
+        console.error("Error memuat produk:", e);
+    }
+}
+
+// 4. FUNGSI KERANJANG & MODAL (Sama seperti punya Anda)
 function updateOrder(nama, change) {
     if (!cart[nama]) cart[nama] = 0;
     cart[nama] += change;
     if (cart[nama] < 0) cart[nama] = 0;
-    
-    // Update angka di kartu produk
     const qtyElement = document.getElementById(`qty-${nama}`);
     if (qtyElement) qtyElement.innerText = cart[nama];
-    
-    // PENTING: Panggil fungsi untuk update tampilan keranjang
     updateCartUI();
 }
 
 function updateCartUI() {
     const cartItemsDiv = document.getElementById('cart-items');
     const cartCount = document.getElementById('cart-count');
-    let html = '';
-    let total = 0;
-    let count = 0;
+    let total = 0, count = 0, html = '';
 
     for (const [nama, qty] of Object.entries(cart)) {
         if (qty > 0) {
@@ -59,43 +98,25 @@ function updateCartUI() {
             }
         }
     }
-    
     if (cartItemsDiv) cartItemsDiv.innerHTML = html || '<p>Keranjang kosong</p>';
     if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = 'Total: Rp ' + total.toLocaleString();
     if (cartCount) cartCount.innerText = count;
 }
 
-function toggleCart() {
-    const box = document.getElementById('cart-box');
-    if (box) box.classList.toggle('hidden');
-}
-
-// Jalankan saat halaman dimuat
-fetchProducts();
-// Fungsi untuk membuka modal
-function openModal(nama) {
-    document.getElementById('edit-nama-produk').innerText = nama;
-    document.getElementById('adminModal').classList.remove('hidden');
-}
-
-// Fungsi untuk menutup modal
-function closeModal() {
-    document.getElementById('adminModal').classList.add('hidden');
-}
-
-// Fungsi simpan (kirim data ke Apps Script)
-async function saveStock() {
+function saveStock() {
     const nama = document.getElementById('edit-nama-produk').innerText;
     const stokBaru = document.getElementById('input-stok-baru').value;
-    
-    // Ganti 'no-cors' menjadi 'cors'
-    await fetch(API_URL, {
+    fetch(API_URL, {
         method: 'POST',
-        mode: 'cors', 
+        mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'updateStok', nama: nama, stokBaru: stokBaru })
-    });
-    
-    alert("Stok berhasil diupdate!");
-    location.reload(); 
+    }).then(() => { alert("Stok berhasil diupdate!"); location.reload(); });
 }
+
+function openModal(nama) { document.getElementById('edit-nama-produk').innerText = nama; document.getElementById('adminModal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('adminModal').classList.add('hidden'); }
+function toggleCart() { document.getElementById('cart-box').classList.toggle('hidden'); }
+
+// 5. JALANKAN SAAT LOAD
+fetchProducts();
