@@ -8,3 +8,4 @@ header { background: var(--primary); padding: 15px; display: flex; justify-conte
 .price-old { text-decoration: line-through; color: #888; font-size: 12px; }
 .price-final { color: var(--primary); font-weight: bold; }
 .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; padding: 15px 0; }
+.hidden { display: none !important; }
