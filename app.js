@@ -11,8 +11,10 @@ async function fetchProducts() {
 
 function renderCategories() {
     const container = document.getElementById('category-container');
-    // Ambil kategori unik dari data produk
-    const categories = ['Semua', ...new Set(allProducts.map(p => p.Kategori))];
+    if (!container) return; // Mencegah error jika div tidak ditemukan
+
+    // .filter(Boolean) akan membuang data yang kosong/null/undefined
+    const categories = ['Semua', ...new Set(allProducts.map(p => p.Kategori).filter(Boolean))];
     
     container.innerHTML = categories.map(cat => `
         <button class="cat-btn" onclick="filterCategory('${cat}')">${cat}</button>
@@ -86,14 +88,14 @@ async function saveStock() {
     const nama = document.getElementById('edit-nama-produk').innerText;
     const stokBaru = document.getElementById('input-stok-baru').value;
     
-    // Pastikan API_URL Anda benar-benar URL Web App dari GAS
+    // Ganti 'no-cors' menjadi 'cors'
     await fetch(API_URL, {
         method: 'POST',
-        mode: 'no-cors', // Mencegah error CORS
+        mode: 'cors', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'updateStok', nama: nama, stokBaru: stokBaru })
     });
     
-    alert("Data terkirim ke server!");
+    alert("Stok berhasil diupdate!");
     location.reload(); 
 }
