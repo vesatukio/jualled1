@@ -73,3 +73,28 @@ function toggleCart() {
 
 // Jalankan saat halaman dimuat
 fetchProducts();
+// Fungsi untuk membuka modal
+function openModal(nama) {
+    document.getElementById('edit-nama-produk').innerText = nama;
+    document.getElementById('adminModal').classList.remove('hidden');
+}
+
+// Fungsi untuk menutup modal
+function closeModal() {
+    document.getElementById('adminModal').classList.add('hidden');
+}
+
+// Fungsi simpan (kirim data ke Apps Script)
+async function saveStock() {
+    const nama = document.getElementById('edit-nama-produk').innerText;
+    const stokBaru = document.getElementById('input-stok-baru').value;
+    
+    // Kirim data ke API Anda (Tambahkan password jika ingin aman)
+    await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'updateStok', nama: nama, stokBaru: stokBaru })
+    });
+    
+    alert("Stok berhasil diupdate!");
+    location.reload();
+}
