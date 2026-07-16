@@ -103,7 +103,28 @@ function updateCartUI() {
             }
         }
     }
-    if (cartItemsDiv) cartItemsDiv.innerHTML = html || '<p>Keranjang kosong</p>';
+    if (cartItemsDiv) {
+    cartItemsDiv.innerHTML = html || '<p>Keranjang kosong</p>';
+
+    if (html) {
+        cartItemsDiv.innerHTML += `
+            <button 
+                onclick="resetCart()"
+                style="
+                    width:100%;
+                    margin-top:15px;
+                    padding:10px;
+                    background:#f44336;
+                    color:white;
+                    border:none;
+                    border-radius:5px;
+                    cursor:pointer;
+                ">
+                Reset Keranjang
+            </button>
+        `;
+    }
+}
     if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = 'Total: Rp ' + total.toLocaleString();
     if (cartCount) cartCount.innerText = count;
 }
@@ -176,4 +197,10 @@ function openModal(nama) {
 function closeModal() {
     document.getElementById("adminModal").classList.add("hidden");
 }
-
+function resetCart() {
+    if (confirm("Hapus semua pesanan?")) {
+        cart = {};
+        updateCartUI();
+        renderProducts(allProducts);
+    }
+}
