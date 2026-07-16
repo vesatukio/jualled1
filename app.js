@@ -2,9 +2,6 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzow1xcIduyHnwMA0WmlCvk
 const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
 let cart = {}; 
 let allProducts = [];
-
-let allProducts = [];
-
 async function fetchProducts() {
     const res = await fetch(`${API_URL}?role=${isAdmin ? 'admin' : 'user'}`);
     allProducts = await res.json();
