@@ -64,15 +64,19 @@ async function fetchProducts() {
     try {
         const res = await fetch(`${API_URL}?role=${isAdmin ? 'admin' : 'user'}`);
         const data = await res.json();
-        // Bersihkan data dari baris kosong
-        allProducts = data.filter(p => p.Nama && p.Nama.trim() !== "");
+        
+        console.log("Data diterima dari server:", data); // CEK DI F12 CONSOLE
+        
+        // Filter agar hanya data yang punya Nama yang masuk
+        allProducts = data.filter(p => p && p.Nama);
+        
         renderCategories();
         renderProducts(allProducts);
     } catch (e) {
-        console.error("Error memuat produk:", e);
+        console.error("Gagal ambil data. Pastikan Web App sudah di-deploy:", e);
+        document.getElementById('product-grid').innerHTML = '<p>Gagal memuat produk. Cek koneksi.</p>';
     }
 }
-
 // 4. FUNGSI KERANJANG & MODAL (Sama seperti punya Anda)
 function updateOrder(nama, change) {
     if (!cart[nama]) cart[nama] = 0;
