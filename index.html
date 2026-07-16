@@ -1,36 +1,30 @@
-html_content = """
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toko Online Duta LED</title>
+    <title>Duta LED Store</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <header>
-        <div class="logo">DUTA LED <span id="admin-secret" style="cursor:pointer;">🔒</span></div>
-        <input type="text" placeholder="Cari produk...">
-        <div class="cart-icon" onclick="toggleCart()">🛒</div>
+        <div class="logo">Duta LED <span id="admin-trigger" style="cursor:pointer">🔒</span></div>
+        <input type="text" id="search" placeholder="Cari barang...">
+        <div class="cart-icon" onclick="toggleCart()">🛒 <span id="cart-count">0</span></div>
     </header>
 
-    <main id="product-grid">
-        </main>
+    <main id="product-grid"></main>
 
     <div id="cart-box" class="hidden">
-        <h3>Ringkasan Order</h3>
+        <h3>Keranjang Anda</h3>
         <div id="cart-items"></div>
-        <div id="cart-total">Total: Rp 0</div>
+        <div id="cart-total"></div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="#">Home</a>
-        <a href="#">Kategori</a>
-        <a href="#">Chat</a>
+        <a href="#">Home</a><a href="#">Kategori</a><a href="#">Chat</a>
     </nav>
-
     <script src="app.js"></script>
 </body>
 </html>
-"""
