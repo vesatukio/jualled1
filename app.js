@@ -163,3 +163,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+function toggleCart() {
+    document.getElementById("cart-box").classList.toggle("hidden");
+}
+function openModal(nama) {
+    document.getElementById("edit-nama-produk").innerText = nama;
+    document.getElementById("input-stok-baru").value = "";
+
+    document.getElementById("adminModal").classList.remove("hidden");
+}
+
+function closeModal() {
+    document.getElementById("adminModal").classList.add("hidden");
+}
