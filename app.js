@@ -13,12 +13,13 @@ grid.innerHTML = data.map(p => `
         <img src="${p.Gambar}" style="width:100%">
         <h4>${p.Nama}</h4>
         
-        ${isAdmin ? `
-            <p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>
-        ` : `
-            <div class="price-old">Rp ${p.HargaCoret}</div>
-            <div class="price-final">Rp ${p.HargaFinal}</div>
-        `}
+        // Pastikan penulisan p.HargaCoret sesuai dengan di GAS
+${isAdmin ? `
+    <p>Modal: ${p.HargaModal} | Untung: ${p.Untung}</p>
+` : `
+    <div class="price-old">Rp ${p.HargaCoret ? p.HargaCoret.toLocaleString('id-ID') : '0'}</div>
+    <div class="price-final">Rp ${p.HargaFinal ? p.HargaFinal.toLocaleString('id-ID') : '0'}</div>
+`}
         
         <p>Stok: ${p.Stok}</p>
         ${p.Stok > 0 ? `<button>+</button> <span>0</span> <button>-</button>` : '<button disabled>Stok Kosong</button>'}
