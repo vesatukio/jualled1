@@ -105,25 +105,12 @@ function updateCartUI() {
     }
     if (cartItemsDiv) {
     cartItemsDiv.innerHTML = html || '<p>Keranjang kosong</p>';
+}
 
-    if (html) {
-        cartItemsDiv.innerHTML += `
-            <button 
-                onclick="resetCart()"
-                style="
-                    width:100%;
-                    margin-top:15px;
-                    padding:10px;
-                    background:#f44336;
-                    color:white;
-                    border:none;
-                    border-radius:5px;
-                    cursor:pointer;
-                ">
-                Reset Keranjang
-            </button>
-        `;
-    }
+const resetButton = document.getElementById("reset-cart-btn");
+
+if (resetButton) {
+    resetButton.style.display = html ? "block" : "none";
 }
     if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = 'Total: Rp ' + total.toLocaleString();
     if (cartCount) cartCount.innerText = count;
