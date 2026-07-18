@@ -110,12 +110,12 @@ header {
     font-weight: bold;
 }
 
-
-/* Nama Produk */
+/* Judul Produk */
 .product-card h3 {
     font-size: 14px;
-    margin: 8px 0 4px;
-    height: 34px;
+    margin: 4px 0 1px;
+    height: 32px;
+    line-height: 1.15;
     overflow: hidden;
 }
 
@@ -126,8 +126,11 @@ header {
     text-decoration: line-through;
     font-size: 12px;
     margin: 0;
+    padding: 0;
     line-height: 1;
 }
+
+
 
 
 /* Harga Diskon */
