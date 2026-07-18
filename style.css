@@ -124,7 +124,7 @@ header {
 .price-old {
     color: var(--danger);
     text-decoration: line-through;
-    font-size: 14px;
+    font-size: 16px;
     margin: 0;
     padding: 0;
     line-height: 1;
@@ -137,7 +137,7 @@ header {
 .price-final {
     color: var(--price-blue);
     font-weight: 700;
-    font-size: 21px;
+    font-size: 19px;
     margin: 3px 0 0;
     line-height: 1;
 }
