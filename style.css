@@ -1,66 +1,69 @@
-:root { --primary: #ff9800; }
-body { margin: 0; font-family: sans-serif; background: #f4f4f4; }
-header { background: var(--primary); padding: 15px; display: flex; justify-content: space-between; color: white; }
-#product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 15px; }
-@media (max-width: 768px) { #product-grid { grid-template-columns: repeat(2, 1fr); } }
-:root { --primary: #ff9800; }
-body { margin: 0; font-family: sans-serif; background: #f4f4f4; }
-header { background: var(--primary); padding: 15px; display: flex; justify-content: space-between; color: white; }
-#product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 15px; }
-@media (max-width: 768px) { #product-grid { grid-template-columns: repeat(2, 1fr); } }
-.product-card img {
-    width: 100%;
-    height: 220px;
-    object-fit: contain;   /* gambar tetap utuh, tidak terpotong */
-    background: white;
-    border-radius: 8px;
-    display: block;
-}
-.discount-badge { position: absolute; top: 10px; right: 10px; background: red; color: white; padding: 4px; font-size: 12px; }
-.price-old { text-decoration: line-through; color: #888; font-size: 12px; }
-.price-final { color: var(--primary); font-weight: bold; }
-.bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; padding: 15px 0; }
-.hidden { display: none !important; }
-.category-container {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
-    padding: 10px;
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-    white-space: nowrap;
+:root {
+    --primary: #ff9800;
+    --background: #f4f4f4;
+    --white: #ffffff;
+    --text: #333;
+    --border: #ddd;
+    --danger: #e53935;
 }
 
-.cat-btn {
-    padding: 6px 15px;
-    border: 1px solid #ff9800;
-    background: white;
-    color: #ff9800;
-    border-radius: 15px;
-    cursor: pointer;
-    font-size: 14px;
+/* Reset */
+* {
+    box-sizing: border-box;
 }
-
-.cat-btn:hover {
-    background: #ff9800;
-    color: white;
-}
-:root { --primary: #ff9800; }
 
 body {
     margin: 0;
-    font-family: sans-serif;
-    background: #f4f4f4;
+    padding-bottom: 80px;
+    font-family: Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
 }
 
+/* Header */
 header {
     background: var(--primary);
     padding: 15px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     color: white;
 }
 
+/* Kategori */
+.category-container {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.category-container::-webkit-scrollbar {
+    display: none;
+}
+
+.cat-btn {
+    padding: 7px 16px;
+    border: 1px solid var(--primary);
+    background: white;
+    color: var(--primary);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.cat-btn:hover,
+.cat-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+
+/* Produk Grid */
 #product-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -68,115 +71,120 @@ header {
     padding: 15px;
 }
 
-@media (max-width: 768px) {
-    #product-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 
+/* Card Produk */
 .product-card {
-    background: white;
+    background: var(--white);
+    border-radius: 10px;
     padding: 10px;
-    border-radius: 8px;
     position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* Tambahkan bagian ini */
+
+/* Gambar Produk */
 .product-card img {
     width: 100%;
-    aspect-ratio: 1 / 1;   /* Semua gambar berbentuk kotak */
-    object-fit: cover;     /* Isi penuh, gambar bisa sedikit terpotong */
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    background: #fafafa;
     border-radius: 8px;
     display: block;
 }
-/* --------------------- */
 
+
+/* Diskon */
 .discount-badge {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: red;
+    background: var(--danger);
     color: white;
-    padding: 4px;
+    padding: 5px 8px;
+    border-radius: 5px;
     font-size: 12px;
+    font-weight: bold;
 }
 
+
+/* Harga */
 .price-old {
     text-decoration: line-through;
     color: #888;
     font-size: 12px;
+    margin-top: 8px;
 }
 
 .price-final {
     color: var(--primary);
     font-weight: bold;
+    font-size: 18px;
 }
 
+
+/* Navigasi Bawah */
 .bottom-nav {
     position: fixed;
+    z-index: 100;
     bottom: 0;
+    left: 0;
     width: 100%;
     background: white;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-around;
-    padding: 15px 0;
+    padding: 12px 0;
 }
 
+
+/* Utility */
 .hidden {
     display: none !important;
 }
 
-.category-container {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
-    padding: 10px;
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-    white-space: nowrap;
+
+/* Tablet */
+@media (max-width: 992px) {
+
+    #product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
 }
 
-.cat-btn {
-    padding: 6px 15px;
-    border: 1px solid #ff9800;
-    background: white;
-    color: #ff9800;
-    border-radius: 15px;
-    cursor: pointer;
-    font-size: 14px;
+
+/* HP */
+@media (max-width: 768px) {
+
+    #product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .product-card {
+        padding: 8px;
+    }
+
+    .price-final {
+        font-size: 16px;
+    }
+
 }
 
-.cat-btn:hover {
-    background: #ff9800;
-    color: white;
-}
-.discount-badge { position: absolute; top: 10px; right: 10px; background: red; color: white; padding: 4px; font-size: 12px; }
-.price-old { text-decoration: line-through; color: #888; font-size: 12px; }
-.price-final { color: var(--primary); font-weight: bold; }
-.bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; padding: 15px 0; }
-.hidden { display: none !important; }
-.category-container {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
-    padding: 10px;
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-    white-space: nowrap;
-}
 
-.cat-btn {
-    padding: 6px 15px;
-    border: 1px solid #ff9800;
-    background: white;
-    color: #ff9800;
-    border-radius: 15px;
-    cursor: pointer;
-    font-size: 14px;
-}
+/* HP kecil */
+@media (max-width: 360px) {
 
-.cat-btn:hover {
-    background: #ff9800;
-    color: white;
+    #product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .cat-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
 }
