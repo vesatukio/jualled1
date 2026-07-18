@@ -124,7 +124,7 @@ header {
 .price-old {
     color: var(--danger);
     text-decoration: line-through;
-    font-size: 12px;
+    font-size: 14px;
     margin: 0;
     padding: 0;
     line-height: 1;
