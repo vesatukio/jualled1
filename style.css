@@ -108,20 +108,31 @@ header {
 }
 
 
-/* Harga */
+/* Harga sebelum diskon */
 .price-old {
     text-decoration: line-through;
-    color: #888;
-    font-size: 12px;
-    margin-top: 8px;
+    color: #e53935;
+    font-size: 13px;
+    margin: 2px 0 0;
+    line-height: 1.2;
 }
 
+/* Harga setelah diskon */
 .price-final {
-    color: var(--primary);
+    color: #1565c0;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
+    margin-top: 2px;
+    line-height: 1.2;
+}
+.product-card h3,
+.product-card p {
+    margin: 5px 0;
 }
 
+.product-card {
+    line-height: 1.2;
+}
 
 /* Navigasi Bawah */
 .bottom-nav {
