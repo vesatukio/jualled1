@@ -5,6 +5,7 @@
     --text: #333;
     --border: #ddd;
     --danger: #e53935;
+    --price-blue: #1565c0;
 }
 
 /* Reset */
@@ -20,6 +21,7 @@ body {
     color: var(--text);
 }
 
+
 /* Header */
 header {
     background: var(--primary);
@@ -30,12 +32,13 @@ header {
     color: white;
 }
 
+
 /* Kategori */
 .category-container {
     display: flex;
     gap: 10px;
     padding: 10px;
-    background: var(--white);
+    background: white;
     border-bottom: 1px solid var(--border);
     overflow-x: auto;
     white-space: nowrap;
@@ -53,7 +56,6 @@ header {
     border-radius: 20px;
     cursor: pointer;
     font-size: 14px;
-    transition: 0.2s;
 }
 
 .cat-btn:hover,
@@ -63,7 +65,7 @@ header {
 }
 
 
-/* Produk Grid */
+/* Grid Produk */
 #product-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -72,18 +74,19 @@ header {
 }
 
 
-/* Card Produk */
+/* Card */
 .product-card {
-    background: var(--white);
+    background: white;
     border-radius: 10px;
     padding: 10px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    line-height: 1.2;
 }
 
 
-/* Gambar Produk */
+/* Gambar */
 .product-card img {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -94,7 +97,7 @@ header {
 }
 
 
-/* Diskon */
+/* Badge Diskon */
 .discount-badge {
     position: absolute;
     top: 10px;
@@ -108,33 +111,36 @@ header {
 }
 
 
-/* Harga sebelum diskon */
+/* Nama Produk */
+.product-card h3 {
+    font-size: 14px;
+    margin: 8px 0 4px;
+    height: 34px;
+    overflow: hidden;
+}
+
+
+/* Harga Coret */
 .price-old {
+    color: var(--danger);
     text-decoration: line-through;
-    color: #e53935;
-    font-size: 13px;
-    margin: 2px 0 0;
-    line-height: 1.2;
+    font-size: 12px;
+    margin: 0;
+    line-height: 1;
 }
 
-/* Harga setelah diskon */
+
+/* Harga Diskon */
 .price-final {
-    color: #1565c0;
-    font-weight: bold;
-    font-size: 20px;
-    margin-top: 2px;
-    line-height: 1.2;
-}
-.product-card h3,
-.product-card p {
-    margin: 5px 0;
+    color: var(--price-blue);
+    font-weight: 700;
+    font-size: 21px;
+    margin: 3px 0 0;
+    line-height: 1;
 }
 
-.product-card {
-    line-height: 1.2;
-}
 
-/* Navigasi Bawah */
+/* Navigasi bawah */
 .bottom-nav {
     position: fixed;
     z-index: 100;
@@ -156,20 +162,20 @@ header {
 
 
 /* Tablet */
-@media (max-width: 992px) {
+@media (max-width:992px) {
 
     #product-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3,1fr);
     }
 
 }
 
 
-/* HP */
-@media (max-width: 768px) {
+/* Mobile */
+@media (max-width:768px) {
 
     #product-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2,1fr);
         gap: 10px;
         padding: 10px;
     }
@@ -178,18 +184,26 @@ header {
         padding: 8px;
     }
 
+    .product-card h3 {
+        font-size: 13px;
+        height: 32px;
+    }
+
+    .price-old {
+        font-size: 11px;
+    }
+
     .price-final {
-        font-size: 16px;
+        font-size: 19px;
     }
 
 }
 
 
 /* HP kecil */
-@media (max-width: 360px) {
+@media (max-width:360px) {
 
     #product-grid {
-        grid-template-columns: repeat(2, 1fr);
         gap: 8px;
     }
 
