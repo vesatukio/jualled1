@@ -34,7 +34,7 @@ function renderProducts(products) {
 
 <p>
     Stok: <b>${p.Stok}</b>
-    <button onclick="openModal('${p.Nama}')">
+    <button onclick="openModal(${JSON.stringify(p.Nama)})">
         Edit Stok
     </button>
 </p>
@@ -66,7 +66,7 @@ ${cart[p.Nama] || 0}
 
 </div>
 `).join('');
-
+}
 // 2. FUNGSI KATEGORI
 function renderCategories() {
     const container = document.getElementById('category-container');
