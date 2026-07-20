@@ -146,5 +146,57 @@ if ("serviceWorker" in navigator) {
         Nanti
     </button>
 </div>
+    <script>
+let deferredPrompt;
+
+const installBox = document.getElementById("pwa-install-box");
+const installBtn = document.getElementById("install-pwa-btn");
+const laterBtn = document.getElementById("later-pwa-btn");
+
+// Jika sudah terinstall, jangan tampilkan lagi
+if (window.matchMedia("(display-mode: standalone)").matches ||
+    localStorage.getItem("pwaInstalled") === "true") {
+
+    installBox.classList.add("hidden");
+}
+
+window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+
+    deferredPrompt = e;
+
+    if(localStorage.getItem("pwaInstalled") !== "true"){
+        installBox.classList.remove("hidden");
+    }
+});
+
+installBtn.addEventListener("click", async () => {
+
+    if(!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if(outcome === "accepted"){
+        installBox.classList.add("hidden");
+    }
+
+    deferredPrompt = null;
+
+});
+
+laterBtn.addEventListener("click", () => {
+    installBox.classList.add("hidden");
+});
+
+window.addEventListener("appinstalled", () => {
+
+    localStorage.setItem("pwaInstalled","true");
+
+    installBox.classList.add("hidden");
+
+});
+</script>
 </body>
 </html>
