@@ -13,8 +13,12 @@ function renderProducts(products) {
         return;
     }
 
-    grid.innerHTML = products.map(p => `
-        <div class="product-card">
+    grid.innerHTML = products.map(p => {
+        const stokNum = Number(p.Stok) || 0;
+        const isHabis = stokNum <= 0;
+
+        return `
+        <div class="product-card ${isHabis ? 'out-of-stock' : ''}">
             ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
             <img src="${p.Gambar || 'https://via.placeholder.com/300'}" style="width:100%">
             <h4>${p.Nama}</h4>
@@ -28,12 +32,12 @@ function renderProducts(products) {
 <p>
     Total Modal: 
     <b>
-    Rp ${(Number(p.HargaModal) * Number(p.Stok)).toLocaleString()}
+    Rp ${(Number(p.HargaModal) * stokNum).toLocaleString()}
     </b>
 </p>
 
 <p>
-    Stok: <b>${p.Stok}</b>
+    Stok: <b>${stokNum}</b>
     <button onclick="openModal('${p.Nama}')">
         Edit Stok
     </button>
@@ -42,17 +46,19 @@ function renderProducts(products) {
             ` : `
                 <div class="price-old">Rp ${p.HargaCoret?.toLocaleString() || '0'}</div>
                 <div class="price-final">Rp ${p.HargaFinal?.toLocaleString() || '0'}</div>
-                <p>Stok: <span id="stok-${p.Nama}">${p.Stok}</span></p>
+                <p>Stok: <span id="stok-${p.Nama}">${stokNum}</span></p>
+                ${isHabis ? '<p style="color: red; font-weight: bold;">Habis</p>' : ''}
             `}
             ${!isAdmin ? `
                 <div class="controls">
-                    <button onclick="updateOrder('${p.Nama}', -1)">-</button>
+                    <button onclick="updateOrder('${p.Nama}', -1)" ${isHabis ? 'disabled' : ''}>-</button>
                     <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
-                    <button onclick="updateOrder('${p.Nama}', 1)">+</button>
+                    <button onclick="updateOrder('${p.Nama}', 1)" ${isHabis ? 'disabled' : ''}>+</button>
                 </div>
             ` : ''}
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 // 2. FUNGSI KATEGORI
@@ -94,9 +100,18 @@ async function fetchProducts() {
 }
 // 4. FUNGSI KERANJANG & MODAL (Sama seperti punya Anda)
 function updateOrder(nama, change) {
+    const prod = allProducts.find(p => p.Nama === nama);
+    if (prod && Number(prod.Stok) <= 0) return;
+
     if (!cart[nama]) cart[nama] = 0;
     cart[nama] += change;
     if (cart[nama] < 0) cart[nama] = 0;
+    
+    if (prod && cart[nama] > Number(prod.Stok)) {
+        cart[nama] = Number(prod.Stok);
+        alert("Jumlah melebihi stok yang tersedia!");
+    }
+
     const qtyElement = document.getElementById(`qty-${nama}`);
     if (qtyElement) qtyElement.innerText = cart[nama];
     updateCartUI();
