@@ -435,6 +435,34 @@ function sendOrderWA(){
 
 }
 // =========================
+// CART
+// =========================
+
+function updateOrder(nama, jumlah){
+
+    if(!cart[nama]){
+        cart[nama] = 0;
+    }
+
+
+    cart[nama] += jumlah;
+
+
+    if(cart[nama] <= 0){
+        delete cart[nama];
+    }
+
+
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
+
+
+    renderProducts(allProducts);
+
+}
+// =========================
 // START APP
 // =========================
 
