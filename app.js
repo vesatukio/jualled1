@@ -46,19 +46,22 @@ function renderProducts(products) {
             `}
             ${!isAdmin ? `
                 <div class="controls">
-                    <button onclick='updateOrder(${JSON.stringify(p.Nama)}, -1)'>
--
-</button>
 
-<span id="qty-${p.Nama}">
-${cart[p.Nama] || 0}
-</span>
+    <button onclick='updateOrder(${JSON.stringify(p.Nama)}, -1)'>
+        -
+    </button>
 
-<button onclick='updateOrder(${JSON.stringify(p.Nama)}, 1)'>
-+
-</button>
-            ` : ''}
-        </div>
+    <span id="qty-${p.Nama}">
+        ${cart[p.Nama] || 0}
+    </span>
+
+    <button onclick='updateOrder(${JSON.stringify(p.Nama)}, 1)'>
+        +
+    </button>
+
+</div>
+
+</div>
     `).join('');
 }
 
