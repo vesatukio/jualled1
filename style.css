@@ -110,34 +110,71 @@ header {
 }
 
 
-/* NAMA PRODUK */
+/* INFORMASI PRODUK */
 .product-card h4 {
     font-size: 14px;
     margin: 5px 0;
     height: 34px;
     line-height: 1.2;
     overflow: hidden;
+    color: #222;
+    font-weight: 700;
 }
 
 
-/* HARGA COREt */
+/* HARGA */
 .price-old {
     color: var(--danger);
     text-decoration: line-through;
     font-size: 15px;
+    font-weight: bold;
 }
 
-
-/* HARGA FINAL */
 .price-final {
     color: var(--price-blue);
-    font-weight: bold;
     font-size: 19px;
+    font-weight: 700;
     margin-top: 3px;
 }
 
 
-/* CONTROL JUMLAH */
+/* STOK */
+.stok-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.stok-habis {
+    display: inline-flex;
+    background: var(--danger);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.out-of-stock {
+    background: #e8e8e8;
+}
+
+.out-of-stock img {
+    filter: grayscale(100%);
+    opacity: .65;
+}
+
+.out-of-stock .controls button {
+    background: #bbb;
+    color: #666;
+    cursor: not-allowed;
+}
+
+
+/* JUMLAH */
 .controls {
     display: flex;
     justify-content: center;
@@ -167,82 +204,13 @@ header {
 }
 
 
-/* =========================
-   PRODUK STOK HABIS
-========================= */
-
-.out-of-stock {
-    opacity: 1; /* jangan membuat seluruh kartu abu-abu */
-    background: #f1f1f1;
-}
-
-.out-of-stock img {
-    filter: grayscale(100%);
-}
-
-
-/* Tulisan stok */
-.stok-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 5px;
-    font-size: 14px;
-}
-
-.stok-habis {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 8px;
-    background: #e53935;
-    color: #fff;
-    font-size: 12px;
-    font-weight: bold;
-    border-radius: 4px;
-    line-height: 1;
-}
-
-
-/* Judul produk tetap jelas */
-.product-card h4 {
-    color: #333;
-    font-weight: bold;
-}
-
-
-/* Harga coret tetap merah jelas */
-.price-old {
-    color: #e53935;
-    opacity: 1;
-    text-decoration: line-through;
-    font-size: 15px;
-    font-weight: bold;
-}
-
-
-/* Harga akhir tetap biru jelas */
-.price-final {
-    color: #1565c0;
-    opacity: 1;
-    font-weight: 700;
-    font-size: 19px;
-}
-
-
-/* Tombol stok habis */
-.out-of-stock .controls button {
-    background: #ccc;
-    color: #777;
-    cursor: not-allowed;
-}
-
 /* ADMIN */
 .admin-panel {
     border-radius: 5px;
 }
 
 
-/* NAV BAWAH */
+/* NAVIGASI BAWAH */
 .bottom-nav {
     position: fixed;
     z-index: 999;
@@ -258,38 +226,146 @@ header {
     box-shadow: 0 -2px 8px rgba(0,0,0,.1);
 }
 
-
 .bottom-nav a {
-    flex:1;
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-decoration:none;
-    color:#666;
-    font-size:12px;
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: #666;
+    font-size: 12px;
 }
 
-
-.bottom-nav a:hover {
-    color:#ff9800;
-}
-
-
+.bottom-nav a:hover,
 .bottom-nav a:first-child {
-    color:#ff9800;
+    color: var(--primary);
 }
-
 
 .bottom-nav span {
-    margin-top:3px;
+    margin-top: 3px;
 }
 
 
-/* HIDDEN */
+/* CART */
+.cart-box {
+    position: fixed;
+    top: 70px;
+    right: 15px;
+    width: 300px;
+    max-width: 90%;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.2);
+    z-index: 999;
+    animation: cartOpen .3s ease;
+}
+
+@keyframes cartOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#cart-total {
+    font-weight: bold;
+    margin-top: 15px;
+    color: var(--price-blue);
+}
+
+#reset-cart-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--danger);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#reset-cart-btn:hover {
+    background: #c62828;
+}
+
+
+/* CART BADGE */
+.cart-icon {
+    position: relative;
+    cursor: pointer;
+}
+
+#cart-count {
+    position: absolute;
+    top: -10px;
+    right: -12px;
+    min-width: 22px;
+    height: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--danger);
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+
+/* ANIMASI CART */
+.cart-bounce {
+    animation: cartBounce .45s ease;
+}
+
+@keyframes cartBounce {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.6);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.cart-shake {
+    animation: shakeCart .5s;
+}
+
+@keyframes shakeCart {
+    0%,100% {
+        transform: rotate(0);
+    }
+
+    25% {
+        transform: rotate(-20deg);
+    }
+
+    50% {
+        transform: rotate(20deg);
+    }
+
+    75% {
+        transform: rotate(-10deg);
+    }
+}
+
+
+/* UTIL */
 .hidden {
-    display:none !important;
+    display: none !important;
 }
 
 
@@ -297,7 +373,7 @@ header {
 @media(max-width:992px){
 
     #product-grid {
-        grid-template-columns:repeat(3,1fr);
+        grid-template-columns: repeat(3,1fr);
     }
 
 }
@@ -307,7 +383,7 @@ header {
 @media(max-width:768px){
 
     #product-grid {
-        grid-template-columns:repeat(2,1fr);
+        grid-template-columns: repeat(2,1fr);
         gap:10px;
         padding:10px;
     }
@@ -342,241 +418,5 @@ header {
         font-size:12px;
         padding:6px 12px;
     }
-
-}
-/* =========================
-   CART BOX
-========================= */
-
-.cart-box {
-    position: fixed;
-    top:70px;
-    right:15px;
-    width:300px;
-    max-width:90%;
-    background:white;
-    padding:20px;
-    border-radius:15px;
-    box-shadow:0 5px 20px rgba(0,0,0,.2);
-    z-index:999;
-    animation: cartOpen .3s ease;
-}
-
-
-@keyframes cartOpen {
-
-    from {
-        opacity:0;
-        transform:translateY(-20px);
-    }
-
-    to {
-        opacity:1;
-        transform:translateY(0);
-    }
-
-}
-
-
-
-#cart-total {
-    font-weight:bold;
-    margin-top:15px;
-    color:#1565c0;
-}
-
-
-
-#reset-cart-btn {
-
-    width:100%;
-    margin-top:15px;
-    padding:10px;
-
-    border:none;
-    border-radius:8px;
-
-    background:#e53935;
-    color:white;
-
-    font-weight:bold;
-    cursor:pointer;
-
-}
-
-
-
-#reset-cart-btn:hover {
-    background:#c62828;
-}
-
-
-
-/* =========================
-   CART BADGE ANIMASI
-========================= */
-
-
-.cart-icon {
-
-    position:relative;
-    cursor:pointer;
-
-}
-
-
-
-#cart-count {
-
-    position:absolute;
-    top:-10px;
-    right:-12px;
-
-    min-width:22px;
-    height:22px;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    background:#e53935;
-    color:white;
-
-    border-radius:50%;
-
-    font-size:12px;
-    font-weight:bold;
-
-}
-
-
-
-/* animasi angka berubah */
-
-.cart-bounce {
-
-    animation:
-    bounce .4s ease;
-
-}
-
-
-
-@keyframes bounce {
-
-    0% {
-        transform:scale(1);
-    }
-
-    50% {
-        transform:scale(1.5);
-    }
-
-    100% {
-        transform:scale(1);
-    }
-
-}
-
-
-
-/* animasi ikon keranjang */
-
-.cart-shake {
-
-    animation:
-    shake .5s ease;
-
-}
-
-
-@keyframes shake {
-
-    0%,100% {
-        transform:rotate(0);
-    }
-
-    25% {
-        transform:rotate(-15deg);
-    }
-
-    50% {
-        transform:rotate(15deg);
-    }
-
-    75% {
-        transform:rotate(-10deg);
-    }
-
-}
-/* angka cart */
-
-#cart-count {
-
-    transition:.3s;
-
-}
-
-
-/* animasi masuk barang */
-
-.cart-bounce {
-
-    animation:
-    cartBounce .45s;
-
-}
-
-
-@keyframes cartBounce {
-
-    0%{
-        transform:scale(1);
-    }
-
-    50%{
-        transform:scale(1.6);
-    }
-
-    100%{
-        transform:scale(1);
-    }
-
-}
-
-
-
-/* icon bergerak */
-
-.cart-shake {
-
-    animation:
-    shakeCart .5s;
-
-}
-
-
-@keyframes shakeCart {
-
-
-0%,100%{
-    transform:rotate(0);
-}
-
-
-25%{
-    transform:rotate(-20deg);
-}
-
-
-50%{
-    transform:rotate(20deg);
-}
-
-
-75%{
-    transform:rotate(-10deg);
-}
-
 
 }
