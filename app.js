@@ -193,7 +193,30 @@ if (resetButton) {
     resetButton.style.display = html ? "block" : "none";
 }
     if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = 'Total: Rp ' + total.toLocaleString();
-    if (cartCount) cartCount.innerText = count;
+    if (cartCount) {
+
+    cartCount.innerText = count;
+
+    cartCount.classList.remove("cart-bounce");
+
+    void cartCount.offsetWidth;
+
+    cartCount.classList.add("cart-bounce");
+
+}
+
+
+const cartIcon = document.querySelector(".cart-icon");
+
+if(cartIcon && count > 0){
+
+    cartIcon.classList.remove("cart-shake");
+
+    void cartIcon.offsetWidth;
+
+    cartIcon.classList.add("cart-shake");
+
+}
 }
 
 async function saveStock() {
