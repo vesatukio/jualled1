@@ -8,7 +8,7 @@
     --price-blue: #1565c0;
 }
 
-/* Reset */
+/* RESET */
 * {
     box-sizing: border-box;
 }
@@ -22,7 +22,7 @@ body {
 }
 
 
-/* Header */
+/* HEADER */
 header {
     background: var(--primary);
     padding: 15px;
@@ -33,7 +33,7 @@ header {
 }
 
 
-/* Kategori */
+/* KATEGORI */
 .category-container {
     display: flex;
     gap: 10px;
@@ -65,16 +65,16 @@ header {
 }
 
 
-/* Grid Produk */
+/* GRID PRODUK */
 #product-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4,1fr);
     gap: 15px;
     padding: 15px;
 }
 
 
-/* Card */
+/* CARD PRODUK */
 .product-card {
     background: white;
     border-radius: 10px;
@@ -82,11 +82,10 @@ header {
     position: relative;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0,0,0,.08);
-    line-height: 1.2;
 }
 
 
-/* Gambar */
+/* GAMBAR */
 .product-card img {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -97,7 +96,7 @@ header {
 }
 
 
-/* Badge Diskon */
+/* DISKON */
 .discount-badge {
     position: absolute;
     top: 10px;
@@ -110,40 +109,93 @@ header {
     font-weight: bold;
 }
 
-/* Judul Produk */
-.product-card h3 {
+
+/* NAMA PRODUK */
+.product-card h4 {
     font-size: 14px;
-    margin: 4px 0 1px;
-    height: 32px;
-    line-height: 1.15;
+    margin: 5px 0;
+    height: 34px;
+    line-height: 1.2;
     overflow: hidden;
 }
 
 
-/* Harga Coret */
+/* HARGA COREt */
 .price-old {
     color: var(--danger);
     text-decoration: line-through;
-    font-size: 16px;
-    margin: 0;
-    padding: 0;
-    line-height: 1;
+    font-size: 15px;
 }
 
 
-
-
-/* Harga Diskon */
+/* HARGA FINAL */
 .price-final {
     color: var(--price-blue);
-    font-weight: 700;
+    font-weight: bold;
     font-size: 19px;
-    margin: 3px 0 0;
-    line-height: 1;
+    margin-top: 3px;
 }
 
 
-/* Navigasi bawah */
+/* CONTROL JUMLAH */
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.controls button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.controls button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.controls span {
+    font-weight: bold;
+}
+
+
+/* STOK HABIS */
+.out-of-stock {
+    opacity: .6;
+}
+
+.out-of-stock img {
+    filter: grayscale(100%);
+}
+
+
+.stok-habis {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 4px 8px;
+    background: var(--danger);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+
+/* ADMIN */
+.admin-panel {
+    border-radius: 5px;
+}
+
+
+/* NAV BAWAH */
 .bottom-nav {
     position: fixed;
     z-index: 100;
@@ -158,94 +210,60 @@ header {
 }
 
 
-/* Utility */
+/* HIDDEN */
 .hidden {
-    display: none !important;
+    display:none !important;
 }
 
 
-/* Tablet */
-@media (max-width:992px) {
+/* TABLET */
+@media(max-width:992px){
 
     #product-grid {
-        grid-template-columns: repeat(3,1fr);
+        grid-template-columns:repeat(3,1fr);
     }
 
 }
 
 
-/* Mobile */
-@media (max-width:768px) {
+/* MOBILE */
+@media(max-width:768px){
 
     #product-grid {
-        grid-template-columns: repeat(2,1fr);
-        gap: 10px;
-        padding: 10px;
+        grid-template-columns:repeat(2,1fr);
+        gap:10px;
+        padding:10px;
     }
 
     .product-card {
-        padding: 8px;
+        padding:8px;
     }
 
-    .product-card h3 {
-        font-size: 13px;
-        height: 32px;
+    .product-card h4 {
+        font-size:13px;
     }
 
     .price-old {
-        font-size: 11px;
+        font-size:11px;
     }
 
     .price-final {
-        font-size: 19px;
+        font-size:18px;
     }
 
 }
 
 
-/* HP kecil */
-@media (max-width:360px) {
+/* HP KECIL */
+@media(max-width:360px){
 
     #product-grid {
-        gap: 8px;
+        gap:8px;
     }
 
     .cat-btn {
-        font-size: 12px;
-        padding: 6px 12px;
+        font-size:12px;
+        padding:6px 12px;
     }
 
-}
-.out-of-stock{
-    opacity: .6;
-}
-
-.out-of-stock button{
-    cursor: not-allowed;
-}
-/* Produk stok habis */
-.out-of-stock{
-    opacity: .6;
-    position: relative;
-}
-
-.out-of-stock button{
-    cursor: not-allowed;
-    background: #ccc;
-    color: #666;
-}
-
-.out-of-stock img{
-    filter: grayscale(100%);
-}
-
-.stok-habis{
-    display: inline-block;
-    margin-top: 5px;
-    padding: 4px 8px;
-    background: #e53935;
-    color: #fff;
-    font-size: 12px;
-    font-weight: bold;
-    border-radius: 4px;
 }
