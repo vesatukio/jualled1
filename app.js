@@ -88,7 +88,12 @@ async function fetchProducts() {
 
         console.log(data);
 
-        allProducts = data;
+        allProducts =
+Array.isArray(data)
+?
+data
+:
+data.products || [];
 
         console.log("Jumlah produk:", allProducts.length);
 
