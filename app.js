@@ -19,7 +19,7 @@ function renderProducts(products) {
         const isHabis = stokNum <= 0;
 
         return `
-        
+        <div class="product-card ${isHabis ? 'out-of-stock' : ''}">
 
             ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
 
@@ -181,8 +181,8 @@ function updateCartUI() {
         if (qty > 0) {
             const prod = allProducts.find(p => p.Nama === nama);
             if (prod) {
-                html += `<p>${nama} x ${qty} = <b>Rp ${(prod.HargaFinal * qty).toLocaleString()}</b></p>`;
-                total += (prod.HargaFinal * qty);
+                html += `<p>${nama} x ${qty} = <b>Rp ${(Number(prod.HargaFinal) * qty).toLocaleString()}</b></p>`;
+                total += Number(prod.HargaFinal) * qty;
                 count += qty;
             }
         }
