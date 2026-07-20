@@ -1,6 +1,6 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbzow1xcIduyHnwMA0WmlCvkz_s81IBu0ALbZ70fxPoXqEsYwtESEMm-S8mg6TZSuw95/exec';
 const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
-let cart = {}; 
+let cart = JSON.parse(localStorage.getItem("cart")) || {};
 let allProducts = [];
 
 // 1. FUNGSI RENDER PRODUK (Diletakkan paling atas agar tidak ReferenceError)
@@ -139,32 +139,53 @@ function updateOrder(nama, change) {
 
     if (!prod) return;
 
-    const stok = Number(prod.Stok);
 
-    // stok habis
-    if (stok <= 0) return;
+    const stok = Number(prod.Stok) || 0;
+
+
+    // stok kosong
+    if (stok <= 0) {
+        alert("Produk sedang habis.");
+        return;
+    }
+
 
     if (!cart[nama]) {
         cart[nama] = 0;
     }
 
+
     cart[nama] += change;
+
 
     if (cart[nama] < 0) {
         cart[nama] = 0;
     }
 
-    // tidak boleh melebihi stok
+
+    // batas stok
     if (cart[nama] > stok) {
+
         cart[nama] = stok;
-        alert("Jumlah melebihi stok yang tersedia.");
+
+        alert("Jumlah melebihi stok tersedia.");
+
     }
+
+
+    // simpan cart
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
+
 
     const qty = document.getElementById(`qty-${nama}`);
 
-    if (qty) {
+    if(qty){
         qty.innerText = cart[nama];
     }
+
 
     updateCartUI();
 }
@@ -190,18 +211,52 @@ function updateCartUI() {
 const resetButton = document.getElementById("reset-cart-btn");
 
 if (resetButton) {
-    resetButton.style.display = html ? "block" : "none";
+
+    resetButton.style.display =
+        count > 0 ? "block" : "none";
+
 }
     if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = 'Total: Rp ' + total.toLocaleString();
     if (cartCount) {
 
     cartCount.innerText = count;
 
-    cartCount.classList.remove("cart-bounce");
+
+    cartCount.classList.remove(
+        "cart-bounce"
+    );
 
     void cartCount.offsetWidth;
 
-    cartCount.classList.add("cart-bounce");
+
+    if(count > 0){
+
+        cartCount.classList.add(
+            "cart-bounce"
+        );
+
+    }
+
+}
+
+
+
+const cartIcon =
+document.querySelector(".cart-icon");
+
+
+if(cartIcon && count > 0){
+
+    cartIcon.classList.remove(
+        "cart-shake"
+    );
+
+    void cartIcon.offsetWidth;
+
+
+    cartIcon.classList.add(
+        "cart-shake"
+    );
 
 }
 
@@ -288,9 +343,25 @@ function closeModal() {
     document.getElementById("adminModal").classList.add("hidden");
 }
 function resetCart() {
-    if (confirm("Hapus semua pesanan?")) {
+
+    if(confirm("Hapus semua pesanan?")){
+
+
         cart = {};
+
+
+        localStorage.removeItem(
+            "cart"
+        );
+
+
         updateCartUI();
-        renderProducts(allProducts);
+
+
+        renderProducts(
+            allProducts
+        );
+
     }
+
 }
