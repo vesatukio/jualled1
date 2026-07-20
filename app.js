@@ -62,11 +62,7 @@ function renderProducts(products) {
                 </div>
 
                 <div class="stok-info">
-    Stok :
-    <span id="stok-${p.Nama}">
-        ${stokNum}
-    </span>
-
+    <span>Stok : ${stokNum}</span>
     ${isHabis ? '<span class="stok-habis">HABIS</span>' : ''}
 </div>
 
