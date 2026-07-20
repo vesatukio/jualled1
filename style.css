@@ -186,19 +186,20 @@ header {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-top: 5px;
     font-size: 14px;
 }
 
-
-/* Label HABIS di samping stok */
 .stok-habis {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     padding: 3px 8px;
     background: #e53935;
-    color: white;
+    color: #fff;
     font-size: 12px;
     font-weight: bold;
     border-radius: 4px;
+    line-height: 1;
 }
 
 
