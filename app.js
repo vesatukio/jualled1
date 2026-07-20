@@ -61,14 +61,14 @@ function renderProducts(products) {
                     Rp ${(Number(p.HargaFinal) || 0).toLocaleString()}
                 </div>
 
-                <p>
-                    Stok :
-                    <span id="stok-${p.Nama}">
-                        ${stokNum}
-                    </span>
-                </p>
+                <div class="stok-info">
+    Stok :
+    <span id="stok-${p.Nama}">
+        ${stokNum}
+    </span>
 
-                ${isHabis ? '<p class="stok-habis">HABIS</p>' : ''}
+    ${isHabis ? '<span class="stok-habis">HABIS</span>' : ''}
+</div>
 
                 <div class="controls">
 
