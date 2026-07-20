@@ -23,7 +23,7 @@ function renderProducts(products) {
 
             ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
 
-            <img src="${p.Gambar || 'https://via.placeholder.com/300'}" style="width:100%">
+            <img src="${p.Gambar || 'https://via.placeholder.com/300'}">
 
             <h4>${p.Nama}</h4>
 
@@ -241,27 +241,16 @@ if (resetButton) {
 
 
 
-const cartIcon =
-document.querySelector(".cart-icon");
+const cartIcon = document.querySelector(".cart-icon");
 
-
-if(cartIcon && count > 0){
-
-    cartIcon.classList.remove(
-        "cart-shake"
-    );
+if (cartIcon && count > 0) {
+    cartIcon.classList.remove("cart-shake");
 
     void cartIcon.offsetWidth;
 
-
-    cartIcon.classList.add(
-        "cart-shake"
-    );
-
+    cartIcon.classList.add("cart-shake");
 }
 
-
-const cartIcon = document.querySelector(".cart-icon");
 
 if(cartIcon && count > 0){
 
