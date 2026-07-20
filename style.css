@@ -211,42 +211,71 @@ header {
 
 
 /* NAVIGASI BAWAH */
-.bottom-nav {
-    position: fixed;
-    z-index: 999;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 65px;
-    background: white;
-    border-top: 1px solid #ddd;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -2px 8px rgba(0,0,0,.1);
+/* ===========================
+   Bottom Navigation Shopee
+=========================== */
+
+.bottom-nav{
+    position:fixed;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:74px;
+    background:#fff;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    border-top:1px solid #e5e5e5;
+    box-shadow:0 -2px 15px rgba(0,0,0,.08);
+    z-index:9999;
+    padding-bottom:env(safe-area-inset-bottom);
 }
 
-.bottom-nav a {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-decoration: none;
-    color: #666;
-    font-size: 12px;
+.bottom-nav a{
+    flex:1;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-decoration:none;
+    color:#888;
+    transition:.2s;
+    -webkit-tap-highlight-color:transparent;
 }
 
-.bottom-nav a:hover,
-.bottom-nav a:first-child {
-    color: var(--primary);
+.bottom-nav a i,
+.bottom-nav a{
+    font-size:30px;
 }
 
-.bottom-nav span {
-    margin-top: 3px;
+.bottom-nav a span{
+    margin-top:4px;
+    font-size:12px;
+    font-weight:600;
 }
 
+.bottom-nav a:hover{
+    color:#ff9800;
+}
+
+.bottom-nav a:active{
+    transform:scale(.92);
+}
+
+/* Menu aktif */
+.bottom-nav a.active{
+    color:#ff9800;
+}
+
+/* Area sentuh lebih besar */
+.bottom-nav a::before{
+    content:"";
+    position:absolute;
+    width:55px;
+    height:55px;
+    border-radius:50%;
+}
 
 /* CART */
 .cart-box {
