@@ -25,8 +25,23 @@
 </div>
 
     <nav class="bottom-nav">
-        <a href="#">Home</a><a href="#">Kategori</a><a href="#">Chat</a>
-    </nav>
+
+    <a href="javascript:void(0)" onclick="goHome()">
+        🏠
+        <span>Home</span>
+    </a>
+
+    <a href="javascript:void(0)" onclick="goKategori()">
+        📂
+        <span>Kategori</span>
+    </a>
+
+    <a href="javascript:void(0)" onclick="goChat()">
+        💬
+        <span>Chat</span>
+    </a>
+
+</nav>
     <script src="app.js"></script>
     <script>
     document.getElementById('admin-trigger').addEventListener('click', () => {
@@ -43,5 +58,42 @@
     <button type="button" onclick="saveStock()" style="background:orange; color:white; border:none; padding:10px; width:100%;">Simpan Stok</button>
     <button type="button" onclick="closeModal()" style="margin-top:5px; width:100%;">Batal</button>
 </div>
+    <script>
+function goHome(){
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+}
+
+
+function goKategori(){
+
+    const kategori = document.getElementById("category-container");
+
+    if(kategori){
+        kategori.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+    }
+
+}
+
+
+function goChat(){
+
+    // ganti nomor WhatsApp sesuai nomor toko
+    const nomor = "6283157925577";
+
+    const pesan = "Halo Duta LED, saya ingin bertanya produk.";
+
+    window.open(
+        "https://wa.me/" + nomor + "?text=" + encodeURIComponent(pesan),
+        "_blank"
+    );
+
+}
+</script>
 </body>
 </html>
