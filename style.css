@@ -223,3 +223,29 @@ header {
 .out-of-stock button{
     cursor: not-allowed;
 }
+/* Produk stok habis */
+.out-of-stock{
+    opacity: .6;
+    position: relative;
+}
+
+.out-of-stock button{
+    cursor: not-allowed;
+    background: #ccc;
+    color: #666;
+}
+
+.out-of-stock img{
+    filter: grayscale(100%);
+}
+
+.stok-habis{
+    display: inline-block;
+    margin-top: 5px;
+    padding: 4px 8px;
+    background: #e53935;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+}
