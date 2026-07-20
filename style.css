@@ -167,9 +167,13 @@ header {
 }
 
 
-/* STOK HABIS */
+/* =========================
+   PRODUK STOK HABIS
+========================= */
+
 .out-of-stock {
-    opacity: .6;
+    opacity: 1; /* jangan membuat seluruh kartu abu-abu */
+    background: #f1f1f1;
 }
 
 .out-of-stock img {
@@ -177,17 +181,59 @@ header {
 }
 
 
+/* Tulisan stok */
+.stok-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+
+/* Label HABIS di samping stok */
 .stok-habis {
     display: inline-block;
-    margin-top: 5px;
-    padding: 4px 8px;
-    background: var(--danger);
+    padding: 3px 8px;
+    background: #e53935;
     color: white;
     font-size: 12px;
     font-weight: bold;
     border-radius: 4px;
 }
 
+
+/* Judul produk tetap jelas */
+.product-card h4 {
+    color: #333;
+    font-weight: bold;
+}
+
+
+/* Harga coret tetap merah jelas */
+.price-old {
+    color: #e53935;
+    opacity: 1;
+    text-decoration: line-through;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+
+/* Harga akhir tetap biru jelas */
+.price-final {
+    color: #1565c0;
+    opacity: 1;
+    font-weight: 700;
+    font-size: 19px;
+}
+
+
+/* Tombol stok habis */
+.out-of-stock .controls button {
+    background: #ccc;
+    color: #777;
+    cursor: not-allowed;
+}
 
 /* ADMIN */
 .admin-panel {
