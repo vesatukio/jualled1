@@ -14,50 +14,88 @@ function renderProducts(products) {
     }
 
     grid.innerHTML = products.map(p => {
+
         const stokNum = Number(p.Stok) || 0;
         const isHabis = stokNum <= 0;
 
         return `
         <div class="product-card ${isHabis ? 'out-of-stock' : ''}">
+
             ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
+
             <img src="${p.Gambar || 'https://via.placeholder.com/300'}" style="width:100%">
+
             <h4>${p.Nama}</h4>
+
             ${isAdmin ? `
-                <div class="admin-panel" style="background:#fff3e0; padding:5px; font-size:12px;">
+
+                <div class="admin-panel" style="background:#fff3e0;padding:5px;font-size:12px;">
+
                     <p>
-    Modal: Rp ${Number(p.HargaModal).toLocaleString()} 
-    | Untung: Rp ${Number(p.Untung).toLocaleString()}
-</p>
+                        Modal : Rp ${Number(p.HargaModal).toLocaleString()}
+                        | Untung : Rp ${Number(p.Untung).toLocaleString()}
+                    </p>
 
-<p>
-    Total Modal: 
-    <b>
-    Rp ${(Number(p.HargaModal) * stokNum).toLocaleString()}
-    </b>
-</p>
+                    <p>
+                        Total Modal :
+                        <b>Rp ${(Number(p.HargaModal) * stokNum).toLocaleString()}</b>
+                    </p>
 
-<p>
-    Stok: <b>${stokNum}</b>
-    <button onclick="openModal('${p.Nama}')">
-        Edit Stok
-    </button>
-</p>
+                    <p>
+                        Stok : <b>${stokNum}</b>
+
+                        <button onclick="openModal('${p.Nama}')">
+                            Edit Stok
+                        </button>
+                    </p>
+
                 </div>
+
             ` : `
-                <div class="price-old">Rp ${p.HargaCoret?.toLocaleString() || '0'}</div>
-                <div class="price-final">Rp ${p.HargaFinal?.toLocaleString() || '0'}</div>
-                <p>Stok: <span id="stok-${p.Nama}">${stokNum}</span></p>
-                ${isHabis ? '<p style="color: red; font-weight: bold;">Habis</p>' : ''}
-            `}
-            ${!isAdmin ? `
-                <div class="controls">
-                    <button onclick="updateOrder('${p.Nama}', -1)" ${isHabis ? 'disabled' : ''}>-</button>
-                    <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
-                    <button onclick="updateOrder('${p.Nama}', 1)" ${isHabis ? 'disabled' : ''}>+</button>
+
+                <div class="price-old">
+                    Rp ${Number(p.HargaCoret).toLocaleString()}
                 </div>
-            ` : ''}
+
+                <div class="price-final">
+                    Rp ${Number(p.HargaFinal).toLocaleString()}
+                </div>
+
+                <p>
+                    Stok :
+                    <span id="stok-${p.Nama}">
+                        ${stokNum}
+                    </span>
+                </p>
+
+                ${isHabis ? '<p style="color:red;font-weight:bold;">HABIS</p>' : ''}
+
+                <div class="controls">
+
+                    <button
+                        onclick="updateOrder('${p.Nama}',-1)"
+                        ${isHabis ? 'disabled' : ''}
+                    >
+                        -
+                    </button>
+
+                    <span id="qty-${p.Nama}">
+                        ${cart[p.Nama] || 0}
+                    </span>
+
+                    <button
+                        onclick="updateOrder('${p.Nama}',1)"
+                        ${isHabis ? 'disabled' : ''}
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            `}
+
         </div>
-    `;
+        `;
     }).join('');
 }
 
@@ -100,23 +138,40 @@ async function fetchProducts() {
 }
 // 4. FUNGSI KERANJANG & MODAL (Sama seperti punya Anda)
 function updateOrder(nama, change) {
-    const prod = allProducts.find(p => p.Nama === nama);
-    if (prod && Number(prod.Stok) <= 0) return;
 
-    if (!cart[nama]) cart[nama] = 0;
-    cart[nama] += change;
-    if (cart[nama] < 0) cart[nama] = 0;
-    
-    if (prod && cart[nama] > Number(prod.Stok)) {
-        cart[nama] = Number(prod.Stok);
-        alert("Jumlah melebihi stok yang tersedia!");
+    const prod = allProducts.find(p => p.Nama === nama);
+
+    if (!prod) return;
+
+    const stok = Number(prod.Stok);
+
+    // stok habis
+    if (stok <= 0) return;
+
+    if (!cart[nama]) {
+        cart[nama] = 0;
     }
 
-    const qtyElement = document.getElementById(`qty-${nama}`);
-    if (qtyElement) qtyElement.innerText = cart[nama];
+    cart[nama] += change;
+
+    if (cart[nama] < 0) {
+        cart[nama] = 0;
+    }
+
+    // tidak boleh melebihi stok
+    if (cart[nama] > stok) {
+        cart[nama] = stok;
+        alert("Jumlah melebihi stok yang tersedia.");
+    }
+
+    const qty = document.getElementById(`qty-${nama}`);
+
+    if (qty) {
+        qty.innerText = cart[nama];
+    }
+
     updateCartUI();
 }
-
 function updateCartUI() {
     const cartItemsDiv = document.getElementById('cart-items');
     const cartCount = document.getElementById('cart-count');
@@ -219,4 +274,49 @@ function resetCart() {
         updateCartUI();
         renderProducts(allProducts);
     }
+}
+<div class="product-card ${isHabis ? 'out-of-stock' : ''}">
+    <div class="price-old">Rp ${p.HargaCoret?.toLocaleString() || '0'}</div>
+<div class="price-final">Rp ${p.HargaFinal?.toLocaleString() || '0'}</div>
+
+<p>Stok: <span id="stok-${p.Nama}">${stokNum}</span></p>
+
+${isHabis ? '<p style="color:red;font-weight:bold;">HABIS</p>' : ''}
+<div class="controls">
+    <button
+        onclick="updateOrder('${p.Nama}', -1)"
+        ${isHabis ? 'disabled' : ''}
+    >-</button>
+
+    <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
+
+    <button
+        onclick="updateOrder('${p.Nama}', 1)"
+        ${isHabis ? 'disabled' : ''}
+    >+</button>
+</div>
+function updateOrder(nama, change) {
+
+    const prod = allProducts.find(p => p.Nama === nama);
+
+    if (!prod) return;
+
+    // stok habis
+    if (Number(prod.Stok) <= 0) return;
+
+    if (!cart[nama]) cart[nama] = 0;
+
+    cart[nama] += change;
+
+    if (cart[nama] < 0) cart[nama] = 0;
+
+    // tidak boleh melebihi stok
+    if (cart[nama] > Number(prod.Stok)) {
+        cart[nama] = Number(prod.Stok);
+        alert("Jumlah melebihi stok.");
+    }
+
+    document.getElementById(`qty-${nama}`).innerText = cart[nama];
+
+    updateCartUI();
 }
