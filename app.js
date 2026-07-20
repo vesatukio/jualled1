@@ -1,6 +1,6 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbzow1xcIduyHnwMA0WmlCvkz_s81IBu0ALbZ70fxPoXqEsYwtESEMm-S8mg6TZSuw95/exec';
 const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
-let cart = {}; 
+let cart = JSON.parse(localStorage.getItem("cart")) || {}; 
 let allProducts = [];
 
 // 1. FUNGSI RENDER PRODUK (Diletakkan paling atas agar tidak ReferenceError)
@@ -46,10 +46,17 @@ function renderProducts(products) {
             `}
             ${!isAdmin ? `
                 <div class="controls">
-                    <button onclick="updateOrder('${p.Nama}', -1)">-</button>
-                    <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
-                    <button onclick="updateOrder('${p.Nama}', 1)">+</button>
-                </div>
+                    <button onclick='updateOrder(${JSON.stringify(p.Nama)}, -1)'>
+-
+</button>
+
+<span id="qty-${p.Nama}">
+${cart[p.Nama] || 0}
+</span>
+
+<button onclick='updateOrder(${JSON.stringify(p.Nama)}, 1)'>
++
+</button>
             ` : ''}
         </div>
     `).join('');
@@ -94,12 +101,29 @@ async function fetchProducts() {
 }
 // 4. FUNGSI KERANJANG & MODAL (Sama seperti punya Anda)
 function updateOrder(nama, change) {
-    if (!cart[nama]) cart[nama] = 0;
+
+    if (!cart[nama]) {
+        cart[nama] = 0;
+    }
+
     cart[nama] += change;
-    if (cart[nama] < 0) cart[nama] = 0;
-    const qtyElement = document.getElementById(`qty-${nama}`);
-    if (qtyElement) qtyElement.innerText = cart[nama];
+
+
+    if (cart[nama] <= 0) {
+        delete cart[nama];
+    }
+
+
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
+
+
+    renderProducts(allProducts);
+
     updateCartUI();
+
 }
 
 function updateCartUI() {
@@ -111,8 +135,8 @@ function updateCartUI() {
         if (qty > 0) {
             const prod = allProducts.find(p => p.Nama === nama);
             if (prod) {
-                html += `<p>${nama} x ${qty} = <b>Rp ${(prod.HargaFinal * qty).toLocaleString()}</b></p>`;
-                total += (prod.HargaFinal * qty);
+                html += `<p>${nama} x ${qty} = <b>Rp ${(Number(prod.HargaFinal) * qty).toLocaleString()}</b></p>`;
+                total += (Number(prod.HargaFinal) * qty);
                 count += qty;
             }
         }
@@ -169,7 +193,12 @@ async function saveStock() {
 // START APP
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
+
     fetchProducts();
+
+    updateCartUI();
+
+});
 
     const search = document.getElementById("search");
 
