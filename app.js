@@ -9,6 +9,7 @@ let cart =
     JSON.parse(localStorage.getItem("cart")) || {};
 
 let allProducts = [];
+let currentCategory = "Semua";
 
 
 
@@ -206,7 +207,7 @@ ${habis?'disabled':''}>
 
 
 // =========================
-// KATEGORI
+// KATEGORI & FILTER GABUNGAN
 // =========================
 
 function renderCategories(){
@@ -237,7 +238,7 @@ allProducts
 container.innerHTML =
 categories.map(cat=>`
 
-<button class="cat-btn"
+<button class="cat-btn ${cat === currentCategory ? 'active' : ''}"
 onclick='filterCategory(${JSON.stringify(cat)})'>
 ${cat}
 </button>
@@ -254,22 +255,41 @@ ${cat}
 
 function filterCategory(kategori){
 
+    currentCategory = kategori;
 
-if(kategori==="Semua"){
+    document.querySelectorAll(".cat-btn").forEach(btn => {
+        if(btn.textContent.trim() === kategori){
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
 
-renderProducts(allProducts);
-
-return;
+    applyFilters();
 
 }
 
 
-renderProducts(
-allProducts.filter(
-p=>p.Kategori===kategori
-)
-);
 
+
+function applyFilters(){
+
+    const searchInput = document.getElementById("search");
+    const keyword = searchInput ? searchInput.value.toLowerCase().trim() : "";
+
+    let filtered = allProducts;
+
+    if(currentCategory !== "Semua"){
+        filtered = filtered.filter(p => p.Kategori === currentCategory);
+    }
+
+    if(keyword !== ""){
+        filtered = filtered.filter(p =>
+            p.Nama && p.Nama.toLowerCase().includes(keyword)
+        );
+    }
+
+    renderProducts(filtered);
 
 }
 
@@ -326,7 +346,7 @@ allProducts.length
 
 renderCategories();
 
-renderProducts(allProducts);
+applyFilters();
 
 
 
@@ -459,7 +479,7 @@ function updateOrder(nama, jumlah){
     );
 
 
-    renderProducts(allProducts);
+    applyFilters();
 
 }
 // =========================
@@ -477,20 +497,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     if(search){
 
-        search.addEventListener("input",function(){
-
-            const keyword =
-            this.value.toLowerCase();
-
-
-            renderProducts(
-                allProducts.filter(p =>
-                    p.Nama
-                    .toLowerCase()
-                    .includes(keyword)
-                )
-            );
-
+        search.addEventListener("input", function(){
+            applyFilters();
         });
 
     }
