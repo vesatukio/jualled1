@@ -216,3 +216,10 @@ header {
     }
 
 }
+.out-of-stock{
+    opacity: .6;
+}
+
+.out-of-stock button{
+    cursor: not-allowed;
+}
