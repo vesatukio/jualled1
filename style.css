@@ -344,3 +344,168 @@ header {
     }
 
 }
+/* =========================
+   CART BOX
+========================= */
+
+.cart-box {
+    position: fixed;
+    top:70px;
+    right:15px;
+    width:300px;
+    max-width:90%;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.2);
+    z-index:999;
+    animation: cartOpen .3s ease;
+}
+
+
+@keyframes cartOpen {
+
+    from {
+        opacity:0;
+        transform:translateY(-20px);
+    }
+
+    to {
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+
+
+#cart-total {
+    font-weight:bold;
+    margin-top:15px;
+    color:#1565c0;
+}
+
+
+
+#reset-cart-btn {
+
+    width:100%;
+    margin-top:15px;
+    padding:10px;
+
+    border:none;
+    border-radius:8px;
+
+    background:#e53935;
+    color:white;
+
+    font-weight:bold;
+    cursor:pointer;
+
+}
+
+
+
+#reset-cart-btn:hover {
+    background:#c62828;
+}
+
+
+
+/* =========================
+   CART BADGE ANIMASI
+========================= */
+
+
+.cart-icon {
+
+    position:relative;
+    cursor:pointer;
+
+}
+
+
+
+#cart-count {
+
+    position:absolute;
+    top:-10px;
+    right:-12px;
+
+    min-width:22px;
+    height:22px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#e53935;
+    color:white;
+
+    border-radius:50%;
+
+    font-size:12px;
+    font-weight:bold;
+
+}
+
+
+
+/* animasi angka berubah */
+
+.cart-bounce {
+
+    animation:
+    bounce .4s ease;
+
+}
+
+
+
+@keyframes bounce {
+
+    0% {
+        transform:scale(1);
+    }
+
+    50% {
+        transform:scale(1.5);
+    }
+
+    100% {
+        transform:scale(1);
+    }
+
+}
+
+
+
+/* animasi ikon keranjang */
+
+.cart-shake {
+
+    animation:
+    shake .5s ease;
+
+}
+
+
+@keyframes shake {
+
+    0%,100% {
+        transform:rotate(0);
+    }
+
+    25% {
+        transform:rotate(-15deg);
+    }
+
+    50% {
+        transform:rotate(15deg);
+    }
+
+    75% {
+        transform:rotate(-10deg);
+    }
+
+}
