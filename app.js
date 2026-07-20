@@ -362,3 +362,75 @@ Gagal memuat produk
 
 
 }
+function sendOrderWA(){
+
+    let pesan = "Pesanan Baru:%0A%0A";
+
+    let total = 0;
+    let adaPesanan = false;
+
+
+    Object.entries(cart).forEach(([nama, qty])=>{
+
+        if(qty > 0){
+
+            const produk =
+            allProducts.find(
+                p => p.Nama === nama
+            );
+
+
+            if(produk){
+
+                const harga =
+                Number(produk.HargaFinal) || 0;
+
+
+                const subtotal =
+                harga * qty;
+
+
+                total += subtotal;
+
+                adaPesanan = true;
+
+
+                pesan +=
+                `${nama} x ${qty} = Rp ${subtotal.toLocaleString()}%0A`;
+
+            }
+
+        }
+
+    });
+
+
+    if(!adaPesanan){
+
+        alert("Keranjang masih kosong");
+
+        return;
+
+    }
+
+
+    pesan +=
+    `%0ATotal Belanja: Rp ${total.toLocaleString()}`;
+
+
+
+    // GANTI NOMOR WA TOKO
+    const nomorWA =
+    "6283157925577";
+
+
+    const url =
+    `https://wa.me/${nomorWA}?text=${pesan}`;
+
+
+    window.open(
+        url,
+        "_blank"
+    );
+
+}
