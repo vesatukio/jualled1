@@ -19,7 +19,7 @@ function renderProducts(products) {
         const isHabis = stokNum <= 0;
 
         return `
-        <div class="product-card ${isHabis ? 'out-of-stock' : ''}">
+        
 
             ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
 
@@ -54,11 +54,11 @@ function renderProducts(products) {
             ` : `
 
                 <div class="price-old">
-                    Rp ${Number(p.HargaCoret).toLocaleString()}
+                    Rp ${(Number(p.HargaCoret) || 0).toLocaleString()}
                 </div>
 
                 <div class="price-final">
-                    Rp ${Number(p.HargaFinal).toLocaleString()}
+                    Rp ${(Number(p.HargaFinal) || 0).toLocaleString()}
                 </div>
 
                 <p>
@@ -68,7 +68,7 @@ function renderProducts(products) {
                     </span>
                 </p>
 
-                ${isHabis ? '<p style="color:red;font-weight:bold;">HABIS</p>' : ''}
+                ${isHabis ? '<p class="stok-habis">HABIS</p>' : ''}
 
                 <div class="controls">
 
@@ -274,49 +274,4 @@ function resetCart() {
         updateCartUI();
         renderProducts(allProducts);
     }
-}
-<div class="product-card ${isHabis ? 'out-of-stock' : ''}">
-    <div class="price-old">Rp ${p.HargaCoret?.toLocaleString() || '0'}</div>
-<div class="price-final">Rp ${p.HargaFinal?.toLocaleString() || '0'}</div>
-
-<p>Stok: <span id="stok-${p.Nama}">${stokNum}</span></p>
-
-${isHabis ? '<p style="color:red;font-weight:bold;">HABIS</p>' : ''}
-<div class="controls">
-    <button
-        onclick="updateOrder('${p.Nama}', -1)"
-        ${isHabis ? 'disabled' : ''}
-    >-</button>
-
-    <span id="qty-${p.Nama}">${cart[p.Nama] || 0}</span>
-
-    <button
-        onclick="updateOrder('${p.Nama}', 1)"
-        ${isHabis ? 'disabled' : ''}
-    >+</button>
-</div>
-function updateOrder(nama, change) {
-
-    const prod = allProducts.find(p => p.Nama === nama);
-
-    if (!prod) return;
-
-    // stok habis
-    if (Number(prod.Stok) <= 0) return;
-
-    if (!cart[nama]) cart[nama] = 0;
-
-    cart[nama] += change;
-
-    if (cart[nama] < 0) cart[nama] = 0;
-
-    // tidak boleh melebihi stok
-    if (cart[nama] > Number(prod.Stok)) {
-        cart[nama] = Number(prod.Stok);
-        alert("Jumlah melebihi stok.");
-    }
-
-    document.getElementById(`qty-${nama}`).innerText = cart[nama];
-
-    updateCartUI();
 }
