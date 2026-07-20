@@ -45,25 +45,27 @@ function renderProducts(products) {
                 <p>Stok: <span id="stok-${p.Nama}">${p.Stok}</span></p>
             `}
             ${!isAdmin ? `
-                <div class="controls">
 
-    <button onclick='updateOrder(${JSON.stringify(p.Nama)}, -1)'>
-        -
-    </button>
+<div class="controls">
 
-    <span id="qty-${p.Nama}">
-        ${cart[p.Nama] || 0}
-    </span>
+<button onclick='updateOrder(${JSON.stringify(p.Nama)}, -1)'>
+-
+</button>
 
-    <button onclick='updateOrder(${JSON.stringify(p.Nama)}, 1)'>
-        +
-    </button>
+<span id="qty-${p.Nama}">
+${cart[p.Nama] || 0}
+</span>
+
+<button onclick='updateOrder(${JSON.stringify(p.Nama)}, 1)'>
++
+</button>
 
 </div>
 
+` : ''}
+
 </div>
-    `).join('');
-}
+`).join('');
 
 // 2. FUNGSI KATEGORI
 function renderCategories() {
