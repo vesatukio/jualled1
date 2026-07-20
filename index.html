@@ -18,10 +18,22 @@
 
     <main id="product-grid"></main>
 
-    <div id="cart-box" class="hidden" style="position:fixed; top:60px; right:10px; background:white; padding:20px; border:1px solid #ddd; z-index:100;">
-    <h3>Ringkasan Order</h3>
-    <div id="cart-items"></div>
-    <div id="cart-total" style="font-weight:bold; margin-top:10px;">Total: Rp 0</div>
+    <div id="cart-box" class="hidden cart-box">
+
+    <h3>🛒 Ringkasan Order</h3>
+
+    <div id="cart-items">
+        Keranjang kosong
+    </div>
+
+    <div id="cart-total">
+        Total: Rp 0
+    </div>
+
+    <button id="reset-cart-btn" onclick="resetCart()">
+        🗑 Hapus Semua
+    </button>
+
 </div>
 
     <nav class="bottom-nav">
