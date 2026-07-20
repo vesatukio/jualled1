@@ -197,27 +197,37 @@ async function saveStock() {
 // =====================
 // START APP
 // =====================
+
 document.addEventListener("DOMContentLoaded", () => {
 
     fetchProducts();
 
     updateCartUI();
 
-});
 
     const search = document.getElementById("search");
 
+
     if (search) {
+
         search.addEventListener("input", function () {
-            const keyword = this.value.toLowerCase();
+
+            const keyword =
+            this.value.toLowerCase();
+
 
             renderProducts(
                 allProducts.filter(p =>
-                    p.Nama.toLowerCase().includes(keyword)
+                    p.Nama
+                    .toLowerCase()
+                    .includes(keyword)
                 )
             );
+
         });
+
     }
+
 });
 function toggleCart() {
     document.getElementById("cart-box").classList.toggle("hidden");
