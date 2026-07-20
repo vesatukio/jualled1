@@ -15,21 +15,48 @@ function renderProducts(products) {
 
     grid.innerHTML = products.map(p => `
         <div class="product-card">
-            ...
+            ${!isAdmin ? `<div class="discount-badge">${p.Diskon}%</div>` : ''}
+            <img src="${p.Gambar || 'https://via.placeholder.com/300'}" style="width:100%">
+            <h4>${p.Nama}</h4>
+            ${isAdmin ? `
+                <div class="admin-panel" style="background:#fff3e0; padding:5px; font-size:12px;">
+                    <p>
+    Modal: Rp ${Number(p.HargaModal).toLocaleString()} 
+    | Untung: Rp ${Number(p.Untung).toLocaleString()}
+</p>
+
+<p>
+    Total Modal: 
+    <b>
+    Rp ${(Number(p.HargaModal) * Number(p.Stok)).toLocaleString()}
+    </b>
+</p>
+
+<p>
+    Stok: <b>${p.Stok}</b>
+    <button onclick="openModal('${p.Nama}')">
+        Edit Stok
+    </button>
+</p>
+                </div>
+            ` : `
+                <div class="price-old">Rp ${p.HargaCoret?.toLocaleString() || '0'}</div>
+                <div class="price-final">Rp ${p.HargaFinal?.toLocaleString() || '0'}</div>
+                <p>Stok: <span id="stok-${p.Nama}">${p.Stok}</span></p>
+            `}
             ${!isAdmin ? `
                 <div class="controls">
                     <button onclick='updateOrder(${JSON.stringify(p.Nama)}, -1)'>
-                        -
-                    </button>
+-
+</button>
 
-                    <span>
-                        ${cart[p.Nama] || 0}
-                    </span>
+<span id="qty-${p.Nama}">
+${cart[p.Nama] || 0}
+</span>
 
-                    <button onclick='updateOrder(${JSON.stringify(p.Nama)}, 1)'>
-                        +
-                    </button>
-                </div>
+<button onclick='updateOrder(${JSON.stringify(p.Nama)}, 1)'>
++
+</button>
             ` : ''}
         </div>
     `).join('');
