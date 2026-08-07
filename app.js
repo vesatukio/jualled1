@@ -1,11 +1,11 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbywjIfrH7oiESl9tzJX24LR27bM_N9pV1TDiczjyMDDr5-pkupjlErpEYgYoe4Tue68/exec";
 
-// Sample Data Produk untuk memudahkan preview & edit awal
+// Sample Data dengan harga diskon dan coret
 const sampleProducts = [
-  { id_produk: "P001", nama: "Driver LED Power Supply 30W Slim", harga: 45000, gambar: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=300" },
-  { id_produk: "P002", nama: "Modul LED HPL 10W White High Power", harga: 12000, gambar: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300" },
-  { id_produk: "P003", nama: "Kabel AC SNI Serabut Murni 2 Meter", harga: 15000, gambar: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300" },
-  { id_produk: "P004", nama: "Kit Power Amplifier Mini Bluetooth", harga: 65000, gambar: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=300" }
+  { id_produk: "P001", nama: "Driver LED Power Supply 30W Slim", harga: 60000, diskon_harga: 45000, diskon_persen: "25%", gambar: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=300" },
+  { id_produk: "P002", nama: "Modul LED HPL 10W White High Power", harga: 18000, diskon_harga: 12000, diskon_persen: "33%", gambar: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300" },
+  { id_produk: "P003", nama: "Kabel AC SNI Serabut Murni 2 Meter", harga: 20000, diskon_harga: 15000, diskon_persen: "25%", gambar: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300" },
+  { id_produk: "P004", nama: "Kit Power Amplifier Mini Bluetooth", harga: 85000, diskon_harga: 65000, diskon_persen: "23%", gambar: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=300" }
 ];
 
 let allProducts = [];
@@ -21,9 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function initPWA() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log("Service Worker Registered"))
-      .catch(err => console.log("SW Registration failed:", err));
+    navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 }
 
@@ -34,11 +32,10 @@ async function fetchProducts() {
     if (json.status === "success" && json.data.length > 0) {
       allProducts = json.data;
     } else {
-      allProducts = sampleProducts; // Gunakan sample jika sheet kosong
+      allProducts = sampleProducts;
     }
     renderProducts(allProducts);
   } catch (err) {
-    console.warn("Mode Offline: Menggunakan data lokal/cache.");
     allProducts = sampleProducts;
     renderProducts(allProducts);
   }
@@ -48,18 +45,28 @@ function renderProducts(products) {
   const grid = document.getElementById("product-grid");
   if (!grid) return;
   
-  grid.innerHTML = products.map(p => `
-    <div class="product-card" onclick="addToCart('${p.id_produk}', '${p.nama}', ${p.harga}, '${p.gambar || 'https://via.placeholder.com/150'}')">
-      <div class="product-img-wrapper">
-        <img src="${p.gambar || 'https://via.placeholder.com/150'}" class="product-img" alt="${p.nama}" loading="lazy">
+  grid.innerHTML = products.map(p => {
+    const hargaAsli = Number(p.harga || p.harga_asli || 0);
+    const hargaDiskon = Number(p.diskon_harga || p.harga || 0);
+    const diskonPersen = p.diskon_persen || "15%";
+
+    return `
+      <div class="product-card">
+        <div class="product-img-wrapper">
+          <img src="${p.gambar || 'https://via.placeholder.com/150'}" class="product-img" alt="${p.nama}" loading="lazy">
+          <div class="discount-badge">-${diskonPersen}</div>
+        </div>
+        <div class="product-info">
+          <div class="product-title">${p.nama}</div>
+          <div class="price-container">
+            <div class="original-price">Rp ${hargaAsli.toLocaleString('id-ID')}</div>
+            <div class="final-price">Rp ${hargaDiskon.toLocaleString('id-ID')}</div>
+          </div>
+          <button class="btn-primary" onclick="addToCart('${p.id_produk}', '${p.nama}', ${hargaDiskon}, '${p.gambar || ''}')">+ Keranjang</button>
+        </div>
       </div>
-      <div class="product-info">
-        <div class="product-title">${p.nama}</div>
-        <div class="product-price">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
-        <button class="btn-primary">+ Keranjang</button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function setupRouter() {
@@ -131,22 +138,38 @@ function renderCartView() {
     return;
   }
 
-  cartContainer.innerHTML = cart.map((item, index) => `
-    <div style="display: flex; gap: 10px; background: var(--card-bg); padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-color); align-items: center;">
-      <img src="${item.gambar}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
-      <div style="flex: 1;">
-        <div style="font-size: 12px; font-weight: 500; margin-bottom: 2px;">${item.nama}</div>
-        <div style="color: var(--primary); font-weight: 700; font-size: 12px;">Rp ${Number(item.harga * item.qty).toLocaleString('id-ID')}</div>
+  let totalBelanja = 0;
+
+  let html = cart.map((item, index) => {
+    const subtotal = item.harga * item.qty;
+    totalBelanja += subtotal;
+    return `
+      <div style="display: flex; gap: 10px; background: var(--card-bg); padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-color); align-items: center;">
+        <img src="${item.gambar}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+        <div style="flex: 1;">
+          <div style="font-size: 12px; font-weight: 500; margin-bottom: 2px;">${item.nama}</div>
+          <div style="color: var(--primary); font-weight: 700; font-size: 12px;">Rp ${subtotal.toLocaleString('id-ID')}</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button onclick="changeQty(${index}, -1)" style="padding: 2px 6px; border: 1px solid var(--border-color); background: transparent; border-radius: 4px; cursor:pointer;">-</button>
+          <span style="font-size: 12px; font-weight: 600;">${item.qty}</span>
+          <button onclick="changeQty(${index}, 1)" style="padding: 2px 6px; border: 1px solid var(--border-color); background: transparent; border-radius: 4px; cursor:pointer;">+</button>
+        </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <button onclick="changeQty(${index}, -1)" style="padding: 2px 6px; border: 1px solid var(--border-color); background: transparent; border-radius: 4px; cursor:pointer;">-</button>
-        <span style="font-size: 12px; font-weight: 600;">${item.qty}</span>
-        <button onclick="changeQty(${index}, 1)" style="padding: 2px 6px; border: 1px solid var(--border-color); background: transparent; border-radius: 4px; cursor:pointer;">+</button>
+    `;
+  }).join('');
+
+  html += `
+    <div style="background: var(--card-bg); padding: 14px; border-radius: 12px; margin-top: 12px; border: 1px solid var(--border-color);">
+      <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; margin-bottom: 12px;">
+        <span>Total Pembayaran:</span>
+        <span style="color: var(--primary);">Rp ${totalBelanja.toLocaleString('id-ID')}</span>
       </div>
+      <button class="btn-primary" onclick="checkoutWhatsApp()" style="padding: 12px; font-size: 13px;">Kirim Pesanan via WhatsApp</button>
     </div>
-  `).join('') + `
-    <button class="btn-primary" onclick="checkoutWhatsApp()" style="margin-top: 12px; padding: 12px;">Checkout via WhatsApp</button>
   `;
+
+  cartContainer.innerHTML = html;
 }
 
 function changeQty(index, delta) {
@@ -166,11 +189,11 @@ function checkoutWhatsApp() {
   let total = 0;
   
   cart.forEach((item, i) => {
-    text += `${i + 1}. *${item.nama}* (${item.qty}x) - Rp ${Number(item.harga * item.qty).toLocaleString('id-ID')}\n`;
+    text += `${i + 1}. *${item.nama}* (${item.qty}x) - Rp ${(item.harga * item.qty).toLocaleString('id-ID')}\n`;
     total += item.harga * item.qty;
   });
   
-  text += `\n*Total Belanja: Rp ${Number(total).toLocaleString('id-ID')}*\n\nMohon informasi ketersediaannya. Terima kasih!`;
+  text += `\n*Total Keseluruhan: Rp ${total.toLocaleString('id-ID')}*\n\nMohon informasi ketersediaan dan total ongkirnya. Terima kasih!`;
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
 }
 
