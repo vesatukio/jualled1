@@ -1,5 +1,12 @@
-// Ganti dengan URL Web App Google Apps Script Anda yang baru
 const API_URL = "https://script.google.com/macros/s/AKfycbywjIfrH7oiESl9tzJX24LR27bM_N9pV1TDiczjyMDDr5-pkupjlErpEYgYoe4Tue68/exec";
+
+// Sample Data Produk untuk memudahkan preview & edit awal
+const sampleProducts = [
+  { id_produk: "P001", nama: "Driver LED Power Supply 30W Slim", harga: 45000, gambar: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=300" },
+  { id_produk: "P002", nama: "Modul LED HPL 10W White High Power", harga: 12000, gambar: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300" },
+  { id_produk: "P003", nama: "Kabel AC SNI Serabut Murni 2 Meter", harga: 15000, gambar: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300" },
+  { id_produk: "P004", nama: "Kit Power Amplifier Mini Bluetooth", harga: 65000, gambar: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=300" }
+];
 
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('dt_cart')) || [];
@@ -24,12 +31,16 @@ async function fetchProducts() {
   try {
     const res = await fetch(`${API_URL}?action=getProducts`);
     const json = await res.json();
-    if (json.status === "success") {
+    if (json.status === "success" && json.data.length > 0) {
       allProducts = json.data;
-      renderProducts(allProducts);
+    } else {
+      allProducts = sampleProducts; // Gunakan sample jika sheet kosong
     }
+    renderProducts(allProducts);
   } catch (err) {
-    console.error("Gagal memuat produk:", err);
+    console.warn("Mode Offline: Menggunakan data lokal/cache.");
+    allProducts = sampleProducts;
+    renderProducts(allProducts);
   }
 }
 
@@ -37,18 +48,15 @@ function renderProducts(products) {
   const grid = document.getElementById("product-grid");
   if (!grid) return;
   
-  if (products.length === 0) {
-    grid.innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 30px; color: var(--text-muted);">Belum ada produk tersedia.</div>`;
-    return;
-  }
-
   grid.innerHTML = products.map(p => `
     <div class="product-card" onclick="addToCart('${p.id_produk}', '${p.nama}', ${p.harga}, '${p.gambar || 'https://via.placeholder.com/150'}')">
-      <img src="${p.gambar || 'https://via.placeholder.com/150'}" class="product-img" alt="${p.nama}" loading="lazy">
+      <div class="product-img-wrapper">
+        <img src="${p.gambar || 'https://via.placeholder.com/150'}" class="product-img" alt="${p.nama}" loading="lazy">
+      </div>
       <div class="product-info">
         <div class="product-title">${p.nama}</div>
         <div class="product-price">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
-        <button class="btn-primary" style="margin-top: 8px; padding: 6px; font-size: 12px;">+ Keranjang</button>
+        <button class="btn-primary">+ Keranjang</button>
       </div>
     </div>
   `).join('');
@@ -102,7 +110,7 @@ function addToCart(id, nama, harga, gambar) {
   }
   localStorage.setItem('dt_cart', JSON.stringify(cart));
   updateCartBadge();
-  showToast(`Berhasil menambahkan ${nama} ke keranjang!`);
+  showToast(`Berhasil menambahkan ${nama}!`);
 }
 
 function updateCartBadge() {
@@ -119,25 +127,25 @@ function renderCartView() {
   if (!cartContainer) return;
 
   if (cart.length === 0) {
-    cartContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Keranjang belanja Anda masih kosong.</div>`;
+    cartContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px;">Keranjang belanja Anda masih kosong.</div>`;
     return;
   }
 
   cartContainer.innerHTML = cart.map((item, index) => `
-    <div style="display: flex; gap: 12px; background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-color); align-items: center;">
-      <img src="${item.gambar}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+    <div style="display: flex; gap: 10px; background: var(--card-bg); padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-color); align-items: center;">
+      <img src="${item.gambar}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
       <div style="flex: 1;">
-        <div style="font-size: 13px; font-weight: 500; margin-bottom: 4px;">${item.nama}</div>
-        <div style="color: var(--primary); font-weight: 700; font-size: 13px;">Rp ${Number(item.harga * item.qty).toLocaleString('id-ID')}</div>
+        <div style="font-size: 12px; font-weight: 500; margin-bottom: 2px;">${item.nama}</div>
+        <div style="color: var(--primary); font-weight: 700; font-size: 12px;">Rp ${Number(item.harga * item.qty).toLocaleString('id-ID')}</div>
       </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <button onclick="changeQty(${index}, -1)" style="padding: 2px 8px; border: 1px solid var(--border-color); background: transparent; border-radius: 4px; cursor:pointer;">-</button>
-        <span style="font-size: 13px; font-weight: 600;">${item.qty}</span>
-        <button onclick="changeQty(${index}, 1)" style="padding: 2px 8px; border: 1px solid var(--border-color); background: transparent; border-radius: 4px; cursor:pointer;">+</button>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <button onclick="changeQty(${index}, -1)" style="padding: 2px 6px; border: 1px solid var(--border-color); background: transparent; border-radius: 4px; cursor:pointer;">-</button>
+        <span style="font-size: 12px; font-weight: 600;">${item.qty}</span>
+        <button onclick="changeQty(${index}, 1)" style="padding: 2px 6px; border: 1px solid var(--border-color); background: transparent; border-radius: 4px; cursor:pointer;">+</button>
       </div>
     </div>
   `).join('') + `
-    <button class="btn-primary" onclick="checkoutWhatsApp()" style="margin-top: 16px;">Checkout via WhatsApp</button>
+    <button class="btn-primary" onclick="checkoutWhatsApp()" style="margin-top: 12px; padding: 12px;">Checkout via WhatsApp</button>
   `;
 }
 
@@ -153,7 +161,7 @@ function changeQty(index, delta) {
 
 function checkoutWhatsApp() {
   if (cart.length === 0) return;
-  const phone = "6281234567890"; // Ganti dengan nomor WhatsApp toko Duta Terang
+  const phone = "6281234567890"; // Ganti dengan nomor WhatsApp toko Anda
   let text = "Halo Duta Terang, saya ingin memesan produk berikut:\n\n";
   let total = 0;
   
@@ -162,7 +170,7 @@ function checkoutWhatsApp() {
     total += item.harga * item.qty;
   });
   
-  text += `\n*Total Belanja: Rp ${Number(total).toLocaleString('id-ID')}*\n\nMohon informasi ketersediaan dan proses selanjutnya. Terima kasih!`;
+  text += `\n*Total Belanja: Rp ${Number(total).toLocaleString('id-ID')}*\n\nMohon informasi ketersediaannya. Terima kasih!`;
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
 }
 
@@ -171,10 +179,10 @@ function showToast(message) {
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'toast-notification';
-    toast.style.cssText = "position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: 0.3s;";
+    toast.style.cssText = "position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: 0.3s;";
     document.body.appendChild(toast);
   }
   toast.textContent = message;
   toast.style.opacity = "1";
-  setTimeout(() => { toast.style.opacity = "0"; }, 2500);
+  setTimeout(() => { toast.style.opacity = "0"; }, 2000);
 }
