@@ -1,5 +1,5 @@
 // Ganti dengan URL Web App Google Apps Script Anda yang baru
-const API_URL = "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI";
+const API_URL = "https://script.google.com/macros/s/AKfycbywjIfrH7oiESl9tzJX24LR27bM_N9pV1TDiczjyMDDr5-pkupjlErpEYgYoe4Tue68/exec";
 
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('dt_cart')) || [];
