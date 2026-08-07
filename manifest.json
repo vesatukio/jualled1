@@ -1,25 +1,20 @@
 {
-  "name": "Duta LED Store",
-  "short_name": "DutaLED",
-  "description": "Katalog dan pemesanan produk Duta LED Store",
-  "start_url": "./",
-  "scope": "./",
+  "name": "Duta Terang - Toko Elektronik & LED",
+  "short_name": "DutaTerang",
+  "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#ff9800",
+  "theme_color": "#FF6600",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "assets/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "assets/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
