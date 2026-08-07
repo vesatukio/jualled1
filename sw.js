@@ -1,11 +1,10 @@
-const CACHE_NAME = 'duta-terang-v1';
+const CACHE_NAME = 'duta-terang-v2';
 const urlsToCache = [
   '/',
   '/index.html',
   '/style.css',
   '/app.js',
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap',
-  'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0'
+  '/manifest.json'
 ];
 
 self.addEventListener('install', event => {
@@ -16,6 +15,12 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request).catch(() => {
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+      });
+    })
   );
 });
