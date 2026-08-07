@@ -1,39 +1,21 @@
-const CACHE_NAME = "dutaled-v1";
-
-const FILES_TO_CACHE = [
-    "./",
-    "./index.html",
-    "./style.css",
-    "./app.js",
-    "./manifest.json",
-    "./icon-192.png",
-    "./icon-512.png"
+const CACHE_NAME = 'duta-terang-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/style.css',
+  '/app.js',
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0'
 ];
 
-self.addEventListener("install", event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(FILES_TO_CACHE))
-    );
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
 });
 
-self.addEventListener("activate", event => {
-    event.waitUntil(
-        caches.keys().then(keys =>
-            Promise.all(
-                keys
-                    .filter(key => key !== CACHE_NAME)
-                    .map(key => caches.delete(key))
-            )
-        )
-    );
-});
-
-self.addEventListener("fetch", event => {
-    if (event.request.method !== "GET") return;
-
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => response || fetch(event.request))
-    );
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
+  );
 });
