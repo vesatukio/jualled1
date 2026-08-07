@@ -6,8 +6,8 @@
   --text-color: #222222;
   --text-muted: #888888;
   --border-color: #eee;
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  --radius: 16px;
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
 }
 
 * {
@@ -26,7 +26,6 @@ body {
   min-height: 100vh;
 }
 
-/* Membungkus tampilan agar rapi berbentuk layar HP di desktop, dan full-screen di HP */
 .app-container {
   width: 100%;
   max-width: 430px;
@@ -38,7 +37,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Sticky Header Modern */
 .sticky-header {
   position: sticky;
   top: 0;
@@ -49,7 +47,6 @@ body {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
 
 .search-box {
@@ -73,21 +70,18 @@ body {
   margin-left: 6px;
 }
 
-/* Banner Slider */
 .banner-container {
   padding: 12px 16px;
 }
 .promo-banner {
   background: linear-gradient(135deg, #FF6600, #ff8533);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 16px;
   color: white;
-  box-shadow: 0 6px 15px rgba(255, 102, 0, 0.25);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 6px 15px rgba(255, 102, 0, 0.2);
 }
 
-/* Product Grid */
+/* Product Grid & Card */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -103,18 +97,13 @@ body {
   border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-}
-
-.product-card:active {
-  transform: scale(0.97);
+  position: relative;
 }
 
 .product-img-wrapper {
   width: 100%;
-  height: 140px;
-  overflow: hidden;
+  height: 130px;
+  position: relative;
   background: #f9f9f9;
 }
 
@@ -122,11 +111,20 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
 }
 
-.product-card:hover .product-img {
-  transform: scale(1.05);
+/* Badge Diskon di Pojok Kanan Gambar */
+.discount-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff3b30;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 .product-info {
@@ -145,17 +143,44 @@ body {
   overflow: hidden;
   margin-bottom: 6px;
   color: var(--text-color);
+  line-height: 1.3;
 }
 
-.product-price {
-  color: var(--primary);
-  font-weight: 700;
-  font-size: 13px;
+.price-container {
   margin-top: auto;
   margin-bottom: 8px;
 }
 
-/* Bottom Navigation Kapsul Elegan */
+.original-price {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.final-price {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  font-size: 11px;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Bottom Navigation */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -168,7 +193,6 @@ body {
   justify-content: space-around;
   padding: 8px 10px;
   z-index: 1000;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
 }
 
 .nav-item {
@@ -178,41 +202,18 @@ body {
   color: var(--text-muted);
   font-size: 10px;
   text-decoration: none;
-  transition: all 0.25s ease;
   padding: 6px 12px;
   border-radius: 20px;
+  transition: 0.2s;
 }
 
 .nav-item span.material-symbols-rounded {
   font-size: 22px;
   margin-bottom: 2px;
-  transition: transform 0.2s;
 }
 
 .nav-item.active {
   color: var(--primary);
   background-color: rgba(255, 102, 0, 0.08);
   font-weight: 600;
-}
-
-.nav-item.active span.material-symbols-rounded {
-  transform: translateY(-2px);
-}
-
-/* Utility Buttons */
-.btn-primary {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-weight: 600;
-  width: 100%;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-size: 11px;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-hover);
 }
