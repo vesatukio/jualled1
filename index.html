@@ -15,64 +15,62 @@
     <!-- Header -->
     <header class="sticky-header">
       <div class="logo">
-        <h2 style="color: var(--primary); font-weight: 700; font-size: 18px;">Duta Terang</h2>
+        <h2 style="color: var(--primary); font-weight: 700; font-size: 16px;">Duta Terang</h2>
       </div>
       <div class="search-box">
-        <span class="material-symbols-rounded" style="font-size: 20px; color: var(--text-muted);">search</span>
+        <span class="material-symbols-rounded" style="font-size: 18px; color: var(--text-muted);">search</span>
         <input type="text" id="search-input" placeholder="Cari LED, driver, spare parts...">
       </div>
     </header>
 
     <!-- Main Content Area -->
-    <main id="app-content" style="padding-bottom: 20px;">
+    <main id="app-content">
       
       <!-- Beranda View -->
       <div id="view-home" class="page-view">
-        <div class="banner-section" style="padding: 16px;">
-          <div style="background: linear-gradient(135deg, #FF6600, #ff8533); border-radius: 16px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(255,102,0,0.3);">
-            <h3 style="font-size: 18px; margin-bottom: 6px;">Pusat Suku Cadang LED & Elektronik</h3>
-            <p style="font-size: 12px; opacity: 0.9;">Terlengkap, Berkualitas, dan Bergaransi.</p>
+        <div class="banner-container">
+          <div class="promo-banner">
+            <h3 style="font-size: 16px; margin-bottom: 4px;">Pusat Suku Cadang LED & Elektronik</h3>
+            <p style="font-size: 11px; opacity: 0.9;">Terlengkap, Berkualitas, dan Bergaransi.</p>
           </div>
         </div>
 
-        <div style="padding: 0 16px; font-weight: 600; font-size: 16px; margin-bottom: 4px;">Produk Pilihan</div>
+        <div style="padding: 0 16px 8px 16px; font-weight: 600; font-size: 14px;">Produk Pilihan</div>
         <div id="product-grid" class="product-grid">
-          <!-- Dinamis dari JavaScript -->
+          <!-- Produk dimuat otomatis via JS -->
         </div>
       </div>
 
       <!-- Kategori View -->
       <div id="view-category" class="page-view" style="display: none; padding: 16px;">
-        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Kategori Produk</h3>
-        <p style="color: var(--text-muted); font-size: 13px;">Daftar kategori spare parts LED dan audio akan tampil di sini.</p>
+        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Kategori Produk</h3>
+        <p style="color: var(--text-muted); font-size: 12px;">Daftar kategori spare parts LED dan audio.</p>
       </div>
 
       <!-- Keranjang View -->
       <div id="view-cart" class="page-view" style="display: none; padding: 16px;">
-        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Keranjang Belanja</h3>
-        <div id="cart-items-container">
-          <!-- Dinamis isi keranjang -->
-        </div>
+        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px;">Keranjang Belanja</h3>
+        <div id="cart-items-container"></div>
       </div>
 
       <!-- Pesanan View -->
       <div id="view-orders" class="page-view" style="display: none; padding: 16px;">
-        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Status Pesanan</h3>
-        <p style="color: var(--text-muted); font-size: 13px;">Belum ada riwayat pesanan aktif.</p>
+        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Status Pesanan</h3>
+        <p style="color: var(--text-muted); font-size: 12px;">Belum ada riwayat pesanan aktif.</p>
       </div>
 
       <!-- Akun View -->
       <div id="view-account" class="page-view" style="display: none; padding: 16px;">
-        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Akun & Toko</h3>
-        <div style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
-          <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Duta Terang Official</div>
-          <div style="color: var(--text-muted); font-size: 12px;">Spesialis Lampu LED, Spare Parts, & Audio</div>
+        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Akun & Toko</h3>
+        <div style="background: var(--card-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 2px;">Duta Terang Official</div>
+          <div style="color: var(--text-muted); font-size: 11px;">Spesialis Lampu LED, Spare Parts, & Audio</div>
         </div>
       </div>
 
     </main>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation Bentuk Kapsul Elegan -->
     <nav class="bottom-nav">
       <a href="#" class="nav-item active" data-target="view-home">
         <span class="material-symbols-rounded">home</span>
@@ -85,7 +83,7 @@
       <a href="#" class="nav-item" data-target="view-cart" style="position: relative;">
         <span class="material-symbols-rounded">shopping_cart</span>
         Keranjang
-        <span id="cart-badge" style="position: absolute; top: 2px; right: 14px; background: red; color: white; font-size: 9px; padding: 1px 5px; border-radius: 10px; display: none;">0</span>
+        <span id="cart-badge" style="position: absolute; top: 4px; right: 8px; background: red; color: white; font-size: 9px; padding: 1px 4px; border-radius: 10px; display: none;">0</span>
       </a>
       <a href="#" class="nav-item" data-target="view-orders">
         <span class="material-symbols-rounded">receipt_long</span>
