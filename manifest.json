@@ -1,10 +1,11 @@
 {
-  "name": "Duta Terang - Toko Elektronik & LED",
-  "short_name": "DutaTerang",
-  "start_url": "/",
+  "name": "Duta Terang Store",
+  "short_name": "Duta Terang",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#FF6600",
+  "theme_color": "#ee4d2d",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "assets/icon-192.png",
