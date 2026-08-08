@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Duta Terang - Toko Online</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ee4d2d">
+  
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -28,17 +31,46 @@
     }
   </script>
   <style>
-    body { font-family: 'Poppins', sans-serif; }
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    /* Full screen responsive container */
+    main#appContent {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    /* Bottom Navigation full width */
+    nav.fixed {
+      max-width: 100% !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Sticky Header Safe Area */
+    header.sticky {
+      padding-top: env(safe-area-inset-top);
+    }
+
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-100 pb-20 select-none">
+<body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-100 pb-24 select-none">
 
   <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-primary text-white shadow-md pt-safe">
+  <header class="sticky top-0 z-50 bg-primary text-white shadow-md">
     <div class="flex items-center justify-between px-4 py-3 gap-3">
-      <div class="font-bold text-lg tracking-wide flex items-center gap-1">
+      <div class="font-bold text-base tracking-wide flex items-center gap-1">
         <span class="material-symbols-rounded">storefront</span> Duta Terang
       </div>
       <div class="flex-1 flex items-center bg-white dark:bg-darkCard rounded-full px-3 py-1.5 shadow-inner">
@@ -58,19 +90,19 @@
   </header>
 
   <!-- Main App Content -->
-  <main id="appContent" class="max-w-md mx-auto min-h-screen pb-16">
+  <main id="appContent" class="min-h-screen pb-16">
     <!-- Beranda View -->
     <div id="view-home" class="view-section">
       <!-- Banner Slider -->
-      <div class="px-4 py-3">
-        <div class="w-full h-36 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl shadow-md flex items-center justify-center text-white font-bold text-lg">
+      <div class="px-3 py-3">
+        <div class="w-full h-36 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl shadow-md flex items-center justify-center text-white font-bold text-base px-4 text-center">
           🔥 Flash Sale Duta Terang - Diskon Spesial!
         </div>
       </div>
 
       <!-- Kategori Grid Icon -->
-      <div class="px-4 mb-4">
-        <div class="grid grid-cols-4 gap-3 bg-white dark:bg-darkCard p-3 rounded-2xl shadow-sm text-center">
+      <div class="px-3 mb-4">
+        <div class="grid grid-cols-4 gap-2 bg-white dark:bg-darkCard p-3 rounded-2xl shadow-sm text-center">
           <div onclick="filterCategory('Semua')" class="cursor-pointer flex flex-col items-center">
             <div class="w-12 h-12 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded">grid_view</span></div>
             <span class="text-[10px] font-medium">Semua</span>
@@ -91,12 +123,12 @@
       </div>
 
       <!-- Produk Section -->
-      <div class="px-4">
-        <div class="flex justify-between items-center mb-3">
+      <div class="px-3">
+        <div class="flex justify-between items-center mb-3 px-1">
           <h2 class="font-bold text-sm tracking-wide">Produk Terbaru</h2>
           <span class="text-xs text-primary font-semibold">Lihat Semua</span>
         </div>
-        <div id="productList" class="grid grid-cols-2 gap-3">
+        <div id="productList" class="grid grid-cols-2 gap-2.5">
           <!-- Skeleton Loading -->
           <div class="bg-white dark:bg-darkCard p-3 rounded-2xl shadow-sm animate-pulse">
             <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 rounded-xl mb-2"></div>
@@ -113,16 +145,16 @@
     </div>
 
     <!-- Kategori View -->
-    <div id="view-category" class="view-section hidden px-4 py-4">
+    <div id="view-category" class="view-section hidden px-3 py-4">
       <h2 class="font-bold text-lg mb-3">Kategori Produk</h2>
       <div id="categoryContainer" class="space-y-2"></div>
     </div>
 
     <!-- Keranjang View -->
-    <div id="view-cart" class="view-section hidden px-4 py-4">
+    <div id="view-cart" class="view-section hidden px-3 py-4">
       <h2 class="font-bold text-lg mb-3">Keranjang Belanja</h2>
-      <div id="cartItems" class="space-y-3 mb-20"></div>
-      <div id="cartFooter" class="fixed bottom-14 left-0 right-0 max-w-md mx-auto bg-white dark:bg-darkCard p-4 border-t dark:border-gray-800 shadow-lg flex items-center justify-between">
+      <div id="cartItems" class="space-y-3 mb-24"></div>
+      <div id="cartFooter" class="fixed bottom-14 left-0 right-0 bg-white dark:bg-darkCard p-4 border-t dark:border-gray-800 shadow-lg flex items-center justify-between z-40">
         <div>
           <p class="text-xs text-gray-500">Total Pembayaran</p>
           <p id="cartTotal" class="font-bold text-primary text-base">Rp 0</p>
@@ -132,27 +164,27 @@
     </div>
 
     <!-- Pesanan View -->
-    <div id="view-orders" class="view-section hidden px-4 py-4 text-center">
+    <div id="view-orders" class="view-section hidden px-3 py-10 text-center">
       <span class="material-symbols-rounded text-5xl text-gray-300 mb-2">receipt_long</span>
       <p class="text-sm font-medium text-gray-500">Belum ada riwayat pesanan aktif.</p>
     </div>
   </main>
 
   <!-- Bottom Navigation -->
-  <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-darkCard border-t dark:border-gray-800 flex justify-around py-2 shadow-lg z-50">
-    <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-primary" data-target="home">
+  <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-darkCard border-t dark:border-gray-800 flex justify-around py-2 shadow-lg z-50">
+    <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-primary flex-1" data-target="home">
       <span class="material-symbols-rounded text-xl">home</span>
       <span class="text-[10px] mt-0.5">Beranda</span>
     </button>
-    <button onclick="switchTab('category')" class="nav-btn flex flex-col items-center text-gray-400" data-target="category">
+    <button onclick="switchTab('category')" class="nav-btn flex flex-col items-center text-gray-400 flex-1" data-target="category">
       <span class="material-symbols-rounded text-xl">category</span>
       <span class="text-[10px] mt-0.5">Kategori</span>
     </button>
-    <button onclick="switchTab('cart')" class="nav-btn flex flex-col items-center text-gray-400" data-target="cart">
+    <button onclick="switchTab('cart')" class="nav-btn flex flex-col items-center text-gray-400 flex-1" data-target="cart">
       <span class="material-symbols-rounded text-xl">shopping_cart</span>
       <span class="text-[10px] mt-0.5">Keranjang</span>
     </button>
-    <button onclick="switchTab('orders')" class="nav-btn flex flex-col items-center text-gray-400" data-target="orders">
+    <button onclick="switchTab('orders')" class="nav-btn flex flex-col items-center text-gray-400 flex-1" data-target="orders">
       <span class="material-symbols-rounded text-xl">list_alt</span>
       <span class="text-[10px] mt-0.5">Pesanan</span>
     </button>
@@ -165,14 +197,12 @@
 
   <!-- JavaScript App Logic -->
   <script>
-    const GAS_URL = 'const GAS_URL = 'https://script.google.com/macros/s/AKfycbx6SgcLlR7yYUDinT-YGQ7jPIg7X_X5RNyxTyp9aTukIdtHDb3xZ74_O9cpe0we71ogSQ/exec';';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx6SgcLlR7yYUDinT-YGQ7jPIg7X_X5RNyxTyp9aTukIdtHDb3xZ74_O9cpe0we71ogSQ/exec';
     let products = [];
     let cart = JSON.parse(localStorage.getItem('dutaterang_cart')) || [];
 
-    // Fetch Data from Google Sheets API
     async function fetchProducts() {
       if(!GAS_URL.includes('http')) {
-        // Mock fallback if URL is empty
         products = [
           { ID_Produk: "1", Nama: "Driver LED 30W Berkualitas Tinggi", Kategori: "Lampu", Harga_Jual: 35000, Diskon: "10%", Harga_setelah_diskon: 31500, Gambar: "https://via.placeholder.com/150", Stok: 50, badge: "Gratis Ongkir", Deskripsi: "Driver berkualitas tinggi untuk lampu LED." },
           { ID_Produk: "2", Nama: "Modul Amplifier Bluetooth D30-II", Kategori: "Audio", Harga_Jual: 125000, Diskon: "0%", Harga_setelah_diskon: 125000, Gambar: "https://via.placeholder.com/150", Stok: 20, badge: "COD", Deskripsi: "Modul audio jernih dan bertenaga." }
@@ -199,15 +229,14 @@
         const hargaJual = p['Harga Jual'] || p.Harga_Jual || 0;
         const hargaDiskon = p['Harga setelah diskon'] || p.Harga_setelah_diskon || hargaJual;
         const diskon = p['Diskon'] || '0%';
-        const badge = p['badge'] || '';
         const gambar = p['Gambar'] || 'https://via.placeholder.com/150';
         const nama = p['Nama'] || 'Produk Duta Terang';
 
         container.innerHTML += `
           <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm flex flex-col justify-between relative">
-            ${diskon !== '0%' && diskon !== '' ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">${diskon}</span>` : ''}
+            ${diskon !== '0%' && diskon !== '' ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10">${diskon}</span>` : ''}
             <div>
-              <img src="${gambar}" alt="${nama}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://via.placeholder.com/150'">
+              <img src="${gambar}" alt="${nama}" class="w-full h-36 object-cover rounded-xl mb-2" onerror="this.src='https://via.placeholder.com/150'">
               <h3 class="text-xs font-medium line-clamp-2 mb-1">${nama}</h3>
             </div>
             <div>
