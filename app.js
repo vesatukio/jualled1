@@ -1,66 +1,37 @@
-const API_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxQI9ONgYCNsO4oSfFGxZ7GmvWieVP0TFIRFrAHiPOW/exec'; 
+// Catatan: Pastikan URL diakhiri dengan /exec, bukan /dev untuk akses publik yang stabil.
 
 document.addEventListener('DOMContentLoaded', () => {
   initPWA();
   initTheme();
-  loadHomeData();
   setupNavigation();
+  loadProductData(); // Memanggil fungsi untuk ambil data dari Sheets
 });
 
-function initPWA() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker Registered'))
-      .catch((err) => console.log('SW Registration Failed', err));
-  }
-}
-
-function initTheme() {
-  const themeToggle = document.getElementById('themeToggle');
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  if (currentTheme === 'dark') {
-    document.body.classList.add('dark-mode');
-    themeToggle.innerHTML = '<span class="material-symbols-rounded fs-5">light_mode</span>';
-  }
-
-  themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    themeToggle.innerHTML = `<span class="material-symbols-rounded fs-5">${isDark ? 'light_mode' : 'dark_mode'}</span>`;
-  });
-}
-
-function setupNavigation() {
-  const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      navItems.forEach(nav => nav.classList.remove('active'));
-      item.classList.add('active');
-      // Handle view switching logic here
-    });
-  });
-}
-
-async function loadHomeData() {
+// Fungsi mengambil data produk dari Google Sheets
+async function loadProductData() {
+  const productGrid = document.getElementById('productGrid');
+  
   try {
-    // Fetch banner, category, and products from Google Apps Script API
-    // Example implementation placeholder
-    setTimeout(() => {
-      document.getElementById('productGrid').innerHTML = `
+    const response = await fetch(`${API_URL}?sheet=PRODUK`);
+    const data = await response.json();
+
+    if (data.length > 0) {
+      productGrid.innerHTML = data.map(item => `
         <div class="col-6">
-          <div class="product-card p-2 position-relative">
-            <span class="badge bg-danger position-absolute top-0 end-0 m-2">-20%</span>
-            <img src="https://via.placeholder.com/150" class="img-fluid rounded-3 mb-2" alt="Product">
-            <h6 class="text-truncate fs-6 mb-1">Modul Driver LED AC 220V High Quality</h6>
-            <div class="text-danger fw-bold">Rp45.000</div>
-            <div class="text-muted text-decoration-line-through small">Rp56.000</div>
+          <div class="product-card p-2 shadow-sm">
+            <img src="${item.Gambar || 'https://via.placeholder.com/150'}" class="img-fluid rounded-3 mb-2 w-100" alt="${item.Nama_Produk}">
+            <h6 class="text-truncate fs-6 mb-1">${item.Nama_Produk}</h6>
+            <div class="text-danger fw-bold">Rp${parseInt(item.Harga).toLocaleString()}</div>
+            <button class="btn btn-sm btn-primary w-100 mt-2 text-white">Beli</button>
           </div>
         </div>
-      `;
-    }, 1000);
+      `).join('');
+    }
   } catch (error) {
-    console.error('Failed to load data:', error);
+    console.error('Gagal mengambil data produk:', error);
+    productGrid.innerHTML = '<p class="text-center w-100">Gagal memuat produk. Periksa koneksi.</p>';
   }
 }
+
+// ... (tambahkan fungsi initPWA, initTheme, setupNavigation dari kode sebelumnya)
