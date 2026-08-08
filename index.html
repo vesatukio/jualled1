@@ -13,68 +13,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: '#ee4d2d',
-            darkBg: '#121212',
-            darkCard: '#1e1e1e'
-          },
-          fontFamily: {
-            poppins: ['Poppins', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { 
-      font-family: 'Poppins', sans-serif; 
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    
-    main#appContent {
-      width: 100% !important;
-      max-width: 100% !important;
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-    }
-
-    nav.fixed {
-      max-width: 100% !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    header.sticky {
-      padding-top: env(safe-area-inset-top);
-    }
-
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
+  
+  <!-- External CSS Terpisah -->
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-100 pb-24 select-none">
+<body class="">
 
   <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-primary text-white shadow-md">
+  <header class="app-header sticky top-0 z-50 shadow-sm">
     <div class="flex items-center justify-between px-3 py-2.5 gap-2.5">
-      <div class="font-bold text-sm tracking-wide flex items-center gap-1 shrink-0">
+      <div class="font-bold text-sm tracking-wide flex items-center gap-1 shrink-0 brand-logo">
         <span class="material-symbols-rounded text-base">storefront</span> Duta Terang
       </div>
-      <div class="flex-1 flex items-center bg-white dark:bg-darkCard rounded-full px-3 py-1.5 shadow-inner">
+      <div class="flex-1 flex items-center bg-card rounded-full px-3 py-1.5 shadow-inner border">
         <span class="material-symbols-rounded text-gray-400 text-xs">search</span>
-        <input type="text" id="searchInput" oninput="searchProducts(this.value)" placeholder="Cari produk lampu, sparepart..." class="w-full bg-transparent text-[11px] text-gray-800 dark:text-gray-100 focus:outline-none px-2">
+        <input type="text" id="searchInput" oninput="searchProducts(this.value)" placeholder="Cari produk lampu, sparepart..." class="w-full bg-transparent text-[11px] focus:outline-none px-2">
       </div>
       <div class="flex items-center gap-2.5 shrink-0">
         <button onclick="toggleDarkMode()" class="relative p-1">
@@ -89,7 +42,7 @@
   </header>
 
   <!-- Main App Content -->
-  <main id="appContent" class="min-h-screen pb-16">
+  <main id="appContent" class="min-h-screen pb-16 w-full">
     <!-- Beranda View -->
     <div id="view-home" class="view-section">
       <!-- Banner Slider -->
@@ -101,21 +54,21 @@
 
       <!-- Kategori Grid Icon -->
       <div class="px-3 mb-3">
-        <div class="grid grid-cols-4 gap-2 bg-white dark:bg-darkCard p-3 rounded-2xl shadow-sm text-center">
+        <div class="grid grid-cols-4 gap-2 bg-card p-3 rounded-2xl shadow-sm text-center border">
           <div onclick="filterCategory('Semua')" class="cursor-pointer flex flex-col items-center">
-            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">grid_view</span></div>
+            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary-color rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">grid_view</span></div>
             <span class="text-[10px] font-medium">Semua</span>
           </div>
           <div onclick="filterCategory('LED')" class="cursor-pointer flex flex-col items-center">
-            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">lightbulb</span></div>
+            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary-color rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">lightbulb</span></div>
             <span class="text-[10px] font-medium">LED</span>
           </div>
           <div onclick="filterCategory('Audio')" class="cursor-pointer flex flex-col items-center">
-            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">speaker</span></div>
+            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary-color rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">speaker</span></div>
             <span class="text-[10px] font-medium">Audio</span>
           </div>
           <div onclick="filterCategory('Sparepart')" class="cursor-pointer flex flex-col items-center">
-            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">settings</span></div>
+            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary-color rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">settings</span></div>
             <span class="text-[10px] font-medium">Sparepart</span>
           </div>
         </div>
@@ -125,20 +78,12 @@
       <div class="px-3">
         <div class="flex justify-between items-center mb-2.5 px-1">
           <h2 class="font-bold text-xs tracking-wide">Produk Terbaru</h2>
-          <span class="text-[11px] text-primary font-semibold">Lihat Semua</span>
+          <span class="text-[11px] font-semibold" style="color: var(--primary-color);">Lihat Semua</span>
         </div>
         <div id="productList" class="grid grid-cols-2 gap-2">
           <!-- Skeleton Loading -->
-          <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm animate-pulse">
-            <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-xl mb-2"></div>
-            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1.5"></div>
-            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-          </div>
-          <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm animate-pulse">
-            <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-xl mb-2"></div>
-            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1.5"></div>
-            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-          </div>
+          <div class="skeleton-card p-2.5 shadow-sm"></div>
+          <div class="skeleton-card p-2.5 shadow-sm"></div>
         </div>
       </div>
     </div>
@@ -153,12 +98,14 @@
     <div id="view-cart" class="view-section hidden px-3 py-3">
       <h2 class="font-bold text-sm mb-3 px-1">Keranjang Belanja</h2>
       <div id="cartItems" class="space-y-2.5 mb-24"></div>
-      <div id="cartFooter" class="fixed bottom-14 left-0 right-0 bg-white dark:bg-darkCard p-3 border-t dark:border-gray-800 shadow-lg flex items-center justify-between z-40">
+      <div id="cartFooter" class="fixed bottom-14 left-0 right-0 bg-card p-3 shadow-lg flex items-center justify-between z-40 border-t">
         <div>
           <p class="text-[10px] text-gray-500">Total Pembayaran</p>
-          <p id="cartTotal" class="font-bold text-primary text-sm">Rp 0</p>
+          <p id="cartTotal" class="font-bold text-sm" style="color: var(--primary-color);">Rp 0</p>
         </div>
-        <button onclick="checkoutWhatsApp()" class="bg-primary text-white px-4 py-2 rounded-full font-semibold text-xs shadow-md active:scale-95 transition-transform">Checkout WhatsApp</button>
+        <button onclick="checkoutWhatsApp()" class="text-white px-4 py-2 rounded-full font-semibold text-xs shadow-md active:scale-95 transition-transform flex items-center gap-1" style="background-color: var(--primary-color);">
+          <span class="material-symbols-rounded text-sm">chat</span> Checkout WhatsApp
+        </button>
       </div>
     </div>
 
@@ -170,22 +117,22 @@
   </main>
 
   <!-- Bottom Navigation -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-darkCard border-t dark:border-gray-800 flex justify-around py-1.5 shadow-lg z-50">
-    <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-primary flex-1 py-1" data-target="home">
-      <span class="material-symbols-rounded text-xl">home</span>
-      <span class="text-[9px] mt-0.5">Beranda</span>
+  <nav class="bottom-nav fixed z-50 flex justify-around py-1.5 shadow-lg">
+    <button onclick="switchTab('home')" class="nav-item active py-1" data-target="home">
+      <span class="material-symbols-rounded">home</span>
+      <span class="mt-0.5">Beranda</span>
     </button>
-    <button onclick="switchTab('category')" class="nav-btn flex flex-col items-center text-gray-400 flex-1 py-1" data-target="category">
-      <span class="material-symbols-rounded text-xl">category</span>
-      <span class="text-[9px] mt-0.5">Kategori</span>
+    <button onclick="switchTab('category')" class="nav-item py-1" data-target="category">
+      <span class="material-symbols-rounded">category</span>
+      <span class="mt-0.5">Kategori</span>
     </button>
-    <button onclick="switchTab('cart')" class="nav-btn flex flex-col items-center text-gray-400 flex-1 py-1" data-target="cart">
-      <span class="material-symbols-rounded text-xl">shopping_cart</span>
-      <span class="text-[9px] mt-0.5">Keranjang</span>
+    <button onclick="switchTab('cart')" class="nav-item py-1" data-target="cart">
+      <span class="material-symbols-rounded">shopping_cart</span>
+      <span class="mt-0.5">Keranjang</span>
     </button>
-    <button onclick="switchTab('orders')" class="nav-btn flex flex-col items-center text-gray-400 flex-1 py-1" data-target="orders">
-      <span class="material-symbols-rounded text-xl">list_alt</span>
-      <span class="text-[9px] mt-0.5">Pesanan</span>
+    <button onclick="switchTab('orders')" class="nav-item py-1" data-target="orders">
+      <span class="material-symbols-rounded">list_alt</span>
+      <span class="mt-0.5">Pesanan</span>
     </button>
   </nav>
 
@@ -227,21 +174,28 @@
         const diskonPercent = diskonRaw > 0 ? Math.round(diskonRaw * 100) + '%' : '';
         const gambar = p['Gambar'] || 'https://via.placeholder.com/150';
         const nama = p['Nama'] || 'Produk Duta Terang';
+        const hasDiscount = diskonRaw > 0 && hargaJual > hargaDiskon;
 
         container.innerHTML += `
-          <div class="bg-white dark:bg-darkCard p-2 rounded-2xl shadow-sm flex flex-col justify-between relative">
+          <div class="product-card p-2.5 shadow-sm flex flex-col justify-between relative">
             ${diskonPercent !== '' ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10">${diskonPercent}</span>` : ''}
             <div>
               <img src="${gambar}" alt="${nama}" class="w-full h-28 object-cover rounded-xl mb-1.5" onerror="this.src='https://via.placeholder.com/150'">
               <h3 class="text-[11px] font-medium line-clamp-2 mb-1">${nama}</h3>
             </div>
             <div>
-              <div class="flex items-center gap-1 mb-1.5">
-                <span class="text-primary font-bold text-xs">Rp ${Number(hargaDiskon).toLocaleString('id-ID')}</span>
+              <div class="mb-1.5">
+                <span class="font-bold text-xs" style="color: var(--primary-color);">Rp ${Number(hargaDiskon).toLocaleString('id-ID')}</span>
+                ${hasDiscount ? `<br><span class="text-[10px] text-gray-400 line-through">Rp ${Number(hargaJual).toLocaleString('id-ID')}</span>` : ''}
               </div>
-              <button onclick='addToCart(${JSON.stringify(p)})' class="w-full bg-primary text-white text-[10px] font-semibold py-1.5 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1">
-                <span class="material-symbols-rounded text-xs">add_shopping_cart</span> Beli
-              </button>
+              <div class="grid grid-cols-2 gap-1">
+                <button onclick='правля_addToCart(${JSON.stringify(p)})' class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-[10px] font-semibold py-1.5 rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-0.5" title="Tambah ke Keranjang" onclick='addToCart(${JSON.stringify(p)})'>
+                  <span class="material-symbols-rounded text-xs">add_shopping_cart</span>
+                </button>
+                <button onclick='buyNow(${JSON.stringify(p)})' class="text-white text-[10px] font-semibold py-1.5 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center" style="background-color: var(--primary-color);">
+                  Beli
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -257,10 +211,10 @@
       document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
       document.getElementById('view-' + tabId).classList.remove('hidden');
 
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.replace('text-primary', 'text-gray-400');
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
+        btn.classList.remove('active');
         if(btn.dataset.target === tabId) {
-          btn.classList.replace('text-gray-400', 'text-primary');
+          btn.classList.add('active');
         }
       });
       window.scrollTo(0, 0);
@@ -278,7 +232,12 @@
       }
       localStorage.setItem('dutaterang_cart', JSON.stringify(cart));
       updateCartBadge();
-      showToast();
+      showToast('Produk ditambahkan ke keranjang');
+    }
+
+    function buyNow(product) {
+      addToCart(product);
+      switchTab('cart');
     }
 
     function updateCartBadge() {
@@ -307,11 +266,11 @@
         const harga = item['Harga setelah diskon'] || item['Harga Jual'] || 0;
         grandTotal += harga * item.qty;
         container.innerHTML += `
-          <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm flex items-center justify-between gap-2.5">
+          <div class="bg-card p-2.5 rounded-2xl shadow-sm flex items-center justify-between gap-2.5 border">
             <img src="${item['Gambar'] || 'https://via.placeholder.com/100'}" class="w-14 h-14 object-cover rounded-xl shrink-0">
             <div class="flex-1 min-w-0">
               <h4 class="text-[11px] font-semibold line-clamp-1">${item['Nama'] || ''}</h4>
-              <p class="text-[11px] text-primary font-bold">Rp ${Number(harga).toLocaleString('id-ID')}</p>
+              <p class="text-[11px] font-bold" style="color: var(--primary-color);">Rp ${Number(harga).toLocaleString('id-ID')}</p>
               <div class="flex items-center gap-2 mt-1.5">
                 <button onclick="updateQty(${idx}, -1)" class="w-5 h-5 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center font-bold text-[10px]">-</button>
                 <span class="text-[11px] font-semibold">${item.qty}</span>
@@ -353,15 +312,16 @@
       window.open(`https://wa.me/6281234567890?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    function showToast() {
+    function showToast(text) {
       const toast = document.getElementById('toast');
+      toast.innerText = text || 'Produk ditambahkan ke keranjang';
       toast.classList.remove('opacity-0');
       setTimeout(() => toast.classList.add('opacity-0'), 1500);
     }
 
     function toggleDarkMode() {
-      document.documentElement.classList.toggle('dark');
-      const isDark = document.documentElement.classList.contains('dark');
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
       document.getElementById('themeIcon').innerText = isDark ? 'light_mode' : 'dark_mode';
     }
 
