@@ -31,11 +31,13 @@
     }
   </script>
   <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { 
       font-family: 'Poppins', sans-serif; 
       margin: 0;
       padding: 0;
       width: 100vw;
+      min-height: 100vh;
       overflow-x: hidden;
     }
     
@@ -69,20 +71,20 @@
 
   <!-- Sticky Header -->
   <header class="sticky top-0 z-50 bg-primary text-white shadow-md">
-    <div class="flex items-center justify-between px-4 py-3 gap-3">
-      <div class="font-bold text-base tracking-wide flex items-center gap-1">
-        <span class="material-symbols-rounded">storefront</span> Duta Terang
+    <div class="flex items-center justify-between px-3 py-2.5 gap-2.5">
+      <div class="font-bold text-sm tracking-wide flex items-center gap-1 shrink-0">
+        <span class="material-symbols-rounded text-base">storefront</span> Duta Terang
       </div>
       <div class="flex-1 flex items-center bg-white dark:bg-darkCard rounded-full px-3 py-1.5 shadow-inner">
-        <span class="material-symbols-rounded text-gray-400 text-sm">search</span>
-        <input type="text" id="searchInput" placeholder="Cari produk lampu, sparepart..." class="w-full bg-transparent text-xs text-gray-800 dark:text-gray-100 focus:outline-none px-2">
+        <span class="material-symbols-rounded text-gray-400 text-xs">search</span>
+        <input type="text" id="searchInput" placeholder="Cari produk lampu, sparepart..." class="w-full bg-transparent text-[11px] text-gray-800 dark:text-gray-100 focus:outline-none px-2">
       </div>
-      <div class="flex items-center gap-3">
-        <button onclick="toggleDarkMode()" class="relative">
-          <span class="material-symbols-rounded" id="themeIcon">dark_mode</span>
+      <div class="flex items-center gap-2.5 shrink-0">
+        <button onclick="toggleDarkMode()" class="relative p-1">
+          <span class="material-symbols-rounded text-lg" id="themeIcon">dark_mode</span>
         </button>
-        <button onclick="switchTab('cart')" class="relative">
-          <span class="material-symbols-rounded">shopping_cart</span>
+        <button onclick="switchTab('cart')" class="relative p-1">
+          <span class="material-symbols-rounded text-lg">shopping_cart</span>
           <span id="cartBadge" class="absolute -top-1 -right-1 bg-yellow-400 text-gray-900 text-[10px] font-bold px-1 rounded-full hidden">0</span>
         </button>
       </div>
@@ -94,29 +96,29 @@
     <!-- Beranda View -->
     <div id="view-home" class="view-section">
       <!-- Banner Slider -->
-      <div class="px-3 py-3">
-        <div class="w-full h-36 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl shadow-md flex items-center justify-center text-white font-bold text-base px-4 text-center">
+      <div class="px-3 py-2.5">
+        <div class="w-full h-32 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl shadow-md flex items-center justify-center text-white font-bold text-sm px-4 text-center">
           🔥 Flash Sale Duta Terang - Diskon Spesial!
         </div>
       </div>
 
       <!-- Kategori Grid Icon -->
-      <div class="px-3 mb-4">
+      <div class="px-3 mb-3">
         <div class="grid grid-cols-4 gap-2 bg-white dark:bg-darkCard p-3 rounded-2xl shadow-sm text-center">
           <div onclick="filterCategory('Semua')" class="cursor-pointer flex flex-col items-center">
-            <div class="w-12 h-12 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded">grid_view</span></div>
+            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">grid_view</span></div>
             <span class="text-[10px] font-medium">Semua</span>
           </div>
           <div onclick="filterCategory('Lampu')" class="cursor-pointer flex flex-col items-center">
-            <div class="w-12 h-12 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded">lightbulb</span></div>
+            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">lightbulb</span></div>
             <span class="text-[10px] font-medium">Lampu</span>
           </div>
           <div onclick="filterCategory('Audio')" class="cursor-pointer flex flex-col items-center">
-            <div class="w-12 h-12 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded">speaker</span></div>
+            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">speaker</span></div>
             <span class="text-[10px] font-medium">Audio</span>
           </div>
           <div onclick="filterCategory('Sparepart')" class="cursor-pointer flex flex-col items-center">
-            <div class="w-12 h-12 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded">settings</span></div>
+            <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">settings</span></div>
             <span class="text-[10px] font-medium">Sparepart</span>
           </div>
         </div>
@@ -124,74 +126,74 @@
 
       <!-- Produk Section -->
       <div class="px-3">
-        <div class="flex justify-between items-center mb-3 px-1">
-          <h2 class="font-bold text-sm tracking-wide">Produk Terbaru</h2>
-          <span class="text-xs text-primary font-semibold">Lihat Semua</span>
+        <div class="flex justify-between items-center mb-2.5 px-1">
+          <h2 class="font-bold text-xs tracking-wide">Produk Terbaru</h2>
+          <span class="text-[11px] text-primary font-semibold">Lihat Semua</span>
         </div>
-        <div id="productList" class="grid grid-cols-2 gap-2.5">
+        <div id="productList" class="grid grid-cols-2 gap-2">
           <!-- Skeleton Loading -->
-          <div class="bg-white dark:bg-darkCard p-3 rounded-2xl shadow-sm animate-pulse">
-            <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 rounded-xl mb-2"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm animate-pulse">
+            <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-xl mb-2"></div>
+            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1.5"></div>
+            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
           </div>
-          <div class="bg-white dark:bg-darkCard p-3 rounded-2xl shadow-sm animate-pulse">
-            <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 rounded-xl mb-2"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm animate-pulse">
+            <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-xl mb-2"></div>
+            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1.5"></div>
+            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Kategori View -->
-    <div id="view-category" class="view-section hidden px-3 py-4">
-      <h2 class="font-bold text-lg mb-3">Kategori Produk</h2>
+    <div id="view-category" class="view-section hidden px-3 py-3">
+      <h2 class="font-bold text-sm mb-3 px-1">Kategori Produk</h2>
       <div id="categoryContainer" class="space-y-2"></div>
     </div>
 
     <!-- Keranjang View -->
-    <div id="view-cart" class="view-section hidden px-3 py-4">
-      <h2 class="font-bold text-lg mb-3">Keranjang Belanja</h2>
-      <div id="cartItems" class="space-y-3 mb-24"></div>
-      <div id="cartFooter" class="fixed bottom-14 left-0 right-0 bg-white dark:bg-darkCard p-4 border-t dark:border-gray-800 shadow-lg flex items-center justify-between z-40">
+    <div id="view-cart" class="view-section hidden px-3 py-3">
+      <h2 class="font-bold text-sm mb-3 px-1">Keranjang Belanja</h2>
+      <div id="cartItems" class="space-y-2.5 mb-24"></div>
+      <div id="cartFooter" class="fixed bottom-14 left-0 right-0 bg-white dark:bg-darkCard p-3 border-t dark:border-gray-800 shadow-lg flex items-center justify-between z-40">
         <div>
-          <p class="text-xs text-gray-500">Total Pembayaran</p>
-          <p id="cartTotal" class="font-bold text-primary text-base">Rp 0</p>
+          <p class="text-[10px] text-gray-500">Total Pembayaran</p>
+          <p id="cartTotal" class="font-bold text-primary text-sm">Rp 0</p>
         </div>
-        <button onclick="checkoutWhatsApp()" class="bg-primary text-white px-5 py-2.5 rounded-full font-semibold text-xs shadow-md">Checkout WhatsApp</button>
+        <button onclick="checkoutWhatsApp()" class="bg-primary text-white px-4 py-2 rounded-full font-semibold text-xs shadow-md active:scale-95 transition-transform">Checkout WhatsApp</button>
       </div>
     </div>
 
     <!-- Pesanan View -->
     <div id="view-orders" class="view-section hidden px-3 py-10 text-center">
-      <span class="material-symbols-rounded text-5xl text-gray-300 mb-2">receipt_long</span>
-      <p class="text-sm font-medium text-gray-500">Belum ada riwayat pesanan aktif.</p>
+      <span class="material-symbols-rounded text-4xl text-gray-300 mb-2">receipt_long</span>
+      <p class="text-xs font-medium text-gray-500">Belum ada riwayat pesanan aktif.</p>
     </div>
   </main>
 
   <!-- Bottom Navigation -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-darkCard border-t dark:border-gray-800 flex justify-around py-2 shadow-lg z-50">
-    <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-primary flex-1" data-target="home">
+  <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-darkCard border-t dark:border-gray-800 flex justify-around py-1.5 shadow-lg z-50">
+    <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-primary flex-1 py-1" data-target="home">
       <span class="material-symbols-rounded text-xl">home</span>
-      <span class="text-[10px] mt-0.5">Beranda</span>
+      <span class="text-[9px] mt-0.5">Beranda</span>
     </button>
-    <button onclick="switchTab('category')" class="nav-btn flex flex-col items-center text-gray-400 flex-1" data-target="category">
+    <button onclick="switchTab('category')" class="nav-btn flex flex-col items-center text-gray-400 flex-1 py-1" data-target="category">
       <span class="material-symbols-rounded text-xl">category</span>
-      <span class="text-[10px] mt-0.5">Kategori</span>
+      <span class="text-[9px] mt-0.5">Kategori</span>
     </button>
-    <button onclick="switchTab('cart')" class="nav-btn flex flex-col items-center text-gray-400 flex-1" data-target="cart">
+    <button onclick="switchTab('cart')" class="nav-btn flex flex-col items-center text-gray-400 flex-1 py-1" data-target="cart">
       <span class="material-symbols-rounded text-xl">shopping_cart</span>
-      <span class="text-[10px] mt-0.5">Keranjang</span>
+      <span class="text-[9px] mt-0.5">Keranjang</span>
     </button>
-    <button onclick="switchTab('orders')" class="nav-btn flex flex-col items-center text-gray-400 flex-1" data-target="orders">
+    <button onclick="switchTab('orders')" class="nav-btn flex flex-col items-center text-gray-400 flex-1 py-1" data-target="orders">
       <span class="material-symbols-rounded text-xl">list_alt</span>
-      <span class="text-[10px] mt-0.5">Pesanan</span>
+      <span class="text-[9px] mt-0.5">Pesanan</span>
     </button>
   </nav>
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+  <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[11px] px-3.5 py-1.5 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
     Produk ditambahkan ke keranjang
   </div>
 
@@ -233,18 +235,18 @@
         const nama = p['Nama'] || 'Produk Duta Terang';
 
         container.innerHTML += `
-          <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm flex flex-col justify-between relative">
+          <div class="bg-white dark:bg-darkCard p-2 rounded-2xl shadow-sm flex flex-col justify-between relative">
             ${diskon !== '0%' && diskon !== '' ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10">${diskon}</span>` : ''}
             <div>
-              <img src="${gambar}" alt="${nama}" class="w-full h-36 object-cover rounded-xl mb-2" onerror="this.src='https://via.placeholder.com/150'">
-              <h3 class="text-xs font-medium line-clamp-2 mb-1">${nama}</h3>
+              <img src="${gambar}" alt="${nama}" class="w-full h-28 object-cover rounded-xl mb-1.5" onerror="this.src='https://via.placeholder.com/150'">
+              <h3 class="text-[11px] font-medium line-clamp-2 mb-1">${nama}</h3>
             </div>
             <div>
-              <div class="flex items-center gap-1 mb-2">
+              <div class="flex items-center gap-1 mb-1.5">
                 <span class="text-primary font-bold text-xs">Rp ${Number(hargaDiskon).toLocaleString('id-ID')}</span>
               </div>
-              <button onclick='addToCart(${JSON.stringify(p)})' class="w-full bg-primary text-white text-[11px] font-semibold py-1.5 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1">
-                <span class="material-symbols-rounded text-sm">add_shopping_cart</span> Beli
+              <button onclick='addToCart(${JSON.stringify(p)})' class="w-full bg-primary text-white text-[10px] font-semibold py-1.5 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1">
+                <span class="material-symbols-rounded text-xs">add_shopping_cart</span> Beli
               </button>
             </div>
           </div>
@@ -305,18 +307,18 @@
         const harga = item['Harga setelah diskon'] || item.Harga_setelah_diskon || item['Harga Jual'] || 0;
         grandTotal += harga * item.qty;
         container.innerHTML += `
-          <div class="bg-white dark:bg-darkCard p-3 rounded-2xl shadow-sm flex items-center justify-between gap-3">
-            <img src="${item['Gambar'] || 'https://via.placeholder.com/100'}" class="w-16 h-16 object-cover rounded-xl">
-            <div class="flex-1">
-              <h4 class="text-xs font-semibold line-clamp-1">${item['Nama'] || item.Nama}</h4>
-              <p class="text-xs text-primary font-bold">Rp ${Number(harga).toLocaleString('id-ID')}</p>
-              <div class="flex items-center gap-2 mt-2">
-                <button onclick="updateQty(${idx}, -1)" class="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center font-bold text-xs">-</button>
-                <span class="text-xs font-semibold">${item.qty}</span>
-                <button onclick="updateQty(${idx}, 1)" class="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center font-bold text-xs">+</button>
+          <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm flex items-center justify-between gap-2.5">
+            <img src="${item['Gambar'] || 'https://via.placeholder.com/100'}" class="w-14 h-14 object-cover rounded-xl shrink-0">
+            <div class="flex-1 min-w-0">
+              <h4 class="text-[11px] font-semibold line-clamp-1">${item['Nama'] || item.Nama}</h4>
+              <p class="text-[11px] text-primary font-bold">Rp ${Number(harga).toLocaleString('id-ID')}</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <button onclick="updateQty(${idx}, -1)" class="w-5 h-5 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center font-bold text-[10px]">-</button>
+                <span class="text-[11px] font-semibold">${item.qty}</span>
+                <button onclick="updateQty(${idx}, 1)" class="w-5 h-5 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center font-bold text-[10px]">+</button>
               </div>
             </div>
-            <button onclick="removeItem(${idx})" class="text-red-500"><span class="material-symbols-rounded">delete</span></button>
+            <button onclick="removeItem(${idx})" class="text-red-500 p-1 shrink-0"><span class="material-symbols-rounded text-base">delete</span></button>
           </div>
         `;
       });
