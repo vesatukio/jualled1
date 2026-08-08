@@ -38,7 +38,8 @@
 
   <!-- Main Content Container -->
   <main class="app-main container py-3 mt-5 mb-5" id="appContainer">
-    <!-- Dynamic View Loaded via JS -->
+    
+    <!-- Home View -->
     <div id="homeView" class="view-section">
       <!-- Banner Slider -->
       <div class="swiper bannerSwiper mb-3 rounded-4 overflow-hidden shadow-sm">
@@ -72,6 +73,70 @@
         <div class="col-6"><div class="skeleton-card"></div></div>
       </div>
     </div>
+
+    <!-- Category View -->
+    <div id="categoryView" class="view-section d-none">
+      <h5 class="fw-bold mb-3">Kategori Produk</h5>
+      <div class="list-group" id="fullCategoryList">
+        <a href="#" class="list-group-item list-group-item-action">Elektronik & Modul</a>
+        <a href="#" class="list-group-item list-group-item-action">Audio & Speaker</a>
+      </div>
+    </div>
+
+    <!-- Cart View -->
+    <div id="cartView" class="view-section d-none">
+      <h5 class="fw-bold mb-3">Keranjang Belanja</h5>
+      <div id="cartItemsContainer">
+        <p class="text-muted text-center py-4">Keranjang Anda masih kosong.</p>
+      </div>
+    </div>
+
+    <!-- Order View -->
+    <div id="orderView" class="view-section d-none">
+      <h5 class="fw-bold mb-3">Daftar Pesanan</h5>
+      <div id="orderListContainer">
+        <p class="text-muted text-center py-4">Belum ada pesanan aktif.</p>
+      </div>
+    </div>
+
+    <!-- Account View -->
+    <div id="accountView" class="view-section d-none">
+      <div class="text-center py-3">
+        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center fw-bold fs-3 mb-2" style="width: 70px; height: 70px;">DT</div>
+        <h5 class="fw-bold mb-0">Duta Terang</h5>
+        <p class="text-muted small">Admin / Pelanggan</p>
+      </div>
+      <div class="list-group rounded-4 shadow-sm overflow-hidden border-0">
+        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-3 text-danger" onclick="switchView('adminView')">
+          <span class="material-symbols-rounded">admin_panel_settings</span> Dashboard Admin (Tambah Produk)
+        </a>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard View -->
+    <div id="adminView" class="view-section d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold m-0">Dashboard Admin</h5>
+        <button class="btn btn-sm btn-outline-secondary" onclick="switchView('accountView')">Kembali</button>
+      </div>
+      <div class="card p-3 shadow-sm border-0 mb-4 bg-card rounded-4">
+        <h6 class="fw-bold mb-3">Tambah Produk Baru</h6>
+        <div class="mb-2">
+          <label class="form-label small">Nama Produk</label>
+          <input type="text" id="adminNama" class="form-control" placeholder="Contoh: Modul LED 12V">
+        </div>
+        <div class="mb-2">
+          <label class="form-label small">Harga (Rp)</label>
+          <input type="number" id="adminHarga" class="form-control" placeholder="Contoh: 25000">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small">URL Gambar</label>
+          <input type="text" id="adminGambar" class="form-control" placeholder="https://... (link gambar)">
+        </div>
+        <button class="btn btn-primary w-100 text-white fw-bold py-2" onclick="tambahProduk()">Simpan ke Google Sheets</button>
+      </div>
+    </div>
+
   </main>
 
   <!-- Bottom Navigation -->
