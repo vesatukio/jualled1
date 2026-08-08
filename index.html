@@ -41,7 +41,6 @@
       overflow-x: hidden;
     }
     
-    /* Full screen responsive container */
     main#appContent {
       width: 100% !important;
       max-width: 100% !important;
@@ -49,7 +48,6 @@
       padding-right: 0 !important;
     }
 
-    /* Bottom Navigation full width */
     nav.fixed {
       max-width: 100% !important;
       left: 0 !important;
@@ -58,7 +56,6 @@
       padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* Sticky Header Safe Area */
     header.sticky {
       padding-top: env(safe-area-inset-top);
     }
@@ -77,7 +74,7 @@
       </div>
       <div class="flex-1 flex items-center bg-white dark:bg-darkCard rounded-full px-3 py-1.5 shadow-inner">
         <span class="material-symbols-rounded text-gray-400 text-xs">search</span>
-        <input type="text" id="searchInput" placeholder="Cari produk lampu, sparepart..." class="w-full bg-transparent text-[11px] text-gray-800 dark:text-gray-100 focus:outline-none px-2">
+        <input type="text" id="searchInput" oninput="searchProducts(this.value)" placeholder="Cari produk lampu, sparepart..." class="w-full bg-transparent text-[11px] text-gray-800 dark:text-gray-100 focus:outline-none px-2">
       </div>
       <div class="flex items-center gap-2.5 shrink-0">
         <button onclick="toggleDarkMode()" class="relative p-1">
@@ -109,9 +106,9 @@
             <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">grid_view</span></div>
             <span class="text-[10px] font-medium">Semua</span>
           </div>
-          <div onclick="filterCategory('Lampu')" class="cursor-pointer flex flex-col items-center">
+          <div onclick="filterCategory('LED')" class="cursor-pointer flex flex-col items-center">
             <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">lightbulb</span></div>
-            <span class="text-[10px] font-medium">Lampu</span>
+            <span class="text-[10px] font-medium">LED</span>
           </div>
           <div onclick="filterCategory('Audio')" class="cursor-pointer flex flex-col items-center">
             <div class="w-11 h-11 bg-orange-100 dark:bg-gray-800 text-primary rounded-full flex items-center justify-center mb-1"><span class="material-symbols-rounded text-xl">speaker</span></div>
@@ -204,14 +201,6 @@
     let cart = JSON.parse(localStorage.getItem('dutaterang_cart')) || [];
 
     async function fetchProducts() {
-      if(!GAS_URL.includes('http')) {
-        products = [
-          { ID_Produk: "1", Nama: "Driver LED 30W Berkualitas Tinggi", Kategori: "Lampu", Harga_Jual: 35000, Diskon: "10%", Harga_setelah_diskon: 31500, Gambar: "https://via.placeholder.com/150", Stok: 50, badge: "Gratis Ongkir", Deskripsi: "Driver berkualitas tinggi untuk lampu LED." },
-          { ID_Produk: "2", Nama: "Modul Amplifier Bluetooth D30-II", Kategori: "Audio", Harga_Jual: 125000, Diskon: "0%", Harga_setelah_diskon: 125000, Gambar: "https://via.placeholder.com/150", Stok: 20, badge: "COD", Deskripsi: "Modul audio jernih dan bertenaga." }
-        ];
-        renderProducts(products);
-        return;
-      }
       try {
         const res = await fetch(GAS_URL);
         const json = await res.json();
@@ -227,16 +216,21 @@
     function renderProducts(data) {
       const container = document.getElementById('productList');
       container.innerHTML = '';
+      if(data.length === 0) {
+        container.innerHTML = `<p class="col-span-2 text-center text-xs text-gray-400 py-6">Produk tidak ditemukan</p>`;
+        return;
+      }
       data.forEach(p => {
-        const hargaJual = p['Harga Jual'] || p.Harga_Jual || 0;
-        const hargaDiskon = p['Harga setelah diskon'] || p.Harga_setelah_diskon || hargaJual;
-        const diskon = p['Diskon'] || '0%';
+        const hargaJual = p['Harga Jual'] || 0;
+        const hargaDiskon = p['Harga setelah diskon'] || hargaJual;
+        const diskonRaw = p['Diskon'] || 0;
+        const diskonPercent = diskonRaw > 0 ? Math.round(diskonRaw * 100) + '%' : '';
         const gambar = p['Gambar'] || 'https://via.placeholder.com/150';
         const nama = p['Nama'] || 'Produk Duta Terang';
 
         container.innerHTML += `
           <div class="bg-white dark:bg-darkCard p-2 rounded-2xl shadow-sm flex flex-col justify-between relative">
-            ${diskon !== '0%' && diskon !== '' ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10">${diskon}</span>` : ''}
+            ${diskonPercent !== '' ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10">${diskonPercent}</span>` : ''}
             <div>
               <img src="${gambar}" alt="${nama}" class="w-full h-28 object-cover rounded-xl mb-1.5" onerror="this.src='https://via.placeholder.com/150'">
               <h3 class="text-[11px] font-medium line-clamp-2 mb-1">${nama}</h3>
@@ -254,6 +248,11 @@
       });
     }
 
+    function searchProducts(keyword) {
+      const filtered = products.filter(p => (p['Nama'] || '').toLowerCase().includes(keyword.toLowerCase()));
+      renderProducts(filtered);
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
       document.getElementById('view-' + tabId).classList.remove('hidden');
@@ -269,7 +268,8 @@
     }
 
     function addToCart(product) {
-      const existing = cart.find(item => (item.ID_Produk || item.ID) === (product.ID_Produk || product.ID));
+      const pId = product['ID_Produk'] || product.ID;
+      const existing = cart.find(item => (item['ID_Produk'] || item.ID) === pId);
       if(existing) {
         existing.qty = (existing.qty || 1) + 1;
       } else {
@@ -304,13 +304,13 @@
 
       let grandTotal = 0;
       cart.forEach((item, idx) => {
-        const harga = item['Harga setelah diskon'] || item.Harga_setelah_diskon || item['Harga Jual'] || 0;
+        const harga = item['Harga setelah diskon'] || item['Harga Jual'] || 0;
         grandTotal += harga * item.qty;
         container.innerHTML += `
           <div class="bg-white dark:bg-darkCard p-2.5 rounded-2xl shadow-sm flex items-center justify-between gap-2.5">
             <img src="${item['Gambar'] || 'https://via.placeholder.com/100'}" class="w-14 h-14 object-cover rounded-xl shrink-0">
             <div class="flex-1 min-w-0">
-              <h4 class="text-[11px] font-semibold line-clamp-1">${item['Nama'] || item.Nama}</h4>
+              <h4 class="text-[11px] font-semibold line-clamp-1">${item['Nama'] || ''}</h4>
               <p class="text-[11px] text-primary font-bold">Rp ${Number(harga).toLocaleString('id-ID')}</p>
               <div class="flex items-center gap-2 mt-1.5">
                 <button onclick="updateQty(${idx}, -1)" class="w-5 h-5 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center font-bold text-[10px]">-</button>
@@ -345,8 +345,8 @@
       let msg = "Halo Duta Terang, saya ingin memesan:\n\n";
       let total = 0;
       cart.forEach(item => {
-        const h = item['Harga setelah diskon'] || item.Harga_setelah_diskon || item['Harga Jual'] || 0;
-        msg += `- ${item['Nama'] || item.Nama} (${item.qty}x) @ Rp ${Number(h).toLocaleString('id-ID')}\n`;
+        const h = item['Harga setelah diskon'] || item['Harga Jual'] || 0;
+        msg += `- ${item['Nama']} (${item.qty}x) @ Rp ${Number(h).toLocaleString('id-ID')}\n`;
         total += h * item.qty;
       });
       msg += `\n*Total Pembayaran: Rp ${Number(total).toLocaleString('id-ID')}*\n\nMohon informasi pembayarannya. Terima kasih!`;
@@ -369,7 +369,7 @@
       if(cat === 'Semua') {
         renderProducts(products);
       } else {
-        const filtered = products.filter(p => (p['Kategori'] || p.Kategori) === cat);
+        const filtered = products.filter(p => (p['Kategori'] || '').toUpperCase() === cat.toUpperCase());
         renderProducts(filtered);
       }
     }
