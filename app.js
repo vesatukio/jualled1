@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbxQI9ONgYCNsO4oSfFGxZ7GmvWieVP0TFIRFrAHiPOW/exec'; 
+const API_URL = 'const API_URL = 'https://script.google.com/macros/s/AKfycbyM5sG2IcP5-ut8nuAt-htHz-bVG70EPd4aKXMuXbVuhdFsdPZ5F8F4ium5EErQha9u8A/exec';'; 
 
 document.addEventListener('DOMContentLoaded', () => {
   initPWA();
