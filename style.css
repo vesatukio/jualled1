@@ -1428,3 +1428,205 @@ img {
 
   cursor: pointer;
 }
+/* =====================================================
+   MARKETPLACE PREMIUM
+===================================================== */
+
+.marketplace-premium {
+  margin-top: 18px;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 9px;
+
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.market-card {
+  position: relative;
+
+  min-height: 62px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 10px 11px;
+
+  border: 0 !important;
+  border-radius: 13px;
+
+  color: #fff !important;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,.12);
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+.market-card::after {
+  content: "";
+
+  position: absolute;
+
+  width: 80px;
+  height: 80px;
+
+  right: -25px;
+  top: -30px;
+
+  border-radius: 50%;
+
+  background: rgba(255,255,255,.12);
+}
+
+.market-card:active {
+  transform: scale(.96);
+}
+
+.market-icon {
+  position: relative;
+
+  width: 39px;
+  height: 39px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 11px;
+
+  background: rgba(255,255,255,.18);
+}
+
+.market-icon svg {
+  width: 22px;
+  height: 22px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 1.8;
+
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.market-info {
+  position: relative;
+
+  flex: 1;
+  min-width: 0;
+
+  margin-left: 9px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.market-info small {
+  font-size: 8px;
+  line-height: 1.2;
+  opacity: .85;
+}
+
+.market-info strong {
+  margin-top: 2px;
+
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.market-arrow {
+  position: relative;
+
+  font-size: 24px;
+  font-weight: 300;
+
+  opacity: .85;
+}
+
+
+/* SHOPEE */
+
+.market-card.shopee {
+  background: linear-gradient(
+    135deg,
+    #ff6435,
+    #ee4d2d
+  );
+}
+
+
+/* TIKTOK */
+
+.market-card.tiktok {
+  background: linear-gradient(
+    135deg,
+    #252525,
+    #050505
+  );
+}
+
+
+/* LAZADA */
+
+.market-card.lazada {
+  background: linear-gradient(
+    135deg,
+    #6b32b5,
+    #43148a
+  );
+}
+
+
+/* LOKASI */
+
+.market-card.location {
+  background: linear-gradient(
+    135deg,
+    #ff8a00,
+    #ff6200
+  );
+}
+
+
+/* HP KECIL */
+
+@media (max-width: 380px) {
+
+  .marketplace-premium {
+    gap: 6px;
+  }
+
+  .market-card {
+    min-height: 57px;
+    padding: 8px;
+  }
+
+  .market-icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .market-icon svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .market-info strong {
+    font-size: 12px;
+  }
+
+  .market-arrow {
+    font-size: 21px;
+  }
+
+}
