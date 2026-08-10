@@ -833,49 +833,51 @@ function renderProducts() {
    CARD PRODUK
 ===================================================== */
 
-function createProductCard(
-  product
-) {
+function createProductCard(product) {
 
-  const card =
-    document.createElement(
-      "article"
-    );
+  const card = document.createElement("article");
+
+  card.className = "product-card";
 
 
-  card.className =
-    "product-card";
+  /* =================================================
+     3 GAMBAR PRODUK
+  ================================================= */
+
+  const images = [
+    product.gambar1,
+    product.gambar2,
+    product.gambar3
+  ].filter(img =>
+    img &&
+    String(img).trim()
+  );
+
+  if (!images.length) {
+    images.push("image/no-image.png");
+  }
 
 
-  const image =
-    product.gambar1 ||
-    product.gambar2 ||
-    product.gambar3 ||
-    "image/no-image.png";
-
+  /* =================================================
+     HARGA
+  ================================================= */
 
   const hargaJual =
-    Number(
-      product.hargaJual
-    ) || 0;
-
+    Number(product.hargaJual) || 0;
 
   const hargaTampil =
-    getProductPrice(
-      product
-    );
+    getProductPrice(product);
 
 
-  let discountHTML =
-    "";
+  /* =================================================
+     DISKON
+  ================================================= */
 
-
-  /* PROMO KHUSUS */
+  let discountHTML = "";
 
   if (
     specialDiscount > 0 &&
-    hargaTampil <
-    hargaJual
+    hargaTampil < hargaJual
   ) {
 
     discountHTML = `
@@ -884,25 +886,17 @@ function createProductCard(
       </span>
     `;
 
-  }
-
-
-  /* PROMO SHEET */
-
-  else {
+  } else {
 
     const hasDiscount =
       product.hargaDiskon > 0 &&
       hargaJual > 0 &&
-      product.hargaDiskon <
-      hargaJual;
-
+      product.hargaDiskon < hargaJual;
 
     if (hasDiscount) {
 
       let persen =
         product.diskon;
-
 
       if (!persen) {
 
@@ -912,12 +906,10 @@ function createProductCard(
               1 -
               product.hargaDiskon /
               hargaJual
-            ) *
-            100
+            ) * 100
           );
 
       }
-
 
       discountHTML = `
         <span class="discount-badge">
@@ -930,28 +922,21 @@ function createProductCard(
   }
 
 
-  /* HARGA */
+  /* =================================================
+     HARGA HTML
+  ================================================= */
 
-  let priceHTML =
-    "";
+  let priceHTML = "";
 
-
-  if (
-    hargaTampil <
-    hargaJual
-  ) {
+  if (hargaTampil < hargaJual) {
 
     priceHTML = `
       <div class="old-price">
-        ${formatRupiah(
-          hargaJual
-        )}
+        ${formatRupiah(hargaJual)}
       </div>
 
       <div class="price">
-        ${formatRupiah(
-          hargaTampil
-        )}
+        ${formatRupiah(hargaTampil)}
       </div>
     `;
 
@@ -959,29 +944,75 @@ function createProductCard(
 
     priceHTML = `
       <div class="price">
-        ${formatRupiah(
-          hargaJual
-        )}
+        ${formatRupiah(hargaJual)}
       </div>
     `;
 
   }
 
 
+  /* =================================================
+     GALERI
+  ================================================= */
+
   card.innerHTML = `
 
     <div class="product-image">
 
-      <img
-        src="${escapeHTML(image)}"
-        alt="${escapeHTML(product.nama)}"
-        loading="lazy"
-        onerror="
-          this.src='this.onerror=null;this.src='image/no-image.png'
-        "
-      >
+      <div class="product-gallery">
 
-      ${discountHTML}
+        <div class="gallery-track">
+
+          ${images.map((img, index) => `
+
+            <div class="gallery-slide">
+
+              <img
+                src="${escapeHTML(img)}"
+                alt="${escapeHTML(product.nama)}"
+                loading="lazy"
+                draggable="false"
+                onerror="
+                  this.onerror=null;
+                  this.src='image/no-image.png';
+                "
+              >
+
+            </div>
+
+          `).join("")}
+
+        </div>
+
+
+        ${
+          images.length > 1
+          ? `
+
+            <div class="gallery-dots">
+
+              ${images.map((_, index) => `
+
+                <span
+                  class="gallery-dot ${
+                    index === 0
+                      ? "active"
+                      : ""
+                  }"
+                ></span>
+
+              `).join("")}
+
+            </div>
+
+          `
+          : ""
+        }
+
+
+        ${discountHTML}
+
+      </div>
 
     </div>
 
@@ -989,11 +1020,8 @@ function createProductCard(
     <div class="product-info">
 
       <div class="product-name">
-        ${escapeHTML(
-          product.nama
-        )}
+        ${escapeHTML(product.nama)}
       </div>
-
 
       ${priceHTML}
 
@@ -1040,6 +1068,396 @@ function createProductCard(
 
   `;
 
+
+  /* =================================================
+     GALERI
+  ================================================= */
+
+  setupProductGallery(card);
+
+
+  /* =================================================
+     KERANJANG
+  ================================================= */
+
+  const buyButton =
+    card.querySelector(".buy-button");
+
+  buyButton.addEventListener(
+    "click",
+    () => {
+
+      addToCart(product);
+
+    }
+  );
+
+
+  /* =================================================
+     SHARE WHATSAPP
+  ================================================= */
+
+  const shareWA =
+    card.querySelector(".share-wa");
+
+  shareWA.addEventListener(
+    "click",
+    () => {
+
+      const link =
+        getProductLink(product);
+
+      const message =
+        `Halo Duta LED, saya tertarik dengan produk:\n\n` +
+        `${product.nama}\n\n` +
+        `${link}`;
+
+      openWhatsApp(message);
+
+    }
+  );
+
+
+  /* =================================================
+     SHARE FACEBOOK
+  ================================================= */
+
+  const shareFB =
+    card.querySelector(".share-fb");
+
+  shareFB.addEventListener(
+    "click",
+    async () => {
+
+      const link =
+        getProductLink(product);
+
+      const harga =
+        getProductPrice(product);
+
+      const text =
+        `${product.nama}\n` +
+        `${formatRupiah(harga)}\n` +
+        `${link}`;
+
+
+      if (navigator.share) {
+
+        try {
+
+          await navigator.share({
+
+            title:
+              product.nama,
+
+            text:
+              text,
+
+            url:
+              link
+
+          });
+
+        } catch (error) {
+
+          if (
+            error.name !==
+            "AbortError"
+          ) {
+
+            console.warn(
+              "Share dibatalkan:",
+              error
+            );
+
+          }
+
+        }
+
+        return;
+
+      }
+
+
+      try {
+
+        await navigator.clipboard.writeText(
+          text
+        );
+
+        alert(
+          "Nama, harga, dan link produk sudah disalin."
+        );
+
+      } catch {
+
+        alert(text);
+
+      }
+
+    }
+  );
+
+
+  /* =================================================
+     COPY LINK
+  ================================================= */
+
+  const shareCopy =
+    card.querySelector(
+      ".share-copy"
+    );
+
+  shareCopy.addEventListener(
+    "click",
+    async () => {
+
+      const link =
+        getProductLink(product);
+
+
+      try {
+
+        await navigator.clipboard.writeText(
+          link
+        );
+
+      } catch {
+
+        const textarea =
+          document.createElement(
+            "textarea"
+          );
+
+        textarea.value =
+          link;
+
+        document.body.appendChild(
+          textarea
+        );
+
+        textarea.select();
+
+        document.execCommand(
+          "copy"
+        );
+
+        textarea.remove();
+
+      }
+
+
+      shareCopy.textContent =
+        "✓";
+
+
+      setTimeout(
+        () => {
+
+          shareCopy.textContent =
+            "🔗";
+
+        },
+        1500
+      );
+
+    }
+  );
+
+
+  return card;
+
+}
+function setupProductGallery(card) {
+
+  const gallery =
+    card.querySelector(
+      ".product-gallery"
+    );
+
+  if (!gallery)
+    return;
+
+
+  const track =
+    gallery.querySelector(
+      ".gallery-track"
+    );
+
+  const slides =
+    gallery.querySelectorAll(
+      ".gallery-slide"
+    );
+
+  const dots =
+    gallery.querySelectorAll(
+      ".gallery-dot"
+    );
+
+
+  if (slides.length <= 1)
+    return;
+
+
+  let current = 0;
+
+  let startX = 0;
+
+
+  function showImage(index) {
+
+    if (index < 0) {
+
+      index =
+        slides.length - 1;
+
+    }
+
+
+    if (
+      index >=
+      slides.length
+    ) {
+
+      index = 0;
+
+    }
+
+
+    current = index;
+
+
+    track.style.transform =
+      `translateX(-${current * 100}%)`;
+
+
+    dots.forEach(
+      (dot, i) => {
+
+        dot.classList.toggle(
+          "active",
+          i === current
+        );
+
+      }
+    );
+
+  }
+
+
+  /* ==========================================
+     SWIPE MULAI
+  ========================================== */
+
+  gallery.addEventListener(
+    "touchstart",
+    event => {
+
+      startX =
+        event.touches[0].clientX;
+
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  /* ==========================================
+     SWIPE SELESAI
+  ========================================== */
+
+  gallery.addEventListener(
+    "touchend",
+    event => {
+
+      const endX =
+        event.changedTouches[0].clientX;
+
+      const difference =
+        endX - startX;
+
+
+      if (
+        Math.abs(difference) < 40
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        difference < 0
+      ) {
+
+        showImage(
+          current + 1
+        );
+
+      } else {
+
+        showImage(
+          current - 1
+        );
+
+      }
+
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  /* ==========================================
+     KLIK FOTO
+  ========================================== */
+
+  slides.forEach(
+    (slide, index) => {
+
+      const img =
+        slide.querySelector(
+          "img"
+        );
+
+      if (!img)
+        return;
+
+
+      img.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+
+          const imageList =
+            Array.from(
+              slides
+            )
+            .map(
+              slide =>
+                slide.querySelector(
+                  "img"
+                )?.src
+            )
+            .filter(Boolean);
+
+
+          openImageZoom(
+            imageList,
+            index
+          );
+
+        }
+      );
+
+    }
+  );
+
+}
 
   /* =================================================
      TOMBOL KERANJANG
@@ -2523,5 +2941,84 @@ function shakeCart() {
     }, 250);
 
   }
+
+}
+function openImageZoom(
+  images,
+  startIndex = 0
+) {
+
+  let current =
+    startIndex;
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.className =
+    "image-zoom-overlay";
+
+
+  overlay.innerHTML = `
+
+    <img
+      class="zoom-image"
+      src="${escapeHTML(images[current])}"
+      draggable="false"
+    >
+
+  `;
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+
+  const image =
+    overlay.querySelector(
+      ".zoom-image"
+    );
+
+
+  /* ==========================================
+     KLIK FOTO = ZOOM / KEMBALI
+  ========================================== */
+
+  image.addEventListener(
+    "click",
+    event => {
+
+      event.stopPropagation();
+
+
+      image.classList.toggle(
+        "zoomed"
+      );
+
+    }
+  );
+
+
+  /* ==========================================
+     KLIK LUAR = TUTUP
+  ========================================== */
+
+  overlay.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target ===
+        overlay
+      ) {
+
+        overlay.remove();
+
+      }
+
+    }
+  );
 
 }
