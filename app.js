@@ -1,212 +1,1002 @@
-const API_URL = 'const API_URL = 'https://script.google.com/macros/s/AKfycbyM5sG2IcP5-ut8nuAt-htHz-bVG70EPd4aKXMuXbVuhdFsdPZ5F8F4ium5EErQha9u8A/exec';'; 
+/* =====================================================
+   DUTA LED
+   APP.JS
+===================================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
-  initPWA();
-  initTheme();
-  setupNavigation();
-  loadProductData();
-});
 
-function initPWA() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker Registered'))
-      .catch((err) => console.log('SW Registration Failed', err));
-  }
+/* =====================================================
+   KONFIGURASI
+===================================================== */
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
+
+
+const WHATSAPP =
+  "6283157925577";
+
+
+/*
+ * GANTI LINK DI BAWAH INI
+ */
+
+const FACEBOOK_URL = "#";
+
+const TIKTOK_URL = "#";
+
+const LOCATION_URL = "#";
+
+
+/*
+ * CACHE
+ */
+
+const CACHE_KEY =
+  "dutaled_products_v3";
+
+
+/* =====================================================
+   ELEMENT
+===================================================== */
+
+const grid =
+  document.getElementById(
+    "productGrid"
+  );
+
+const loading =
+  document.getElementById(
+    "loading"
+  );
+
+const empty =
+  document.getElementById(
+    "emptyState"
+  );
+
+const search =
+  document.getElementById(
+    "searchInput"
+  );
+
+const status =
+  document.getElementById(
+    "connectionStatus"
+  );
+
+
+let products = [];
+
+
+/* =====================================================
+   INIT
+===================================================== */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  init
+);
+
+
+function init() {
+
+  setupLinks();
+
+  updateStatus();
+
+  loadProducts();
+
+  registerServiceWorker();
+
 }
 
-function initTheme() {
-  const themeToggle = document.getElementById('themeToggle');
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  if (currentTheme === 'dark') {
-    document.body.classList.add('dark-mode');
-    if(themeToggle) themeToggle.innerHTML = '<span class="material-symbols-rounded fs-5">light_mode</span>';
-  }
 
-  if(themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      themeToggle.innerHTML = `<span class="material-symbols-rounded fs-5">${isDark ? 'light_mode' : 'dark_mode'}</span>`;
-    });
-  }
+/* =====================================================
+   LINKS
+===================================================== */
+
+function setupLinks() {
+
+  const message =
+    "Halo Duta LED, saya ingin bertanya tentang produk.";
+
+  const whatsapp =
+    createWhatsappLink(
+      message
+    );
+
+
+  document.getElementById(
+    "heroWhatsapp"
+  ).href = whatsapp;
+
+
+  document.getElementById(
+    "contactWhatsapp"
+  ).href = whatsapp;
+
+
+  document.getElementById(
+    "floatingWhatsapp"
+  ).href = whatsapp;
+
+
+  document.getElementById(
+    "facebookLink"
+  ).href = FACEBOOK_URL;
+
+
+  document.getElementById(
+    "tiktokLink"
+  ).href = TIKTOK_URL;
+
+
+  document.getElementById(
+    "locationLink"
+  ).href = LOCATION_URL;
+
+
+  document.getElementById(
+    "year"
+  ).textContent =
+    new Date().getFullYear();
+
 }
 
-function setupNavigation() {
-  const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      const targetID = item.getAttribute('data-target');
-      navItems.forEach(nav => nav.classList.remove('active'));
-      item.classList.add('active');
-      switchView(targetID);
-    });
-  });
+
+/* =====================================================
+   WHATSAPP
+===================================================== */
+
+function createWhatsappLink(
+  message
+) {
+
+  return (
+    "https://wa.me/" +
+    WHATSAPP +
+    "?text=" +
+    encodeURIComponent(message)
+  );
+
 }
 
-function switchView(targetID) {
-  document.querySelectorAll('.view-section').forEach(view => {
-    if (view.id === targetID) {
-      view.classList.remove('d-none');
-    } else {
-      view.classList.add('d-none');
+
+function productWhatsapp(
+  productName
+) {
+
+  return createWhatsappLink(
+    `Halo Duta LED, saya ingin pesan ${productName}.`
+  );
+
+}
+
+
+/* =====================================================
+   STATUS INTERNET
+===================================================== */
+
+function updateStatus() {
+
+  if (
+    navigator.onLine
+  ) {
+
+    status.textContent =
+      "● Online";
+
+    status.className =
+      "connection-status online";
+
+  } else {
+
+    status.textContent =
+      "● Offline • menampilkan produk tersimpan";
+
+    status.className =
+      "connection-status offline";
+
+  }
+
+}
+
+
+window.addEventListener(
+  "online",
+  () => {
+
+    updateStatus();
+
+    /*
+     * Saat koneksi kembali,
+     * update katalog otomatis.
+     */
+
+    loadOnlineProducts();
+
+  }
+);
+
+
+window.addEventListener(
+  "offline",
+  updateStatus
+);
+
+
+/* =====================================================
+   LOAD PRODUK
+===================================================== */
+
+async function loadProducts() {
+
+  /*
+   * Tampilkan cache dahulu.
+   */
+
+  const cached =
+    getCachedProducts();
+
+
+  if (
+    cached.length
+  ) {
+
+    products =
+      cached;
+
+    renderProducts(
+      products
+    );
+
+    hideLoading();
+
+  }
+
+
+  /*
+   * Jika online,
+   * ambil data terbaru.
+   */
+
+  if (
+    navigator.onLine
+  ) {
+
+    await loadOnlineProducts();
+
+  } else {
+
+    if (
+      !cached.length
+    ) {
+
+      showOfflineEmpty();
+
     }
-  });
-  window.scrollTo(0, 0);
-  if(targetID === 'adminView') {
-    loadAdminProductList();
+
   }
+
 }
 
-// Ambil dan Tampilkan Produk di Beranda
-async function loadProductData() {
-  const productGrid = document.getElementById('productGrid');
-  try {
-    const response = await fetch(`${API_URL}?sheet=PRODUK`);
-    const data = await response.json();
 
-    if (data && data.length > 0) {
-      productGrid.innerHTML = data.map(item => `
-        <div class="col-6">
-          <div class="product-card p-2 shadow-sm rounded-4 position-relative bg-card h-100 d-flex flex-column">
-            <img src="${item.Gambar || 'https://via.placeholder.com/150'}" class="img-fluid rounded-3 mb-2 w-100 object-fit-cover" style="height: 140px;" alt="${item.Nama_Produk}">
-            <h6 class="text-truncate fs-6 mb-1">${item.Nama_Produk}</h6>
-            <div class="text-danger fw-bold mt-auto">Rp${parseInt(item.Harga || 0).toLocaleString()}</div>
-            <button class="btn btn-sm btn-primary w-100 mt-2 text-white rounded-3 fw-semibold" onclick="beliProduk('${item.ID_Produk}')">Beli</button>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      productGrid.innerHTML = '<p class="text-center text-muted w-100 py-4">Belum ada produk tersedia.</p>';
-    }
-  } catch (error) {
-    console.error('Gagal mengambil data produk:', error);
-    productGrid.innerHTML = '<p class="text-center text-muted w-100 py-4">Gagal memuat produk dari server.</p>';
-  }
-}
+/* =====================================================
+   ONLINE DATA
+===================================================== */
 
-// Tambah Produk Baru (Admin)
-async function tambahProduk() {
-  const id = document.getElementById('adminId').value || "PROD-" + Date.now();
-  const nama = document.getElementById('adminNama').value;
-  const harga = document.getElementById('adminHarga').value;
-  const gambar = document.getElementById('adminGambar').value;
-
-  if (!nama || !harga) {
-    Swal.fire('Peringatan', 'Nama dan Harga produk wajib diisi!', 'warning');
-    return;
-  }
-
-  Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+async function loadOnlineProducts() {
 
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        sheet: "PRODUK",
-        action: "upsert", // Mendukung tambah / update
-        payload: {
-          ID_Produk: id,
-          Nama_Produk: nama,
-          Harga: harga,
-          Gambar: gambar,
-          Stok: 10
+
+    const response =
+      await fetch(
+        API_URL +
+        "?action=produk&v=" +
+        Date.now(),
+        {
+          method: "GET",
+          cache: "no-store"
         }
-      })
-    });
-    
-    const result = await response.json();
-    if (result.status === "success") {
-      Swal.fire('Berhasil!', 'Data produk berhasil disimpan ke Google Sheets.', 'success');
-      resetAdminForm();
-      loadProductData();
-      loadAdminProductList();
-    } else {
-      Swal.fire('Gagal', 'Gagal menyimpan data.', 'error');
+      );
+
+
+    if (
+      !response.ok
+    ) {
+
+      throw new Error(
+        "Server API tidak merespons."
+      );
+
     }
+
+
+    const result =
+      await response.json();
+
+
+    if (
+      !result.success
+    ) {
+
+      throw new Error(
+        result.message ||
+        "API gagal."
+      );
+
+    }
+
+
+    if (
+      !Array.isArray(
+        result.data
+      )
+    ) {
+
+      throw new Error(
+        "Format data produk salah."
+      );
+
+    }
+
+
+    /*
+     * Data terbaru.
+     */
+
+    products =
+      result.data;
+
+
+    /*
+     * Simpan ke browser.
+     */
+
+    saveProducts(
+      products
+    );
+
+
+    /*
+     * Tampilkan.
+     */
+
+    renderProducts(
+      products
+    );
+
+
+    hideLoading();
+
+    updateStatus();
+
+
   } catch (error) {
-    Swal.fire('Error', 'Terjadi kesalahan koneksi.', 'error');
+
+    console.error(
+      "API:",
+      error
+    );
+
+
+    /*
+     * Jika cache sudah ada,
+     * tidak perlu mengganggu tampilan.
+     */
+
+    if (
+      products.length
+    ) {
+
+      hideLoading();
+
+      return;
+
+    }
+
+
+    showApiError();
+
   }
+
 }
 
-// Tampilkan Daftar Produk di Dashboard Admin untuk Edit/Hapus
-async function loadAdminProductList() {
-  const container = document.getElementById('adminProductList');
-  if(!container) return;
-  
-  container.innerHTML = '<p class="text-center text-muted small">Memuat daftar produk...</p>';
+
+/* =====================================================
+   CACHE
+===================================================== */
+
+function saveProducts(
+  data
+) {
+
   try {
-    const response = await fetch(`${API_URL}?sheet=PRODUK`);
-    const data = await response.json();
 
-    if (data && data.length > 0) {
-      container.innerHTML = data.map(item => `
-        <div class="d-flex align-items-center justify-content-between p-2 mb-2 border rounded-3 bg-body">
-          <div class="text-truncate" style="max-width: 60%;">
-            <strong>${item.Nama_Produk}</strong><br>
-            <small class="text-danger">Rp${parseInt(item.Harga || 0).toLocaleString()}</small>
-          </div>
-          <div class="d-flex gap-1">
-            <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editProduk('${item.ID_Produk}', '${item.Nama_Produk}', '${item.Harga}', '${item.Gambar}')">Edit</button>
-            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="hapusProduk('${item.ID_Produk}')">Hapus</button>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      container.innerHTML = '<p class="text-center text-muted small">Belum ada produk.</p>';
-    }
-  } catch (e) {
-    container.innerHTML = '<p class="text-center text-muted small">Gagal memuat daftar.</p>';
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify(data)
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Cache gagal:",
+      error
+    );
+
   }
+
 }
 
-function editProduk(id, nama, harga, gambar) {
-  document.getElementById('adminId').value = id;
-  document.getElementById('adminNama').value = nama;
-  document.getElementById('adminHarga').value = harga;
-  document.getElementById('adminGambar').value = gambar;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+function getCachedProducts() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(
+        CACHE_KEY
+      );
+
+
+    if (
+      !saved
+    ) {
+
+      return [];
+
+    }
+
+
+    const data =
+      JSON.parse(saved);
+
+
+    return Array.isArray(data)
+      ? data
+      : [];
+
+  } catch (error) {
+
+    return [];
+
+  }
+
 }
 
-async function hapusProduk(id) {
-  const confirm = await Swal.fire({
-    title: 'Hapus Produk?',
-    text: "Data akan dihapus dari Google Sheets.",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#ee4d2d',
-    cancelButtonText: 'Batal',
-    confirmButtonText: 'Ya, Hapus'
-  });
 
-  if(confirm.isConfirmed) {
-    Swal.fire({ title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ sheet: "PRODUK", action: "delete", payload: { ID_Produk: id } })
-      });
-      const result = await response.json();
-      if(result.status === "success") {
-        Swal.fire('Terhapus!', 'Produk berhasil dihapus.', 'success');
-        loadProductData();
-        loadAdminProductList();
+/* =====================================================
+   RENDER PRODUK
+===================================================== */
+
+function renderProducts(
+  data
+) {
+
+  grid.innerHTML = "";
+
+
+  if (
+    !data.length
+  ) {
+
+    empty.classList.remove(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+
+  empty.classList.add(
+    "hidden"
+  );
+
+
+  data.forEach(
+    (
+      product,
+      index
+    ) => {
+
+      grid.appendChild(
+        createProductCard(
+          product,
+          index
+        )
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   PRODUCT CARD
+===================================================== */
+
+function createProductCard(
+  product,
+  index
+) {
+
+  const card =
+    document.createElement(
+      "article"
+    );
+
+
+  card.className =
+    "product-card";
+
+
+  const name =
+    product.nama ||
+    "Produk";
+
+
+  const image =
+    product.gambar1 ||
+    product.gambar2 ||
+    product.gambar3 ||
+    createPlaceholder();
+
+
+  const price =
+    Number(
+      product.hargaJual
+    ) || 0;
+
+
+  const discountPrice =
+    Number(
+      product.hargaDiskon
+    ) || 0;
+
+
+  const hasDiscount =
+    discountPrice > 0 &&
+    discountPrice < price;
+
+
+  let discount =
+    Number(
+      product.diskon
+    ) || 0;
+
+
+  if (
+    hasDiscount &&
+    !discount &&
+    price
+  ) {
+
+    discount =
+      Math.round(
+        (
+          (price - discountPrice) /
+          price
+        ) * 100
+      );
+
+  }
+
+
+  card.innerHTML = `
+
+    <div class="product-image">
+
+      ${
+        hasDiscount
+          ? `
+            <span class="discount-badge">
+              -${discount}%
+            </span>
+          `
+          : ""
       }
-    } catch(e) {
-      Swal.fire('Gagal', 'Terjadi kesalahan.', 'error');
+
+
+      <img
+        src="${escapeHTML(image)}"
+        alt="${escapeHTML(name)}"
+        loading="${
+          index < 4
+            ? "eager"
+            : "lazy"
+        }"
+      >
+
+    </div>
+
+
+    <div class="product-content">
+
+      <h3>
+        ${escapeHTML(name)}
+      </h3>
+
+
+      ${
+        product.diskipsi
+          ? `
+            <p class="product-description">
+              ${escapeHTML(
+                product.diskipsi
+              )}
+            </p>
+          `
+          : ""
+      }
+
+
+      <div class="product-price">
+
+        ${
+          hasDiscount
+            ? `
+              <span class="old-price">
+                ${formatRupiah(price)}
+              </span>
+
+              <strong>
+                ${formatRupiah(
+                  discountPrice
+                )}
+              </strong>
+            `
+            : `
+              <strong>
+                ${formatRupiah(price)}
+              </strong>
+            `
+        }
+
+      </div>
+
+
+      <div class="product-buttons">
+
+        <a
+          href="${productWhatsapp(name)}"
+          target="_blank"
+          rel="noopener"
+          class="buy-button"
+        >
+          💬 Beli
+        </a>
+
+
+        <button
+          type="button"
+          class="share-button"
+          aria-label="Bagikan produk"
+        >
+          ↗
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  const shareButton =
+    card.querySelector(
+      ".share-button"
+    );
+
+
+  shareButton.addEventListener(
+    "click",
+    () =>
+      shareProduct(
+        product
+      )
+  );
+
+
+  return card;
+
+}
+
+
+/* =====================================================
+   FORMAT HARGA
+===================================================== */
+
+function formatRupiah(
+  value
+) {
+
+  return new Intl.NumberFormat(
+    "id-ID",
+    {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0
     }
+  ).format(
+    Number(value) || 0
+  );
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+search.addEventListener(
+  "input",
+  function () {
+
+    const keyword =
+      this.value
+        .trim()
+        .toLowerCase();
+
+
+    if (
+      !keyword
+    ) {
+
+      renderProducts(
+        products
+      );
+
+      return;
+
+    }
+
+
+    const result =
+      products.filter(
+        product =>
+          String(
+            product.nama || ""
+          )
+          .toLowerCase()
+          .includes(
+            keyword
+          )
+      );
+
+
+    renderProducts(
+      result
+    );
+
   }
+);
+
+
+/* =====================================================
+   SHARE
+===================================================== */
+
+async function shareProduct(
+  product
+) {
+
+  const name =
+    product.nama ||
+    "Produk Duta LED";
+
+
+  const url =
+    window.location.origin +
+    window.location.pathname;
+
+
+  const text =
+    `${name} - Duta LED`;
+
+
+  /*
+   * HP modern
+   */
+
+  if (
+    navigator.share
+  ) {
+
+    try {
+
+      await navigator.share({
+
+        title: name,
+
+        text: text,
+
+        url: url
+
+      });
+
+      return;
+
+    } catch (error) {
+
+      /*
+       * User membatalkan share.
+       */
+
+    }
+
+  }
+
+
+  /*
+   * Fallback WhatsApp
+   */
+
+  const wa =
+    createWhatsappLink(
+      `${text}\n${url}`
+    );
+
+
+  window.open(
+    wa,
+    "_blank",
+    "noopener"
+  );
+
 }
 
-function resetAdminForm() {
-  document.getElementById('adminId').value = '';
-  document.getElementById('adminNama').value = '';
-  document.getElementById('adminHarga').value = '';
-  document.getElementById('adminGambar').value = '';
+
+/* =====================================================
+   PLACEHOLDER
+===================================================== */
+
+function createPlaceholder() {
+
+  return (
+    "data:image/svg+xml," +
+    encodeURIComponent(`
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 500 500"
+      >
+        <rect
+          width="500"
+          height="500"
+          fill="#f5f5f5"
+        />
+
+        <text
+          x="250"
+          y="250"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          font-family="Arial"
+          font-size="32"
+          fill="#999"
+        >
+          Duta LED
+        </text>
+
+      </svg>
+    `)
+  );
+
 }
 
-function beliProduk(id) {
-  Swal.fire('Informasi', 'Fitur keranjang & checkout aktif. Produk dipilih: ' + id, 'info');
+
+/* =====================================================
+   SECURITY
+===================================================== */
+
+function escapeHTML(
+  value
+) {
+
+  return String(
+    value || ""
+  )
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+function hideLoading() {
+
+  loading.classList.add(
+    "hidden"
+  );
+
+}
+
+
+function showOfflineEmpty() {
+
+  loading.innerHTML = `
+    <div class="offline-message">
+      <strong>Belum ada katalog tersimpan.</strong>
+      <span>
+        Buka halaman saat online
+        untuk memuat produk.
+      </span>
+    </div>
+  `;
+
+}
+
+
+function showApiError() {
+
+  loading.innerHTML = `
+    <div class="offline-message">
+      <strong>
+        Katalog belum dapat dimuat.
+      </strong>
+
+      <span>
+        Periksa koneksi internet
+        atau Apps Script.
+      </span>
+    </div>
+  `;
+
+}
+
+
+/* =====================================================
+   SERVICE WORKER
+===================================================== */
+
+function registerServiceWorker() {
+
+  if (
+    "serviceWorker" in navigator
+  ) {
+
+    window.addEventListener(
+      "load",
+      function () {
+
+        navigator.serviceWorker
+          .register(
+            "./sw.js"
+          )
+          .catch(
+            error =>
+              console.warn(
+                "SW:",
+                error
+              )
+          );
+
+      }
+    );
+
+  }
+
 }
