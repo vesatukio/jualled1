@@ -90,57 +90,171 @@
 
 </header>
 
+/* ================================
+   HERO 3 KOLOM
+================================ */
+
+.hero {
+  background: #fff;
+  padding: 8px 0 10px;
+}
+
+.hero-3col {
+  display: grid;
+  grid-template-columns:
+    1.25fr
+    .85fr
+    .85fr;
+  gap: 7px;
+  height: 145px;
+}
 
 
-<section class="hero">
+/* TEKS KIRI */
 
-  <div class="container hero-inner">
+.hero-text {
+  min-width: 0;
+  padding: 12px 10px;
+  border-radius: 9px;
+  background: #fff4e9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-    <div>
+.hero-text .eyebrow {
+  font-size: 8px;
+  margin-bottom: 3px;
+}
 
-      <span class="eyebrow">
-        TOKO LISTRIK & ELEKTRONIK
-      </span>
+.hero-text h1 {
+  font-size: 19px;
+  line-height: 1.05;
+  margin: 0;
+}
 
-      <h1>
-        Listrik dan Elektronik
-      </h1>
+.hero-text p {
+  margin-top: 6px;
+  color: #777;
+  font-size: 8px;
+  line-height: 1.35;
+}
 
-      <p>
-        Lampu LED, modul LED dan
-        sparepart dengan harga bersaing.
-      </p>
-
-
-      <div class="hero-buttons">
-
-        <a
-          href="#produk"
-          class="btn orange"
-        >
-          🛒 Belanja
-        </a>
-
-        <a
-          id="heroWA"
-          href="#"
-          class="btn green"
-        >
-          💬 WhatsApp
-        </a>
-
-      </div>
-
-    </div>
+.hero-wa {
+  width: fit-content;
+  margin-top: 7px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: #16a34a;
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+}
 
 
-    <div class="hero-light">
-      💡
-    </div>
+/* GAMBAR IKLAN */
 
-  </div>
+.hero-ad {
+  display: block;
+  overflow: hidden;
+  min-width: 0;
+  border-radius: 9px;
+  background: #f1f1f1;
+}
 
-</section>
+.hero-ad img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+
+/* HP SANGAT KECIL */
+
+@media (max-width: 380px) {
+
+  .hero-3col {
+    height: 125px;
+    gap: 5px;
+  }
+
+  .hero-text {
+    padding: 8px;
+  }
+
+  .hero-text h1 {
+    font-size: 16px;
+  }
+
+  .hero-text p {
+    font-size: 7px;
+  }
+
+  .hero-wa {
+    font-size: 7px;
+    padding: 4px 6px;
+  }
+
+}
+
+
+/* TABLET */
+
+@media (min-width: 600px) {
+
+  .hero {
+    padding: 12px 0 15px;
+  }
+
+  .hero-3col {
+    height: 180px;
+    gap: 10px;
+  }
+
+  .hero-text h1 {
+    font-size: 27px;
+  }
+
+  .hero-text p {
+    font-size: 11px;
+  }
+
+  .hero-wa {
+    font-size: 10px;
+    padding: 7px 11px;
+  }
+
+}
+
+
+/* PC */
+
+@media (min-width: 1000px) {
+
+  .hero-3col {
+    height: 210px;
+    grid-template-columns:
+      1.3fr
+      .85fr
+      .85fr;
+  }
+
+  .hero-text {
+    padding: 20px;
+  }
+
+  .hero-text h1 {
+    font-size: 34px;
+  }
+
+  .hero-text p {
+    font-size: 12px;
+    max-width: 300px;
+  }
+
+}
+
 
 
 
