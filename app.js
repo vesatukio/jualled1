@@ -1,38 +1,32 @@
-```javascript
 /* =========================================================
    DUTA LED - APP.JS
-   =========================================================
-
-   DATA:
-   Google Sheet melalui API
-   + Cache LocalStorage
+   Versi bersih
+   Google Sheet / Apps Script + Local Cache
 
    FITUR:
-   ✓ Google Sheet
-   ✓ Cache offline
-   ✓ Kategori
-   ✓ Pencarian
-   ✓ Link unik produk
-   ✓ Produk langsung tampil berdasarkan ?id=
-   ✓ Keranjang multi produk
-   ✓ Tambah / kurang / hapus
-   ✓ Checkout WhatsApp
-   ✓ Diskon katalog
-   ✓ Promo khusus ?promo=10
-   ✓ Share WhatsApp
-   ✓ Share Facebook / Web Share
-   ✓ Salin link produk
-   ✓ 3 gambar produk
-   ✓ Swipe gambar
-   ✓ Klik gambar = zoom
-   ✓ Klik lagi = kembali
-   ✓ Swipe saat zoom
-   ✓ Menu promo
-   ✓ Efek keranjang
+   - API Google Sheet
+   - Cache lokal
+   - Offline
+   - Produk berdasarkan ?id=
+   - Link unik setiap produk
+   - Kategori
+   - Pencarian
+   - Keranjang multi produk
+   - Tambah / kurang / hapus
+   - Checkout WhatsApp
+   - Diskon dari Sheet
+   - Promo ?promo=1-99
+   - 3 gambar produk
+   - Swipe gambar
+   - Klik gambar = zoom
+   - Klik lagi = kembali
+   - Share WhatsApp
+   - Share Facebook
+   - Copy link produk
+   - Efek keranjang
 ========================================================= */
 
 "use strict";
-
 
 /* =========================================================
    PENGATURAN
@@ -41,41 +35,29 @@
 const API_URL =
   "https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
 
-const WHATSAPP =
-  "6283157925577";
+const WHATSAPP = "6283157925577";
 
-const FACEBOOK_URL =
-  "#";
+const FACEBOOK_URL = "#";
+const TIKTOK_URL = "#";
+const LOCATION_URL = "#";
 
-const TIKTOK_URL =
-  "#";
-
-const LOCATION_URL =
-  "#";
-
-const CACHE_KEY =
-  "dutaled_produk_v3";
-
-const CART_KEY =
-  "dutaled_cart_v3";
-
+const CACHE_KEY = "dutaled_produk_v4";
+const CART_KEY = "dutaled_cart_v4";
 
 /* =========================================================
    DATA
 ========================================================= */
 
 let products = [];
-
 let cart = [];
 
 let currentCategory = "Semua";
-
 let searchText = "";
 
 let specialDiscount = 0;
-
 let specialPromoCode = "";
 
+let selectedProductId = "";
 
 /* =========================================================
    ELEMENT
@@ -97,184 +79,101 @@ let cartCount;
 let cartTotal;
 let checkoutButton;
 
-
 /* =========================================================
    START
 ========================================================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  init
-);
-
+document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
 
-  /* -------------------------------------------------------
-     Ambil element HTML
-  ------------------------------------------------------- */
+  /* -----------------------------------------
+     Ambil elemen HTML
+  ----------------------------------------- */
 
-  productGrid =
-    document.getElementById(
-      "productGrid"
-    );
+  productGrid = document.getElementById("productGrid");
+  categoryBar = document.getElementById("categoryBar");
+  searchInput = document.getElementById("searchInput");
+  loading = document.getElementById("loading");
+  empty = document.getElementById("empty");
+  status = document.getElementById("status");
 
-  categoryBar =
-    document.getElementById(
-      "categoryBar"
-    );
+  cartButton = document.getElementById("cartButton");
+  cartOverlay = document.getElementById("cartOverlay");
+  cartPanel = document.getElementById("cartPanel");
+  cartClose = document.getElementById("cartClose");
+  cartBox = document.getElementById("cartBox");
+  cartCount = document.getElementById("cartCount");
+  cartTotal = document.getElementById("cartTotal");
+  checkoutButton = document.getElementById("checkoutButton");
 
-  searchInput =
-    document.getElementById(
-      "searchInput"
-    );
-
-  loading =
-    document.getElementById(
-      "loading"
-    );
-
-  empty =
-    document.getElementById(
-      "empty"
-    );
-
-  status =
-    document.getElementById(
-      "status"
-    );
-
-  cartButton =
-    document.getElementById(
-      "cartButton"
-    );
-
-  cartOverlay =
-    document.getElementById(
-      "cartOverlay"
-    );
-
-  cartPanel =
-    document.getElementById(
-      "cartPanel"
-    );
-
-  cartClose =
-    document.getElementById(
-      "cartClose"
-    );
-
-  cartBox =
-    document.getElementById(
-      "cartBox"
-    );
-
-  cartCount =
-    document.getElementById(
-      "cartCount"
-    );
-
-  cartTotal =
-    document.getElementById(
-      "cartTotal"
-    );
-
-  checkoutButton =
-    document.getElementById(
-      "checkoutButton"
-    );
-
-
-  /* -------------------------------------------------------
-     Promo
-  ------------------------------------------------------- */
+  /* -----------------------------------------
+     Baca URL
+  ----------------------------------------- */
 
   loadSpecialPromo();
+  loadSelectedProduct();
 
-
-  /* -------------------------------------------------------
+  /* -----------------------------------------
      Setup
-  ------------------------------------------------------- */
+  ----------------------------------------- */
 
   setupLinks();
-
   setupSearch();
-
   setupPromoButton();
-
   setupCartButton();
 
-
-  /* -------------------------------------------------------
+  /* -----------------------------------------
      Keranjang
-  ------------------------------------------------------- */
+  ----------------------------------------- */
 
   loadCart();
-
   renderCart();
 
-
-  /* -------------------------------------------------------
+  /* -----------------------------------------
      Loading
-  ------------------------------------------------------- */
+  ----------------------------------------- */
 
   showLoading(true);
 
+  /* =====================================================
+     LOAD CACHE TERLEBIH DAHULU
+  ===================================================== */
 
-  /* =======================================================
-     LOAD CACHE
-  ======================================================= */
+  const cached = loadCache();
 
-  const cached =
-    loadCache();
+  if (cached.length) {
 
-  if (
-    cached.length
-  ) {
-
-    products =
-      cached;
+    products = cached;
 
     renderCategories();
-
     renderProducts();
 
-    showStatus(
-      "Katalog tersimpan"
-    );
+    showStatus("Katalog tersimpan");
 
+    showSelectedProduct();
   }
 
-
-  /* =======================================================
+  /* =====================================================
      LOAD API
-  ======================================================= */
+  ===================================================== */
 
   try {
 
-    const fresh =
-      await loadFromGoogle();
+    const fresh = await loadFromGoogle();
 
+    if (fresh.length) {
 
-    if (
-      fresh.length
-    ) {
+      products = fresh;
 
-      products =
-        fresh;
-
-      saveCache(
-        products
-      );
+      saveCache(products);
 
       renderCategories();
-
       renderProducts();
 
-      showStatus(
-        "Katalog terbaru"
-      );
+      showStatus("Katalog terbaru");
 
+      showSelectedProduct();
     }
 
   } catch (error) {
@@ -284,36 +183,38 @@ async function init() {
       error
     );
 
+    if (!products.length) {
 
-    if (
-      !products.length
-    ) {
-
-      showStatus(
-        "Mode offline"
-      );
+      showStatus("Mode offline");
 
     }
-
   }
-
-
-  /* -------------------------------------------------------
-     Setelah data tersedia:
-     buka produk sesuai ?id=
-  ------------------------------------------------------- */
 
   showLoading(false);
 
-  openProductFromURL();
-
   renderCart();
-
 }
 
 
 /* =========================================================
-   PROMO KHUSUS
+   URL PRODUK
+========================================================= */
+
+function loadSelectedProduct() {
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  selectedProductId =
+    String(
+      params.get("id") || ""
+    ).trim();
+}
+
+
+/* =========================================================
+   PROMO URL
 ========================================================= */
 
 function loadSpecialPromo() {
@@ -323,18 +224,14 @@ function loadSpecialPromo() {
       window.location.search
     );
 
-
   const promo =
-    (
+    String(
       params.get("promo") || ""
     )
-    .trim()
-    .replace("%", "");
+      .trim()
+      .replace("%", "");
 
-
-  const discount =
-    Number(promo);
-
+  const discount = Number(promo);
 
   if (
     Number.isFinite(discount) &&
@@ -342,27 +239,19 @@ function loadSpecialPromo() {
     discount <= 99
   ) {
 
-    specialDiscount =
-      discount;
-
-    specialPromoCode =
-      String(discount);
+    specialDiscount = discount;
+    specialPromoCode = String(discount);
 
   } else {
 
-    specialDiscount =
-      0;
-
-    specialPromoCode =
-      "";
-
+    specialDiscount = 0;
+    specialPromoCode = "";
   }
-
 }
 
 
 /* =========================================================
-   LOAD GOOGLE SHEET
+   GOOGLE SHEET / API
 ========================================================= */
 
 async function loadFromGoogle() {
@@ -378,49 +267,35 @@ async function loadFromGoogle() {
       }
     );
 
-
-  if (
-    !response.ok
-  ) {
+  if (!response.ok) {
 
     throw new Error(
       "HTTP " +
       response.status
     );
-
   }
-
 
   const data =
     await response.json();
-
 
   const rows =
     Array.isArray(data)
       ? data
       : data.data;
 
-
-  if (
-    !Array.isArray(rows)
-  ) {
+  if (!Array.isArray(rows)) {
 
     throw new Error(
-      "Format data tidak valid"
+      "Format data API tidak valid"
     );
-
   }
 
-
   return rows
-    .map(
-      normalizeProduct
-    )
+    .map(normalizeProduct)
     .filter(
       product =>
         product.nama
     );
-
 }
 
 
@@ -439,31 +314,26 @@ function normalizeProduct(row) {
         row.Id
       ),
 
-
     nama:
       value(
         row.nama ??
         row.Nama ??
-        row.name
+        row.NAMA
       ),
-
 
     kategori:
       value(
         row.kategori ??
         row.Kategori ??
-        row.category
-      ) ||
-      "Lainnya",
-
+        row.KATEGORI
+      ) || "Lainnya",
 
     hargaModal:
       number(
         row["harga modal"] ??
         row.hargaModal ??
-        row.modal
+        row.HargaModal
       ),
-
 
     laba:
       number(
@@ -471,14 +341,12 @@ function normalizeProduct(row) {
         row.laba
       ),
 
-
     hargaJual:
       number(
         row["harga jual"] ??
         row.hargaJual ??
-        row.harga
+        row.HargaJual
       ),
-
 
     diskon:
       number(
@@ -486,31 +354,25 @@ function normalizeProduct(row) {
         row.Diskon
       ),
 
-
     hargaDiskon:
       number(
         row["harga diskon"] ??
         row.hargaDiskon ??
-        row.harga_diskon
+        row.HargaDiskon
       ),
-
 
     deskripsi:
       value(
         row.deskripsi ??
-        row.diskipsi ??
-        row.Deskripsi
+        row.Deskripsi ??
+        row.diskipsi
       ),
-
 
     gambar1:
       value(
         row.gambar1 ??
-        row.Gambar1 ??
-        row.image ??
-        row.foto
+        row.Gambar1
       ),
-
 
     gambar2:
       value(
@@ -518,20 +380,17 @@ function normalizeProduct(row) {
         row.Gambar2
       ),
 
-
     gambar3:
       value(
         row.gambar3 ??
         row.Gambar3
       )
-
   };
-
 }
 
 
 /* =========================================================
-   HELPER VALUE
+   HELPER
 ========================================================= */
 
 function value(v) {
@@ -542,19 +401,11 @@ function value(v) {
   ) {
 
     return "";
-
   }
 
-
-  return String(v)
-    .trim();
-
+  return String(v).trim();
 }
 
-
-/* =========================================================
-   HELPER NUMBER
-========================================================= */
 
 function number(v) {
 
@@ -565,23 +416,13 @@ function number(v) {
   ) {
 
     return 0;
-
   }
-
 
   const cleaned =
     String(v)
-      .replace(
-        /[^\d.-]/g,
-        ""
-      );
+      .replace(/[^\d.-]/g, "");
 
-
-  return (
-    Number(cleaned) ||
-    0
-  );
-
+  return Number(cleaned) || 0;
 }
 
 
@@ -591,105 +432,63 @@ function number(v) {
 
 function renderCategories() {
 
-  if (
-    !categoryBar
-  ) {
-
+  if (!categoryBar) {
     return;
-
   }
 
+  const categories = ["Semua"];
 
-  const categories =
-    ["Semua"];
+  products.forEach(product => {
 
+    const category =
+      String(
+        product.kategori || ""
+      ).trim();
 
-  products.forEach(
-    product => {
+    if (
+      category &&
+      !categories.includes(category)
+    ) {
 
-      const category =
-        String(
-          product.kategori ||
-          ""
-        ).trim();
-
-
-      if (
-        category &&
-        !categories.includes(
-          category
-        )
-      ) {
-
-        categories.push(
-          category
-        );
-
-      }
-
+      categories.push(category);
     }
-  );
+  });
 
+  categoryBar.innerHTML = "";
 
-  categoryBar.innerHTML =
-    "";
+  categories.forEach(category => {
 
+    const button =
+      document.createElement("button");
 
-  categories.forEach(
-    category => {
+    button.type = "button";
 
-      const button =
-        document.createElement(
-          "button"
-        );
+    button.className =
+      "category-button";
 
+    if (
+      category ===
+      currentCategory
+    ) {
 
-      button.type =
-        "button";
-
-
-      button.className =
-        "category-button";
-
-
-      if (
-        category ===
-        currentCategory
-      ) {
-
-        button.classList.add(
-          "active"
-        );
-
-      }
-
-
-      button.textContent =
-        category;
-
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          currentCategory =
-            category;
-
-          renderCategories();
-
-          renderProducts();
-
-        }
-      );
-
-
-      categoryBar.appendChild(
-        button
-      );
-
+      button.classList.add("active");
     }
-  );
 
+    button.textContent = category;
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        currentCategory = category;
+
+        renderCategories();
+        renderProducts();
+      }
+    );
+
+    categoryBar.appendChild(button);
+  });
 }
 
 
@@ -699,30 +498,24 @@ function renderCategories() {
 
 function setupSearch() {
 
-  if (
-    !searchInput
-  ) {
-
+  if (!searchInput) {
     return;
-
   }
-
 
   searchInput.addEventListener(
     "input",
     event => {
 
       searchText =
-        event.target.value
+        String(
+          event.target.value || ""
+        )
           .trim()
           .toLowerCase();
 
-
       renderProducts();
-
     }
   );
-
 }
 
 
@@ -732,58 +525,42 @@ function setupSearch() {
 
 function getFilteredProducts() {
 
-  return products.filter(
-    product => {
+  return products.filter(product => {
 
-      const category =
-        String(
-          product.kategori ||
-          ""
-        ).toLowerCase();
+    const categoryOK =
+      currentCategory === "Semua" ||
+      String(
+        product.kategori || ""
+      )
+        .toLowerCase() ===
+      currentCategory.toLowerCase();
 
+    const nama =
+      String(
+        product.nama || ""
+      ).toLowerCase();
 
-      const nama =
-        String(
-          product.nama ||
-          ""
-        ).toLowerCase();
+    const kategori =
+      String(
+        product.kategori || ""
+      ).toLowerCase();
 
+    const deskripsi =
+      String(
+        product.deskripsi || ""
+      ).toLowerCase();
 
-      const deskripsi =
-        String(
-          product.deskripsi ||
-          ""
-        ).toLowerCase();
+    const searchOK =
+      !searchText ||
+      nama.includes(searchText) ||
+      kategori.includes(searchText) ||
+      deskripsi.includes(searchText);
 
-
-      const categoryOK =
-        currentCategory ===
-        "Semua" ||
-        category ===
-        currentCategory.toLowerCase();
-
-
-      const searchOK =
-        !searchText ||
-        nama.includes(
-          searchText
-        ) ||
-        category.includes(
-          searchText
-        ) ||
-        deskripsi.includes(
-          searchText
-        );
-
-
-      return (
-        categoryOK &&
-        searchOK
-      );
-
-    }
-  );
-
+    return (
+      categoryOK &&
+      searchOK
+    );
+  });
 }
 
 
@@ -791,19 +568,14 @@ function getFilteredProducts() {
    HARGA PRODUK
 ========================================================= */
 
-function getProductPrice(
-  product
-) {
+function getProductPrice(product) {
 
   const hargaJual =
     Number(
       product.hargaJual
     ) || 0;
 
-
-  /* -------------------------------------------------------
-     Promo khusus URL
-  ------------------------------------------------------- */
+  /* PROMO URL */
 
   if (
     specialDiscount > 0 &&
@@ -818,27 +590,19 @@ function getProductPrice(
         100
       )
     );
-
   }
 
-
-  /* -------------------------------------------------------
-     Diskon Sheet
-  ------------------------------------------------------- */
+  /* DISKON SHEET */
 
   if (
     product.hargaDiskon > 0 &&
-    product.hargaDiskon <
-    hargaJual
+    product.hargaDiskon < hargaJual
   ) {
 
     return product.hargaDiskon;
-
   }
 
-
   return hargaJual;
-
 }
 
 
@@ -848,53 +612,54 @@ function getProductPrice(
 
 function renderProducts() {
 
-  if (
-    !productGrid
-  ) {
-
+  if (!productGrid) {
     return;
-
   }
 
-
-  const list =
+  let list =
     getFilteredProducts();
 
+  /* -----------------------------------------
+     Jika URL ?id=123
+     tampilkan produk tersebut saja
+  ----------------------------------------- */
 
-  productGrid.innerHTML =
-    "";
+  if (selectedProductId) {
 
-
-  if (
-    !list.length
-  ) {
-
-    empty?.classList.remove(
-      "hidden"
-    );
-
-    return;
-
-  }
-
-
-  empty?.classList.add(
-    "hidden"
-  );
-
-
-  list.forEach(
-    product => {
-
-      productGrid.appendChild(
-        createProductCard(
-          product
-        )
+    const selected =
+      products.find(
+        product =>
+          String(product.id) ===
+          String(selectedProductId)
       );
 
-    }
-  );
+    if (selected) {
 
+      list = [selected];
+
+    } else {
+
+      list = [];
+    }
+  }
+
+  productGrid.innerHTML = "";
+
+  if (!list.length) {
+
+    empty?.classList.remove("hidden");
+
+    return;
+  }
+
+  empty?.classList.add("hidden");
+
+  list.forEach(product => {
+
+    productGrid.appendChild(
+      createProductCard(product)
+    );
+  });
 }
 
 
@@ -902,78 +667,53 @@ function renderProducts() {
    CARD PRODUK
 ========================================================= */
 
-function createProductCard(
-  product
-) {
+function createProductCard(product) {
 
   const card =
-    document.createElement(
-      "article"
-    );
-
+    document.createElement("article");
 
   card.className =
     "product-card";
 
-
-  /* =======================================================
-     GAMBAR
-  ======================================================= */
+  /* -----------------------------------------
+     3 GAMBAR
+  ----------------------------------------- */
 
   const images = [
-
     product.gambar1,
-
     product.gambar2,
-
     product.gambar3
-
   ]
-  .map(
-    img =>
-      String(
-        img || ""
-      ).trim()
-  )
-  .filter(
-    Boolean
-  );
+    .map(
+      img =>
+        String(img || "").trim()
+    )
+    .filter(Boolean);
 
-
-  if (
-    !images.length
-  ) {
+  if (!images.length) {
 
     images.push(
       "image/no-image.png"
     );
-
   }
 
-
-  /* =======================================================
+  /* -----------------------------------------
      HARGA
-  ======================================================= */
+  ----------------------------------------- */
 
   const hargaJual =
     Number(
       product.hargaJual
     ) || 0;
 
-
   const hargaTampil =
-    getProductPrice(
-      product
-    );
+    getProductPrice(product);
 
-
-  /* =======================================================
+  /* -----------------------------------------
      DISKON
-  ======================================================= */
+  ----------------------------------------- */
 
-  let discountHTML =
-    "";
-
+  let discountHTML = "";
 
   if (
     specialDiscount > 0 &&
@@ -991,23 +731,14 @@ function createProductCard(
     const hasDiscount =
       product.hargaDiskon > 0 &&
       hargaJual > 0 &&
-      product.hargaDiskon <
-      hargaJual;
+      product.hargaDiskon < hargaJual;
 
-
-    if (
-      hasDiscount
-    ) {
+    if (hasDiscount) {
 
       let persen =
-        Number(
-          product.diskon
-        ) || 0;
+        Number(product.diskon) || 0;
 
-
-      if (
-        !persen
-      ) {
+      if (!persen) {
 
         persen =
           Math.round(
@@ -1015,141 +746,102 @@ function createProductCard(
               1 -
               product.hargaDiskon /
               hargaJual
-            ) * 100
+            ) *
+            100
           );
-
       }
-
 
       discountHTML = `
         <span class="discount-badge">
           -${persen}%
         </span>
       `;
-
     }
-
   }
 
+  /* -----------------------------------------
+     HARGA HTML
+  ----------------------------------------- */
 
-  /* =======================================================
-     HTML HARGA
-  ======================================================= */
-
-  let priceHTML =
-    "";
-
+  let priceHTML = "";
 
   if (
-    hargaTampil <
-    hargaJual
+    hargaTampil < hargaJual
   ) {
 
     priceHTML = `
-
       <div class="old-price">
-        ${formatRupiah(
-          hargaJual
-        )}
+        ${formatRupiah(hargaJual)}
       </div>
 
       <div class="price">
-        ${formatRupiah(
-          hargaTampil
-        )}
+        ${formatRupiah(hargaTampil)}
       </div>
-
     `;
 
   } else {
 
     priceHTML = `
-
       <div class="price">
-        ${formatRupiah(
-          hargaJual
-        )}
+        ${formatRupiah(hargaJual)}
       </div>
-
     `;
-
   }
 
-
-  /* =======================================================
-     HTML CARD
-  ======================================================= */
+  /* -----------------------------------------
+     GALERI
+  ----------------------------------------- */
 
   card.innerHTML = `
-
     <div class="product-image">
 
       <div class="product-gallery">
 
         <div class="gallery-track">
 
-          ${images.map(
-            (
-              img,
-              index
-            ) => `
+          ${images
+            .map(
+              (img, index) => `
+                <div class="gallery-slide">
 
-              <div
-                class="gallery-slide"
-              >
+                  <img
+                    src="${escapeHTML(img)}"
+                    alt="${escapeHTML(product.nama)}"
+                    loading="lazy"
+                    draggable="false"
+                    data-index="${index}"
+                  >
 
-                <img
-                  src="${escapeHTML(
-                    img
-                  )}"
-                  alt="${escapeHTML(
-                    product.nama
-                  )}"
-                  loading="lazy"
-                  draggable="false"
-                  onerror="
-                    this.onerror=null;
-                    this.src='image/no-image.png';
-                  "
-                >
-
-              </div>
-
-            `
-          ).join("")}
+                </div>
+              `
+            )
+            .join("")}
 
         </div>
-
 
         ${
           images.length > 1
             ? `
-
               <div class="gallery-dots">
 
-                ${images.map(
-                  (
-                    _,
-                    index
-                  ) => `
-
-                    <span
-                      class="gallery-dot ${
-                        index === 0
-                          ? "active"
-                          : ""
-                      }"
-                    ></span>
-
-                  `
-                ).join("")}
+                ${images
+                  .map(
+                    (_, index) => `
+                      <span
+                        class="gallery-dot ${
+                          index === 0
+                            ? "active"
+                            : ""
+                        }"
+                      ></span>
+                    `
+                  )
+                  .join("")}
 
               </div>
-
             `
             : ""
         }
-
 
         ${discountHTML}
 
@@ -1157,18 +849,13 @@ function createProductCard(
 
     </div>
 
-
     <div class="product-info">
 
       <div class="product-name">
-        ${escapeHTML(
-          product.nama
-        )}
+        ${escapeHTML(product.nama)}
       </div>
 
-
       ${priceHTML}
-
 
       <button
         type="button"
@@ -1176,7 +863,6 @@ function createProductCard(
       >
         🛒 + Keranjang
       </button>
-
 
       <div class="product-share">
 
@@ -1188,7 +874,6 @@ function createProductCard(
           💬
         </button>
 
-
         <button
           type="button"
           class="share-fb"
@@ -1196,7 +881,6 @@ function createProductCard(
         >
           f
         </button>
-
 
         <button
           type="button"
@@ -1209,113 +893,87 @@ function createProductCard(
       </div>
 
     </div>
-
   `;
 
-
-  /* =======================================================
+  /* -----------------------------------------
      GALERI
-  ======================================================= */
+  ----------------------------------------- */
 
   setupProductGallery(
-    card
+    card,
+    images
   );
 
-
-  /* =======================================================
+  /* -----------------------------------------
      KERANJANG
-  ======================================================= */
+  ----------------------------------------- */
 
   const buyButton =
     card.querySelector(
       ".buy-button"
     );
 
-
   buyButton?.addEventListener(
     "click",
     () => {
 
-      addToCart(
-        product
-      );
-
+      addToCart(product);
     }
   );
 
-
-  /* =======================================================
+  /* -----------------------------------------
      WHATSAPP
-  ======================================================= */
+  ----------------------------------------- */
 
   const shareWA =
     card.querySelector(
       ".share-wa"
     );
 
-
   shareWA?.addEventListener(
     "click",
     () => {
 
       const link =
-        getProductLink(
-          product
-        );
-
+        getProductLink(product);
 
       const harga =
-        getProductPrice(
-          product
-        );
-
+        getProductPrice(product);
 
       const message =
-        `Halo Duta LED, saya tertarik dengan produk:\n\n` +
         `${product.nama}\n` +
         `${formatRupiah(harga)}\n` +
         `${link}`;
 
-
-      openWhatsApp(
-        message
-      );
-
+      openWhatsApp(message);
     }
   );
 
-
-  /* =======================================================
-     FACEBOOK / WEB SHARE
-  ======================================================= */
+  /* -----------------------------------------
+     FACEBOOK
+  ----------------------------------------- */
 
   const shareFB =
     card.querySelector(
       ".share-fb"
     );
 
-
   shareFB?.addEventListener(
     "click",
     async () => {
 
       const link =
-        getProductLink(
-          product
-        );
-
+        getProductLink(product);
 
       const harga =
-        getProductPrice(
-          product
-        );
-
+        getProductPrice(product);
 
       const text =
         `${product.nama}\n` +
         `${formatRupiah(harga)}\n` +
         `${link}`;
 
+      /* Browser / Android Web Share */
 
       if (
         navigator.share
@@ -1336,9 +994,7 @@ function createProductCard(
 
           });
 
-        } catch (
-          error
-        ) {
+        } catch (error) {
 
           if (
             error.name !==
@@ -1346,18 +1002,16 @@ function createProductCard(
           ) {
 
             console.warn(
-              "Share gagal:",
+              "Share error:",
               error
             );
-
           }
-
         }
 
         return;
-
       }
 
+      /* Fallback */
 
       try {
 
@@ -1365,82 +1019,36 @@ function createProductCard(
           text
         );
 
-
         alert(
-          "Nama, harga, dan link produk sudah disalin."
+          "Nama, harga dan link produk sudah disalin."
         );
 
       } catch {
 
-        alert(
-          text
-        );
-
+        alert(text);
       }
-
     }
   );
 
-
-  /* =======================================================
+  /* -----------------------------------------
      COPY LINK
-  ======================================================= */
+  ----------------------------------------- */
 
   const shareCopy =
     card.querySelector(
       ".share-copy"
     );
 
-
   shareCopy?.addEventListener(
     "click",
     async () => {
 
       const link =
-        getProductLink(
-          product
-        );
+        getProductLink(product);
 
+      await copyText(link);
 
-      try {
-
-        await navigator.clipboard.writeText(
-          link
-        );
-
-      } catch {
-
-        const textarea =
-          document.createElement(
-            "textarea"
-          );
-
-
-        textarea.value =
-          link;
-
-
-        document.body.appendChild(
-          textarea
-        );
-
-
-        textarea.select();
-
-
-        document.execCommand(
-          "copy"
-        );
-
-
-        textarea.remove();
-
-      }
-
-
-      shareCopy.textContent =
-        "✓";
-
+      shareCopy.textContent = "✓";
 
       setTimeout(
         () => {
@@ -1451,13 +1059,10 @@ function createProductCard(
         },
         1500
       );
-
     }
   );
 
-
   return card;
-
 }
 
 
@@ -1466,7 +1071,8 @@ function createProductCard(
 ========================================================= */
 
 function setupProductGallery(
-  card
+  card,
+  images
 ) {
 
   const gallery =
@@ -1474,209 +1080,73 @@ function setupProductGallery(
       ".product-gallery"
     );
 
-
-  if (
-    !gallery
-  ) {
-
+  if (!gallery) {
     return;
-
   }
-
 
   const track =
     gallery.querySelector(
       ".gallery-track"
     );
 
-
   const slides =
     gallery.querySelectorAll(
       ".gallery-slide"
     );
-
 
   const dots =
     gallery.querySelectorAll(
       ".gallery-dot"
     );
 
-
-  if (
-    !track ||
-    !slides.length
-  ) {
-
+  if (!track || !slides.length) {
     return;
-
   }
 
+  let current = 0;
 
-  let current =
-    0;
+  let startX = 0;
+  let endX = 0;
 
+  /* -----------------------------------------
+     Tampilkan gambar
+  ----------------------------------------- */
 
-  let startX =
-    0;
+  function showImage(index) {
 
-
-  let startY =
-    0;
-
-
-  /* =======================================================
-     SHOW IMAGE
-  ======================================================= */
-
-  function showImage(
-    index
-  ) {
-
-    if (
-      index < 0
-    ) {
+    if (index < 0) {
 
       index =
         slides.length - 1;
-
     }
-
 
     if (
       index >=
       slides.length
     ) {
 
-      index =
-        0;
-
+      index = 0;
     }
 
-
-    current =
-      index;
-
+    current = index;
 
     track.style.transform =
-      `translateX(-${
-        current * 100
-      }%)`;
-
+      `translateX(-${current * 100}%)`;
 
     dots.forEach(
-      (
-        dot,
-        i
-      ) => {
+      (dot, i) => {
 
         dot.classList.toggle(
           "active",
           i === current
         );
-
       }
     );
-
   }
 
-
-  /* =======================================================
-     KLIK GAMBAR
-  ======================================================= */
-
-  slides.forEach(
-    (
-      slide,
-      index
-    ) => {
-
-      const img =
-        slide.querySelector(
-          "img"
-        );
-
-
-      if (
-        !img
-      ) {
-
-        return;
-
-      }
-
-
-      img.addEventListener(
-        "click",
-        event => {
-
-          event.stopPropagation();
-
-
-          const imageList =
-            Array.from(
-              slides
-            )
-            .map(
-              slide => {
-
-                const image =
-                  slide.querySelector(
-                    "img"
-                  );
-
-                return image
-                  ? image.src
-                  : "";
-
-              }
-            )
-            .filter(
-              Boolean
-            );
-
-
-          openImageZoom(
-            imageList,
-            index
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-  /* =======================================================
-     DOT
-  ======================================================= */
-
-  dots.forEach(
-    (
-      dot,
-      index
-    ) => {
-
-      dot.addEventListener(
-        "click",
-        event => {
-
-          event.stopPropagation();
-
-          showImage(
-            index
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-  /* =======================================================
-     TOUCH START
-  ======================================================= */
+  /* -----------------------------------------
+     SWIPE TOUCH
+  ----------------------------------------- */
 
   gallery.addEventListener(
     "touchstart",
@@ -1685,31 +1155,16 @@ function setupProductGallery(
       if (
         !event.touches.length
       ) {
-
         return;
-
       }
 
-
       startX =
-        event.touches[0]
-          .clientX;
-
-
-      startY =
-        event.touches[0]
-          .clientY;
-
+        event.touches[0].clientX;
     },
     {
       passive: true
     }
   );
-
-
-  /* =======================================================
-     TOUCH END
-  ======================================================= */
 
   gallery.addEventListener(
     "touchend",
@@ -1718,65 +1173,23 @@ function setupProductGallery(
       if (
         !event.changedTouches.length
       ) {
-
         return;
-
       }
 
+      endX =
+        event.changedTouches[0].clientX;
 
-      const endX =
-        event.changedTouches[0]
-          .clientX;
-
-
-      const endY =
-        event.changedTouches[0]
-          .clientY;
-
-
-      const differenceX =
-        endX -
-        startX;
-
-
-      const differenceY =
-        endY -
-        startY;
-
-
-      /* Jangan dianggap swipe
-         kalau gerak vertikal */
+      const difference =
+        endX - startX;
 
       if (
-        Math.abs(
-          differenceY
-        ) >
-        Math.abs(
-          differenceX
-        )
+        Math.abs(difference) < 40
       ) {
 
         return;
-
       }
 
-
-      /* Swipe minimal 40px */
-
-      if (
-        Math.abs(
-          differenceX
-        ) < 40
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        differenceX < 0
-      ) {
+      if (difference < 0) {
 
         showImage(
           current + 1
@@ -1787,20 +1200,69 @@ function setupProductGallery(
         showImage(
           current - 1
         );
-
       }
-
     },
     {
       passive: true
     }
   );
 
+  /* -----------------------------------------
+     KLIK DOT
+  ----------------------------------------- */
+
+  dots.forEach(
+    (dot, index) => {
+
+      dot.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+          showImage(index);
+        }
+      );
+    }
+  );
+
+  /* -----------------------------------------
+     KLIK FOTO
+     buka zoom
+  ----------------------------------------- */
+
+  slides.forEach(
+    (slide, index) => {
+
+      const img =
+        slide.querySelector("img");
+
+      if (!img) {
+        return;
+      }
+
+      img.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+          openImageZoom(
+            images,
+            index
+          );
+        }
+      );
+    }
+  );
 }
 
 
 /* =========================================================
    ZOOM FOTO
+   Klik foto -> zoom
+   Klik lagi -> normal
+   Klik luar -> tutup
 ========================================================= */
 
 function openImageZoom(
@@ -1808,70 +1270,117 @@ function openImageZoom(
   startIndex = 0
 ) {
 
-  if (
-    !images ||
-    !images.length
-  ) {
-
+  if (!images.length) {
     return;
-
   }
 
-
   let current =
-    startIndex;
-
-
-  const overlay =
-    document.createElement(
-      "div"
+    Math.max(
+      0,
+      Math.min(
+        startIndex,
+        images.length - 1
+      )
     );
 
+  const overlay =
+    document.createElement("div");
 
   overlay.className =
     "image-zoom-overlay";
 
-
   overlay.innerHTML = `
+    <div class="zoom-viewer">
 
-    <img
-      class="zoom-image"
-      src="${escapeHTML(
-        images[current]
-      )}"
-      draggable="false"
-    >
+      <img
+        class="zoom-image"
+        src="${escapeHTML(images[current])}"
+        draggable="false"
+        alt=""
+      >
 
+      ${
+        images.length > 1
+          ? `
+            <button
+              type="button"
+              class="zoom-prev"
+              aria-label="Sebelumnya"
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              class="zoom-next"
+              aria-label="Berikutnya"
+            >
+              ›
+            </button>
+
+            <div class="zoom-counter">
+              ${current + 1}/${images.length}
+            </div>
+          `
+          : ""
+      }
+
+    </div>
   `;
-
 
   document.body.appendChild(
     overlay
   );
-
 
   const image =
     overlay.querySelector(
       ".zoom-image"
     );
 
+  const viewer =
+    overlay.querySelector(
+      ".zoom-viewer"
+    );
 
-  if (
-    !image
-  ) {
+  const prev =
+    overlay.querySelector(
+      ".zoom-prev"
+    );
 
-    overlay.remove();
+  const next =
+    overlay.querySelector(
+      ".zoom-next"
+    );
 
-    return;
+  const counter =
+    overlay.querySelector(
+      ".zoom-counter"
+    );
 
+  /* -----------------------------------------
+     Update gambar
+  ----------------------------------------- */
+
+  function updateZoomImage() {
+
+    image.src =
+      images[current];
+
+    image.classList.remove(
+      "zoomed"
+    );
+
+    if (counter) {
+
+      counter.textContent =
+        `${current + 1}/${images.length}`;
+    }
   }
 
-
-  /* =======================================================
-     KLIK:
-     NORMAL → ZOOM
-     ZOOM → NORMAL
-  ======================================================= */
+  /* -----------------------------------------
+     KLIK FOTO
+     zoom / kembali
+  ----------------------------------------- */
 
   image.addEventListener(
     "click",
@@ -1879,122 +1388,61 @@ function openImageZoom(
 
       event.stopPropagation();
 
-
       image.classList.toggle(
         "zoomed"
       );
-
     }
   );
 
+  /* -----------------------------------------
+     PREV
+  ----------------------------------------- */
 
-  /* =======================================================
-     SWIPE ZOOM
-  ======================================================= */
-
-  let startX =
-    0;
-
-
-  overlay.addEventListener(
-    "touchstart",
+  prev?.addEventListener(
+    "click",
     event => {
 
-      if (
-        !event.touches.length
-      ) {
+      event.stopPropagation();
 
-        return;
+      current--;
 
+      if (current < 0) {
+
+        current =
+          images.length - 1;
       }
 
-
-      startX =
-        event.touches[0]
-          .clientX;
-
-    },
-    {
-      passive: true
+      updateZoomImage();
     }
   );
 
+  /* -----------------------------------------
+     NEXT
+  ----------------------------------------- */
 
-  overlay.addEventListener(
-    "touchend",
+  next?.addEventListener(
+    "click",
     event => {
 
-      if (
-        !event.changedTouches.length
-      ) {
+      event.stopPropagation();
 
-        return;
-
-      }
-
-
-      const endX =
-        event.changedTouches[0]
-          .clientX;
-
-
-      const difference =
-        endX -
-        startX;
-
+      current++;
 
       if (
-        Math.abs(
-          difference
-        ) < 50
+        current >=
+        images.length
       ) {
 
-        return;
-
+        current = 0;
       }
 
-
-      if (
-        difference < 0
-      ) {
-
-        current =
-          (
-            current + 1
-          ) %
-          images.length;
-
-      } else {
-
-        current =
-          (
-            current -
-            1 +
-            images.length
-          ) %
-          images.length;
-
-      }
-
-
-      image.classList.remove(
-        "zoomed"
-      );
-
-
-      image.src =
-        images[current];
-
-    },
-    {
-      passive: true
+      updateZoomImage();
     }
   );
 
-
-  /* =======================================================
-     KLIK AREA LUAR
-  ======================================================= */
+  /* -----------------------------------------
+     Klik luar foto = tutup
+  ----------------------------------------- */
 
   overlay.addEventListener(
     "click",
@@ -2002,24 +1450,21 @@ function openImageZoom(
 
       if (
         event.target ===
-        overlay
+        overlay ||
+        event.target ===
+        viewer
       ) {
 
         overlay.remove();
-
       }
-
     }
   );
 
+  /* -----------------------------------------
+     ESC = tutup
+  ----------------------------------------- */
 
-  /* =======================================================
-     ESC
-  ======================================================= */
-
-  function closeByEscape(
-    event
-  ) {
+  function escHandler(event) {
 
     if (
       event.key ===
@@ -2030,19 +1475,15 @@ function openImageZoom(
 
       document.removeEventListener(
         "keydown",
-        closeByEscape
+        escHandler
       );
-
     }
-
   }
-
 
   document.addEventListener(
     "keydown",
-    closeByEscape
+    escHandler
   );
-
 }
 
 
@@ -2050,35 +1491,26 @@ function openImageZoom(
    LINK PRODUK UNIK
 ========================================================= */
 
-function getProductLink(
-  product
-) {
+function getProductLink(product) {
 
   const url =
     new URL(
       window.location.href
     );
 
-
-  /* Hapus semua parameter lama */
+  /* Hapus semua parameter */
 
   url.search = "";
 
+  /* ID produk */
 
-  /* ID PRODUK */
-
-  if (
-    product &&
-    product.id
-  ) {
+  if (product.id) {
 
     url.searchParams.set(
       "id",
-      product.id
+      String(product.id)
     );
-
   }
-
 
   /* Promo */
 
@@ -2088,174 +1520,107 @@ function getProductLink(
 
     url.searchParams.set(
       "promo",
-      specialPromoCode
+      String(specialDiscount)
     );
-
   }
 
-
-  url.hash =
-    "";
-
+  url.hash = "";
 
   return url.toString();
-
 }
 
 
 /* =========================================================
-   PRODUK DARI URL
+   TAMPILKAN PRODUK DARI LINK
 ========================================================= */
 
-function openProductFromURL() {
+function showSelectedProduct() {
 
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-
-  const productID =
-    (
-      params.get("id") ||
-      ""
-    ).trim();
-
-
-  if (
-    !productID ||
-    !products.length
-  ) {
-
+  if (!selectedProductId) {
     return;
-
   }
-
 
   const product =
     products.find(
       item =>
-        String(
-          item.id
-        ) ===
-        String(
-          productID
-        )
+        String(item.id) ===
+        String(selectedProductId)
     );
 
-
-  if (
-    !product
-  ) {
-
-    showStatus(
-      "Produk tidak ditemukan"
-    );
-
+  if (!product) {
     return;
-
   }
 
+  /* Pastikan produk dirender */
 
-  /* Reset filter */
+  renderProducts();
 
-  currentCategory =
-    "Semua";
+  /* Scroll */
 
-  searchText =
-    "";
+  setTimeout(
+    () => {
 
+      const card =
+        productGrid?.querySelector(
+          ".product-card"
+        );
 
-  if (
-    searchInput
-  ) {
+      if (card) {
 
-    searchInput.value =
-      "";
+        card.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
 
-  }
-
-
-  renderCategories();
-
-
-  /* Hanya tampilkan produk yang dipilih */
-
-  if (
-    productGrid
-  ) {
-
-    productGrid.innerHTML =
-      "";
-
-
-    productGrid.appendChild(
-      createProductCard(
-        product
-      )
-    );
-
-  }
-
-
-  empty?.classList.add(
-    "hidden"
+    },
+    150
   );
-
 
   showStatus(
     "Produk: " +
     product.nama
   );
-
-
-  /* Scroll ke produk */
-
-  setTimeout(
-    () => {
-
-      productGrid
-        ?.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-
-    },
-    100
-  );
-
 }
 
 
 /* =========================================================
-   KERANJANG SETUP
+   KERANJANG BUTTON
 ========================================================= */
 
 function setupCartButton() {
 
-  cartButton?.addEventListener(
-    "click",
-    openCart
-  );
+  if (cartButton) {
 
+    cartButton.addEventListener(
+      "click",
+      openCart
+    );
+  }
 
-  cartClose?.addEventListener(
-    "click",
-    closeCart
-  );
+  if (cartClose) {
 
+    cartClose.addEventListener(
+      "click",
+      closeCart
+    );
+  }
 
-  cartOverlay?.addEventListener(
-    "click",
-    closeCart
-  );
+  if (cartOverlay) {
 
+    cartOverlay.addEventListener(
+      "click",
+      closeCart
+    );
+  }
 
-  checkoutButton?.addEventListener(
-    "click",
-    checkoutWhatsApp
-  );
+  if (checkoutButton) {
 
+    checkoutButton.addEventListener(
+      "click",
+      checkoutWhatsApp
+    );
+  }
 }
 
 
@@ -2265,20 +1630,15 @@ function setupCartButton() {
 
 function openCart() {
 
-  cartPanel?.classList.add(
-    "show"
-  );
-
+  cartPanel?.classList.add("show");
 
   cartOverlay?.classList.remove(
     "hidden"
   );
 
-
   document.body.classList.add(
     "cart-open"
   );
-
 }
 
 
@@ -2292,16 +1652,13 @@ function closeCart() {
     "show"
   );
 
-
   cartOverlay?.classList.add(
     "hidden"
   );
 
-
   document.body.classList.remove(
     "cart-open"
   );
-
 }
 
 
@@ -2309,25 +1666,16 @@ function closeCart() {
    TAMBAH KERANJANG
 ========================================================= */
 
-function addToCart(
-  product
-) {
+function addToCart(product) {
 
   const existing =
     cart.find(
       item =>
-        String(
-          item.id
-        ) ===
-        String(
-          product.id
-        )
+        String(item.id) ===
+        String(product.id)
     );
 
-
-  if (
-    existing
-  ) {
+  if (existing) {
 
     existing.qty += 1;
 
@@ -2356,13 +1704,9 @@ function addToCart(
           product.diskon
         ) || 0,
 
-      qty:
-        1
-
+      qty: 1
     });
-
   }
-
 
   saveCart();
 
@@ -2373,7 +1717,6 @@ function addToCart(
   showCartMessage(
     product.nama
   );
-
 }
 
 
@@ -2381,121 +1724,77 @@ function addToCart(
    TAMBAH JUMLAH
 ========================================================= */
 
-function increaseCart(
-  id
-) {
+function increaseCart(id) {
 
   const item =
     cart.find(
       item =>
-        String(
-          item.id
-        ) ===
-        String(
-          id
-        )
+        String(item.id) ===
+        String(id)
     );
 
-
-  if (
-    !item
-  ) {
-
+  if (!item) {
     return;
-
   }
-
 
   item.qty += 1;
 
   saveCart();
-
   renderCart();
-
 }
 
 
 /* =========================================================
-   KURANG JUMLAH
+   KURANG
 ========================================================= */
 
-function decreaseCart(
-  id
-) {
+function decreaseCart(id) {
 
   const item =
     cart.find(
       item =>
-        String(
-          item.id
-        ) ===
-        String(
-          id
-        )
+        String(item.id) ===
+        String(id)
     );
 
-
-  if (
-    !item
-  ) {
-
+  if (!item) {
     return;
-
   }
-
 
   item.qty -= 1;
 
-
-  if (
-    item.qty <= 0
-  ) {
+  if (item.qty <= 0) {
 
     cart =
       cart.filter(
         item =>
-          String(
-            item.id
-          ) !==
-          String(
-            id
-          )
+          String(item.id) !==
+          String(id)
       );
-
   }
-
 
   saveCart();
 
   renderCart();
-
 }
 
 
 /* =========================================================
-   HAPUS KERANJANG
+   HAPUS
 ========================================================= */
 
-function removeCart(
-  id
-) {
+function removeCart(id) {
 
   cart =
     cart.filter(
       item =>
-        String(
-          item.id
-        ) !==
-        String(
-          id
-        )
+        String(item.id) !==
+        String(id)
     );
-
 
   saveCart();
 
   renderCart();
-
 }
 
 
@@ -2503,17 +1802,12 @@ function removeCart(
    HARGA KERANJANG
 ========================================================= */
 
-function getCartPrice(
-  item
-) {
+function getCartPrice(item) {
 
   const hargaJual =
-    Number(
-      item.harga
-    ) || 0;
+    Number(item.harga) || 0;
 
-
-  /* Promo khusus */
+  /* Promo URL */
 
   if (
     specialDiscount > 0
@@ -2527,254 +1821,172 @@ function getCartPrice(
         100
       )
     );
-
   }
 
-
-  /* Diskon normal */
+  /* Diskon Sheet */
 
   if (
     item.hargaDiskon > 0 &&
-    item.hargaDiskon <
-    hargaJual
+    item.hargaDiskon < hargaJual
   ) {
 
     return item.hargaDiskon;
-
   }
 
-
   return hargaJual;
-
 }
 
 
 /* =========================================================
-   RENDER KERANJANG
+   RENDER CART
 ========================================================= */
 
 function renderCart() {
 
-  if (
-    !cartBox
-  ) {
-
-    updateCartTotal();
-
+  if (!cartBox) {
     return;
-
   }
 
-
-  if (
-    !cart.length
-  ) {
+  if (!cart.length) {
 
     cartBox.innerHTML = `
-
       <div class="cart-empty">
         🛒 Keranjang masih kosong
       </div>
-
     `;
-
 
     updateCartTotal();
 
     return;
-
   }
-
 
   cartBox.innerHTML =
     cart
-      .map(
-        item => {
+      .map(item => {
 
-          const harga =
-            getCartPrice(
-              item
-            );
+        const harga =
+          getCartPrice(item);
 
+        const subtotal =
+          harga *
+          item.qty;
 
-          const subtotal =
-            harga *
-            item.qty;
+        return `
+          <div class="cart-item">
 
+            <div class="cart-item-info">
 
-          return `
+              <strong>
+                ${escapeHTML(item.nama)}
+              </strong>
 
-            <div
-              class="cart-item"
-            >
-
-              <div
-                class="cart-item-info"
-              >
-
-                <strong>
-                  ${escapeHTML(
-                    item.nama
-                  )}
-                </strong>
-
-                <span>
-                  ${formatRupiah(
-                    harga
-                  )}
-                </span>
-
-              </div>
-
-
-              <div
-                class="cart-controls"
-              >
-
-                <button
-                  type="button"
-                  class="qty-button"
-                  data-action="minus"
-                  data-id="${escapeHTML(
-                    item.id
-                  )}"
-                >
-                  −
-                </button>
-
-
-                <strong>
-                  ${item.qty}
-                </strong>
-
-
-                <button
-                  type="button"
-                  class="qty-button"
-                  data-action="plus"
-                  data-id="${escapeHTML(
-                    item.id
-                  )}"
-                >
-                  +
-                </button>
-
-
-                <button
-                  type="button"
-                  class="cart-remove"
-                  data-action="remove"
-                  data-id="${escapeHTML(
-                    item.id
-                  )}"
-                >
-                  ×
-                </button>
-
-              </div>
-
-
-              <div
-                class="cart-subtotal"
-              >
-                ${formatRupiah(
-                  subtotal
-                )}
-              </div>
+              <span>
+                ${formatRupiah(harga)}
+              </span>
 
             </div>
 
-          `;
+            <div class="cart-controls">
 
-        }
-      )
+              <button
+                type="button"
+                class="qty-button"
+                data-action="minus"
+                data-id="${escapeHTML(item.id)}"
+              >
+                −
+              </button>
+
+              <strong>
+                ${item.qty}
+              </strong>
+
+              <button
+                type="button"
+                class="qty-button"
+                data-action="plus"
+                data-id="${escapeHTML(item.id)}"
+              >
+                +
+              </button>
+
+              <button
+                type="button"
+                class="cart-remove"
+                data-action="remove"
+                data-id="${escapeHTML(item.id)}"
+              >
+                ×
+              </button>
+
+            </div>
+
+            <div class="cart-subtotal">
+              ${formatRupiah(subtotal)}
+            </div>
+
+          </div>
+        `;
+      })
       .join("");
-
 
   cartBox
     .querySelectorAll(
       "[data-action]"
     )
-    .forEach(
-      button => {
+    .forEach(button => {
 
-        button.addEventListener(
-          "click",
-          () => {
+      button.addEventListener(
+        "click",
+        () => {
 
-            const id =
-              button.dataset.id;
+          const id =
+            button.dataset.id;
 
+          const action =
+            button.dataset.action;
 
-            const action =
-              button.dataset.action;
+          if (
+            action === "plus"
+          ) {
 
-
-            if (
-              action ===
-              "plus"
-            ) {
-
-              increaseCart(
-                id
-              );
-
-            }
-
-
-            if (
-              action ===
-              "minus"
-            ) {
-
-              decreaseCart(
-                id
-              );
-
-            }
-
-
-            if (
-              action ===
-              "remove"
-            ) {
-
-              removeCart(
-                id
-              );
-
-            }
-
+            increaseCart(id);
           }
-        );
 
-      }
-    );
+          if (
+            action === "minus"
+          ) {
 
+            decreaseCart(id);
+          }
+
+          if (
+            action === "remove"
+          ) {
+
+            removeCart(id);
+          }
+        }
+      );
+    });
 
   updateCartTotal();
-
 }
 
 
 /* =========================================================
-   TOTAL KERANJANG
+   TOTAL
 ========================================================= */
 
 function getCartTotal() {
 
   return cart.reduce(
-    (
-      total,
-      item
-    ) => {
+    (total, item) => {
 
       return (
         total +
         (
-          getCartPrice(
-            item
-          ) *
+          getCartPrice(item) *
           item.qty
         )
       );
@@ -2782,21 +1994,17 @@ function getCartTotal() {
     },
     0
   );
-
 }
 
 
 /* =========================================================
-   JUMLAH KERANJANG
+   JUMLAH CART
 ========================================================= */
 
 function getCartCount() {
 
   return cart.reduce(
-    (
-      total,
-      item
-    ) => {
+    (total, item) => {
 
       return (
         total +
@@ -2806,7 +2014,6 @@ function getCartCount() {
     },
     0
   );
-
 }
 
 
@@ -2819,32 +2026,20 @@ function updateCartTotal() {
   const total =
     getCartTotal();
 
-
   const count =
     getCartCount();
 
-
-  if (
-    cartCount
-  ) {
+  if (cartCount) {
 
     cartCount.textContent =
       count;
-
   }
 
-
-  if (
-    cartTotal
-  ) {
+  if (cartTotal) {
 
     cartTotal.textContent =
-      formatRupiah(
-        total
-      );
-
+      formatRupiah(total);
   }
-
 }
 
 
@@ -2854,60 +2049,40 @@ function updateCartTotal() {
 
 function checkoutWhatsApp() {
 
-  if (
-    !cart.length
-  ) {
+  if (!cart.length) {
 
     alert(
       "Keranjang masih kosong."
     );
 
     return;
-
   }
-
 
   let message =
     "Halo Duta LED, saya ingin pesan:\n\n";
 
-
   cart.forEach(
-    (
-      item,
-      index
-    ) => {
+    (item, index) => {
 
       const harga =
-        getCartPrice(
-          item
-        );
-
+        getCartPrice(item);
 
       const subtotal =
         harga *
         item.qty;
 
-
       message +=
         `${index + 1}. ${item.nama}\n`;
 
-
       message +=
-        `   ${item.qty} x ${formatRupiah(
-          harga
-        )} = ${formatRupiah(
-          subtotal
-        )}\n\n`;
-
+        `   ${item.qty} x ${formatRupiah(harga)} = ${formatRupiah(subtotal)}\n\n`;
     }
   );
-
 
   message +=
     `TOTAL: ${formatRupiah(
       getCartTotal()
     )}`;
-
 
   if (
     specialDiscount > 0
@@ -2915,19 +2090,14 @@ function checkoutWhatsApp() {
 
     message +=
       `\n\nDiskon khusus: ${specialDiscount}%`;
-
   }
 
-
-  openWhatsApp(
-    message
-  );
-
+  openWhatsApp(message);
 }
 
 
 /* =========================================================
-   SIMPAN KERANJANG
+   SAVE CART
 ========================================================= */
 
 function saveCart() {
@@ -2936,27 +2106,21 @@ function saveCart() {
 
     localStorage.setItem(
       CART_KEY,
-      JSON.stringify(
-        cart
-      )
+      JSON.stringify(cart)
     );
 
-  } catch (
-    error
-  ) {
+  } catch (error) {
 
     console.warn(
       "Keranjang gagal disimpan:",
       error
     );
-
   }
-
 }
 
 
 /* =========================================================
-   LOAD KERANJANG
+   LOAD CART
 ========================================================= */
 
 function loadCart() {
@@ -2968,44 +2132,30 @@ function loadCart() {
         CART_KEY
       );
 
+    if (!data) {
 
-    if (
-      !data
-    ) {
-
-      cart =
-        [];
+      cart = [];
 
       return;
-
     }
 
-
     const parsed =
-      JSON.parse(
-        data
-      );
-
+      JSON.parse(data);
 
     cart =
-      Array.isArray(
-        parsed
-      )
+      Array.isArray(parsed)
         ? parsed
         : [];
 
   } catch {
 
-    cart =
-      [];
-
+    cart = [];
   }
-
 }
 
 
 /* =========================================================
-   PESAN KERANJANG
+   CART MESSAGE
 ========================================================= */
 
 function showCartMessage(
@@ -3017,36 +2167,26 @@ function showCartMessage(
       ".cart-toast"
     );
 
-
-  if (
-    old
-  ) {
-
+  if (old) {
     old.remove();
-
   }
-
 
   const toast =
     document.createElement(
       "div"
     );
 
-
   toast.className =
     "cart-toast";
-
 
   toast.textContent =
     "✓ " +
     productName +
     " masuk keranjang";
 
-
   document.body.appendChild(
     toast
   );
-
 
   setTimeout(
     () => {
@@ -3056,45 +2196,72 @@ function showCartMessage(
     },
     1800
   );
-
 }
 
 
 /* =========================================================
-   WHATSAPP LINK
+   WHATSAPP
 ========================================================= */
 
-function whatsappLink(
-  message
-) {
+function whatsappLink(message) {
 
   return (
     "https://wa.me/" +
     WHATSAPP +
     "?text=" +
-    encodeURIComponent(
-      message
-    )
+    encodeURIComponent(message)
   );
+}
 
+
+function openWhatsApp(message) {
+
+  window.open(
+    whatsappLink(message),
+    "_blank"
+  );
 }
 
 
 /* =========================================================
-   BUKA WHATSAPP
+   COPY TEXT
 ========================================================= */
 
-function openWhatsApp(
-  message
-) {
+async function copyText(text) {
 
-  window.open(
-    whatsappLink(
-      message
-    ),
-    "_blank"
-  );
+  try {
 
+    await navigator.clipboard.writeText(
+      text
+    );
+
+  } catch {
+
+    const textarea =
+      document.createElement(
+        "textarea"
+      );
+
+    textarea.value = text;
+
+    textarea.style.position =
+      "fixed";
+
+    textarea.style.opacity =
+      "0";
+
+    document.body.appendChild(
+      textarea
+    );
+
+    textarea.focus();
+
+    textarea.select();
+
+    document.execCommand("copy");
+
+    textarea.remove();
+  }
 }
 
 
@@ -3107,126 +2274,89 @@ function setupLinks() {
   const generalMessage =
     "Halo Duta LED, saya ingin bertanya tentang produk.";
 
-
   const generalWA =
     whatsappLink(
       generalMessage
     );
-
 
   const heroWA =
     document.getElementById(
       "heroWA"
     );
 
-
   const contactWA =
     document.getElementById(
       "contactWA"
     );
-
 
   const floatingWA =
     document.getElementById(
       "floatingWA"
     );
 
-
   const menuGrosir =
     document.getElementById(
       "menuGrosir"
     );
-
 
   const facebook =
     document.getElementById(
       "facebook"
     );
 
-
   const tiktok =
     document.getElementById(
       "tiktok"
     );
-
 
   const location =
     document.getElementById(
       "location"
     );
 
-
-  if (
-    heroWA
-  ) {
+  if (heroWA) {
 
     heroWA.href =
       generalWA;
-
   }
 
-
-  if (
-    contactWA
-  ) {
+  if (contactWA) {
 
     contactWA.href =
       generalWA;
-
   }
 
-
-  if (
-    floatingWA
-  ) {
+  if (floatingWA) {
 
     floatingWA.href =
       generalWA;
-
   }
 
-
-  if (
-    menuGrosir
-  ) {
+  if (menuGrosir) {
 
     menuGrosir.href =
       whatsappLink(
         "Halo Duta LED, saya ingin bertanya harga grosir."
       );
-
   }
 
-
-  if (
-    facebook
-  ) {
+  if (facebook) {
 
     facebook.href =
       FACEBOOK_URL;
-
   }
 
-
-  if (
-    tiktok
-  ) {
+  if (tiktok) {
 
     tiktok.href =
       TIKTOK_URL;
-
   }
 
-
-  if (
-    location
-  ) {
+  if (location) {
 
     location.href =
       LOCATION_URL;
-
   }
-
 }
 
 
@@ -3241,15 +2371,9 @@ function setupPromoButton() {
       "menuPromo"
     );
 
-
-  if (
-    !button
-  ) {
-
+  if (!button) {
     return;
-
   }
-
 
   button.addEventListener(
     "click",
@@ -3257,60 +2381,40 @@ function setupPromoButton() {
 
       event.preventDefault();
 
+      /* Hapus mode produk tunggal */
 
-      searchText =
-        "";
+      selectedProductId = "";
 
+      searchText = "";
 
-      if (
-        searchInput
-      ) {
+      if (searchInput) {
 
-        searchInput.value =
-          "";
-
+        searchInput.value = "";
       }
 
-
-      currentCategory =
-        "Semua";
-
+      currentCategory = "Semua";
 
       renderCategories();
-
 
       const promoProducts =
         products.filter(
           product => {
 
             return (
-              product.hargaDiskon >
-                0 &&
-
-              product.hargaJual >
-                0 &&
-
+              product.hargaDiskon > 0 &&
+              product.hargaJual > 0 &&
               product.hargaDiskon <
                 product.hargaJual
             );
-
           }
         );
 
+      if (productGrid) {
 
-      if (
-        productGrid
-      ) {
-
-        productGrid.innerHTML =
-          "";
-
+        productGrid.innerHTML = "";
       }
 
-
-      if (
-        !promoProducts.length
-      ) {
+      if (!promoProducts.length) {
 
         empty?.classList.remove(
           "hidden"
@@ -3322,7 +2426,6 @@ function setupPromoButton() {
           "hidden"
         );
 
-
         promoProducts.forEach(
           product => {
 
@@ -3331,25 +2434,17 @@ function setupPromoButton() {
                 product
               )
             );
-
           }
         );
-
       }
 
-
       document
-        .getElementById(
-          "produk"
-        )
+        .getElementById("produk")
         ?.scrollIntoView({
-          behavior:
-            "smooth"
+          behavior: "smooth"
         });
-
     }
   );
-
 }
 
 
@@ -3357,26 +2452,18 @@ function setupPromoButton() {
    FORMAT RUPIAH
 ========================================================= */
 
-function formatRupiah(
-  value
-) {
+function formatRupiah(value) {
 
   return new Intl.NumberFormat(
     "id-ID",
     {
-      style:
-        "currency",
-
-      currency:
-        "IDR",
-
-      maximumFractionDigits:
-        0
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0
     }
   ).format(
-    value || 0
+    Number(value) || 0
   );
-
 }
 
 
@@ -3384,36 +2471,24 @@ function formatRupiah(
    CACHE
 ========================================================= */
 
-function saveCache(
-  data
-) {
+function saveCache(data) {
 
   try {
 
     localStorage.setItem(
       CACHE_KEY,
-      JSON.stringify(
-        data
-      )
+      JSON.stringify(data)
     );
 
-  } catch (
-    error
-  ) {
+  } catch (error) {
 
     console.warn(
       "Cache gagal:",
       error
     );
-
   }
-
 }
 
-
-/* =========================================================
-   LOAD CACHE
-========================================================= */
 
 function loadCache() {
 
@@ -3424,34 +2499,21 @@ function loadCache() {
         CACHE_KEY
       );
 
-
-    if (
-      !data
-    ) {
-
+    if (!data) {
       return [];
-
     }
 
-
     const parsed =
-      JSON.parse(
-        data
-      );
+      JSON.parse(data);
 
-
-    return Array.isArray(
-      parsed
-    )
+    return Array.isArray(parsed)
       ? parsed
       : [];
 
   } catch {
 
     return [];
-
   }
-
 }
 
 
@@ -3459,24 +2521,16 @@ function loadCache() {
    LOADING
 ========================================================= */
 
-function showLoading(
-  show
-) {
+function showLoading(show) {
 
-  if (
-    !loading
-  ) {
-
+  if (!loading) {
     return;
-
   }
-
 
   loading.style.display =
     show
       ? "block"
       : "none";
-
 }
 
 
@@ -3484,19 +2538,13 @@ function showLoading(
    STATUS
 ========================================================= */
 
-function showStatus(
-  text
-) {
+function showStatus(text) {
 
-  if (
-    status
-  ) {
+  if (status) {
 
     status.textContent =
       text;
-
   }
-
 }
 
 
@@ -3504,34 +2552,16 @@ function showStatus(
    ESCAPE HTML
 ========================================================= */
 
-function escapeHTML(
-  value
-) {
+function escapeHTML(value) {
 
   return String(
     value ?? ""
   )
-  .replace(
-    /&/g,
-    "&amp;"
-  )
-  .replace(
-    /</g,
-    "&lt;"
-  )
-  .replace(
-    />/g,
-    "&gt;"
-  )
-  .replace(
-    /"/g,
-    "&quot;"
-  )
-  .replace(
-    /'/g,
-    "&#039;"
-  );
-
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 
@@ -3555,33 +2585,22 @@ function shakeCart() {
       "[data-cart]"
     );
 
-
   const count =
     document.getElementById(
       "cartCount"
     );
 
-
-  /* -------------------------------------------------------
-     Tombol keranjang
-  ------------------------------------------------------- */
-
-  if (
-    button
-  ) {
+  if (button) {
 
     button.classList.remove(
       "cart-shake"
     );
 
-
     void button.offsetWidth;
-
 
     button.classList.add(
       "cart-shake"
     );
-
 
     setTimeout(
       () => {
@@ -3593,30 +2612,19 @@ function shakeCart() {
       },
       600
     );
-
   }
 
-
-  /* -------------------------------------------------------
-     Angka jumlah
-  ------------------------------------------------------- */
-
-  if (
-    count
-  ) {
+  if (count) {
 
     count.classList.remove(
       "cart-count-pop"
     );
 
-
     void count.offsetWidth;
-
 
     count.classList.add(
       "cart-count-pop"
     );
-
 
     setTimeout(
       () => {
@@ -3628,13 +2636,5 @@ function shakeCart() {
       },
       250
     );
-
   }
-
 }
-
-
-/* =========================================================
-   SELESAI
-========================================================= */
-```
