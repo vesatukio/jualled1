@@ -3069,3 +3069,22 @@ window.addEventListener(
 
   }
 );
+const SHOPEE_URL = "ISI_LINK_SHOPEE";
+const TIKTOK_URL = "ISI_LINK_TIKTOK";
+const LAZADA_URL = "ISI_LINK_LAZADA";
+
+const shopee = document.getElementById("shopee");
+const tiktok = document.getElementById("tiktok");
+const lazada = document.getElementById("lazada");
+
+if (shopee) {
+  shopee.href = SHOPEE_URL;
+}
+
+if (tiktok) {
+  tiktok.href = TIKTOK_URL;
+}
+
+if (lazada) {
+  lazada.href = LAZADA_URL;
+}
