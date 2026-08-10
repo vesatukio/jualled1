@@ -91,10 +91,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
 
-  /* -----------------------------------------
-     Ambil elemen HTML
-     ----------------------------------------- */
-
+  // Ambil elemen HTML
   productGrid = document.getElementById("productGrid");
   categoryBar = document.getElementById("categoryBar");
   searchInput = document.getElementById("searchInput");
@@ -111,43 +108,25 @@ async function init() {
   cartTotal = document.getElementById("cartTotal");
   checkoutButton = document.getElementById("checkoutButton");
 
-
-  /* -----------------------------------------
-     Baca URL
-     ----------------------------------------- */
-
+  // URL
   loadSpecialPromo();
   loadSelectedProduct();
 
-
-  /* -----------------------------------------
-     Setup
-     ----------------------------------------- */
-
+  // Setup
   setupLinks();
   setupSearch();
   setupPromoButton();
   setupCartButton();
 
-
-  /* -----------------------------------------
-     Keranjang
-     ----------------------------------------- */
-
+  // Cart
   loadCart();
   renderCart();
 
-
-  /* -----------------------------------------
-     Loading
-     ----------------------------------------- */
-
-  showLoading(true);
-
-
-  /* =====================================================
-     LOAD CACHE TERLEBIH DAHULU
-     ===================================================== */
+  /*
+   * =====================================================
+   * 1. TAMPILKAN CACHE SECEPAT MUNGKIN
+   * =====================================================
+   */
 
   const cached = loadCache();
 
@@ -157,16 +136,25 @@ async function init() {
 
     renderCategories();
     renderProducts();
-
-    showStatus("Katalog tersimpan");
-
     showSelectedProduct();
+
+    showStatus("Katalog siap");
+
+    // HILANGKAN loading segera
+    showLoading(false);
+
+  } else {
+
+    // Kalau belum ada cache
+    showLoading(true);
+    showStatus("Memuat produk...");
   }
 
-
-  /* =====================================================
-     LOAD API
-     ===================================================== */
+  /*
+   * =====================================================
+   * 2. AMBIL DATA GOOGLE SHEET DI BACKGROUND
+   * =====================================================
+   */
 
   try {
 
@@ -181,17 +169,13 @@ async function init() {
       renderCategories();
       renderProducts();
 
-      showStatus("Katalog terbaru");
-
       showSelectedProduct();
 
-    } else {
+      showStatus("Katalog terbaru");
 
-      if (!products.length) {
+    } else if (!products.length) {
 
-        showStatus("Produk belum tersedia");
-
-      }
+      showStatus("Produk belum tersedia");
 
     }
 
@@ -206,16 +190,20 @@ async function init() {
 
       showStatus("Mode offline");
 
+    } else {
+
+      showStatus("Menggunakan katalog tersimpan");
+
     }
+
+  } finally {
+
+    showLoading(false);
 
   }
 
-
-  showLoading(false);
-
   renderCart();
 }
-
 
 /* =========================================================
    URL PRODUK
@@ -279,55 +267,59 @@ function loadSpecialPromo() {
 
 async function loadFromGoogle() {
 
-  const response =
-    await fetch(
-      API_URL +
-      "?t=" +
-      Date.now(),
+  const controller =
+    new AbortController();
+
+  const timeout =
+    setTimeout(() => {
+      controller.abort();
+    }, 5000);
+
+  try {
+
+    const response = await fetch(
+      API_URL,
       {
         method: "GET",
-        cache: "no-store"
+        cache: "default",
+        signal: controller.signal
       }
     );
 
+    if (!response.ok) {
 
-  if (!response.ok) {
+      throw new Error(
+        "HTTP " + response.status
+      );
 
-    throw new Error(
-      "HTTP " +
-      response.status
-    );
+    }
+
+    const data =
+      await response.json();
+
+    const rows =
+      Array.isArray(data)
+        ? data
+        : data.data;
+
+    if (!Array.isArray(rows)) {
+
+      throw new Error(
+        "Format data API tidak valid"
+      );
+
+    }
+
+    return rows
+      .map(normalizeProduct)
+      .filter(product => product.nama);
+
+  } finally {
+
+    clearTimeout(timeout);
 
   }
-
-
-  const data =
-    await response.json();
-
-
-  const rows =
-    Array.isArray(data)
-      ? data
-      : data.data;
-
-
-  if (!Array.isArray(rows)) {
-
-    throw new Error(
-      "Format data API tidak valid"
-    );
-
-  }
-
-
-  return rows
-    .map(normalizeProduct)
-    .filter(
-      product =>
-        product.nama
-    );
 }
-
 
 /* =========================================================
    NORMALISASI PRODUK
@@ -3087,4 +3079,166 @@ if (tiktok) {
 
 if (lazada) {
   lazada.href = LAZADA_URL;
+}
+/* =========================================================
+CACHE PRODUK - FAST LOAD
+========================================================= */
+
+const CACHE_TIME =
+  1000 * 60 * 30; // 30 menit
+
+
+function saveCache(data) {
+
+  try {
+
+    const cacheData = {
+
+      time: Date.now(),
+
+      data: data
+
+    };
+
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify(cacheData)
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Cache gagal:",
+      error
+    );
+
+  }
+
+}
+
+
+function loadCache() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        CACHE_KEY
+      );
+
+    if (!raw) {
+
+      return [];
+
+    }
+
+    const parsed =
+      JSON.parse(raw);
+
+
+    /*
+     * CACHE FORMAT BARU
+     */
+
+    if (
+      parsed &&
+      Array.isArray(parsed.data)
+    ) {
+
+      return parsed.data;
+
+    }
+
+
+    /*
+     * KOMPATIBEL DENGAN
+     * CACHE VERSI LAMA
+     */
+
+    if (
+      Array.isArray(parsed)
+    ) {
+
+      return parsed;
+
+    }
+
+
+    return [];
+
+  } catch (error) {
+
+    console.warn(
+      "Cache tidak valid:",
+      error
+    );
+
+    return [];
+
+  }
+
+}
+
+
+/*
+ * CEK UMUR CACHE
+ *
+ * true  = cache masih baru
+ * false = cache sudah lama
+ */
+
+function isCacheFresh() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        CACHE_KEY
+      );
+
+    if (!raw) {
+
+      return false;
+
+    }
+
+    const parsed =
+      JSON.parse(raw);
+
+    /*
+     * Cache lama
+     */
+
+    if (
+      Array.isArray(parsed)
+    ) {
+
+      return false;
+
+    }
+
+    /*
+     * Cache baru
+     */
+
+    if (
+      !parsed ||
+      !parsed.time
+    ) {
+
+      return false;
+
+    }
+
+    return (
+      Date.now() -
+      Number(parsed.time)
+    ) < CACHE_TIME;
+
+  } catch {
+
+    return false;
+
+  }
+
 }
