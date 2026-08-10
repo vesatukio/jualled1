@@ -1359,12 +1359,10 @@ function closeCart() {
 
 
 /* =====================================================
-   TAMBAH KERANJANG
+TAMBAH KERANJANG
 ===================================================== */
 
-function addToCart(
-  product
-) {
+function addToCart(product) {
 
   const existing =
     cart.find(
@@ -1372,7 +1370,6 @@ function addToCart(
         String(item.id) ===
         String(product.id)
     );
-
 
   if (existing) {
 
@@ -1410,26 +1407,32 @@ function addToCart(
 
   }
 
-
   saveCart();
 
-renderCart();
+  renderCart();
 
-/* Efek keranjang */
-shakeCart();
+  /* ==========================================
+     EFEK GOYANG KERANJANG
+  ========================================== */
 
-showCartMessage(
-  product.nama
-);
+  shakeCart();
+
+  /* ==========================================
+     PESAN
+  ========================================== */
+
+  showCartMessage(
+    product.nama
+  );
+
+}
 
 
 /* =====================================================
-   TAMBAH JUMLAH
+TAMBAH JUMLAH
 ===================================================== */
 
-function increaseCart(
-  id
-) {
+function increaseCart(id) {
 
   const item =
     cart.find(
@@ -1438,13 +1441,10 @@ function increaseCart(
         String(id)
     );
 
-
   if (!item)
     return;
 
-
   item.qty += 1;
-
 
   saveCart();
 
@@ -1454,12 +1454,10 @@ function increaseCart(
 
 
 /* =====================================================
-   KURANGI JUMLAH
+KURANGI JUMLAH
 ===================================================== */
 
-function decreaseCart(
-  id
-) {
+function decreaseCart(id) {
 
   const item =
     cart.find(
@@ -1468,13 +1466,10 @@ function decreaseCart(
         String(id)
     );
 
-
   if (!item)
     return;
 
-
   item.qty -= 1;
-
 
   if (
     item.qty <= 0
@@ -1489,7 +1484,6 @@ function decreaseCart(
 
   }
 
-
   saveCart();
 
   renderCart();
@@ -1498,12 +1492,10 @@ function decreaseCart(
 
 
 /* =====================================================
-   HAPUS
+HAPUS
 ===================================================== */
 
-function removeCart(
-  id
-) {
+function removeCart(id) {
 
   cart =
     cart.filter(
@@ -1512,7 +1504,6 @@ function removeCart(
         String(id)
     );
 
-
   saveCart();
 
   renderCart();
@@ -1521,12 +1512,10 @@ function removeCart(
 
 
 /* =====================================================
-   HARGA KERANJANG
+HARGA KERANJANG
 ===================================================== */
 
-function getCartPrice(
-  item
-) {
+function getCartPrice(item) {
 
   const hargaJual =
     Number(
@@ -1534,7 +1523,9 @@ function getCartPrice(
     ) || 0;
 
 
-  /* PROMO KHUSUS */
+  /* ==========================================
+     PROMO KHUSUS DARI URL
+  ========================================== */
 
   if (
     specialDiscount > 0
@@ -1552,7 +1543,9 @@ function getCartPrice(
   }
 
 
-  /* DISKON SHEET */
+  /* ==========================================
+     DISKON NORMAL GOOGLE SHEET
+  ========================================== */
 
   if (
     item.hargaDiskon > 0 &&
@@ -1568,7 +1561,6 @@ function getCartPrice(
   return hargaJual;
 
 }
-
 
 /* =====================================================
    RENDER KERANJANG
