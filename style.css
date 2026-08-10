@@ -1288,21 +1288,21 @@ img {
 .image-zoom-overlay {
   position: fixed;
   inset: 0;
-
   z-index: 99999;
-
-  background: rgba(0, 0, 0, 0.92);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  overflow: hidden;
+  background: rgba(0, 0, 0, 0.85);
+
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .zoom-image {
-  max-width: 92vw;
-  max-height: 88vh;
+  max-width: 90vw;
+  max-height: 85vh;
 
   width: auto;
   height: auto;
@@ -1311,10 +1311,11 @@ img {
 
   cursor: zoom-in;
 
+  transition: transform 0.25s ease;
+  transform: scale(1);
+
   user-select: none;
   -webkit-user-drag: none;
-
-  transition: transform 0.2s ease;
 }
 
 .zoom-image.zoomed {
