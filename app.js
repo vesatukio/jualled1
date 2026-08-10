@@ -851,7 +851,7 @@ function createProductCard(
     product.gambar1 ||
     product.gambar2 ||
     product.gambar3 ||
-    "https://via.placeholder.com/500?text=Duta+LED";
+    "image/no-image.png";
 
 
   const hargaJual =
@@ -977,7 +977,7 @@ function createProductCard(
         alt="${escapeHTML(product.nama)}"
         loading="lazy"
         onerror="
-          this.src='https://via.placeholder.com/500?text=Duta+LED'
+          this.src='this.onerror=null;this.src='image/no-image.png'
         "
       >
 
