@@ -1,9 +1,13 @@
-const CACHE_NAME = "dutaled-v1";
+const CACHE_NAME =
+  "dutaled-static-v1";
 
-const FILES = [
+
+const STATIC_FILES = [
   "./",
   "./index.html",
   "./style.css",
+  "./app.js",
+  "./manifest.json",
   "./sw.js"
 ];
 
@@ -14,10 +18,15 @@ self.addEventListener(
 
     event.waitUntil(
 
-      caches.open(CACHE_NAME)
-        .then(cache =>
-          cache.addAll(FILES)
-        )
+      caches.open(
+        CACHE_NAME
+      )
+      .then(
+        cache =>
+          cache.addAll(
+            STATIC_FILES
+          )
+      )
 
     );
 
@@ -34,20 +43,23 @@ self.addEventListener(
     event.waitUntil(
 
       caches.keys()
-        .then(keys =>
-          Promise.all(
+        .then(
+          keys =>
+            Promise.all(
 
-            keys
-              .filter(
-                key =>
-                  key !== CACHE_NAME
-              )
-              .map(
-                key =>
-                  caches.delete(key)
-              )
+              keys
+                .filter(
+                  key =>
+                    key !== CACHE_NAME
+                )
+                .map(
+                  key =>
+                    caches.delete(
+                      key
+                    )
+                )
 
-          )
+            )
         )
 
     );
@@ -62,18 +74,11 @@ self.addEventListener(
   "fetch",
   event => {
 
-    /*
-      Untuk halaman dan file website:
-      cache dulu, lalu gunakan internet
-      bila tersedia.
-    */
-
-    if(
-      event.request.method !== "GET"
-    ){
-
+    if (
+      event.request.method !==
+      "GET"
+    ) {
       return;
-
     }
 
 
@@ -84,18 +89,17 @@ self.addEventListener(
 
 
     /*
-      API Google Apps Script
-      jangan dimasukkan ke cache Service Worker.
+     * Jangan cache API Apps Script.
+     *
+     * Data produk disimpan
+     * oleh localStorage.
+     */
 
-      Data produk sudah ditangani
-      oleh localStorage di index.html.
-    */
-
-    if(
+    if (
       url.hostname.includes(
         "script.google.com"
       )
-    ){
+    ) {
 
       return;
 
@@ -110,47 +114,47 @@ self.addEventListener(
       .then(
         cached => {
 
-          if(cached){
-
+          if (cached) {
             return cached;
-
           }
 
 
           return fetch(
             event.request
           )
-          .then(response => {
+          .then(
+            response => {
 
-            if(
-              !response ||
-              response.status !== 200
-            ){
+              if (
+                !response ||
+                response.status !== 200
+              ) {
+
+                return response;
+
+              }
+
+
+              const copy =
+                response.clone();
+
+
+              caches.open(
+                CACHE_NAME
+              )
+              .then(
+                cache =>
+                  cache.put(
+                    event.request,
+                    copy
+                  )
+              );
+
 
               return response;
 
             }
-
-
-            const clone =
-              response.clone();
-
-
-            caches.open(
-              CACHE_NAME
-            )
-            .then(
-              cache =>
-                cache.put(
-                  event.request,
-                  clone
-                )
-            );
-
-
-            return response;
-
-          });
+          );
 
         }
       )
