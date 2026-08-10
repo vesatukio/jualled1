@@ -1,16 +1,17 @@
-const CACHE_NAME =
-  "dutaled-static-v4";
+const CACHE_NAME = "dutaled-v2";
 
-
-const FILES = [
+const APP_FILES = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
-  "./manifest.json",
-  "./sw.js"
+  "./manifest.json"
 ];
 
+
+/* =========================================
+   INSTALL
+========================================= */
 
 self.addEventListener(
   "install",
@@ -18,14 +19,15 @@ self.addEventListener(
 
     event.waitUntil(
 
-      caches.open(
-        CACHE_NAME
-      ).then(
-        cache =>
-          cache.addAll(
-            FILES
-          )
-      )
+      caches
+        .open(CACHE_NAME)
+        .then(cache => {
+
+          return cache.addAll(
+            APP_FILES
+          );
+
+        })
 
     );
 
@@ -35,15 +37,21 @@ self.addEventListener(
 );
 
 
+/* =========================================
+   ACTIVATE
+========================================= */
+
 self.addEventListener(
   "activate",
   event => {
 
     event.waitUntil(
 
-      caches.keys().then(
-        keys =>
-          Promise.all(
+      caches.keys()
+        .then(keys => {
+
+          return Promise.all(
+
             keys
               .filter(
                 key =>
@@ -53,8 +61,10 @@ self.addEventListener(
                 key =>
                   caches.delete(key)
               )
-          )
-      )
+
+          );
+
+        })
 
     );
 
@@ -64,88 +74,132 @@ self.addEventListener(
 );
 
 
+/* =========================================
+   FETCH
+========================================= */
+
 self.addEventListener(
   "fetch",
   event => {
 
-    if (
-      event.request.method !==
-      "GET"
-    ) {
-      return;
-    }
-
-
-    const url =
-      new URL(
-        event.request.url
-      );
+    const request =
+      event.request;
 
 
     /*
-     * Apps Script jangan dicache
-     * oleh Service Worker.
-     *
-     * Produk sudah dicache
-     * oleh app.js.
-     */
+      Jangan cache request
+      Google Apps Script.
+    */
 
     if (
-      url.hostname.includes(
+      request.url.includes(
         "script.google.com"
       )
     ) {
+
       return;
+
     }
 
 
+    /*
+      Navigasi halaman:
+      coba internet dulu,
+      kalau gagal gunakan cache.
+    */
+
+    if (
+      request.mode ===
+      "navigate"
+    ) {
+
+      event.respondWith(
+
+        fetch(request)
+          .then(response => {
+
+            const copy =
+              response.clone();
+
+            caches
+              .open(CACHE_NAME)
+              .then(cache => {
+
+                cache.put(
+                  request,
+                  copy
+                );
+
+              });
+
+            return response;
+
+          })
+          .catch(() => {
+
+            return caches.match(
+              "./index.html"
+            );
+
+          })
+
+      );
+
+      return;
+
+    }
+
+
+    /*
+      CSS / JS / gambar:
+      cache dulu,
+      kemudian update dari internet.
+    */
+
     event.respondWith(
 
-      caches.match(
-        event.request
-      ).then(
-        cached => {
+      caches.match(request)
+        .then(cached => {
 
-          if (cached) {
-            return cached;
-          }
+          const network =
+            fetch(request)
+              .then(response => {
 
+                if (
+                  response &&
+                  response.ok
+                ) {
 
-          return fetch(
-            event.request
-          ).then(
-            response => {
+                  const copy =
+                    response.clone();
 
-              if (
-                !response ||
-                response.status !== 200
-              ) {
+                  caches
+                    .open(
+                      CACHE_NAME
+                    )
+                    .then(cache => {
+
+                      cache.put(
+                        request,
+                        copy
+                      );
+
+                    });
+
+                }
+
                 return response;
-              }
 
-
-              const copy =
-                response.clone();
-
-
-              caches.open(
-                CACHE_NAME
-              ).then(
-                cache =>
-                  cache.put(
-                    event.request,
-                    copy
-                  )
+              })
+              .catch(
+                () => cached
               );
 
 
-              return response;
+          return cached ||
+            network;
 
-            }
-          );
-
-        }
-      )
+        })
 
     );
 
