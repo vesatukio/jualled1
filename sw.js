@@ -1,8 +1,8 @@
 const CACHE_NAME =
-  "dutaled-static-v1";
+  "dutaled-static-v4";
 
 
-const STATIC_FILES = [
+const FILES = [
   "./",
   "./index.html",
   "./style.css",
@@ -20,11 +20,10 @@ self.addEventListener(
 
       caches.open(
         CACHE_NAME
-      )
-      .then(
+      ).then(
         cache =>
           cache.addAll(
-            STATIC_FILES
+            FILES
           )
       )
 
@@ -42,25 +41,20 @@ self.addEventListener(
 
     event.waitUntil(
 
-      caches.keys()
-        .then(
-          keys =>
-            Promise.all(
-
-              keys
-                .filter(
-                  key =>
-                    key !== CACHE_NAME
-                )
-                .map(
-                  key =>
-                    caches.delete(
-                      key
-                    )
-                )
-
-            )
-        )
+      caches.keys().then(
+        keys =>
+          Promise.all(
+            keys
+              .filter(
+                key =>
+                  key !== CACHE_NAME
+              )
+              .map(
+                key =>
+                  caches.delete(key)
+              )
+          )
+      )
 
     );
 
@@ -89,10 +83,11 @@ self.addEventListener(
 
 
     /*
-     * Jangan cache API Apps Script.
+     * Apps Script jangan dicache
+     * oleh Service Worker.
      *
-     * Data produk disimpan
-     * oleh localStorage.
+     * Produk sudah dicache
+     * oleh app.js.
      */
 
     if (
@@ -100,9 +95,7 @@ self.addEventListener(
         "script.google.com"
       )
     ) {
-
       return;
-
     }
 
 
@@ -110,8 +103,7 @@ self.addEventListener(
 
       caches.match(
         event.request
-      )
-      .then(
+      ).then(
         cached => {
 
           if (cached) {
@@ -121,17 +113,14 @@ self.addEventListener(
 
           return fetch(
             event.request
-          )
-          .then(
+          ).then(
             response => {
 
               if (
                 !response ||
                 response.status !== 200
               ) {
-
                 return response;
-
               }
 
 
@@ -141,8 +130,7 @@ self.addEventListener(
 
               caches.open(
                 CACHE_NAME
-              )
-              .then(
+              ).then(
                 cache =>
                   cache.put(
                     event.request,
