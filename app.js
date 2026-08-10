@@ -1265,98 +1265,56 @@ function setupProductGallery(
    Klik luar -> tutup
 ========================================================= */
 
-function openImageZoom(
-  images,
-  startIndex = 0
-) {
+function openImageZoom(images, startIndex = 0) {
 
-  if (!images.length) {
-    return;
-  }
+  let current = startIndex;
 
-  let current =
-    Math.max(
-      0,
-      Math.min(
-        startIndex,
-        images.length - 1
-      )
-    );
-
-  const overlay =
-    document.createElement("div");
-
-  overlay.className =
-    "image-zoom-overlay";
+  const overlay = document.createElement("div");
+  overlay.className = "image-zoom-overlay";
 
   overlay.innerHTML = `
-    <div class="zoom-viewer">
-
-      <img
-        class="zoom-image"
-        src="${escapeHTML(images[current])}"
-        draggable="false"
-        alt=""
-      >
-
-      ${
-        images.length > 1
-          ? `
-            <button
-              type="button"
-              class="zoom-prev"
-              aria-label="Sebelumnya"
-            >
-              ‹
-            </button>
-
-            <button
-              type="button"
-              class="zoom-next"
-              aria-label="Berikutnya"
-            >
-              ›
-            </button>
-
-            <div class="zoom-counter">
-              ${current + 1}/${images.length}
-            </div>
-          `
-          : ""
-      }
-
-    </div>
+    <img
+      class="zoom-image"
+      src="${escapeHTML(images[current])}"
+      draggable="false"
+      alt="Zoom produk"
+    >
   `;
 
-  document.body.appendChild(
-    overlay
-  );
+  document.body.appendChild(overlay);
 
-  const image =
-    overlay.querySelector(
-      ".zoom-image"
-    );
+  const image = overlay.querySelector(".zoom-image");
 
-  const viewer =
-    overlay.querySelector(
-      ".zoom-viewer"
-    );
+  /* Posisi awal */
+  image.classList.remove("zoomed");
 
-  const prev =
-    overlay.querySelector(
-      ".zoom-prev"
-    );
+  /* ==========================================
+     KLIK GAMBAR
+     1x = ZOOM
+     2x = KEMBALI NORMAL
+  ========================================== */
 
-  const next =
-    overlay.querySelector(
-      ".zoom-next"
-    );
+  image.addEventListener("click", function (event) {
 
-  const counter =
-    overlay.querySelector(
-      ".zoom-counter"
-    );
+    event.stopPropagation();
 
+    image.classList.toggle("zoomed");
+
+  });
+
+  /* ==========================================
+     KLIK DI LUAR GAMBAR = TUTUP
+  ========================================== */
+
+  overlay.addEventListener("click", function (event) {
+
+    if (event.target === overlay) {
+      overlay.remove();
+    }
+
+  });
+
+}
   /* -----------------------------------------
      Update gambar
   ----------------------------------------- */
