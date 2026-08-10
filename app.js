@@ -875,53 +875,61 @@ function getProductLink(product) {
    BELI PRODUK
 ===================================================== */
 
-function buyProduct(
-  product
-) {
+function buyProduct(product) {
+
+  const harga =
+    product.hargaJual || 0;
+
+  if (!harga) {
+    openWhatsApp(
+      `Halo Duta LED, saya ingin pesan ${product.nama}.`
+    );
+    return;
+  }
+
+  let input = prompt(
+    `Diskon khusus untuk ${product.nama}\n\n` +
+    `Harga normal: ${formatRupiah(harga)}\n\n` +
+    `Masukkan diskon (%):`,
+    "0"
+  );
+
+  if (input === null) {
+    return;
+  }
+
+  input = input.replace(",", ".");
+
+  let diskon =
+    parseFloat(input);
+
+  if (isNaN(diskon)) {
+    alert("Diskon harus berupa angka.");
+    return;
+  }
+
+  if (diskon < 0) {
+    diskon = 0;
+  }
+
+  if (diskon > 100) {
+    diskon = 100;
+  }
+
+  const hargaSetelahDiskon =
+    Math.round(
+      harga - (harga * diskon / 100)
+    );
 
   const message =
-    `Halo Duta LED, saya ingin pesan ${product.nama}.`;
+    `Halo Duta LED, saya ingin pesan:\n\n` +
+    `Produk: ${product.nama}\n` +
+    `Harga normal: ${formatRupiah(harga)}\n` +
+    `Diskon khusus: ${diskon}%\n` +
+    `Harga setelah diskon: ${formatRupiah(hargaSetelahDiskon)}`;
 
-
-  openWhatsApp(
-    message
-  );
-
+  openWhatsApp(message);
 }
-
-
-/* =====================================================
-   WHATSAPP
-===================================================== */
-
-function whatsappLink(
-  message
-) {
-
-  return (
-    "https://wa.me/" +
-    WHATSAPP +
-    "?text=" +
-    encodeURIComponent(
-      message
-    )
-  );
-
-}
-
-
-function openWhatsApp(
-  message
-) {
-
-  window.open(
-    whatsappLink(message),
-    "_blank",
-    "noopener"
-  );
-
-}
-
 
 /* =====================================================
    LINK MENU
