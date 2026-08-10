@@ -1,62 +1,64 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
 
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
 
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1"
->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
 
-<title>Duta LED | Listrik & Elektronik</title>
+  <title>Duta LED | Listrik & Elektronik</title>
 
-<meta
-  name="description"
-  content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp."
->
+  <meta
+    name="description"
+    content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp."
+  >
 
-<meta
-  name="theme-color"
-  content="#ff7200"
->
+  <meta
+    name="theme-color"
+    content="#ff7200"
+  >
 
-<meta
-  property="og:title"
-  content="Duta LED | Listrik & Elektronik"
->
+  <meta
+    property="og:title"
+    content="Duta LED | Listrik & Elektronik"
+  >
 
-<meta
-  property="og:description"
-  content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp."
->
+  <meta
+    property="og:description"
+    content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp."
+  >
 
-<meta
-  property="og:type"
-  content="website"
->
+  <meta
+    property="og:type"
+    content="website"
+  >
 
-<meta
-  property="og:image"
-  content="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200"
->
+  <meta
+    property="og:image"
+    content="promo1.jpg"
+  >
 
-<link
-  rel="manifest"
-  href="manifest.json"
->
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
 
-<link
-  rel="stylesheet"
-  href="style.css"
->
+  <link
+    rel="manifest"
+    href="manifest.json"
+  >
 
 </head>
 
 
 <body>
 
+<!-- =========================
+     HEADER
+========================= -->
 
 <header class="header">
 
@@ -71,9 +73,16 @@
         D
       </div>
 
-      <div>
-        <strong>Duta LED</strong>
-        <small>Listrik & Elektronik</small>
+      <div class="brand-info">
+
+        <strong>
+          Duta LED
+        </strong>
+
+        <small>
+          Listrik & Elektronik
+        </small>
+
       </div>
 
     </a>
@@ -90,196 +99,183 @@
 
 </header>
 
-/* ================================
-   HERO 3 KOLOM
-================================ */
 
-.hero {
-  background: #fff;
-  padding: 8px 0 10px;
-}
+<!-- =========================
+     HERO
+========================= -->
 
-.hero-3col {
-  display: grid;
-  grid-template-columns:
-    1.25fr
-    .85fr
-    .85fr;
-  gap: 7px;
-  height: 145px;
-}
-
-
-/* TEKS KIRI */
-
-.hero-text {
-  min-width: 0;
-  padding: 12px 10px;
-  border-radius: 9px;
-  background: #fff4e9;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.hero-text .eyebrow {
-  font-size: 8px;
-  margin-bottom: 3px;
-}
-
-.hero-text h1 {
-  font-size: 19px;
-  line-height: 1.05;
-  margin: 0;
-}
-
-.hero-text p {
-  margin-top: 6px;
-  color: #777;
-  font-size: 8px;
-  line-height: 1.35;
-}
-
-.hero-wa {
-  width: fit-content;
-  margin-top: 7px;
-  padding: 5px 8px;
-  border-radius: 5px;
-  background: #16a34a;
-  color: white;
-  font-size: 8px;
-  font-weight: 700;
-}
-
-
-/* GAMBAR IKLAN */
-
-.hero-ad {
-  display: block;
-  overflow: hidden;
-  min-width: 0;
-  border-radius: 9px;
-  background: #f1f1f1;
-}
-
-.hero-ad img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-
-
-/* HP SANGAT KECIL */
-
-@media (max-width: 380px) {
-
-  .hero-3col {
-    height: 125px;
-    gap: 5px;
-  }
-
-  .hero-text {
-    padding: 8px;
-  }
-
-  .hero-text h1 {
-    font-size: 16px;
-  }
-
-  .hero-text p {
-    font-size: 7px;
-  }
-
-  .hero-wa {
-    font-size: 7px;
-    padding: 4px 6px;
-  }
-
-}
-
-
-/* TABLET */
-
-@media (min-width: 600px) {
-
-  .hero {
-    padding: 12px 0 15px;
-  }
-
-  .hero-3col {
-    height: 180px;
-    gap: 10px;
-  }
-
-  .hero-text h1 {
-    font-size: 27px;
-  }
-
-  .hero-text p {
-    font-size: 11px;
-  }
-
-  .hero-wa {
-    font-size: 10px;
-    padding: 7px 11px;
-  }
-
-}
-
-
-/* PC */
-
-@media (min-width: 1000px) {
-
-  .hero-3col {
-    height: 210px;
-    grid-template-columns:
-      1.3fr
-      .85fr
-      .85fr;
-  }
-
-  .hero-text {
-    padding: 20px;
-  }
-
-  .hero-text h1 {
-    font-size: 34px;
-  }
-
-  .hero-text p {
-    font-size: 12px;
-    max-width: 300px;
-  }
-
-}
-
-
-
-
-<main id="produk">
-
-<section class="catalog">
+<section class="hero">
 
   <div class="container">
 
-    <div class="section-title">
+    <div class="hero-3col">
 
-      <div>
+
+      <!-- TEKS -->
+
+      <div class="hero-text">
 
         <span class="eyebrow">
-          KATALOG
+          TOKO LISTRIK & ELEKTRONIK
         </span>
 
-        <h2>
-          Produk Pilihan
-        </h2>
+        <h1>
+          Listrik &<br>
+          Elektronik
+        </h1>
+
+        <p>
+          Lampu LED, modul LED dan
+          sparepart dengan harga bersaing.
+        </p>
+
+        <a
+          id="heroWA"
+          href="#"
+          class="hero-wa"
+        >
+          💬 Chat WhatsApp
+        </a>
 
       </div>
 
+
+      <!-- GAMBAR 1 -->
+
+      <a
+        href="#produk"
+        class="hero-ad"
+      >
+
+        <img
+          src="promo1.jpg"
+          alt="Promo Duta LED"
+        >
+
+      </a>
+
+
+      <!-- GAMBAR 2 -->
+
+      <a
+        href="#produk"
+        class="hero-ad"
+      >
+
+        <img
+          src="promo2.jpg"
+          alt="Produk Duta LED"
+        >
+
+      </a>
+
     </div>
 
+  </div>
+
+</section>
+
+
+<!-- =========================
+     MENU CEPAT
+========================= -->
+
+<section class="quick-menu">
+
+  <div class="container">
+
+    <div class="quick-menu-grid">
+
+
+      <a
+        href="#produk"
+        class="quick-menu-item"
+      >
+
+        <span>🛍️</span>
+
+        <strong>
+          Katalog
+        </strong>
+
+        <small>
+          Lihat semua produk
+        </small>
+
+      </a>
+
+
+      <a
+        href="#produk"
+        id="menuPromo"
+        class="quick-menu-item"
+      >
+
+        <span>🔥</span>
+
+        <strong>
+          Promo
+        </strong>
+
+        <small>
+          Produk diskon
+        </small>
+
+      </a>
+
+
+      <a
+        id="menuGrosir"
+        href="#"
+        class="quick-menu-item"
+      >
+
+        <span>📦</span>
+
+        <strong>
+          Grosir
+        </strong>
+
+        <small>
+          Harga lebih hemat
+        </small>
+
+      </a>
+
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================
+     PRODUK
+========================= -->
+
+<section
+  id="produk"
+  class="products"
+>
+
+  <div class="container">
+
+
+    <div class="section-title">
+
+      <span class="eyebrow">
+        KATALOG
+      </span>
+
+      <h2>
+        Produk Pilihan
+      </h2>
+
+    </div>
+
+
+    <!-- STATUS -->
 
     <div
       id="status"
@@ -293,7 +289,9 @@
 
     <div class="search">
 
-      <span>🔍</span>
+      <span>
+        🔍
+      </span>
 
       <input
         id="searchInput"
@@ -341,7 +339,9 @@
       class="empty hidden"
     >
 
-      <div>🔎</div>
+      <div>
+        🔎
+      </div>
 
       <strong>
         Produk tidak ditemukan
@@ -353,100 +353,20 @@
 
     </div>
 
-  </div>
-
-</section>
-
-
-
-<!-- PROMO -->
-
-</section>
-<!-- SELESAI PRODUK -->
-
-
-<!-- 3 MENU CEPAT -->
-<section class="quick-menu">
-
-  <div class="container">
-
-    <div class="quick-menu-grid">
-
-      <a
-        href="#produk"
-        class="quick-menu-item"
-      >
-        <span>🛍️</span>
-        <strong>Katalog</strong>
-        <small>Lihat semua produk</small>
-      </a>
-
-      <a
-        href="#promo"
-        class="quick-menu-item"
-      >
-        <span>🔥</span>
-        <strong>Promo</strong>
-        <small>Harga spesial</small>
-      </a>
-
-      <a
-        id="menuGrosir"
-        href="#"
-        class="quick-menu-item"
-      >
-        <span>📦</span>
-        <strong>Grosir</strong>
-        <small>Harga lebih hemat</small>
-      </a>
-
-    </div>
 
   </div>
 
 </section>
 
 
-<!-- PROMO PRODUK -->
-<section
-  id="promo"
-  class="promo-products"
->
-
-  <div class="container">
-
-    <div class="section-title">
-
-      <span class="eyebrow">
-        PROMO
-      </span>
-
-      <h2>
-        Harga Spesial
-      </h2>
-
-    </div>
-
-    <div
-      id="promoGrid"
-      class="product-grid"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- KEUNGGULAN -->
-<section class="advantages">
-
-
-
-<!-- KEUNGGULAN -->
+<!-- =========================
+     KEUNGGULAN
+========================= -->
 
 <section class="advantages">
 
   <div class="container">
+
 
     <div class="section-title center">
 
@@ -463,29 +383,74 @@
 
     <div class="advantages-grid">
 
-      <div class="advantage">
-        <div>💰</div>
-        <strong>Harga Terjangkau</strong>
-        <span>Harga bersaing</span>
-      </div>
 
       <div class="advantage">
-        <div>📦</div>
-        <strong>Eceran & Grosir</strong>
-        <span>Beli sedikit atau banyak</span>
+
+        <div>
+          💰
+        </div>
+
+        <strong>
+          Harga Terjangkau
+        </strong>
+
+        <span>
+          Harga bersaing
+        </span>
+
       </div>
 
-      <div class="advantage">
-        <div>🔧</div>
-        <strong>Sparepart Lengkap</strong>
-        <span>Berbagai kebutuhan</span>
-      </div>
 
       <div class="advantage">
-        <div>💬</div>
-        <strong>Bisa Konsultasi</strong>
-        <span>Tanya melalui WhatsApp</span>
+
+        <div>
+          📦
+        </div>
+
+        <strong>
+          Eceran & Grosir
+        </strong>
+
+        <span>
+          Beli sedikit atau banyak
+        </span>
+
       </div>
+
+
+      <div class="advantage">
+
+        <div>
+          🔧
+        </div>
+
+        <strong>
+          Sparepart Lengkap
+        </strong>
+
+        <span>
+          Berbagai kebutuhan
+        </span>
+
+      </div>
+
+
+      <div class="advantage">
+
+        <div>
+          💬
+        </div>
+
+        <strong>
+          Bisa Konsultasi
+        </strong>
+
+        <span>
+          Tanya melalui WhatsApp
+        </span>
+
+      </div>
+
 
     </div>
 
@@ -494,24 +459,29 @@
 </section>
 
 
-
-<!-- KONTAK -->
+<!-- =========================
+     KONTAK
+========================= -->
 
 <section class="contact">
 
-  <div class="container">
+  <div class="container contact-box">
+
 
     <span class="eyebrow">
       HUBUNGI KAMI
     </span>
 
+
     <h2>
       Butuh Produk Listrik?
     </h2>
 
+
     <p>
       Tanya stok dan harga melalui WhatsApp.
     </p>
+
 
     <a
       id="contactWA"
@@ -547,45 +517,44 @@
 
     </div>
 
+
   </div>
 
 </section>
 
-</main>
 
+<!-- =========================
+     FOOTER
+========================= -->
 
-
-<footer>
+<footer class="footer">
 
   <strong>
     Duta Terang LED
   </strong>
 
-  <p>
+  <span>
     Clapar, Subah, Batang, Jawa Tengah
-  </p>
-
-  <small>
-    © <span id="year"></span> Duta LED
-  </small>
+  </span>
 
 </footer>
 
 
+<!-- =========================
+     FLOATING WHATSAPP
+========================= -->
 
 <a
   id="floatingWA"
   href="#"
   class="floating-wa"
+  aria-label="WhatsApp"
 >
   💬
 </a>
 
 
-<script
-  src="app.js"
-  defer
-></script>
+<script src="app.js"></script>
 
 </body>
 </html>
