@@ -3,54 +3,54 @@
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1"
+>
 
-  <title>Duta LED | Listrik & Elektronik</title>
+<title>Duta LED | Listrik & Elektronik</title>
 
-  <meta
-    name="description"
-    content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp."
-  >
+<meta
+  name="description"
+  content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp."
+>
 
-  <meta
-    name="theme-color"
-    content="#ff7200"
-  >
+<meta
+  name="theme-color"
+  content="#ff7200"
+>
 
-  <meta
-    property="og:title"
-    content="Duta LED | Listrik & Elektronik"
-  >
+<meta
+  property="og:title"
+  content="Duta LED | Listrik & Elektronik"
+>
 
-  <meta
-    property="og:description"
-    content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp."
-  >
+<meta
+  property="og:description"
+  content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp."
+>
 
-  <meta
-    property="og:type"
-    content="website"
-  >
+<meta
+  property="og:type"
+  content="website"
+>
 
-  <meta
-    property="og:image"
-    content="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200"
-  >
+<meta
+  property="og:image"
+  content="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200"
+>
 
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+<link
+  rel="manifest"
+  href="manifest.json"
+>
 
-  <link
-    rel="manifest"
-    href="manifest.json"
-  >
+<link
+  rel="stylesheet"
+  href="style.css"
+>
 
 </head>
 
@@ -58,9 +58,7 @@
 <body>
 
 
-<!-- HEADER -->
-
-<header class="site-header">
+<header class="header">
 
   <div class="container header-inner">
 
@@ -73,16 +71,9 @@
         D
       </div>
 
-      <div class="brand-text">
-
-        <strong>
-          Duta LED
-        </strong>
-
-        <span>
-          Listrik & Elektronik
-        </span>
-
+      <div>
+        <strong>Duta LED</strong>
+        <small>Listrik & Elektronik</small>
       </div>
 
     </a>
@@ -90,7 +81,7 @@
 
     <a
       href="#produk"
-      class="header-shop"
+      class="header-button"
     >
       Belanja
     </a>
@@ -101,45 +92,41 @@
 
 
 
-<!-- HERO -->
-
 <section class="hero">
 
   <div class="container hero-inner">
 
-    <div class="hero-content">
+    <div>
 
       <span class="eyebrow">
         TOKO LISTRIK & ELEKTRONIK
       </span>
 
       <h1>
-        Listrik dan<br>
-        Elektronik
+        Listrik dan Elektronik
       </h1>
 
       <p>
         Lampu LED, modul LED dan
-        berbagai sparepart dengan
-        harga bersaing.
+        sparepart dengan harga bersaing.
       </p>
 
 
-      <div class="hero-actions">
+      <div class="hero-buttons">
 
         <a
           href="#produk"
-          class="btn btn-primary"
+          class="btn orange"
         >
           🛒 Belanja
         </a>
 
         <a
+          id="heroWA"
           href="#"
-          id="heroWhatsapp"
-          class="btn btn-whatsapp"
+          class="btn green"
         >
-          WhatsApp
+          💬 WhatsApp
         </a>
 
       </div>
@@ -147,20 +134,8 @@
     </div>
 
 
-    <div class="hero-card">
-
-      <div class="hero-card-icon">
-        💡
-      </div>
-
-      <strong>
-        Harga Terjangkau
-      </strong>
-
-      <span>
-        Eceran & Grosir
-      </span>
-
+    <div class="hero-light">
+      💡
     </div>
 
   </div>
@@ -169,19 +144,13 @@
 
 
 
-<!-- PRODUK -->
+<main id="produk">
 
-<main>
-
-<section
-  class="products-section"
-  id="produk"
->
+<section class="catalog">
 
   <div class="container">
 
-
-    <div class="section-heading">
+    <div class="section-title">
 
       <div>
 
@@ -198,11 +167,9 @@
     </div>
 
 
-    <!-- STATUS -->
-
     <div
-      id="connectionStatus"
-      class="connection-status"
+      id="status"
+      class="status"
     >
       Memuat katalog...
     </div>
@@ -210,20 +177,25 @@
 
     <!-- SEARCH -->
 
-    <div class="search-wrap">
+    <div class="search">
 
-      <span>
-        🔍
-      </span>
+      <span>🔍</span>
 
       <input
         id="searchInput"
         type="search"
         placeholder="Cari produk..."
-        autocomplete="off"
       >
 
     </div>
+
+
+    <!-- KATEGORI -->
+
+    <div
+      id="categoryBar"
+      class="category-bar"
+    ></div>
 
 
     <!-- LOADING -->
@@ -233,16 +205,14 @@
       class="loading"
     >
 
-      <div class="loading-spinner"></div>
+      <div class="spinner"></div>
 
-      <span>
-        Memuat produk...
-      </span>
+      Memuat produk...
 
     </div>
 
 
-    <!-- PRODUCTS -->
+    <!-- PRODUK -->
 
     <div
       id="productGrid"
@@ -250,27 +220,24 @@
     ></div>
 
 
-    <!-- EMPTY -->
+    <!-- KOSONG -->
 
     <div
-      id="emptyState"
-      class="empty-state hidden"
+      id="empty"
+      class="empty hidden"
     >
 
-      <div>
-        🔎
-      </div>
+      <div>🔎</div>
 
       <strong>
         Produk tidak ditemukan
       </strong>
 
       <span>
-        Coba gunakan kata pencarian lain.
+        Coba kategori atau pencarian lain.
       </span>
 
     </div>
-
 
   </div>
 
@@ -286,7 +253,7 @@
 
     <div class="promo">
 
-      <div class="promo-copy">
+      <div class="promo-text">
 
         <span>
           PROMO
@@ -298,8 +265,7 @@
         </h2>
 
         <p>
-          Pesan eceran maupun grosir
-          melalui WhatsApp.
+          Pesan mudah lewat WhatsApp.
         </p>
 
         <a href="#produk">
@@ -309,7 +275,7 @@
       </div>
 
 
-      <div class="promo-photo">
+      <div class="promo-image">
 
         <img
           src="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=700"
@@ -320,11 +286,11 @@
       </div>
 
 
-      <div class="promo-photo promo-photo-second">
+      <div class="promo-image">
 
         <img
           src="https://images.unsplash.com/photo-1558008258-3256797b43f3?w=700"
-          alt="Peralatan listrik"
+          alt="Elektronik"
           loading="lazy"
         >
 
@@ -344,7 +310,7 @@
 
   <div class="container">
 
-    <div class="section-heading center">
+    <div class="section-title center">
 
       <span class="eyebrow">
         DUTA LED
@@ -359,74 +325,29 @@
 
     <div class="advantages-grid">
 
-
       <div class="advantage">
-
-        <div class="advantage-icon">
-          💰
-        </div>
-
-        <strong>
-          Harga Terjangkau
-        </strong>
-
-        <span>
-          Harga bersaing
-        </span>
-
+        <div>💰</div>
+        <strong>Harga Terjangkau</strong>
+        <span>Harga bersaing</span>
       </div>
 
-
       <div class="advantage">
-
-        <div class="advantage-icon">
-          📦
-        </div>
-
-        <strong>
-          Eceran & Grosir
-        </strong>
-
-        <span>
-          Beli sedikit atau banyak
-        </span>
-
+        <div>📦</div>
+        <strong>Eceran & Grosir</strong>
+        <span>Beli sedikit atau banyak</span>
       </div>
 
-
       <div class="advantage">
-
-        <div class="advantage-icon">
-          🔧
-        </div>
-
-        <strong>
-          Sparepart
-        </strong>
-
-        <span>
-          Berbagai kebutuhan
-        </span>
-
+        <div>🔧</div>
+        <strong>Sparepart Lengkap</strong>
+        <span>Berbagai kebutuhan</span>
       </div>
 
-
       <div class="advantage">
-
-        <div class="advantage-icon">
-          💬
-        </div>
-
-        <strong>
-          Konsultasi
-        </strong>
-
-        <span>
-          Tanya lewat WhatsApp
-        </span>
-
+        <div>💬</div>
+        <strong>Bisa Konsultasi</strong>
+        <span>Tanya melalui WhatsApp</span>
       </div>
-
 
     </div>
 
@@ -438,9 +359,9 @@
 
 <!-- KONTAK -->
 
-<section class="contact-section">
+<section class="contact">
 
-  <div class="container contact-inner">
+  <div class="container">
 
     <span class="eyebrow">
       HUBUNGI KAMI
@@ -451,40 +372,39 @@
     </h2>
 
     <p>
-      Silakan tanyakan stok dan harga
-      melalui WhatsApp.
+      Tanya stok dan harga melalui WhatsApp.
     </p>
 
     <a
-      id="contactWhatsapp"
-      class="btn btn-whatsapp contact-button"
+      id="contactWA"
       href="#"
+      class="btn green"
     >
       💬 Chat WhatsApp
     </a>
 
 
-    <div class="social-links">
+    <div class="social">
 
       <a
-        id="facebookLink"
+        id="facebook"
         href="#"
       >
         Facebook
       </a>
 
       <a
-        id="tiktokLink"
+        id="tiktok"
         href="#"
       >
         TikTok
       </a>
 
       <a
-        id="locationLink"
+        id="location"
         href="#"
       >
-        📍 Lokasi
+        📍 Lokasi Toko
       </a>
 
     </div>
@@ -497,43 +417,31 @@
 
 
 
-<!-- FOOTER -->
+<footer>
 
-<footer class="footer">
+  <strong>
+    Duta Terang LED
+  </strong>
 
-  <div class="container">
+  <p>
+    Clapar, Subah, Batang, Jawa Tengah
+  </p>
 
-    <strong>
-      Duta Terang LED
-    </strong>
-
-    <p>
-      Clapar, Subah, Batang,
-      Jawa Tengah
-    </p>
-
-    <small>
-      © <span id="year"></span>
-      Duta LED
-    </small>
-
-  </div>
+  <small>
+    © <span id="year"></span> Duta LED
+  </small>
 
 </footer>
 
 
 
-<!-- FLOATING WA -->
-
 <a
-  id="floatingWhatsapp"
+  id="floatingWA"
   href="#"
-  class="floating-whatsapp"
-  aria-label="WhatsApp"
+  class="floating-wa"
 >
   💬
 </a>
-
 
 
 <script
