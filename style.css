@@ -1323,3 +1323,101 @@ img {
 
   cursor: zoom-out;
 }
+/* =====================================================
+   PWA INSTALL
+===================================================== */
+
+.install-pwa {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 145px;
+
+  z-index: 12000;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px;
+
+  background: #fff;
+
+  border: 1px solid #eee;
+  border-radius: 14px;
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,.18);
+}
+
+.install-pwa.hidden {
+  display: none !important;
+}
+
+.install-pwa-icon {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  background: #fff4e9;
+
+  font-size: 23px;
+}
+
+.install-pwa-info {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+}
+
+.install-pwa-info strong {
+  font-size: 13px;
+}
+
+.install-pwa-info small {
+  margin-top: 2px;
+
+  color: #777;
+
+  font-size: 10px;
+}
+
+#installButton {
+  border: 0;
+
+  padding: 9px 13px;
+
+  border-radius: 8px;
+
+  background: #ff7200;
+  color: #fff;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+#installClose {
+  width: 30px;
+  height: 30px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #f3f3f3;
+  color: #777;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
