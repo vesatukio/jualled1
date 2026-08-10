@@ -1108,3 +1108,110 @@ img {
 .cart-count-pop {
   transform: scale(1.35);
 }
+/* =====================================================
+   EFEK GOYANG KERANJANG
+===================================================== */
+
+.floating-cart.cart-shake {
+
+  animation:
+    cartShake
+    0.6s
+    ease-in-out;
+
+}
+
+
+@keyframes cartShake {
+
+  0% {
+    transform:
+      translateX(0)
+      rotate(0deg)
+      scale(1);
+  }
+
+  15% {
+    transform:
+      translateX(-6px)
+      rotate(-7deg)
+      scale(1.08);
+  }
+
+  30% {
+    transform:
+      translateX(6px)
+      rotate(7deg)
+      scale(1.08);
+  }
+
+  45% {
+    transform:
+      translateX(-6px)
+      rotate(-6deg)
+      scale(1.08);
+  }
+
+  60% {
+    transform:
+      translateX(6px)
+      rotate(6deg)
+      scale(1.08);
+  }
+
+  75% {
+    transform:
+      translateX(-3px)
+      rotate(-3deg)
+      scale(1.04);
+  }
+
+  90% {
+    transform:
+      translateX(3px)
+      rotate(3deg)
+      scale(1.02);
+  }
+
+  100% {
+    transform:
+      translateX(0)
+      rotate(0deg)
+      scale(1);
+  }
+
+}
+
+
+/* =====================================================
+   ANGKA KERANJANG MEMANTUL
+===================================================== */
+
+#cartCount.cart-count-pop {
+
+  animation:
+    cartCountPop
+    0.3s
+    ease-out;
+
+}
+
+
+@keyframes cartCountPop {
+
+  0% {
+    transform:
+      scale(1);
+  }
+
+  50% {
+    transform:
+      scale(1.6);
+  }
+
+  100% {
+    transform:
+      scale(1);
+  }
+
+}
