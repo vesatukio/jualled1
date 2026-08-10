@@ -1107,35 +1107,46 @@ function createProductCard(
     );
 
 
-  shareFB.addEventListener(
-  "click",
-  () => {
+  shareFB.addEventListener("click", async () => {
 
-    const link =
-      getProductLink(product);
+  const link = getProductLink(product);
+  const harga = getProductPrice(product);
 
-    const harga =
-      getProductPrice(product);
+  const text =
+    `${product.nama}\n` +
+    `${formatRupiah(harga)}\n` +
+    `${link}`;
 
-    const text =
-      `${product.nama}\n` +
-      `${formatRupiah(harga)}\n` +
-      `${link}`;
+  if (navigator.share) {
 
-    const facebookURL =
-      "https://www.facebook.com/sharer/sharer.php?" +
-      "u=" +
-      encodeURIComponent(link) +
-      "&quote=" +
-      encodeURIComponent(text);
+    try {
 
-    window.open(
-      facebookURL,
-      "_blank"
-    );
+      await navigator.share({
+        title: product.nama,
+        text: text,
+        url: link
+      });
 
+    } catch (error) {
+
+      if (error.name !== "AbortError") {
+        console.warn("Share dibatalkan:", error);
+      }
+
+    }
+
+    return;
   }
-);
+
+  // Jika browser tidak mendukung Web Share
+  await navigator.clipboard.writeText(text);
+
+  alert(
+    "Nama, harga, dan link produk sudah disalin.\n\n" +
+    text
+  );
+
+});
 
   /* =================================================
      COPY LINK
