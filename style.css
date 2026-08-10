@@ -389,15 +389,12 @@ img {
 
 .old-price {
   margin-top: 4px;
-
-  color: #999;
-
-  font-size: 11px;
+  color: #1976d2;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.2;
-
   text-decoration: line-through;
 }
-
 .price {
   margin-top: 3px;
 
