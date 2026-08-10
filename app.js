@@ -1,29 +1,42 @@
-/* =====================================================
+```javascript
+/* =========================================================
    DUTA LED - APP.JS
-   Google Sheet : jualled1
-   Sheet        : PRODUK
+   =========================================================
+
+   DATA:
+   Google Sheet melalui API
+   + Cache LocalStorage
 
    FITUR:
-   - Google Sheet
-   - Offline cache
-   - Kategori
-   - Pencarian
-   - Keranjang multi produk
-   - Tambah / kurang / hapus
-   - Checkout WhatsApp
-   - Diskon katalog
-   - Diskon khusus 1-99% dari URL
-   - Share WhatsApp
-   - Share Facebook
-   - Salin link produk
-===================================================== */
+   ✓ Google Sheet
+   ✓ Cache offline
+   ✓ Kategori
+   ✓ Pencarian
+   ✓ Link unik produk
+   ✓ Produk langsung tampil berdasarkan ?id=
+   ✓ Keranjang multi produk
+   ✓ Tambah / kurang / hapus
+   ✓ Checkout WhatsApp
+   ✓ Diskon katalog
+   ✓ Promo khusus ?promo=10
+   ✓ Share WhatsApp
+   ✓ Share Facebook / Web Share
+   ✓ Salin link produk
+   ✓ 3 gambar produk
+   ✓ Swipe gambar
+   ✓ Klik gambar = zoom
+   ✓ Klik lagi = kembali
+   ✓ Swipe saat zoom
+   ✓ Menu promo
+   ✓ Efek keranjang
+========================================================= */
 
 "use strict";
 
 
-/* =====================================================
+/* =========================================================
    PENGATURAN
-===================================================== */
+========================================================= */
 
 const API_URL =
   "https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
@@ -40,7 +53,6 @@ const TIKTOK_URL =
 const LOCATION_URL =
   "#";
 
-
 const CACHE_KEY =
   "dutaled_produk_v3";
 
@@ -48,9 +60,9 @@ const CART_KEY =
   "dutaled_cart_v3";
 
 
-/* =====================================================
+/* =========================================================
    DATA
-===================================================== */
+========================================================= */
 
 let products = [];
 
@@ -60,73 +72,14 @@ let currentCategory = "Semua";
 
 let searchText = "";
 
-
-/* =====================================================
-   DISKON KHUSUS
-
-   Contoh:
-
-   https://dutaled.my.id/?promo=10
-   https://dutaled.my.id/?promo=23
-   https://dutaled.my.id/?promo=32
-   https://dutaled.my.id/?promo=43
-
-   Berlaku 1 - 99%
-===================================================== */
-
 let specialDiscount = 0;
 
 let specialPromoCode = "";
 
 
-function loadSpecialPromo() {
-
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-
-  const promo =
-    (
-      params.get("promo") || ""
-    )
-      .trim()
-      .replace("%", "");
-
-
-  const discount =
-    Number(promo);
-
-
-  if (
-    Number.isFinite(discount) &&
-    discount >= 1 &&
-    discount <= 99
-  ) {
-
-    specialDiscount =
-      discount;
-
-    specialPromoCode =
-      String(discount);
-
-  } else {
-
-    specialDiscount = 0;
-
-    specialPromoCode = "";
-
-  }
-
-}
-
-
-/* =====================================================
+/* =========================================================
    ELEMENT
-   PENTING:
-   ELEMENT DIAMBIL SETELAH DOM READY
-===================================================== */
+========================================================= */
 
 let productGrid;
 let categoryBar;
@@ -145,9 +98,9 @@ let cartTotal;
 let checkoutButton;
 
 
-/* =====================================================
+/* =========================================================
    START
-===================================================== */
+========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
@@ -157,7 +110,9 @@ document.addEventListener(
 
 async function init() {
 
-  /* Ambil elemen setelah HTML selesai */
+  /* -------------------------------------------------------
+     Ambil element HTML
+  ------------------------------------------------------- */
 
   productGrid =
     document.getElementById(
@@ -188,7 +143,6 @@ async function init() {
     document.getElementById(
       "status"
     );
-
 
   cartButton =
     document.getElementById(
@@ -231,12 +185,16 @@ async function init() {
     );
 
 
-  /* Diskon URL */
+  /* -------------------------------------------------------
+     Promo
+  ------------------------------------------------------- */
 
   loadSpecialPromo();
 
 
-  /* Setup */
+  /* -------------------------------------------------------
+     Setup
+  ------------------------------------------------------- */
 
   setupLinks();
 
@@ -247,27 +205,32 @@ async function init() {
   setupCartButton();
 
 
-  /* Keranjang */
+  /* -------------------------------------------------------
+     Keranjang
+  ------------------------------------------------------- */
 
   loadCart();
 
   renderCart();
 
 
-  /* Loading */
+  /* -------------------------------------------------------
+     Loading
+  ------------------------------------------------------- */
 
   showLoading(true);
 
 
-  /* =================================================
-     CACHE
-  ================================================= */
+  /* =======================================================
+     LOAD CACHE
+  ======================================================= */
 
   const cached =
     loadCache();
 
-
-  if (cached.length) {
+  if (
+    cached.length
+  ) {
 
     products =
       cached;
@@ -283,9 +246,9 @@ async function init() {
   }
 
 
-  /* =================================================
-     GOOGLE SHEET
-  ================================================= */
+  /* =======================================================
+     LOAD API
+  ======================================================= */
 
   try {
 
@@ -293,7 +256,9 @@ async function init() {
       await loadFromGoogle();
 
 
-    if (fresh.length) {
+    if (
+      fresh.length
+    ) {
 
       products =
         fresh;
@@ -320,7 +285,9 @@ async function init() {
     );
 
 
-    if (!products.length) {
+    if (
+      !products.length
+    ) {
 
       showStatus(
         "Mode offline"
@@ -331,16 +298,72 @@ async function init() {
   }
 
 
+  /* -------------------------------------------------------
+     Setelah data tersedia:
+     buka produk sesuai ?id=
+  ------------------------------------------------------- */
+
   showLoading(false);
+
+  openProductFromURL();
 
   renderCart();
 
 }
 
 
-/* =====================================================
-   GOOGLE SHEET
-===================================================== */
+/* =========================================================
+   PROMO KHUSUS
+========================================================= */
+
+function loadSpecialPromo() {
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const promo =
+    (
+      params.get("promo") || ""
+    )
+    .trim()
+    .replace("%", "");
+
+
+  const discount =
+    Number(promo);
+
+
+  if (
+    Number.isFinite(discount) &&
+    discount >= 1 &&
+    discount <= 99
+  ) {
+
+    specialDiscount =
+      discount;
+
+    specialPromoCode =
+      String(discount);
+
+  } else {
+
+    specialDiscount =
+      0;
+
+    specialPromoCode =
+      "";
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD GOOGLE SHEET
+========================================================= */
 
 async function loadFromGoogle() {
 
@@ -356,7 +379,9 @@ async function loadFromGoogle() {
     );
 
 
-  if (!response.ok) {
+  if (
+    !response.ok
+  ) {
 
     throw new Error(
       "HTTP " +
@@ -376,7 +401,9 @@ async function loadFromGoogle() {
       : data.data;
 
 
-  if (!Array.isArray(rows)) {
+  if (
+    !Array.isArray(rows)
+  ) {
 
     throw new Error(
       "Format data tidak valid"
@@ -397,9 +424,9 @@ async function loadFromGoogle() {
 }
 
 
-/* =====================================================
+/* =========================================================
    NORMALISASI PRODUK
-===================================================== */
+========================================================= */
 
 function normalizeProduct(row) {
 
@@ -408,21 +435,24 @@ function normalizeProduct(row) {
     id:
       value(
         row.ID ??
-        row.id
+        row.id ??
+        row.Id
       ),
 
 
     nama:
       value(
         row.nama ??
-        row.Nama
+        row.Nama ??
+        row.name
       ),
 
 
     kategori:
       value(
         row.kategori ??
-        row.Kategori
+        row.Kategori ??
+        row.category
       ) ||
       "Lainnya",
 
@@ -430,7 +460,8 @@ function normalizeProduct(row) {
     hargaModal:
       number(
         row["harga modal"] ??
-        row.hargaModal
+        row.hargaModal ??
+        row.modal
       ),
 
 
@@ -444,45 +475,54 @@ function normalizeProduct(row) {
     hargaJual:
       number(
         row["harga jual"] ??
-        row.hargaJual
+        row.hargaJual ??
+        row.harga
       ),
 
 
     diskon:
       number(
-        row.diskon
+        row.diskon ??
+        row.Diskon
       ),
 
 
     hargaDiskon:
       number(
         row["harga diskon"] ??
-        row.hargaDiskon
+        row.hargaDiskon ??
+        row.harga_diskon
       ),
 
 
     deskripsi:
       value(
+        row.deskripsi ??
         row.diskipsi ??
-        row.deskripsi
+        row.Deskripsi
       ),
 
 
     gambar1:
       value(
-        row.gambar1
+        row.gambar1 ??
+        row.Gambar1 ??
+        row.image ??
+        row.foto
       ),
 
 
     gambar2:
       value(
-        row.gambar2
+        row.gambar2 ??
+        row.Gambar2
       ),
 
 
     gambar3:
       value(
-        row.gambar3
+        row.gambar3 ??
+        row.Gambar3
       )
 
   };
@@ -490,9 +530,9 @@ function normalizeProduct(row) {
 }
 
 
-/* =====================================================
-   HELPER
-===================================================== */
+/* =========================================================
+   HELPER VALUE
+========================================================= */
 
 function value(v) {
 
@@ -505,12 +545,16 @@ function value(v) {
 
   }
 
-  return String(
-    v
-  ).trim();
+
+  return String(v)
+    .trim();
 
 }
 
+
+/* =========================================================
+   HELPER NUMBER
+========================================================= */
 
 function number(v) {
 
@@ -541,28 +585,33 @@ function number(v) {
 }
 
 
-/* =====================================================
+/* =========================================================
    KATEGORI
-===================================================== */
+========================================================= */
 
 function renderCategories() {
 
-  if (!categoryBar)
+  if (
+    !categoryBar
+  ) {
+
     return;
+
+  }
 
 
   const categories =
-    [
-      "Semua"
-    ];
+    ["Semua"];
 
 
   products.forEach(
     product => {
 
       const category =
-        product.kategori
-          .trim();
+        String(
+          product.kategori ||
+          ""
+        ).trim();
 
 
       if (
@@ -644,14 +693,19 @@ function renderCategories() {
 }
 
 
-/* =====================================================
+/* =========================================================
    SEARCH
-===================================================== */
+========================================================= */
 
 function setupSearch() {
 
-  if (!searchInput)
+  if (
+    !searchInput
+  ) {
+
     return;
+
+  }
 
 
   searchInput.addEventListener(
@@ -672,44 +726,54 @@ function setupSearch() {
 }
 
 
-/* =====================================================
+/* =========================================================
    FILTER
-===================================================== */
+========================================================= */
 
 function getFilteredProducts() {
 
   return products.filter(
     product => {
 
+      const category =
+        String(
+          product.kategori ||
+          ""
+        ).toLowerCase();
+
+
+      const nama =
+        String(
+          product.nama ||
+          ""
+        ).toLowerCase();
+
+
+      const deskripsi =
+        String(
+          product.deskripsi ||
+          ""
+        ).toLowerCase();
+
+
       const categoryOK =
         currentCategory ===
         "Semua" ||
-        product.kategori
-          .toLowerCase() ===
-        currentCategory
-          .toLowerCase();
+        category ===
+        currentCategory.toLowerCase();
 
 
       const searchOK =
         !searchText ||
-
-        product.nama
-          .toLowerCase()
-          .includes(
-            searchText
-          ) ||
-
-        product.kategori
-          .toLowerCase()
-          .includes(
-            searchText
-          ) ||
-
-        product.deskripsi
-          .toLowerCase()
-          .includes(
-            searchText
-          );
+        nama.includes(
+          searchText
+        ) ||
+        category.includes(
+          searchText
+        ) ||
+        deskripsi.includes(
+          searchText
+        );
 
 
       return (
@@ -723,15 +787,9 @@ function getFilteredProducts() {
 }
 
 
-/* =====================================================
+/* =========================================================
    HARGA PRODUK
-
-   Pelanggan biasa:
-   harga diskon dari Sheet
-
-   Pelanggan khusus:
-   harga jual dikurangi promo URL
-===================================================== */
+========================================================= */
 
 function getProductPrice(
   product
@@ -743,7 +801,9 @@ function getProductPrice(
     ) || 0;
 
 
-  /* PROMO KHUSUS */
+  /* -------------------------------------------------------
+     Promo khusus URL
+  ------------------------------------------------------- */
 
   if (
     specialDiscount > 0 &&
@@ -762,7 +822,9 @@ function getProductPrice(
   }
 
 
-  /* DISKON SHEET */
+  /* -------------------------------------------------------
+     Diskon Sheet
+  ------------------------------------------------------- */
 
   if (
     product.hargaDiskon > 0 &&
@@ -780,14 +842,19 @@ function getProductPrice(
 }
 
 
-/* =====================================================
+/* =========================================================
    RENDER PRODUK
-===================================================== */
+========================================================= */
 
 function renderProducts() {
 
-  if (!productGrid)
+  if (
+    !productGrid
+  ) {
+
     return;
+
+  }
 
 
   const list =
@@ -798,7 +865,9 @@ function renderProducts() {
     "";
 
 
-  if (!list.length) {
+  if (
+    !list.length
+  ) {
 
     empty?.classList.remove(
       "hidden"
@@ -829,51 +898,82 @@ function renderProducts() {
 }
 
 
-/* =====================================================
+/* =========================================================
    CARD PRODUK
-===================================================== */
+========================================================= */
 
-function createProductCard(product) {
+function createProductCard(
+  product
+) {
 
-  const card = document.createElement("article");
+  const card =
+    document.createElement(
+      "article"
+    );
 
-  card.className = "product-card";
+
+  card.className =
+    "product-card";
 
 
-  /* =================================================
-     3 GAMBAR PRODUK
-  ================================================= */
+  /* =======================================================
+     GAMBAR
+  ======================================================= */
 
   const images = [
+
     product.gambar1,
+
     product.gambar2,
+
     product.gambar3
-  ].filter(img =>
-    img &&
-    String(img).trim()
+
+  ]
+  .map(
+    img =>
+      String(
+        img || ""
+      ).trim()
+  )
+  .filter(
+    Boolean
   );
 
-  if (!images.length) {
-    images.push("image/no-image.png");
+
+  if (
+    !images.length
+  ) {
+
+    images.push(
+      "image/no-image.png"
+    );
+
   }
 
 
-  /* =================================================
+  /* =======================================================
      HARGA
-  ================================================= */
+  ======================================================= */
 
   const hargaJual =
-    Number(product.hargaJual) || 0;
+    Number(
+      product.hargaJual
+    ) || 0;
+
 
   const hargaTampil =
-    getProductPrice(product);
+    getProductPrice(
+      product
+    );
 
 
-  /* =================================================
+  /* =======================================================
      DISKON
-  ================================================= */
+  ======================================================= */
 
-  let discountHTML = "";
+  let discountHTML =
+    "";
+
 
   if (
     specialDiscount > 0 &&
@@ -891,14 +991,23 @@ function createProductCard(product) {
     const hasDiscount =
       product.hargaDiskon > 0 &&
       hargaJual > 0 &&
-      product.hargaDiskon < hargaJual;
+      product.hargaDiskon <
+      hargaJual;
 
-    if (hasDiscount) {
+
+    if (
+      hasDiscount
+    ) {
 
       let persen =
-        product.diskon;
+        Number(
+          product.diskon
+        ) || 0;
 
-      if (!persen) {
+
+      if (
+        !persen
+      ) {
 
         persen =
           Math.round(
@@ -911,6 +1020,7 @@ function createProductCard(product) {
 
       }
 
+
       discountHTML = `
         <span class="discount-badge">
           -${persen}%
@@ -922,38 +1032,53 @@ function createProductCard(product) {
   }
 
 
-  /* =================================================
-     HARGA HTML
-  ================================================= */
+  /* =======================================================
+     HTML HARGA
+  ======================================================= */
 
-  let priceHTML = "";
+  let priceHTML =
+    "";
 
-  if (hargaTampil < hargaJual) {
+
+  if (
+    hargaTampil <
+    hargaJual
+  ) {
 
     priceHTML = `
+
       <div class="old-price">
-        ${formatRupiah(hargaJual)}
+        ${formatRupiah(
+          hargaJual
+        )}
       </div>
 
       <div class="price">
-        ${formatRupiah(hargaTampil)}
+        ${formatRupiah(
+          hargaTampil
+        )}
       </div>
+
     `;
 
   } else {
 
     priceHTML = `
+
       <div class="price">
-        ${formatRupiah(hargaJual)}
+        ${formatRupiah(
+          hargaJual
+        )}
       </div>
+
     `;
 
   }
 
 
-  /* =================================================
-     GALERI
-  ================================================= */
+  /* =======================================================
+     HTML CARD
+  ======================================================= */
 
   card.innerHTML = `
 
@@ -963,50 +1088,66 @@ function createProductCard(product) {
 
         <div class="gallery-track">
 
-          ${images.map((img, index) => `
+          ${images.map(
+            (
+              img,
+              index
+            ) => `
 
-            <div class="gallery-slide">
-
-              <img
-                src="${escapeHTML(img)}"
-                alt="${escapeHTML(product.nama)}"
-                loading="lazy"
-                draggable="false"
-                onerror="
-                  this.onerror=null;
-                  this.src='image/no-image.png';
-                "
+              <div
+                class="gallery-slide"
               >
 
-            </div>
+                <img
+                  src="${escapeHTML(
+                    img
+                  )}"
+                  alt="${escapeHTML(
+                    product.nama
+                  )}"
+                  loading="lazy"
+                  draggable="false"
+                  onerror="
+                    this.onerror=null;
+                    this.src='image/no-image.png';
+                  "
+                >
 
-          `).join("")}
+              </div>
+
+            `
+          ).join("")}
 
         </div>
 
 
         ${
           images.length > 1
-          ? `
+            ? `
 
-            <div class="gallery-dots">
+              <div class="gallery-dots">
 
-              ${images.map((_, index) => `
+                ${images.map(
+                  (
+                    _,
+                    index
+                  ) => `
 
-                <span
-                  class="gallery-dot ${
-                    index === 0
-                      ? "active"
-                      : ""
-                  }"
-                ></span>
+                    <span
+                      class="gallery-dot ${
+                        index === 0
+                          ? "active"
+                          : ""
+                      }"
+                    ></span>
 
-              `).join("")}
+                  `
+                ).join("")}
 
-            </div>
+              </div>
 
-          `
-          : ""
+            `
+            : ""
         }
 
 
@@ -1020,8 +1161,11 @@ function createProductCard(product) {
     <div class="product-info">
 
       <div class="product-name">
-        ${escapeHTML(product.nama)}
+        ${escapeHTML(
+          product.nama
+        )}
       </div>
+
 
       ${priceHTML}
 
@@ -1069,71 +1213,103 @@ function createProductCard(product) {
   `;
 
 
-  /* =================================================
+  /* =======================================================
      GALERI
-  ================================================= */
+  ======================================================= */
 
-  setupProductGallery(card);
+  setupProductGallery(
+    card
+  );
 
 
-  /* =================================================
+  /* =======================================================
      KERANJANG
-  ================================================= */
+  ======================================================= */
 
   const buyButton =
-    card.querySelector(".buy-button");
+    card.querySelector(
+      ".buy-button"
+    );
 
-  buyButton.addEventListener(
+
+  buyButton?.addEventListener(
     "click",
     () => {
 
-      addToCart(product);
+      addToCart(
+        product
+      );
 
     }
   );
 
 
-  /* =================================================
-     SHARE WHATSAPP
-  ================================================= */
+  /* =======================================================
+     WHATSAPP
+  ======================================================= */
 
   const shareWA =
-    card.querySelector(".share-wa");
+    card.querySelector(
+      ".share-wa"
+    );
 
-  shareWA.addEventListener(
+
+  shareWA?.addEventListener(
     "click",
     () => {
 
       const link =
-        getProductLink(product);
+        getProductLink(
+          product
+        );
+
+
+      const harga =
+        getProductPrice(
+          product
+        );
+
 
       const message =
         `Halo Duta LED, saya tertarik dengan produk:\n\n` +
-        `${product.nama}\n\n` +
+        `${product.nama}\n` +
+        `${formatRupiah(harga)}\n` +
         `${link}`;
 
-      openWhatsApp(message);
+
+      openWhatsApp(
+        message
+      );
 
     }
   );
 
 
-  /* =================================================
-     SHARE FACEBOOK
-  ================================================= */
+  /* =======================================================
+     FACEBOOK / WEB SHARE
+  ======================================================= */
 
   const shareFB =
-    card.querySelector(".share-fb");
+    card.querySelector(
+      ".share-fb"
+    );
 
-  shareFB.addEventListener(
+
+  shareFB?.addEventListener(
     "click",
     async () => {
 
       const link =
-        getProductLink(product);
+        getProductLink(
+          product
+        );
+
 
       const harga =
-        getProductPrice(product);
+        getProductPrice(
+          product
+        );
+
 
       const text =
         `${product.nama}\n` +
@@ -1141,7 +1317,9 @@ function createProductCard(product) {
         `${link}`;
 
 
-      if (navigator.share) {
+      if (
+        navigator.share
+      ) {
 
         try {
 
@@ -1158,7 +1336,9 @@ function createProductCard(product) {
 
           });
 
-        } catch (error) {
+        } catch (
+          error
+        ) {
 
           if (
             error.name !==
@@ -1166,7 +1346,7 @@ function createProductCard(product) {
           ) {
 
             console.warn(
-              "Share dibatalkan:",
+              "Share gagal:",
               error
             );
 
@@ -1185,13 +1365,16 @@ function createProductCard(product) {
           text
         );
 
+
         alert(
           "Nama, harga, dan link produk sudah disalin."
         );
 
       } catch {
 
-        alert(text);
+        alert(
+          text
+        );
 
       }
 
@@ -1199,21 +1382,24 @@ function createProductCard(product) {
   );
 
 
-  /* =================================================
+  /* =======================================================
      COPY LINK
-  ================================================= */
+  ======================================================= */
 
   const shareCopy =
     card.querySelector(
       ".share-copy"
     );
 
-  shareCopy.addEventListener(
+
+  shareCopy?.addEventListener(
     "click",
     async () => {
 
       const link =
-        getProductLink(product);
+        getProductLink(
+          product
+        );
 
 
       try {
@@ -1229,18 +1415,23 @@ function createProductCard(product) {
             "textarea"
           );
 
+
         textarea.value =
           link;
+
 
         document.body.appendChild(
           textarea
         );
 
+
         textarea.select();
+
 
         document.execCommand(
           "copy"
         );
+
 
         textarea.remove();
 
@@ -1268,15 +1459,29 @@ function createProductCard(product) {
   return card;
 
 }
-function setupProductGallery(card) {
+
+
+/* =========================================================
+   GALERI PRODUK
+========================================================= */
+
+function setupProductGallery(
+  card
+) {
 
   const gallery =
     card.querySelector(
       ".product-gallery"
     );
 
-  if (!gallery)
+
+  if (
+    !gallery
+  ) {
+
     return;
+
+  }
 
 
   const track =
@@ -1284,10 +1489,12 @@ function setupProductGallery(card) {
       ".gallery-track"
     );
 
+
   const slides =
     gallery.querySelectorAll(
       ".gallery-slide"
     );
+
 
   const dots =
     gallery.querySelectorAll(
@@ -1295,18 +1502,39 @@ function setupProductGallery(card) {
     );
 
 
-  if (slides.length <= 1)
+  if (
+    !track ||
+    !slides.length
+  ) {
+
     return;
 
-
-  let current = 0;
-
-  let startX = 0;
+  }
 
 
-  function showImage(index) {
+  let current =
+    0;
 
-    if (index < 0) {
+
+  let startX =
+    0;
+
+
+  let startY =
+    0;
+
+
+  /* =======================================================
+     SHOW IMAGE
+  ======================================================= */
+
+  function showImage(
+    index
+  ) {
+
+    if (
+      index < 0
+    ) {
 
       index =
         slides.length - 1;
@@ -1319,20 +1547,27 @@ function setupProductGallery(card) {
       slides.length
     ) {
 
-      index = 0;
+      index =
+        0;
 
     }
 
 
-    current = index;
+    current =
+      index;
 
 
     track.style.transform =
-      `translateX(-${current * 100}%)`;
+      `translateX(-${
+        current * 100
+      }%)`;
 
 
     dots.forEach(
-      (dot, i) => {
+      (
+        dot,
+        i
+      ) => {
 
         dot.classList.toggle(
           "active",
@@ -1345,16 +1580,125 @@ function setupProductGallery(card) {
   }
 
 
-  /* ==========================================
-     SWIPE MULAI
-  ========================================== */
+  /* =======================================================
+     KLIK GAMBAR
+  ======================================================= */
+
+  slides.forEach(
+    (
+      slide,
+      index
+    ) => {
+
+      const img =
+        slide.querySelector(
+          "img"
+        );
+
+
+      if (
+        !img
+      ) {
+
+        return;
+
+      }
+
+
+      img.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+
+          const imageList =
+            Array.from(
+              slides
+            )
+            .map(
+              slide => {
+
+                const image =
+                  slide.querySelector(
+                    "img"
+                  );
+
+                return image
+                  ? image.src
+                  : "";
+
+              }
+            )
+            .filter(
+              Boolean
+            );
+
+
+          openImageZoom(
+            imageList,
+            index
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  /* =======================================================
+     DOT
+  ======================================================= */
+
+  dots.forEach(
+    (
+      dot,
+      index
+    ) => {
+
+      dot.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+          showImage(
+            index
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  /* =======================================================
+     TOUCH START
+  ======================================================= */
 
   gallery.addEventListener(
     "touchstart",
     event => {
 
+      if (
+        !event.touches.length
+      ) {
+
+        return;
+
+      }
+
+
       startX =
-        event.touches[0].clientX;
+        event.touches[0]
+          .clientX;
+
+
+      startY =
+        event.touches[0]
+          .clientY;
 
     },
     {
@@ -1363,23 +1707,66 @@ function setupProductGallery(card) {
   );
 
 
-  /* ==========================================
-     SWIPE SELESAI
-  ========================================== */
+  /* =======================================================
+     TOUCH END
+  ======================================================= */
 
   gallery.addEventListener(
     "touchend",
     event => {
 
+      if (
+        !event.changedTouches.length
+      ) {
+
+        return;
+
+      }
+
+
       const endX =
-        event.changedTouches[0].clientX;
+        event.changedTouches[0]
+          .clientX;
 
-      const difference =
-        endX - startX;
 
+      const endY =
+        event.changedTouches[0]
+          .clientY;
+
+
+      const differenceX =
+        endX -
+        startX;
+
+
+      const differenceY =
+        endY -
+        startY;
+
+
+      /* Jangan dianggap swipe
+         kalau gerak vertikal */
 
       if (
-        Math.abs(difference) < 40
+        Math.abs(
+          differenceY
+        ) >
+        Math.abs(
+          differenceX
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      /* Swipe minimal 40px */
+
+      if (
+        Math.abs(
+          differenceX
+        ) < 40
       ) {
 
         return;
@@ -1388,7 +1775,7 @@ function setupProductGallery(card) {
 
 
       if (
-        difference < 0
+        differenceX < 0
       ) {
 
         showImage(
@@ -1409,253 +1796,259 @@ function setupProductGallery(card) {
     }
   );
 
-
-  /* ==========================================
-     KLIK FOTO
-  ========================================== */
-
-  slides.forEach(
-    (slide, index) => {
-
-      const img =
-        slide.querySelector(
-          "img"
-        );
-
-      if (!img)
-        return;
-
-
-      img.addEventListener(
-        "click",
-        event => {
-
-          event.stopPropagation();
-
-
-          const imageList =
-            Array.from(
-              slides
-            )
-            .map(
-              slide =>
-                slide.querySelector(
-                  "img"
-                )?.src
-            )
-            .filter(Boolean);
-
-
-          openImageZoom(
-            imageList,
-            index
-          );
-
-        }
-      );
-
-    }
-  );
-
 }
 
-  /* =================================================
-     TOMBOL KERANJANG
-  ================================================= */
 
-  const buyButton =
-    card.querySelector(
-      ".buy-button"
-    );
+/* =========================================================
+   ZOOM FOTO
+========================================================= */
 
+function openImageZoom(
+  images,
+  startIndex = 0
+) {
 
-  buyButton.addEventListener(
-    "click",
-    () => {
-
-      addToCart(
-        product
-      );
-
-    }
-  );
-
-
-  /* =================================================
-     SHARE WHATSAPP
-  ================================================= */
-
-  const shareWA =
-    card.querySelector(
-      ".share-wa"
-    );
-
-
-  shareWA.addEventListener(
-    "click",
-    () => {
-
-      const link =
-        getProductLink(
-          product
-        );
-
-
-      const message =
-        `Halo Duta LED, saya tertarik dengan produk:\n\n` +
-        `${product.nama}\n\n` +
-        `${link}`;
-
-
-      openWhatsApp(
-        message
-      );
-
-    }
-  );
-
-
-  /* =================================================
-     SHARE FACEBOOK
-  ================================================= */
-
-  const shareFB =
-    card.querySelector(
-      ".share-fb"
-    );
-
-
-  shareFB.addEventListener("click", async () => {
-
-  const link = getProductLink(product);
-  const harga = getProductPrice(product);
-
-  const text =
-    `${product.nama}\n` +
-    `${formatRupiah(harga)}\n` +
-    `${link}`;
-
-  if (navigator.share) {
-
-    try {
-
-      await navigator.share({
-        title: product.nama,
-        text: text,
-        url: link
-      });
-
-    } catch (error) {
-
-      if (error.name !== "AbortError") {
-        console.warn("Share dibatalkan:", error);
-      }
-
-    }
+  if (
+    !images ||
+    !images.length
+  ) {
 
     return;
+
   }
 
-  // Jika browser tidak mendukung Web Share
-  await navigator.clipboard.writeText(text);
 
-  alert(
-    "Nama, harga, dan link produk sudah disalin.\n\n" +
-    text
-  );
+  let current =
+    startIndex;
 
-});
 
-  /* =================================================
-     COPY LINK
-  ================================================= */
-
-  const shareCopy =
-    card.querySelector(
-      ".share-copy"
+  const overlay =
+    document.createElement(
+      "div"
     );
 
 
-  shareCopy.addEventListener(
+  overlay.className =
+    "image-zoom-overlay";
+
+
+  overlay.innerHTML = `
+
+    <img
+      class="zoom-image"
+      src="${escapeHTML(
+        images[current]
+      )}"
+      draggable="false"
+    >
+
+  `;
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+
+  const image =
+    overlay.querySelector(
+      ".zoom-image"
+    );
+
+
+  if (
+    !image
+  ) {
+
+    overlay.remove();
+
+    return;
+
+  }
+
+
+  /* =======================================================
+     KLIK:
+     NORMAL → ZOOM
+     ZOOM → NORMAL
+  ======================================================= */
+
+  image.addEventListener(
     "click",
-    async () => {
+    event => {
 
-      const link =
-        getProductLink(
-          product
-        );
+      event.stopPropagation();
 
 
-      try {
-
-        await navigator.clipboard.writeText(
-          link
-        );
-
-      } catch {
-
-        const textarea =
-          document.createElement(
-            "textarea"
-          );
-
-
-        textarea.value =
-          link;
-
-
-        document.body.appendChild(
-          textarea
-        );
-
-
-        textarea.select();
-
-
-        document.execCommand(
-          "copy"
-        );
-
-
-        textarea.remove();
-
-      }
-
-
-      shareCopy.textContent =
-        "✓";
-
-
-      setTimeout(
-        () => {
-
-          shareCopy.textContent =
-            "🔗";
-
-        },
-        1500
+      image.classList.toggle(
+        "zoomed"
       );
 
     }
   );
 
 
-  return card;
+  /* =======================================================
+     SWIPE ZOOM
+  ======================================================= */
+
+  let startX =
+    0;
+
+
+  overlay.addEventListener(
+    "touchstart",
+    event => {
+
+      if (
+        !event.touches.length
+      ) {
+
+        return;
+
+      }
+
+
+      startX =
+        event.touches[0]
+          .clientX;
+
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  overlay.addEventListener(
+    "touchend",
+    event => {
+
+      if (
+        !event.changedTouches.length
+      ) {
+
+        return;
+
+      }
+
+
+      const endX =
+        event.changedTouches[0]
+          .clientX;
+
+
+      const difference =
+        endX -
+        startX;
+
+
+      if (
+        Math.abs(
+          difference
+        ) < 50
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        difference < 0
+      ) {
+
+        current =
+          (
+            current + 1
+          ) %
+          images.length;
+
+      } else {
+
+        current =
+          (
+            current -
+            1 +
+            images.length
+          ) %
+          images.length;
+
+      }
+
+
+      image.classList.remove(
+        "zoomed"
+      );
+
+
+      image.src =
+        images[current];
+
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  /* =======================================================
+     KLIK AREA LUAR
+  ======================================================= */
+
+  overlay.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target ===
+        overlay
+      ) {
+
+        overlay.remove();
+
+      }
+
+    }
+  );
+
+
+  /* =======================================================
+     ESC
+  ======================================================= */
+
+  function closeByEscape(
+    event
+  ) {
+
+    if (
+      event.key ===
+      "Escape"
+    ) {
+
+      overlay.remove();
+
+      document.removeEventListener(
+        "keydown",
+        closeByEscape
+      );
+
+    }
+
+  }
+
+
+  document.addEventListener(
+    "keydown",
+    closeByEscape
+  );
 
 }
 
 
-/* =====================================================
-   LINK PRODUK
-
-   Contoh hasil:
-
-   https://dutaled.my.id/?id=123
-
-   Jika promo:
-
-   https://dutaled.my.id/?id=123&promo=32
-===================================================== */
+/* =========================================================
+   LINK PRODUK UNIK
+========================================================= */
 
 function getProductLink(
   product
@@ -1667,10 +2060,17 @@ function getProductLink(
     );
 
 
+  /* Hapus semua parameter lama */
+
   url.search = "";
 
 
-  if (product.id) {
+  /* ID PRODUK */
+
+  if (
+    product &&
+    product.id
+  ) {
 
     url.searchParams.set(
       "id",
@@ -1679,6 +2079,8 @@ function getProductLink(
 
   }
 
+
+  /* Promo */
 
   if (
     specialDiscount > 0
@@ -1701,57 +2103,165 @@ function getProductLink(
 }
 
 
-/* =====================================================
-   KERANJANG BUTTON
-===================================================== */
+/* =========================================================
+   PRODUK DARI URL
+========================================================= */
 
-function setupCartButton() {
+function openProductFromURL() {
 
-  if (cartButton) {
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
 
-    cartButton.addEventListener(
-      "click",
-      openCart
+
+  const productID =
+    (
+      params.get("id") ||
+      ""
+    ).trim();
+
+
+  if (
+    !productID ||
+    !products.length
+  ) {
+
+    return;
+
+  }
+
+
+  const product =
+    products.find(
+      item =>
+        String(
+          item.id
+        ) ===
+        String(
+          productID
+        )
+    );
+
+
+  if (
+    !product
+  ) {
+
+    showStatus(
+      "Produk tidak ditemukan"
+    );
+
+    return;
+
+  }
+
+
+  /* Reset filter */
+
+  currentCategory =
+    "Semua";
+
+  searchText =
+    "";
+
+
+  if (
+    searchInput
+  ) {
+
+    searchInput.value =
+      "";
+
+  }
+
+
+  renderCategories();
+
+
+  /* Hanya tampilkan produk yang dipilih */
+
+  if (
+    productGrid
+  ) {
+
+    productGrid.innerHTML =
+      "";
+
+
+    productGrid.appendChild(
+      createProductCard(
+        product
+      )
     );
 
   }
 
 
-  if (cartClose) {
-
-    cartClose.addEventListener(
-      "click",
-      closeCart
-    );
-
-  }
+  empty?.classList.add(
+    "hidden"
+  );
 
 
-  if (cartOverlay) {
-
-    cartOverlay.addEventListener(
-      "click",
-      closeCart
-    );
-
-  }
+  showStatus(
+    "Produk: " +
+    product.nama
+  );
 
 
-  if (checkoutButton) {
+  /* Scroll ke produk */
 
-    checkoutButton.addEventListener(
-      "click",
-      checkoutWhatsApp
-    );
+  setTimeout(
+    () => {
 
-  }
+      productGrid
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+    },
+    100
+  );
 
 }
 
 
-/* =====================================================
+/* =========================================================
+   KERANJANG SETUP
+========================================================= */
+
+function setupCartButton() {
+
+  cartButton?.addEventListener(
+    "click",
+    openCart
+  );
+
+
+  cartClose?.addEventListener(
+    "click",
+    closeCart
+  );
+
+
+  cartOverlay?.addEventListener(
+    "click",
+    closeCart
+  );
+
+
+  checkoutButton?.addEventListener(
+    "click",
+    checkoutWhatsApp
+  );
+
+}
+
+
+/* =========================================================
    BUKA KERANJANG
-===================================================== */
+========================================================= */
 
 function openCart() {
 
@@ -1759,9 +2269,11 @@ function openCart() {
     "show"
   );
 
+
   cartOverlay?.classList.remove(
     "hidden"
   );
+
 
   document.body.classList.add(
     "cart-open"
@@ -1770,9 +2282,9 @@ function openCart() {
 }
 
 
-/* =====================================================
+/* =========================================================
    TUTUP KERANJANG
-===================================================== */
+========================================================= */
 
 function closeCart() {
 
@@ -1780,9 +2292,11 @@ function closeCart() {
     "show"
   );
 
+
   cartOverlay?.classList.add(
     "hidden"
   );
+
 
   document.body.classList.remove(
     "cart-open"
@@ -1791,20 +2305,29 @@ function closeCart() {
 }
 
 
-/* =====================================================
-TAMBAH KERANJANG
-===================================================== */
+/* =========================================================
+   TAMBAH KERANJANG
+========================================================= */
 
-function addToCart(product) {
+function addToCart(
+  product
+) {
 
   const existing =
     cart.find(
       item =>
-        String(item.id) ===
-        String(product.id)
+        String(
+          item.id
+        ) ===
+        String(
+          product.id
+        )
     );
 
-  if (existing) {
+
+  if (
+    existing
+  ) {
 
     existing.qty += 1;
 
@@ -1840,19 +2363,12 @@ function addToCart(product) {
 
   }
 
+
   saveCart();
 
   renderCart();
 
-  /* ==========================================
-     EFEK GOYANG KERANJANG
-  ========================================== */
-
   shakeCart();
-
-  /* ==========================================
-     PESAN
-  ========================================== */
 
   showCartMessage(
     product.nama
@@ -1861,21 +2377,34 @@ function addToCart(product) {
 }
 
 
-/* =====================================================
-TAMBAH JUMLAH
-===================================================== */
+/* =========================================================
+   TAMBAH JUMLAH
+========================================================= */
 
-function increaseCart(id) {
+function increaseCart(
+  id
+) {
 
   const item =
     cart.find(
       item =>
-        String(item.id) ===
-        String(id)
+        String(
+          item.id
+        ) ===
+        String(
+          id
+        )
     );
 
-  if (!item)
+
+  if (
+    !item
+  ) {
+
     return;
+
+  }
+
 
   item.qty += 1;
 
@@ -1886,23 +2415,37 @@ function increaseCart(id) {
 }
 
 
-/* =====================================================
-KURANGI JUMLAH
-===================================================== */
+/* =========================================================
+   KURANG JUMLAH
+========================================================= */
 
-function decreaseCart(id) {
+function decreaseCart(
+  id
+) {
 
   const item =
     cart.find(
       item =>
-        String(item.id) ===
-        String(id)
+        String(
+          item.id
+        ) ===
+        String(
+          id
+        )
     );
 
-  if (!item)
+
+  if (
+    !item
+  ) {
+
     return;
 
+  }
+
+
   item.qty -= 1;
+
 
   if (
     item.qty <= 0
@@ -1911,12 +2454,17 @@ function decreaseCart(id) {
     cart =
       cart.filter(
         item =>
-          String(item.id) !==
-          String(id)
+          String(
+            item.id
+          ) !==
+          String(
+            id
+          )
       );
 
   }
 
+
   saveCart();
 
   renderCart();
@@ -1924,18 +2472,25 @@ function decreaseCart(id) {
 }
 
 
-/* =====================================================
-HAPUS
-===================================================== */
+/* =========================================================
+   HAPUS KERANJANG
+========================================================= */
 
-function removeCart(id) {
+function removeCart(
+  id
+) {
 
   cart =
     cart.filter(
       item =>
-        String(item.id) !==
-        String(id)
+        String(
+          item.id
+        ) !==
+        String(
+          id
+        )
     );
+
 
   saveCart();
 
@@ -1944,11 +2499,13 @@ function removeCart(id) {
 }
 
 
-/* =====================================================
-HARGA KERANJANG
-===================================================== */
+/* =========================================================
+   HARGA KERANJANG
+========================================================= */
 
-function getCartPrice(item) {
+function getCartPrice(
+  item
+) {
 
   const hargaJual =
     Number(
@@ -1956,9 +2513,7 @@ function getCartPrice(item) {
     ) || 0;
 
 
-  /* ==========================================
-     PROMO KHUSUS DARI URL
-  ========================================== */
+  /* Promo khusus */
 
   if (
     specialDiscount > 0
@@ -1976,9 +2531,7 @@ function getCartPrice(item) {
   }
 
 
-  /* ==========================================
-     DISKON NORMAL GOOGLE SHEET
-  ========================================== */
+  /* Diskon normal */
 
   if (
     item.hargaDiskon > 0 &&
@@ -1995,22 +2548,34 @@ function getCartPrice(item) {
 
 }
 
-/* =====================================================
+
+/* =========================================================
    RENDER KERANJANG
-===================================================== */
+========================================================= */
 
 function renderCart() {
 
-  if (!cartBox)
+  if (
+    !cartBox
+  ) {
+
+    updateCartTotal();
+
     return;
 
+  }
 
-  if (!cart.length) {
+
+  if (
+    !cart.length
+  ) {
 
     cartBox.innerHTML = `
+
       <div class="cart-empty">
         🛒 Keranjang masih kosong
       </div>
+
     `;
 
 
@@ -2022,110 +2587,109 @@ function renderCart() {
 
 
   cartBox.innerHTML =
-    cart.map(
-      item => {
+    cart
+      .map(
+        item => {
 
-        const harga =
-          getCartPrice(
-            item
-          );
-
-
-        const subtotal =
-          harga *
-          item.qty;
+          const harga =
+            getCartPrice(
+              item
+            );
 
 
-        return `
+          const subtotal =
+            harga *
+            item.qty;
 
-          <div
-            class="cart-item"
-          >
+
+          return `
 
             <div
-              class="cart-item-info"
+              class="cart-item"
             >
 
-              <strong>
-                ${escapeHTML(
-                  item.nama
-                )}
-              </strong>
+              <div
+                class="cart-item-info"
+              >
 
-              <span>
+                <strong>
+                  ${escapeHTML(
+                    item.nama
+                  )}
+                </strong>
+
+                <span>
+                  ${formatRupiah(
+                    harga
+                  )}
+                </span>
+
+              </div>
+
+
+              <div
+                class="cart-controls"
+              >
+
+                <button
+                  type="button"
+                  class="qty-button"
+                  data-action="minus"
+                  data-id="${escapeHTML(
+                    item.id
+                  )}"
+                >
+                  −
+                </button>
+
+
+                <strong>
+                  ${item.qty}
+                </strong>
+
+
+                <button
+                  type="button"
+                  class="qty-button"
+                  data-action="plus"
+                  data-id="${escapeHTML(
+                    item.id
+                  )}"
+                >
+                  +
+                </button>
+
+
+                <button
+                  type="button"
+                  class="cart-remove"
+                  data-action="remove"
+                  data-id="${escapeHTML(
+                    item.id
+                  )}"
+                >
+                  ×
+                </button>
+
+              </div>
+
+
+              <div
+                class="cart-subtotal"
+              >
                 ${formatRupiah(
-                  harga
+                  subtotal
                 )}
-              </span>
+              </div>
 
             </div>
 
+          `;
 
-            <div
-              class="cart-controls"
-            >
+        }
+      )
+      .join("");
 
-              <button
-                type="button"
-                class="qty-button"
-                data-action="minus"
-                data-id="${escapeHTML(
-                  item.id
-                )}"
-              >
-                −
-              </button>
-
-
-              <strong>
-                ${item.qty}
-              </strong>
-
-
-              <button
-                type="button"
-                class="qty-button"
-                data-action="plus"
-                data-id="${escapeHTML(
-                  item.id
-                )}"
-              >
-                +
-              </button>
-
-
-              <button
-                type="button"
-                class="cart-remove"
-                data-action="remove"
-                data-id="${escapeHTML(
-                  item.id
-                )}"
-              >
-                ×
-              </button>
-
-            </div>
-
-
-            <div
-              class="cart-subtotal"
-            >
-              ${formatRupiah(
-                subtotal
-              )}
-            </div>
-
-          </div>
-
-        `;
-
-      }
-    )
-    .join("");
-
-
-  /* Tombol + - x */
 
   cartBox
     .querySelectorAll(
@@ -2140,6 +2704,7 @@ function renderCart() {
 
             const id =
               button.dataset.id;
+
 
             const action =
               button.dataset.action;
@@ -2192,9 +2757,9 @@ function renderCart() {
 }
 
 
-/* =====================================================
-   TOTAL
-===================================================== */
+/* =========================================================
+   TOTAL KERANJANG
+========================================================= */
 
 function getCartTotal() {
 
@@ -2221,9 +2786,9 @@ function getCartTotal() {
 }
 
 
-/* =====================================================
-   JUMLAH
-===================================================== */
+/* =========================================================
+   JUMLAH KERANJANG
+========================================================= */
 
 function getCartCount() {
 
@@ -2245,9 +2810,9 @@ function getCartCount() {
 }
 
 
-/* =====================================================
+/* =========================================================
    UPDATE TOTAL
-===================================================== */
+========================================================= */
 
 function updateCartTotal() {
 
@@ -2259,7 +2824,9 @@ function updateCartTotal() {
     getCartCount();
 
 
-  if (cartCount) {
+  if (
+    cartCount
+  ) {
 
     cartCount.textContent =
       count;
@@ -2267,7 +2834,9 @@ function updateCartTotal() {
   }
 
 
-  if (cartTotal) {
+  if (
+    cartTotal
+  ) {
 
     cartTotal.textContent =
       formatRupiah(
@@ -2279,13 +2848,15 @@ function updateCartTotal() {
 }
 
 
-/* =====================================================
+/* =========================================================
    CHECKOUT WHATSAPP
-===================================================== */
+========================================================= */
 
 function checkoutWhatsApp() {
 
-  if (!cart.length) {
+  if (
+    !cart.length
+  ) {
 
     alert(
       "Keranjang masih kosong."
@@ -2322,7 +2893,11 @@ function checkoutWhatsApp() {
 
 
       message +=
-        `   ${item.qty} x ${formatRupiah(harga)} = ${formatRupiah(subtotal)}\n\n`;
+        `   ${item.qty} x ${formatRupiah(
+          harga
+        )} = ${formatRupiah(
+          subtotal
+        )}\n\n`;
 
     }
   );
@@ -2351,9 +2926,9 @@ function checkoutWhatsApp() {
 }
 
 
-/* =====================================================
+/* =========================================================
    SIMPAN KERANJANG
-===================================================== */
+========================================================= */
 
 function saveCart() {
 
@@ -2366,7 +2941,9 @@ function saveCart() {
       )
     );
 
-  } catch (error) {
+  } catch (
+    error
+  ) {
 
     console.warn(
       "Keranjang gagal disimpan:",
@@ -2378,9 +2955,9 @@ function saveCart() {
 }
 
 
-/* =====================================================
+/* =========================================================
    LOAD KERANJANG
-===================================================== */
+========================================================= */
 
 function loadCart() {
 
@@ -2392,9 +2969,12 @@ function loadCart() {
       );
 
 
-    if (!data) {
+    if (
+      !data
+    ) {
 
-      cart = [];
+      cart =
+        [];
 
       return;
 
@@ -2416,16 +2996,17 @@ function loadCart() {
 
   } catch {
 
-    cart = [];
+    cart =
+      [];
 
   }
 
 }
 
 
-/* =====================================================
-   PESAN MASUK KERANJANG
-===================================================== */
+/* =========================================================
+   PESAN KERANJANG
+========================================================= */
 
 function showCartMessage(
   productName
@@ -2437,8 +3018,13 @@ function showCartMessage(
     );
 
 
-  if (old)
+  if (
+    old
+  ) {
+
     old.remove();
+
+  }
 
 
   const toast =
@@ -2474,9 +3060,9 @@ function showCartMessage(
 }
 
 
-/* =====================================================
-   WHATSAPP
-===================================================== */
+/* =========================================================
+   WHATSAPP LINK
+========================================================= */
 
 function whatsappLink(
   message
@@ -2494,6 +3080,10 @@ function whatsappLink(
 }
 
 
+/* =========================================================
+   BUKA WHATSAPP
+========================================================= */
+
 function openWhatsApp(
   message
 ) {
@@ -2508,9 +3098,9 @@ function openWhatsApp(
 }
 
 
-/* =====================================================
+/* =========================================================
    LINK MENU
-===================================================== */
+========================================================= */
 
 function setupLinks() {
 
@@ -2566,22 +3156,39 @@ function setupLinks() {
     );
 
 
-  if (heroWA)
+  if (
+    heroWA
+  ) {
+
     heroWA.href =
       generalWA;
 
+  }
 
-  if (contactWA)
+
+  if (
+    contactWA
+  ) {
+
     contactWA.href =
       generalWA;
 
+  }
 
-  if (floatingWA)
+
+  if (
+    floatingWA
+  ) {
+
     floatingWA.href =
       generalWA;
 
+  }
 
-  if (menuGrosir) {
+
+  if (
+    menuGrosir
+  ) {
 
     menuGrosir.href =
       whatsappLink(
@@ -2591,26 +3198,41 @@ function setupLinks() {
   }
 
 
-  if (facebook)
+  if (
+    facebook
+  ) {
+
     facebook.href =
       FACEBOOK_URL;
 
+  }
 
-  if (tiktok)
+
+  if (
+    tiktok
+  ) {
+
     tiktok.href =
       TIKTOK_URL;
 
+  }
 
-  if (location)
+
+  if (
+    location
+  ) {
+
     location.href =
       LOCATION_URL;
+
+  }
 
 }
 
 
-/* =====================================================
+/* =========================================================
    MENU PROMO
-===================================================== */
+========================================================= */
 
 function setupPromoButton() {
 
@@ -2620,8 +3242,13 @@ function setupPromoButton() {
     );
 
 
-  if (!button)
+  if (
+    !button
+  ) {
+
     return;
+
+  }
 
 
   button.addEventListener(
@@ -2635,9 +3262,14 @@ function setupPromoButton() {
         "";
 
 
-      if (searchInput)
+      if (
+        searchInput
+      ) {
+
         searchInput.value =
           "";
+
+      }
 
 
       currentCategory =
@@ -2666,7 +3298,9 @@ function setupPromoButton() {
         );
 
 
-      if (productGrid) {
+      if (
+        productGrid
+      ) {
 
         productGrid.innerHTML =
           "";
@@ -2719,9 +3353,9 @@ function setupPromoButton() {
 }
 
 
-/* =====================================================
+/* =========================================================
    FORMAT RUPIAH
-===================================================== */
+========================================================= */
 
 function formatRupiah(
   value
@@ -2746,9 +3380,9 @@ function formatRupiah(
 }
 
 
-/* =====================================================
+/* =========================================================
    CACHE
-===================================================== */
+========================================================= */
 
 function saveCache(
   data
@@ -2763,7 +3397,9 @@ function saveCache(
       )
     );
 
-  } catch (error) {
+  } catch (
+    error
+  ) {
 
     console.warn(
       "Cache gagal:",
@@ -2775,6 +3411,10 @@ function saveCache(
 }
 
 
+/* =========================================================
+   LOAD CACHE
+========================================================= */
+
 function loadCache() {
 
   try {
@@ -2785,8 +3425,13 @@ function loadCache() {
       );
 
 
-    if (!data)
+    if (
+      !data
+    ) {
+
       return [];
+
+    }
 
 
     const parsed =
@@ -2810,16 +3455,21 @@ function loadCache() {
 }
 
 
-/* =====================================================
+/* =========================================================
    LOADING
-===================================================== */
+========================================================= */
 
 function showLoading(
   show
 ) {
 
-  if (!loading)
+  if (
+    !loading
+  ) {
+
     return;
+
+  }
 
 
   loading.style.display =
@@ -2830,24 +3480,29 @@ function showLoading(
 }
 
 
-/* =====================================================
+/* =========================================================
    STATUS
-===================================================== */
+========================================================= */
 
 function showStatus(
   text
 ) {
 
-  if (status)
+  if (
+    status
+  ) {
+
     status.textContent =
       text;
+
+  }
 
 }
 
 
-/* =====================================================
+/* =========================================================
    ESCAPE HTML
-===================================================== */
+========================================================= */
 
 function escapeHTML(
   value
@@ -2856,169 +3511,130 @@ function escapeHTML(
   return String(
     value ?? ""
   )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
 
 }
-/* =====================================================
+
+
+/* =========================================================
    EFEK GOYANG KERANJANG
-===================================================== */
+========================================================= */
 
 function shakeCart() {
 
-  const cartButton =
-    document.getElementById("cartButton") ||
-    document.querySelector(".cart-button") ||
-    document.querySelector(".cart-icon") ||
-    document.querySelector("[data-cart]");
+  const button =
+    document.getElementById(
+      "cartButton"
+    ) ||
+    document.querySelector(
+      ".cart-button"
+    ) ||
+    document.querySelector(
+      ".cart-icon"
+    ) ||
+    document.querySelector(
+      "[data-cart]"
+    );
 
-  const cartCount =
-    document.getElementById("cartCount");
 
-  /* Goyangkan tombol keranjang */
+  const count =
+    document.getElementById(
+      "cartCount"
+    );
 
-  if (cartButton) {
 
-    cartButton.classList.remove(
+  /* -------------------------------------------------------
+     Tombol keranjang
+  ------------------------------------------------------- */
+
+  if (
+    button
+  ) {
+
+    button.classList.remove(
       "cart-shake"
     );
 
-    /* restart animasi */
-    void cartButton.offsetWidth;
 
-    cartButton.classList.add(
+    void button.offsetWidth;
+
+
+    button.classList.add(
       "cart-shake"
     );
 
-    setTimeout(() => {
 
-      cartButton.classList.remove(
-        "cart-shake"
-      );
+    setTimeout(
+      () => {
 
-    }, 600);
+        button.classList.remove(
+          "cart-shake"
+        );
+
+      },
+      600
+    );
 
   }
 
-  /* Efek angka jumlah */
 
-  if (cartCount) {
+  /* -------------------------------------------------------
+     Angka jumlah
+  ------------------------------------------------------- */
 
-    cartCount.classList.remove(
+  if (
+    count
+  ) {
+
+    count.classList.remove(
       "cart-count-pop"
     );
 
-    void cartCount.offsetWidth;
 
-    cartCount.classList.add(
+    void count.offsetWidth;
+
+
+    count.classList.add(
       "cart-count-pop"
     );
 
-    setTimeout(() => {
 
-      cartCount.classList.remove(
-        "cart-count-pop"
-      );
+    setTimeout(
+      () => {
 
-    }, 250);
+        count.classList.remove(
+          "cart-count-pop"
+        );
+
+      },
+      250
+    );
 
   }
 
 }
-function openImageZoom(
-  images,
-  startIndex = 0
-) {
-
-  let current =
-    startIndex;
-
-  const overlay =
-    document.createElement(
-      "div"
-    );
-
-  overlay.className =
-    "image-zoom-overlay";
 
 
-  overlay.innerHTML = `
-
-    <img
-      class="zoom-image"
-      src="${escapeHTML(images[current])}"
-      draggable="false"
-    >
-
-  `;
-
-
-  document.body.appendChild(
-    overlay
-  );
-
-
-  const image =
-    overlay.querySelector(
-      ".zoom-image"
-    );
-
-
-  /* ==========================================
-     KLIK FOTO = ZOOM / KEMBALI
-  ========================================== */
-
-  image.addEventListener(
-    "click",
-    event => {
-
-      event.stopPropagation();
-
-
-      image.classList.toggle(
-        "zoomed"
-      );
-
-    }
-  );
-
-
-  /* ==========================================
-     KLIK LUAR = TUTUP
-  ========================================== */
-
-  overlay.addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target ===
-        overlay
-      ) {
-
-        overlay.remove();
-
-      }
-
-    }
-  );
-
-}
+/* =========================================================
+   SELESAI
+========================================================= */
+```
