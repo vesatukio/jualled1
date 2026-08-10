@@ -2925,3 +2925,33 @@ function shakeCart() {
   }
 
 }
+/* =====================================================
+   PWA - DUTA LED
+===================================================== */
+
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener("load", function () {
+
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then(function (registration) {
+
+        console.log(
+          "Duta LED PWA aktif:",
+          registration.scope
+        );
+
+      })
+      .catch(function (error) {
+
+        console.error(
+          "Duta LED PWA gagal:",
+          error
+        );
+
+      });
+
+  });
+
+}
