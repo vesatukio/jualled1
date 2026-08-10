@@ -587,19 +587,11 @@ function renderProducts() {
    CARD PRODUK
 ===================================================== */
 
-function createProductCard(
-  product
-) {
+function createProductCard(product) {
 
-  const card =
-    document.createElement(
-      "article"
-    );
+  const card = document.createElement("article");
 
-
-  card.className =
-    "product-card";
-
+  card.className = "product-card";
 
   const image =
     product.gambar1 ||
@@ -607,72 +599,50 @@ function createProductCard(
     product.gambar3 ||
     "https://via.placeholder.com/500?text=Duta+LED";
 
-
-  const hargaJual =
-    product.hargaJual;
-
-
-  const hargaDiskon =
-    product.hargaDiskon;
-
+  const hargaJual = product.hargaJual;
+  const hargaDiskon = product.hargaDiskon;
 
   const hasDiscount =
     hargaDiskon > 0 &&
     hargaJual > 0 &&
     hargaDiskon < hargaJual;
 
-
-  let discountHTML =
-    "";
-
+  let discountHTML = "";
 
   if (hasDiscount) {
 
-    let persen =
-      product.diskon;
-
+    let persen = product.diskon;
 
     if (!persen) {
-
-      persen =
-        Math.round(
-          (
-            1 -
-            hargaDiskon /
-            hargaJual
-          ) * 100
-        );
-
+      persen = Math.round(
+        (1 - hargaDiskon / hargaJual) * 100
+      );
     }
-
 
     discountHTML = `
       <span class="discount-badge">
         -${persen}%
       </span>
     `;
-
   }
 
+  const priceHTML = hasDiscount
 
-  const priceHTML =
-    hasDiscount
+    ? `
+      <div class="old-price">
+        ${formatRupiah(hargaJual)}
+      </div>
 
-      ? `
-        <div class="old-price">
-          ${formatRupiah(hargaJual)}
-        </div>
+      <div class="price">
+        ${formatRupiah(hargaDiskon)}
+      </div>
+    `
 
-        <div class="price">
-          ${formatRupiah(hargaDiskon)}
-        </div>
-      `
-
-      : `
-        <div class="price">
-          ${formatRupiah(hargaJual)}
-        </div>
-      `;
+    : `
+      <div class="price">
+        ${formatRupiah(hargaJual)}
+      </div>
+    `;
 
 
   card.innerHTML = `
@@ -697,7 +667,6 @@ function createProductCard(
         ${escapeHTML(product.nama)}
       </div>
 
-
       ${priceHTML}
 
 
@@ -708,33 +677,199 @@ function createProductCard(
         🛒 Beli
       </button>
 
+
+      <div class="product-share">
+
+        <button
+          type="button"
+          class="share-wa"
+          title="Bagikan ke WhatsApp"
+        >
+          💬
+        </button>
+
+        <button
+          type="button"
+          class="share-fb"
+          title="Bagikan ke Facebook"
+        >
+          f
+        </button>
+
+        <button
+          type="button"
+          class="share-copy"
+          title="Salin link produk"
+        >
+          🔗
+        </button>
+
+      </div>
+
     </div>
 
   `;
 
 
-  const button =
-    card.querySelector(
-      ".buy-button"
-    );
+  /* =========================
+     TOMBOL BELI
+  ========================= */
+
+  const buyButton =
+    card.querySelector(".buy-button");
+
+  buyButton.addEventListener(
+    "click",
+    () => {
+      buyProduct(product);
+    }
+  );
 
 
-  button.addEventListener(
+  /* =========================
+     SHARE WHATSAPP
+  ========================= */
+
+  const shareWA =
+    card.querySelector(".share-wa");
+
+  shareWA.addEventListener(
     "click",
     () => {
 
-      buyProduct(
-        product
+      const link =
+        getProductLink(product);
+
+      const message =
+        `Halo Duta LED, saya ingin melihat produk ${product.nama}.\n\n${link}`;
+
+      openWhatsApp(message);
+
+    }
+  );
+
+
+  /* =========================
+     SHARE FACEBOOK
+  ========================= */
+
+  const shareFB =
+    card.querySelector(".share-fb");
+
+  shareFB.addEventListener(
+    "click",
+    () => {
+
+      const link =
+        getProductLink(product);
+
+      const facebookURL =
+        "https://www.facebook.com/sharer/sharer.php?u=" +
+        encodeURIComponent(link);
+
+      window.open(
+        facebookURL,
+        "_blank",
+        "width=600,height=500"
       );
 
     }
   );
 
 
-  return card;
+  /* =========================
+     SALIN LINK
+  ========================= */
 
+  const shareCopy =
+    card.querySelector(".share-copy");
+
+  shareCopy.addEventListener(
+    "click",
+    async () => {
+
+      const link =
+        getProductLink(product);
+
+      try {
+
+        await navigator.clipboard.writeText(
+          link
+        );
+
+        shareCopy.textContent = "✓";
+
+        setTimeout(() => {
+          shareCopy.textContent = "🔗";
+        }, 1500);
+
+      } catch (error) {
+
+        /* Fallback HP/browser lama */
+
+        const textarea =
+          document.createElement("textarea");
+
+        textarea.value = link;
+
+        document.body.appendChild(
+          textarea
+        );
+
+        textarea.select();
+
+        document.execCommand(
+          "copy"
+        );
+
+        textarea.remove();
+
+        shareCopy.textContent = "✓";
+
+        setTimeout(() => {
+          shareCopy.textContent = "🔗";
+        }, 1500);
+
+      }
+
+    }
+  );
+
+
+  return card;
 }
 
+
+/* =====================================================
+   LINK PRODUK
+===================================================== */
+
+function getProductLink(product) {
+
+  const url =
+    new URL(
+      window.location.href
+    );
+
+  if (product.id) {
+
+    url.searchParams.set(
+      "id",
+      product.id
+    );
+
+  }
+
+  /*
+    Hapus anchor agar link
+    lebih bersih saat dibagikan.
+  */
+
+  url.hash = "";
+
+  return url.toString();
+
+}
 
 /* =====================================================
    BELI PRODUK
