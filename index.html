@@ -555,7 +555,91 @@
   </span>
 
 </footer>
+<!-- =====================================================
+     FLOATING CART
+===================================================== -->
 
+<button
+  id="cartButton"
+  class="floating-cart"
+  type="button"
+  aria-label="Buka keranjang"
+>
+  🛒
+  <span id="cartCount">0</span>
+</button>
+
+
+<!-- =====================================================
+     CART PANEL
+===================================================== -->
+
+<div
+  id="cartOverlay"
+  class="cart-overlay hidden"
+></div>
+
+
+<div
+  id="cartPanel"
+  class="cart-panel"
+>
+
+  <div class="cart-header">
+
+    <strong>
+      🛒 Keranjang Belanja
+    </strong>
+
+    <button
+      id="cartClose"
+      type="button"
+      class="cart-close"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div
+    id="cartBox"
+    class="cart-box"
+  >
+
+    <div class="cart-empty">
+      🛒 Keranjang masih kosong
+    </div>
+
+  </div>
+
+
+  <div class="cart-footer">
+
+    <div class="cart-total-row">
+
+      <span>
+        Total
+      </span>
+
+      <strong id="cartTotal">
+        Rp0
+      </strong>
+
+    </div>
+
+
+    <button
+      id="checkoutButton"
+      type="button"
+      class="checkout-button"
+    >
+      💬 Pesan via WhatsApp
+    </button>
+
+  </div>
+
+</div>
 
 <!-- =========================
      FLOATING WHATSAPP
