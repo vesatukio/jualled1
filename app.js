@@ -1,13 +1,3 @@
-/* =====================================================
-   DUTA LED
-   APP.JS
-===================================================== */
-
-
-/* =====================================================
-   KONFIGURASI
-===================================================== */
-
 const API_URL =
   "https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
 
@@ -16,32 +6,33 @@ const WHATSAPP =
   "6283157925577";
 
 
-/*
- * GANTI LINK DI BAWAH INI
- */
-
 const FACEBOOK_URL = "#";
-
 const TIKTOK_URL = "#";
-
 const LOCATION_URL = "#";
 
 
-/*
- * CACHE
- */
-
 const CACHE_KEY =
-  "dutaled_products_v3";
+  "dutaled_produk_v4";
 
 
-/* =====================================================
-   ELEMENT
-===================================================== */
+let products = [];
+
+let selectedCategory = "Semua";
+
 
 const grid =
   document.getElementById(
     "productGrid"
+  );
+
+const categoryBar =
+  document.getElementById(
+    "categoryBar"
+  );
+
+const searchInput =
+  document.getElementById(
+    "searchInput"
   );
 
 const loading =
@@ -51,26 +42,14 @@ const loading =
 
 const empty =
   document.getElementById(
-    "emptyState"
-  );
-
-const search =
-  document.getElementById(
-    "searchInput"
+    "empty"
   );
 
 const status =
   document.getElementById(
-    "connectionStatus"
+    "status"
   );
 
-
-let products = [];
-
-
-/* =====================================================
-   INIT
-===================================================== */
 
 document.addEventListener(
   "DOMContentLoaded",
@@ -82,57 +61,49 @@ function init() {
 
   setupLinks();
 
-  updateStatus();
-
   loadProducts();
 
-  registerServiceWorker();
+  registerSW();
 
 }
 
-
-/* =====================================================
-   LINKS
-===================================================== */
 
 function setupLinks() {
 
   const message =
     "Halo Duta LED, saya ingin bertanya tentang produk.";
 
-  const whatsapp =
-    createWhatsappLink(
-      message
-    );
+  const link =
+    whatsappLink(message);
 
 
   document.getElementById(
-    "heroWhatsapp"
-  ).href = whatsapp;
+    "heroWA"
+  ).href = link;
 
 
   document.getElementById(
-    "contactWhatsapp"
-  ).href = whatsapp;
+    "contactWA"
+  ).href = link;
 
 
   document.getElementById(
-    "floatingWhatsapp"
-  ).href = whatsapp;
+    "floatingWA"
+  ).href = link;
 
 
   document.getElementById(
-    "facebookLink"
+    "facebook"
   ).href = FACEBOOK_URL;
 
 
   document.getElementById(
-    "tiktokLink"
+    "tiktok"
   ).href = TIKTOK_URL;
 
 
   document.getElementById(
-    "locationLink"
+    "location"
   ).href = LOCATION_URL;
 
 
@@ -144,13 +115,7 @@ function setupLinks() {
 }
 
 
-/* =====================================================
-   WHATSAPP
-===================================================== */
-
-function createWhatsappLink(
-  message
-) {
+function whatsappLink(message) {
 
   return (
     "https://wa.me/" +
@@ -162,130 +127,47 @@ function createWhatsappLink(
 }
 
 
-function productWhatsapp(
-  productName
-) {
-
-  return createWhatsappLink(
-    `Halo Duta LED, saya ingin pesan ${productName}.`
-  );
-
-}
-
-
-/* =====================================================
-   STATUS INTERNET
-===================================================== */
-
-function updateStatus() {
-
-  if (
-    navigator.onLine
-  ) {
-
-    status.textContent =
-      "● Online";
-
-    status.className =
-      "connection-status online";
-
-  } else {
-
-    status.textContent =
-      "● Offline • menampilkan produk tersimpan";
-
-    status.className =
-      "connection-status offline";
-
-  }
-
-}
-
-
-window.addEventListener(
-  "online",
-  () => {
-
-    updateStatus();
-
-    /*
-     * Saat koneksi kembali,
-     * update katalog otomatis.
-     */
-
-    loadOnlineProducts();
-
-  }
-);
-
-
-window.addEventListener(
-  "offline",
-  updateStatus
-);
-
-
-/* =====================================================
-   LOAD PRODUK
-===================================================== */
+/* =========================================
+   LOAD DATA
+========================================= */
 
 async function loadProducts() {
 
-  /*
-   * Tampilkan cache dahulu.
-   */
-
-  const cached =
-    getCachedProducts();
+  const cache =
+    getCache();
 
 
-  if (
-    cached.length
-  ) {
+  if (cache.length) {
 
-    products =
-      cached;
+    products = cache;
 
-    renderProducts(
-      products
-    );
+    createCategories();
+
+    filterProducts();
 
     hideLoading();
 
+    setStatus(
+      navigator.onLine
+        ? "● Online • katalog tersimpan"
+        : "● Offline • katalog tersimpan"
+    );
+
   }
 
-
-  /*
-   * Jika online,
-   * ambil data terbaru.
-   */
 
   if (
-    navigator.onLine
+    !navigator.onLine
   ) {
 
-    await loadOnlineProducts();
-
-  } else {
-
-    if (
-      !cached.length
-    ) {
-
-      showOfflineEmpty();
-
+    if (!cache.length) {
+      showOffline();
     }
+
+    return;
 
   }
 
-}
-
-
-/* =====================================================
-   ONLINE DATA
-===================================================== */
-
-async function loadOnlineProducts() {
 
   try {
 
@@ -295,20 +177,15 @@ async function loadOnlineProducts() {
         "?action=produk&v=" +
         Date.now(),
         {
-          method: "GET",
           cache: "no-store"
         }
       );
 
 
-    if (
-      !response.ok
-    ) {
-
+    if (!response.ok) {
       throw new Error(
-        "Server API tidak merespons."
+        "API tidak merespons"
       );
-
     }
 
 
@@ -317,169 +194,283 @@ async function loadOnlineProducts() {
 
 
     if (
-      !result.success
+      !result.success ||
+      !Array.isArray(result.data)
     ) {
-
       throw new Error(
         result.message ||
-        "API gagal."
+        "Data tidak valid"
       );
-
     }
 
-
-    if (
-      !Array.isArray(
-        result.data
-      )
-    ) {
-
-      throw new Error(
-        "Format data produk salah."
-      );
-
-    }
-
-
-    /*
-     * Data terbaru.
-     */
 
     products =
       result.data;
 
 
-    /*
-     * Simpan ke browser.
-     */
-
-    saveProducts(
+    saveCache(
       products
     );
 
 
-    /*
-     * Tampilkan.
-     */
+    createCategories();
 
-    renderProducts(
-      products
-    );
-
+    filterProducts();
 
     hideLoading();
 
-    updateStatus();
+
+    setStatus(
+      "● Online • katalog terbaru"
+    );
 
 
   } catch (error) {
 
-    console.error(
-      "API:",
-      error
-    );
+    console.error(error);
 
 
-    /*
-     * Jika cache sudah ada,
-     * tidak perlu mengganggu tampilan.
-     */
-
-    if (
-      products.length
-    ) {
-
-      hideLoading();
-
-      return;
-
+    if (!products.length) {
+      showError();
     }
 
-
-    showApiError();
-
   }
 
 }
 
 
-/* =====================================================
-   CACHE
-===================================================== */
+/* =========================================
+   KATEGORI
+========================================= */
 
-function saveProducts(
-  data
+function createCategories() {
+
+  const categories =
+    [
+      ...new Set(
+
+        products
+          .map(
+            product =>
+              String(
+                product.kategori || ""
+              ).trim()
+          )
+          .filter(Boolean)
+
+      )
+    ];
+
+
+  categories.sort(
+    (a, b) =>
+      a.localeCompare(
+        b,
+        "id"
+      )
+  );
+
+
+  categoryBar.innerHTML = "";
+
+
+  /*
+   * SEMUA
+   */
+
+  categoryBar.appendChild(
+    createCategoryButton(
+      "Semua"
+    )
+  );
+
+
+  /*
+   * KATEGORI DARI SHEET
+   */
+
+  categories.forEach(
+    category => {
+
+      categoryBar.appendChild(
+        createCategoryButton(
+          category
+        )
+      );
+
+    }
+  );
+
+}
+
+
+function createCategoryButton(
+  category
 ) {
 
-  try {
-
-    localStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify(data)
+  const button =
+    document.createElement(
+      "button"
     );
 
-  } catch (error) {
 
-    console.warn(
-      "Cache gagal:",
-      error
+  button.type =
+    "button";
+
+
+  button.textContent =
+    category;
+
+
+  button.className =
+    "category-button";
+
+
+  if (
+    category ===
+    selectedCategory
+  ) {
+
+    button.classList.add(
+      "active"
     );
 
   }
 
-}
+
+  button.addEventListener(
+    "click",
+    function() {
+
+      selectedCategory =
+        category;
 
 
-function getCachedProducts() {
+      document
+        .querySelectorAll(
+          ".category-button"
+        )
+        .forEach(
+          item =>
+            item.classList.remove(
+              "active"
+            )
+        );
 
-  try {
 
-    const saved =
-      localStorage.getItem(
-        CACHE_KEY
+      button.classList.add(
+        "active"
       );
 
 
-    if (
-      !saved
-    ) {
-
-      return [];
+      filterProducts();
 
     }
+  );
 
 
-    const data =
-      JSON.parse(saved);
-
-
-    return Array.isArray(data)
-      ? data
-      : [];
-
-  } catch (error) {
-
-    return [];
-
-  }
+  return button;
 
 }
 
 
-/* =====================================================
-   RENDER PRODUK
-===================================================== */
+/* =========================================
+   FILTER
+========================================= */
+
+function filterProducts() {
+
+  const keyword =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+
+  let result =
+    products;
+
+
+  if (
+    selectedCategory !==
+    "Semua"
+  ) {
+
+    result =
+      result.filter(
+        product =>
+          String(
+            product.kategori || ""
+          )
+          .trim()
+          .toLowerCase() ===
+          selectedCategory
+            .toLowerCase()
+      );
+
+  }
+
+
+  if (keyword) {
+
+    result =
+      result.filter(
+        product => {
+
+          const name =
+            String(
+              product.nama || ""
+            ).toLowerCase();
+
+
+          const category =
+            String(
+              product.kategori || ""
+            ).toLowerCase();
+
+
+          const description =
+            String(
+              product.diskipsi || ""
+            ).toLowerCase();
+
+
+          return (
+            name.includes(keyword) ||
+            category.includes(keyword) ||
+            description.includes(keyword)
+          );
+
+        }
+      );
+
+  }
+
+
+  renderProducts(
+    result
+  );
+
+}
+
+
+searchInput.addEventListener(
+  "input",
+  filterProducts
+);
+
+
+/* =========================================
+   RENDER
+========================================= */
 
 function renderProducts(
-  data
+  list
 ) {
 
   grid.innerHTML = "";
 
 
-  if (
-    !data.length
-  ) {
+  if (!list.length) {
 
     empty.classList.remove(
       "hidden"
@@ -495,14 +486,11 @@ function renderProducts(
   );
 
 
-  data.forEach(
-    (
-      product,
-      index
-    ) => {
+  list.forEach(
+    (product, index) => {
 
       grid.appendChild(
-        createProductCard(
+        createCard(
           product,
           index
         )
@@ -514,11 +502,7 @@ function renderProducts(
 }
 
 
-/* =====================================================
-   PRODUCT CARD
-===================================================== */
-
-function createProductCard(
+function createCard(
   product,
   index
 ) {
@@ -542,7 +526,7 @@ function createProductCard(
     product.gambar1 ||
     product.gambar2 ||
     product.gambar3 ||
-    createPlaceholder();
+    placeholder();
 
 
   const price =
@@ -551,38 +535,27 @@ function createProductCard(
     ) || 0;
 
 
-  const discountPrice =
+  const salePrice =
     Number(
       product.hargaDiskon
     ) || 0;
 
 
-  const hasDiscount =
-    discountPrice > 0 &&
-    discountPrice < price;
-
-
-  let discount =
+  const discount =
     Number(
       product.diskon
     ) || 0;
 
 
-  if (
-    hasDiscount &&
-    !discount &&
-    price
-  ) {
+  const hasDiscount =
+    salePrice > 0 &&
+    salePrice < price;
 
-    discount =
-      Math.round(
-        (
-          (price - discountPrice) /
-          price
-        ) * 100
-      );
 
-  }
+  const finalPrice =
+    hasDiscount
+      ? salePrice
+      : price;
 
 
   card.innerHTML = `
@@ -592,13 +565,12 @@ function createProductCard(
       ${
         hasDiscount
           ? `
-            <span class="discount-badge">
-              -${discount}%
+            <span class="discount">
+              -${discount || ""}%
             </span>
           `
           : ""
       }
-
 
       <img
         src="${escapeHTML(image)}"
@@ -613,7 +585,14 @@ function createProductCard(
     </div>
 
 
-    <div class="product-content">
+    <div class="product-info">
+
+      <span class="product-category">
+        ${escapeHTML(
+          product.kategori || "Produk"
+        )}
+      </span>
+
 
       <h3>
         ${escapeHTML(name)}
@@ -623,7 +602,7 @@ function createProductCard(
       ${
         product.diskipsi
           ? `
-            <p class="product-description">
+            <p>
               ${escapeHTML(
                 product.diskipsi
               )}
@@ -633,47 +612,42 @@ function createProductCard(
       }
 
 
-      <div class="product-price">
+      <div class="price">
 
         ${
           hasDiscount
             ? `
-              <span class="old-price">
-                ${formatRupiah(price)}
-              </span>
-
-              <strong>
-                ${formatRupiah(
-                  discountPrice
-                )}
-              </strong>
+              <del>
+                ${rupiah(price)}
+              </del>
             `
-            : `
-              <strong>
-                ${formatRupiah(price)}
-              </strong>
-            `
+            : ""
         }
+
+        <strong>
+          ${rupiah(finalPrice)}
+        </strong>
 
       </div>
 
 
-      <div class="product-buttons">
+      <div class="card-buttons">
 
         <a
-          href="${productWhatsapp(name)}"
+          class="buy"
           target="_blank"
           rel="noopener"
-          class="buy-button"
+          href="${whatsappLink(
+            `Halo Duta LED, saya ingin pesan ${name}.`
+          )}"
         >
           💬 Beli
         </a>
 
 
         <button
+          class="share"
           type="button"
-          class="share-button"
-          aria-label="Bagikan produk"
         >
           ↗
         </button>
@@ -685,19 +659,15 @@ function createProductCard(
   `;
 
 
-  const shareButton =
-    card.querySelector(
-      ".share-button"
+  card
+    .querySelector(".share")
+    .addEventListener(
+      "click",
+      () =>
+        shareProduct(
+          product
+        )
     );
-
-
-  shareButton.addEventListener(
-    "click",
-    () =>
-      shareProduct(
-        product
-      )
-  );
 
 
   return card;
@@ -705,13 +675,178 @@ function createProductCard(
 }
 
 
-/* =====================================================
-   FORMAT HARGA
-===================================================== */
+/* =========================================
+   SHARE
+========================================= */
 
-function formatRupiah(
-  value
+async function shareProduct(
+  product
 ) {
+
+  const name =
+    product.nama ||
+    "Produk Duta LED";
+
+
+  const url =
+    window.location.href;
+
+
+  if (
+    navigator.share
+  ) {
+
+    try {
+
+      await navigator.share({
+
+        title: name,
+
+        text:
+          `${name} - Duta LED`,
+
+        url: url
+
+      });
+
+      return;
+
+    } catch (e) {}
+
+  }
+
+
+  window.open(
+    whatsappLink(
+      `${name} - Duta LED\n${url}`
+    ),
+    "_blank"
+  );
+
+}
+
+
+/* =========================================
+   CACHE
+========================================= */
+
+function saveCache(data) {
+
+  try {
+
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify(data)
+    );
+
+  } catch (e) {
+
+    console.warn(
+      "Cache gagal",
+      e
+    );
+
+  }
+
+}
+
+
+function getCache() {
+
+  try {
+
+    const data =
+      localStorage.getItem(
+        CACHE_KEY
+      );
+
+
+    if (!data) {
+      return [];
+    }
+
+
+    const parsed =
+      JSON.parse(data);
+
+
+    return Array.isArray(parsed)
+      ? parsed
+      : [];
+
+  } catch (e) {
+
+    return [];
+
+  }
+
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+function setStatus(text) {
+
+  status.textContent =
+    text;
+
+
+  status.className =
+    "status";
+
+
+  if (
+    navigator.onLine
+  ) {
+
+    status.classList.add(
+      "online"
+    );
+
+  } else {
+
+    status.classList.add(
+      "offline"
+    );
+
+  }
+
+}
+
+
+window.addEventListener(
+  "online",
+  function() {
+
+    setStatus(
+      "● Online • memperbarui katalog"
+    );
+
+    loadProducts();
+
+  }
+);
+
+
+window.addEventListener(
+  "offline",
+  function() {
+
+    setStatus(
+      "● Offline • menggunakan cache"
+    );
+
+  }
+);
+
+
+/* =========================================
+   UTILITAS
+========================================= */
+
+function rupiah(value) {
 
   return new Intl.NumberFormat(
     "id-ID",
@@ -727,133 +862,36 @@ function formatRupiah(
 }
 
 
-/* =====================================================
-   SEARCH
-===================================================== */
+function escapeHTML(value) {
 
-search.addEventListener(
-  "input",
-  function () {
-
-    const keyword =
-      this.value
-        .trim()
-        .toLowerCase();
-
-
-    if (
-      !keyword
-    ) {
-
-      renderProducts(
-        products
-      );
-
-      return;
-
-    }
-
-
-    const result =
-      products.filter(
-        product =>
-          String(
-            product.nama || ""
-          )
-          .toLowerCase()
-          .includes(
-            keyword
-          )
-      );
-
-
-    renderProducts(
-      result
+  return String(
+    value || ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
     );
-
-  }
-);
-
-
-/* =====================================================
-   SHARE
-===================================================== */
-
-async function shareProduct(
-  product
-) {
-
-  const name =
-    product.nama ||
-    "Produk Duta LED";
-
-
-  const url =
-    window.location.origin +
-    window.location.pathname;
-
-
-  const text =
-    `${name} - Duta LED`;
-
-
-  /*
-   * HP modern
-   */
-
-  if (
-    navigator.share
-  ) {
-
-    try {
-
-      await navigator.share({
-
-        title: name,
-
-        text: text,
-
-        url: url
-
-      });
-
-      return;
-
-    } catch (error) {
-
-      /*
-       * User membatalkan share.
-       */
-
-    }
-
-  }
-
-
-  /*
-   * Fallback WhatsApp
-   */
-
-  const wa =
-    createWhatsappLink(
-      `${text}\n${url}`
-    );
-
-
-  window.open(
-    wa,
-    "_blank",
-    "noopener"
-  );
 
 }
 
 
-/* =====================================================
-   PLACEHOLDER
-===================================================== */
-
-function createPlaceholder() {
+function placeholder() {
 
   return (
     "data:image/svg+xml," +
@@ -872,7 +910,6 @@ function createPlaceholder() {
           x="250"
           y="250"
           text-anchor="middle"
-          dominant-baseline="middle"
           font-family="Arial"
           font-size="32"
           fill="#999"
@@ -887,44 +924,9 @@ function createPlaceholder() {
 }
 
 
-/* =====================================================
-   SECURITY
-===================================================== */
-
-function escapeHTML(
-  value
-) {
-
-  return String(
-    value || ""
-  )
-  .replace(
-    /&/g,
-    "&amp;"
-  )
-  .replace(
-    /</g,
-    "&lt;"
-  )
-  .replace(
-    />/g,
-    "&gt;"
-  )
-  .replace(
-    /"/g,
-    "&quot;"
-  )
-  .replace(
-    /'/g,
-    "&#039;"
-  );
-
-}
-
-
-/* =====================================================
+/* =========================================
    LOADING
-===================================================== */
+========================================= */
 
 function hideLoading() {
 
@@ -935,14 +937,16 @@ function hideLoading() {
 }
 
 
-function showOfflineEmpty() {
+function showOffline() {
 
   loading.innerHTML = `
-    <div class="offline-message">
-      <strong>Belum ada katalog tersimpan.</strong>
+    <div class="offline-box">
+      <strong>
+        Belum ada katalog tersimpan
+      </strong>
       <span>
         Buka halaman saat online
-        untuk memuat produk.
+        terlebih dahulu.
       </span>
     </div>
   `;
@@ -950,17 +954,15 @@ function showOfflineEmpty() {
 }
 
 
-function showApiError() {
+function showError() {
 
   loading.innerHTML = `
-    <div class="offline-message">
+    <div class="offline-box">
       <strong>
-        Katalog belum dapat dimuat.
+        Katalog belum dapat dimuat
       </strong>
-
       <span>
-        Periksa koneksi internet
-        atau Apps Script.
+        Periksa koneksi atau Apps Script.
       </span>
     </div>
   `;
@@ -968,34 +970,23 @@ function showApiError() {
 }
 
 
-/* =====================================================
+/* =========================================
    SERVICE WORKER
-===================================================== */
+========================================= */
 
-function registerServiceWorker() {
+function registerSW() {
 
   if (
     "serviceWorker" in navigator
   ) {
 
-    window.addEventListener(
-      "load",
-      function () {
-
-        navigator.serviceWorker
-          .register(
-            "./sw.js"
-          )
-          .catch(
-            error =>
-              console.warn(
-                "SW:",
-                error
-              )
-          );
-
-      }
-    );
+    navigator.serviceWorker
+      .register(
+        "./sw.js"
+      )
+      .catch(
+        console.error
+      );
 
   }
 
