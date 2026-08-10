@@ -1108,30 +1108,34 @@ function createProductCard(
 
 
   shareFB.addEventListener(
-    "click",
-    () => {
+  "click",
+  () => {
 
-      const link =
-        getProductLink(
-          product
-        );
+    const link =
+      getProductLink(product);
 
+    const harga =
+      getProductPrice(product);
 
-      const facebookURL =
-        "https://www.facebook.com/sharer/sharer.php?u=" +
-        encodeURIComponent(
-          link
-        );
+    const text =
+      `${product.nama}\n` +
+      `${formatRupiah(harga)}\n` +
+      `${link}`;
 
+    const facebookURL =
+      "https://www.facebook.com/sharer/sharer.php?" +
+      "u=" +
+      encodeURIComponent(link) +
+      "&quote=" +
+      encodeURIComponent(text);
 
-      window.open(
-        facebookURL,
-        "_blank"
-      );
+    window.open(
+      facebookURL,
+      "_blank"
+    );
 
-    }
-  );
-
+  }
+);
 
   /* =================================================
      COPY LINK
