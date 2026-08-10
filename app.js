@@ -2955,3 +2955,117 @@ if ("serviceWorker" in navigator) {
   });
 
 }
+/* =====================================================
+   INSTALL PROMPT
+===================================================== */
+
+let deferredPrompt = null;
+
+const installPWA =
+  document.getElementById("installPWA");
+
+const installButton =
+  document.getElementById("installButton");
+
+const installClose =
+  document.getElementById("installClose");
+
+
+window.addEventListener(
+  "beforeinstallprompt",
+  function (event) {
+
+    event.preventDefault();
+
+    deferredPrompt = event;
+
+    // Jangan tampilkan kalau sudah pernah ditutup
+    if (
+      localStorage.getItem("dutaled_install_closed")
+      !== "1"
+    ) {
+
+      if (installPWA) {
+        installPWA.classList.remove("hidden");
+      }
+
+    }
+
+  }
+);
+
+
+if (installButton) {
+
+  installButton.addEventListener(
+    "click",
+    async function () {
+
+      if (!deferredPrompt) {
+        return;
+      }
+
+      deferredPrompt.prompt();
+
+      const result =
+        await deferredPrompt.userChoice;
+
+      console.log(
+        "Install Duta LED:",
+        result.outcome
+      );
+
+      deferredPrompt = null;
+
+      if (installPWA) {
+        installPWA.classList.add("hidden");
+      }
+
+    }
+  );
+
+}
+
+
+if (installClose) {
+
+  installClose.addEventListener(
+    "click",
+    function () {
+
+      localStorage.setItem(
+        "dutaled_install_closed",
+        "1"
+      );
+
+      if (installPWA) {
+        installPWA.classList.add("hidden");
+      }
+
+    }
+  );
+
+}
+
+
+window.addEventListener(
+  "appinstalled",
+  function () {
+
+    console.log(
+      "Duta LED berhasil di-install"
+    );
+
+    localStorage.setItem(
+      "dutaled_installed",
+      "1"
+    );
+
+    if (installPWA) {
+      installPWA.classList.add("hidden");
+    }
+
+    deferredPrompt = null;
+
+  }
+);
