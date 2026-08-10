@@ -572,6 +572,18 @@
 
 
 <script src="app.js"></script>
-
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js")
+      .then(function () {
+        console.log("Duta LED PWA aktif");
+      })
+      .catch(function (error) {
+        console.log("PWA gagal:", error);
+      });
+  });
+}
+</script>
 </body>
 </html>
