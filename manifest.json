@@ -1,11 +1,24 @@
 {
   "name": "Duta LED | Listrik & Elektronik",
   "short_name": "Duta LED",
-  "description": "Lampu LED, modul LED dan sparepart dengan harga terjangkau.",
-  "lang": "id-ID",
+  "description": "Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#ff7200"
+  "theme_color": "#ff7200",
+  "lang": "id-ID",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
