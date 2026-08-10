@@ -1212,3 +1212,113 @@ img {
   }
 
 }
+/* =====================================================
+   GALERI 3 GAMBAR PRODUK
+   Swipe kiri/kanan + klik zoom
+===================================================== */
+
+.product-gallery {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #fff;
+  touch-action: pan-y;
+}
+
+.gallery-track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.25s ease;
+}
+
+.gallery-slide {
+  min-width: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gallery-slide img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+
+  cursor: zoom-in;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+
+/* =====================================================
+   TITIK INDIKATOR GAMBAR
+===================================================== */
+
+.gallery-dots {
+  position: absolute;
+  bottom: 7px;
+  left: 0;
+  right: 0;
+
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+
+  z-index: 5;
+}
+
+.gallery-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+  background: #ccc;
+}
+
+.gallery-dot.active {
+  background: #ff7200;
+}
+
+
+/* =====================================================
+   ZOOM FOTO
+===================================================== */
+
+.image-zoom-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 99999;
+
+  background: rgba(0, 0, 0, 0.92);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.zoom-image {
+  max-width: 92vw;
+  max-height: 88vh;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+
+  cursor: zoom-in;
+
+  user-select: none;
+  -webkit-user-drag: none;
+
+  transition: transform 0.2s ease;
+}
+
+.zoom-image.zoomed {
+  transform: scale(2);
+
+  cursor: zoom-out;
+}
