@@ -1413,13 +1413,14 @@ function addToCart(
 
   saveCart();
 
-  renderCart();
+renderCart();
 
-  showCartMessage(
-    product.nama
-  );
+/* Efek keranjang */
+shakeCart();
 
-}
+showCartMessage(
+  product.nama
+);
 
 
 /* =====================================================
@@ -2450,5 +2451,70 @@ function escapeHTML(
       /'/g,
       "&#039;"
     );
+
+}
+/* =====================================================
+   EFEK GOYANG KERANJANG
+===================================================== */
+
+function shakeCart() {
+
+  const cartButton =
+    document.getElementById("cartButton") ||
+    document.querySelector(".cart-button") ||
+    document.querySelector(".cart-icon") ||
+    document.querySelector("[data-cart]");
+
+  const cartCount =
+    document.getElementById("cartCount");
+
+  /* Goyangkan tombol keranjang */
+
+  if (cartButton) {
+
+    cartButton.classList.remove(
+      "cart-shake"
+    );
+
+    /* restart animasi */
+    void cartButton.offsetWidth;
+
+    cartButton.classList.add(
+      "cart-shake"
+    );
+
+    setTimeout(() => {
+
+      cartButton.classList.remove(
+        "cart-shake"
+      );
+
+    }, 600);
+
+  }
+
+  /* Efek angka jumlah */
+
+  if (cartCount) {
+
+    cartCount.classList.remove(
+      "cart-count-pop"
+    );
+
+    void cartCount.offsetWidth;
+
+    cartCount.classList.add(
+      "cart-count-pop"
+    );
+
+    setTimeout(() => {
+
+      cartCount.classList.remove(
+        "cart-count-pop"
+      );
+
+    }, 250);
+
+  }
 
 }
