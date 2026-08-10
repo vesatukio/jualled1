@@ -1,122 +1,1168 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duta Terang LED</title>
-    
-    <!-- Meta Tags Utama -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Duta Terang LED | Solusi Sparepart & Audio">
-<meta property="og:description" content="Hemat biaya servis lampu! Sedia LED AC, Driver, & Sparepart Audio kualitas teknisi.">
-<meta property="og:image" content="https://vesatukio.github.io/jualled/icon.png"> <!-- PASTIKAN LINK INI VALID -->
-<meta property="og:url" content="https://vesatukio.github.io/jualled/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<!-- Tambahan untuk WhatsApp/Twitter agar gambar besar -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://vesatukio.github.io/jualled/icon.png">
+  <title>Duta LED | Listrik & Elektronik</title>
 
-    <!-- HUBUNGKAN KE CSS -->
-    <link rel="stylesheet" href="style.css">
-    
-    <link rel="manifest" href="manifest.json">
-    <link rel="preconnect" href="https://i.imghippo.com">
-    <link rel="preconnect" href="https://script.googleusercontent.com">
+  <meta name="description"
+    content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp.">
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7H75Z5DYFZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-7H75Z5DYFZ');
-    </script>
+  <meta property="og:title"
+    content="Duta LED | Listrik & Elektronik">
+
+  <meta property="og:description"
+    content="Lampu LED, modul LED dan sparepart dengan harga terjangkau. Eceran dan grosir. Pesan mudah melalui WhatsApp.">
+
+  <meta property="og:type" content="website">
+
+  <meta property="og:image"
+    content="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200">
+
+  <meta name="theme-color" content="#ff7200">
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="manifest" href="manifest.json">
+
 </head>
+
 <body>
 
-<div class="top-nav">
-    <header>
-        <div style="font-weight: 900; font-size: 18px; letter-spacing: 1px;">DUTA TERANG LED</div>
-        <div style="font-size: 11px; background: rgba(0,0,0,0.15); padding: 5px 12px; border-radius: 20px;">📲 1.284 Terpasang</div>
-    </header>
-    
-    <div class="promo-running">
-        <marquee scrollamount="5" style="font-family: Arial, sans-serif; font-weight: bold;">
-            📢 INFO: Sparepart LED Berkualitas | Ready Stok LED AC 5W-50W | Bisa COD (Bayar di Tempat) | Garansi Terjamin
-        </marquee>
+<header class="header">
+
+  <div class="brand">
+
+    <div class="logo">D</div>
+
+    <div>
+      <strong>Duta LED</strong>
+      <span>Listrik dan Elektronik</span>
     </div>
 
-    <div id="cat-bar"></div>
-</div>
+  </div>
 
-<div id="list" class="container">
-    <p style="grid-column: span 2; text-align: center; padding: 50px; color: #888;">Menghubungkan ke server...</p>
-</div>
+  <a href="#produk" class="header-btn">
+    Belanja
+  </a>
 
-<button id="btn-install-float" onclick="actionInstall()">
-    <span>📲</span><span style="writing-mode: vertical-rl; margin-top:5px; font-weight: bold;">INSTALL</span>
-</button>
+</header>
 
-<div id="zoomModal" class="modal" onclick="this.style.display='none'">
-    <img id="imgZoom" src="" style="max-width:90%; max-height:80%; border-radius:10px; border: 5px solid white;">
-</div>
 
-<div id="installModal" class="modal">
-    <div class="promo-box">
-        <div style="font-size: 60px; margin-bottom: 10px;">🔥</div>
-        <h3 style="margin:0; font-weight:900; color:#222;">PROMO KHUSUS!</h3>
-        <div style="background: #fff0f4; border: 2px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0;">
-            <p style="color: var(--pink); font-weight: 800; margin: 0; font-size: 16px;">DISKON & FREE ONGKIR</p>
-            <p style="color: #333; font-size: 12px; margin: 8px 0 0;">Minimal order <b>100 biji</b><br>(Bisa Campur Semua Produk)</p>
-        </div>
-        <button style="background: var(--pink); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer;" onclick="actionInstall()">📲 INSTALL SEKARANG</button>
-        <button style="background: none; border: none; color: #999; margin-top: 15px; cursor: pointer; font-size: 13px;" onclick="closeModal()">Nanti Saja</button>
+<main>
+
+<!-- HERO -->
+
+<section class="hero">
+
+  <div class="hero-content">
+
+    <span class="hero-label">
+      TOKO LISTRIK & ELEKTRONIK
+    </span>
+
+    <h1>
+      Listrik dan Elektronik
+    </h1>
+
+    <p>
+      Lampu LED, modul LED dan berbagai sparepart
+      dengan harga bersaing.
+    </p>
+
+    <div class="hero-buttons">
+
+      <a href="#produk"
+         class="btn btn-primary">
+        🛒 BELANJA
+      </a>
+
+      <a id="heroWA"
+         href="#"
+         class="btn btn-wa">
+        💬 CHAT WHATSAPP
+      </a>
+
     </div>
-</div>
 
-<div id="cart" class="hide">
-    <div class="cart-left">
-        <div style="display: flex; gap: 5px;">
-            <button onclick="resetCart()" style="flex:1; font-size:10px; padding:4px;">🗑️ Reset</button>
-            <button onclick="hapusIdentitas()" style="flex:1; font-size:10px; padding:4px;">❌ Hapus</button>
-        </div>
-        <input type="text" id="f_nama" placeholder="Nama Penerima">
-        <textarea id="f_alamat" style="height:45px; resize:none;" placeholder="Alamat Lengkap"></textarea>
-        <select id="f_bayar">
-            <option value="COD">Bayar COD (Ditempat)</option>
-            <option value="Transfer">Transfer Bank</option>
-        </select>
+  </div>
+
+</section>
+
+
+<!-- PRODUK -->
+
+<section class="section" id="produk">
+
+  <div class="section-title">
+
+    <span>KOLEKSI PRODUK</span>
+
+    <h2>Produk Unggulan</h2>
+
+  </div>
+
+
+  <div class="status-online" id="statusOnline">
+    ● Menghubungkan...
+  </div>
+
+
+  <div class="search-box">
+
+    <input
+      type="search"
+      id="searchInput"
+      placeholder="Cari produk..."
+      autocomplete="off">
+
+  </div>
+
+
+  <div id="loading" class="loading">
+    Memuat produk...
+  </div>
+
+
+  <div id="produkGrid"
+       class="produk-grid">
+  </div>
+
+
+  <div id="empty"
+       class="empty hidden">
+
+    Produk tidak ditemukan.
+
+  </div>
+
+</section>
+
+
+<!-- PROMO -->
+
+<section class="promo-section">
+
+  <div class="promo-box">
+
+    <div class="promo-text">
+
+      <small>PROMO DUTA LED</small>
+
+      <h2>
+        Harga Grosir
+        <br>
+        Lebih Hemat
+      </h2>
+
+      <p>
+        Cocok untuk toko,
+        teknisi dan pembelian banyak.
+      </p>
+
+      <a href="#produk"
+         class="promo-btn">
+        Lihat Produk
+      </a>
+
     </div>
-    <div class="cart-right">
-        <div id="cart-list-render"></div>
-        <div style="font-size: 10px; color: #999;">TOTAL:</div>
-        <div id="total">Rp 0</div>
-        <button id="btn-wa" onclick="prosesPemesanan()">ORDER WA</button>
+
+
+    <div class="promo-image">
+
+      <img
+        src="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=700"
+        alt="Lampu LED"
+        loading="lazy">
+
     </div>
-</div>
 
-<div id="camera-modal">
-    <video id="video-preview" autoplay playsinline></video>
-    <div class="scan-box"></div>
-    <button onclick="stopScanner()" style="position: absolute; top: 25px; right: 25px; background: rgba(255,255,255,0.3); border:none; color:white; width:40px; height:40px; border-radius:50%; font-size:20px;">✕</button>
-</div>
 
-<nav class="bottom-nav">
-    <a href="index.html" class="nav-item active">
-        <span>🏠</span><span>Home</span>
+    <div class="promo-image">
+
+      <img
+        src="https://images.unsplash.com/photo-1558008258-3256797b43f3?w=700"
+        alt="Produk listrik"
+        loading="lazy">
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- KEUNGGULAN -->
+
+<section class="section keunggulan">
+
+  <div class="section-title center">
+
+    <span>KENAPA DUTA LED?</span>
+
+    <h2>Belanja Lebih Mudah</h2>
+
+  </div>
+
+
+  <div class="unggulan-grid">
+
+    <div class="unggulan">
+
+      <div class="unggulan-icon">
+        💰
+      </div>
+
+      <h3>Harga Terjangkau</h3>
+
+      <p>
+        Harga bersaing untuk kebutuhan listrik
+        dan elektronik.
+      </p>
+
+    </div>
+
+
+    <div class="unggulan">
+
+      <div class="unggulan-icon">
+        📦
+      </div>
+
+      <h3>Eceran & Grosir</h3>
+
+      <p>
+        Beli sedikit maupun dalam jumlah banyak.
+      </p>
+
+    </div>
+
+
+    <div class="unggulan">
+
+      <div class="unggulan-icon">
+        🔧
+      </div>
+
+      <h3>Sparepart Lengkap</h3>
+
+      <p>
+        Berbagai modul dan komponen elektronik.
+      </p>
+
+    </div>
+
+
+    <div class="unggulan">
+
+      <div class="unggulan-icon">
+        💬
+      </div>
+
+      <h3>Bisa Konsultasi</h3>
+
+      <p>
+        Tanyakan kebutuhan produk melalui WhatsApp.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- KONTAK -->
+
+<section class="kontak">
+
+  <div class="kontak-inner">
+
+    <span>HUBUNGI KAMI</span>
+
+    <h2>
+      Butuh Produk Listrik?
+    </h2>
+
+    <p>
+      Pesan langsung melalui WhatsApp.
+      Kami siap membantu.
+    </p>
+
+    <a id="contactWA"
+       href="#"
+       class="btn btn-wa contact-btn">
+
+      💬 Pesan via WhatsApp
+
     </a>
-    <div class="qris-wrapper">
-        <button class="btn-qris" onclick="startScanner()">📷</button>
-        <div style="text-align: center; font-size: 10px; font-weight: bold; margin-top: 4px; color: var(--primary);">SCAN</div>
-    </div>
-    <a href="javascript:void(0)" onclick="bukaPromo()" class="nav-item">
-        <span id="badge-promo" class="badge-notif">0</span>
-        <span>🎥</span><span>Panduan</span>
-    </a>
-</nav>
 
-<!-- HUBUNGKAN KE JAVASCRIPT -->
-<script src="script.js"></script>
+
+    <div class="social">
+
+      <a id="facebookLink"
+         href="#"
+         target="_blank">
+        Facebook
+      </a>
+
+      <a id="tiktokLink"
+         href="#"
+         target="_blank">
+        TikTok
+      </a>
+
+      <a id="locationLink"
+         href="#"
+         target="_blank">
+        📍 Lokasi Toko
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+  <strong>
+    Duta Terang LED
+  </strong>
+
+  <p>
+    Clapar, Subah, Batang, Jawa Tengah
+  </p>
+
+  <small>
+    © <span id="year"></span> Duta LED
+  </small>
+
+</footer>
+
+
+<a id="floatingWA"
+   href="#"
+   class="floating-wa"
+   aria-label="WhatsApp">
+
+  💬
+
+</a>
+
+
+<script>
+
+/* =================================================
+   PENGATURAN
+================================================= */
+
+
+/* GOOGLE APPS SCRIPT */
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
+
+
+/* WHATSAPP DUTA LED */
+
+const WHATSAPP =
+"6283157925577";
+
+
+/* SOSIAL MEDIA */
+
+const FACEBOOK_URL = "#";
+
+const TIKTOK_URL = "#";
+
+const LOCATION_URL = "#";
+
+
+/* CACHE */
+
+const CACHE_KEY =
+"dutaled_produk_v1";
+
+
+/* =================================================
+   ELEMENT
+================================================= */
+
+const produkGrid =
+document.getElementById("produkGrid");
+
+const loading =
+document.getElementById("loading");
+
+const empty =
+document.getElementById("empty");
+
+const searchInput =
+document.getElementById("searchInput");
+
+const statusOnline =
+document.getElementById("statusOnline");
+
+
+let semuaProduk = [];
+
+
+/* =================================================
+   STATUS INTERNET
+================================================= */
+
+function updateOnlineStatus(){
+
+  if(navigator.onLine){
+
+    statusOnline.textContent =
+      "● Online";
+
+    statusOnline.className =
+      "status-online online";
+
+  }else{
+
+    statusOnline.textContent =
+      "● Offline — menampilkan produk tersimpan";
+
+    statusOnline.className =
+      "status-online offline";
+
+  }
+
+}
+
+
+window.addEventListener(
+  "online",
+  updateOnlineStatus
+);
+
+window.addEventListener(
+  "offline",
+  updateOnlineStatus
+);
+
+updateOnlineStatus();
+
+
+/* =================================================
+   RUPIAH
+================================================= */
+
+function rupiah(value){
+
+  const angka =
+    Number(
+      String(value || "")
+      .replace(/[^\d]/g,"")
+    ) || 0;
+
+  return new Intl.NumberFormat(
+    "id-ID",
+    {
+      style:"currency",
+      currency:"IDR",
+      maximumFractionDigits:0
+    }
+  ).format(angka);
+
+}
+
+
+/* =================================================
+   WHATSAPP
+================================================= */
+
+function whatsapp(nama){
+
+  const pesan =
+    `Halo Duta LED, saya ingin pesan ${nama}.`;
+
+  return (
+    "https://wa.me/" +
+    WHATSAPP +
+    "?text=" +
+    encodeURIComponent(pesan)
+  );
+
+}
+
+
+function chatWhatsApp(){
+
+  const pesan =
+    "Halo Duta LED, saya ingin bertanya tentang produk.";
+
+  return (
+    "https://wa.me/" +
+    WHATSAPP +
+    "?text=" +
+    encodeURIComponent(pesan)
+  );
+
+}
+
+
+/* =================================================
+   AMBIL DATA DARI APPS SCRIPT
+================================================= */
+
+async function ambilProdukOnline(){
+
+  const response =
+    await fetch(
+      API_URL + "?action=produk",
+      {
+        cache:"no-store"
+      }
+    );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      "API tidak dapat diakses"
+    );
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  let produk = data;
+
+
+  /*
+    Mendukung beberapa bentuk
+    response Apps Script.
+  */
+
+  if(data.produk){
+    produk = data.produk;
+  }
+
+  if(data.data){
+    produk = data.data;
+  }
+
+
+  if(!Array.isArray(produk)){
+
+    throw new Error(
+      "Format data API tidak sesuai"
+    );
+
+  }
+
+
+  return produk;
+
+}
+
+
+/* =================================================
+   CACHE PRODUK
+================================================= */
+
+function simpanCache(produk){
+
+  try{
+
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify(produk)
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Cache tidak dapat disimpan",
+      error
+    );
+
+  }
+
+}
+
+
+function ambilCache(){
+
+  try{
+
+    const data =
+      localStorage.getItem(
+        CACHE_KEY
+      );
+
+
+    if(!data){
+      return [];
+    }
+
+
+    const produk =
+      JSON.parse(data);
+
+
+    return Array.isArray(produk)
+      ? produk
+      : [];
+
+  }catch(error){
+
+    return [];
+
+  }
+
+}
+
+
+/* =================================================
+   LOAD PRODUK
+================================================= */
+
+async function loadProduk(){
+
+  loading.style.display =
+    "block";
+
+
+  /*
+    1. Tampilkan cache lebih dahulu.
+    Jadi pelanggan tidak perlu menunggu.
+  */
+
+  const cache =
+    ambilCache();
+
+
+  if(cache.length){
+
+    semuaProduk =
+      cache;
+
+    loading.style.display =
+      "none";
+
+    tampilProduk(
+      semuaProduk
+    );
+
+  }
+
+
+  /*
+    2. Kalau online,
+       ambil data terbaru.
+  */
+
+  if(navigator.onLine){
+
+    try{
+
+      const produk =
+        await ambilProdukOnline();
+
+
+      if(produk.length){
+
+        semuaProduk =
+          produk;
+
+
+        simpanCache(
+          produk
+        );
+
+
+        tampilProduk(
+          semuaProduk
+        );
+
+      }
+
+
+      loading.style.display =
+        "none";
+
+
+    }catch(error){
+
+      console.error(error);
+
+
+      if(!cache.length){
+
+        loading.innerHTML = `
+          <div class="error-box">
+
+            Produk belum dapat dimuat.
+
+            <br><br>
+
+            Data akan otomatis
+            dicoba kembali.
+
+          </div>
+        `;
+
+      }else{
+
+        loading.style.display =
+          "none";
+
+      }
+
+    }
+
+  }else{
+
+    loading.style.display =
+      "none";
+
+
+    if(!cache.length){
+
+      loading.innerHTML = `
+        <div class="error-box">
+          Belum ada produk tersimpan.
+          Buka halaman sekali saat online.
+        </div>
+      `;
+
+    }
+
+  }
+
+}
+
+
+/* =================================================
+   TAMPIL PRODUK
+================================================= */
+
+function tampilProduk(data){
+
+  produkGrid.innerHTML =
+    "";
+
+
+  if(!data.length){
+
+    empty.classList.remove(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+
+  empty.classList.add(
+    "hidden"
+  );
+
+
+  data.forEach(
+    (produk,index)=>{
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+
+      card.className =
+        "produk-card";
+
+
+      const gambar =
+        produk.gambar1 ||
+        produk.gambar ||
+        "https://via.placeholder.com/500x500?text=Duta+LED";
+
+
+      const hargaJual =
+        Number(
+          String(
+            produk.hargaJual ||
+            produk.harga_jual ||
+            ""
+          )
+          .replace(/[^\d]/g,"")
+        ) || 0;
+
+
+      const hargaDiskon =
+        Number(
+          String(
+            produk.hargaDiskon ||
+            produk.harga_diskon ||
+            ""
+          )
+          .replace(/[^\d]/g,"")
+        ) || 0;
+
+
+      const adaDiskon =
+        hargaDiskon > 0 &&
+        hargaDiskon < hargaJual;
+
+
+      let badge = "";
+
+
+      if(adaDiskon){
+
+        let persen =
+          produk.diskon;
+
+
+        if(!persen){
+
+          persen =
+            Math.round(
+              (
+                (hargaJual-hargaDiskon) /
+                hargaJual
+              ) * 100
+            );
+
+        }
+
+
+        badge =
+        `<span class="diskon-badge">
+          -${persen}%
+        </span>`;
+
+      }
+
+
+      let hargaHTML;
+
+
+      if(adaDiskon){
+
+        hargaHTML = `
+
+          <div class="harga-lama">
+            ${rupiah(hargaJual)}
+          </div>
+
+          <div class="harga">
+            ${rupiah(hargaDiskon)}
+          </div>
+
+        `;
+
+      }else{
+
+        hargaHTML = `
+
+          <div class="harga">
+            ${rupiah(hargaJual)}
+          </div>
+
+        `;
+
+      }
+
+
+      card.innerHTML = `
+
+        <div class="produk-image">
+
+          ${badge}
+
+          <img
+            src="${escapeHTML(gambar)}"
+            alt="${escapeHTML(produk.nama)}"
+            loading="${index < 4 ? "eager":"lazy"}"
+            onerror="this.src='https://via.placeholder.com/500x500?text=Duta+LED'">
+
+        </div>
+
+
+        <div class="produk-info">
+
+          <h3>
+            ${escapeHTML(produk.nama)}
+          </h3>
+
+
+          ${
+            produk.diskipsi ||
+            produk.deskripsi
+              ? `
+                <p class="deskripsi">
+                  ${escapeHTML(
+                    produk.diskipsi ||
+                    produk.deskripsi
+                  )}
+                </p>
+              `
+              : ""
+          }
+
+
+          <div class="harga-area">
+
+            ${hargaHTML}
+
+          </div>
+
+
+          <div class="produk-actions">
+
+            <a
+              href="${whatsapp(produk.nama)}"
+              target="_blank"
+              class="beli-btn">
+
+              💬 Beli
+
+            </a>
+
+
+            <button
+              class="share-btn"
+              onclick="bagikanProduk(${index})">
+
+              ↗
+
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      produkGrid.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+
+
+/* =================================================
+   SEARCH
+================================================= */
+
+searchInput.addEventListener(
+  "input",
+  function(){
+
+    const keyword =
+      this.value
+      .toLowerCase()
+      .trim();
+
+
+    if(!keyword){
+
+      tampilProduk(
+        semuaProduk
+      );
+
+      return;
+
+    }
+
+
+    const hasil =
+      semuaProduk.filter(
+        produk =>
+          String(
+            produk.nama || ""
+          )
+          .toLowerCase()
+          .includes(keyword)
+      );
+
+
+    tampilProduk(
+      hasil
+    );
+
+  }
+);
+
+
+/* =================================================
+   SHARE
+================================================= */
+
+async function bagikanProduk(index){
+
+  const produk =
+    semuaProduk[index];
+
+
+  if(!produk) return;
+
+
+  const url =
+    window.location.origin +
+    window.location.pathname +
+    "?produk=" +
+    encodeURIComponent(
+      produk.id ||
+      produk.nama
+    );
+
+
+  const text =
+    `${produk.nama} - Duta LED`;
+
+
+  if(navigator.share){
+
+    try{
+
+      await navigator.share({
+        title:produk.nama,
+        text:text,
+        url:url
+      });
+
+    }catch(e){}
+
+    return;
+
+  }
+
+
+  const wa =
+    "https://wa.me/?text=" +
+    encodeURIComponent(
+      text + "\n" + url
+    );
+
+
+  window.open(
+    wa,
+    "_blank"
+  );
+
+}
+
+
+/* =================================================
+   ESCAPE HTML
+================================================= */
+
+function escapeHTML(value){
+
+  return String(
+    value || ""
+  )
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;");
+
+}
+
+
+/* =================================================
+   LINK
+================================================= */
+
+document.getElementById(
+  "heroWA"
+).href =
+  chatWhatsApp();
+
+
+document.getElementById(
+  "contactWA"
+).href =
+  chatWhatsApp();
+
+
+document.getElementById(
+  "floatingWA"
+).href =
+  chatWhatsApp();
+
+
+document.getElementById(
+  "facebookLink"
+).href =
+  FACEBOOK_URL;
+
+
+document.getElementById(
+  "tiktokLink"
+).href =
+  TIKTOK_URL;
+
+
+document.getElementById(
+  "locationLink"
+).href =
+  LOCATION_URL;
+
+
+document.getElementById(
+  "year"
+).textContent =
+  new Date().getFullYear();
+
+
+/* =================================================
+   SERVICE WORKER
+================================================= */
+
+if(
+  "serviceWorker" in navigator
+){
+
+  window.addEventListener(
+    "load",
+    () => {
+
+      navigator.serviceWorker
+      .register(
+        "./sw.js"
+      )
+      .catch(
+        error =>
+          console.warn(
+            "Service Worker:",
+            error
+          )
+      );
+
+    }
+  );
+
+}
+
+
+/* =================================================
+   START
+================================================= */
+
+loadProduk();
+
+</script>
 
 </body>
 </html>
