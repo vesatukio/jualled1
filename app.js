@@ -1,36 +1,41 @@
 "use strict";
 
 /* =========================================================
-   DUTA LED - APP.JS
-   VERSI PERBAIKAN
-   =========================================================
-   FITUR:
-   - API Google Sheet
-   - Cache lokal
-   - Offline
-   - Produk berdasarkan ?id=
-   - Link unik setiap produk
-   - Kategori
-   - Pencarian
-   - Keranjang multi produk
-   - Tambah / kurang / hapus
-   - Checkout WhatsApp
-   - Diskon dari Sheet
-   - Promo ?promo=1-99
-   - 3 gambar produk
-   - Swipe gambar
-   - Klik gambar = zoom
-   - Klik lagi = kembali
-   - Share WhatsApp
-   - Share Facebook / Web Share
-   - Copy link produk
-   - Efek keranjang
-   ========================================================= */
+DUTA LED - APP.JS
+=========================================================
+
+FITUR:
+- API Google Sheet
+- Cache lokal 30 menit
+- Offline
+- Produk berdasarkan ?id=
+- Link unik setiap produk
+- Kategori
+- Pencarian
+- Keranjang multi produk
+- Tambah / kurang / hapus
+- Checkout WhatsApp
+- Diskon dari Sheet
+- Promo ?promo=1-99
+- 3 gambar produk
+- Swipe gambar
+- Klik gambar = zoom
+- Klik lagi = kembali
+- Share WhatsApp
+- Share Facebook / Web Share
+- Copy link produk
+- Efek keranjang
+- PWA
+- Install PWA
+- Shopee
+- TikTok
+- Lazada
+========================================================= */
 
 
 /* =========================================================
-   PENGATURAN
-   ========================================================= */
+PENGATURAN
+========================================================= */
 
 const API_URL =
   "https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
@@ -41,13 +46,20 @@ const FACEBOOK_URL = "#";
 const TIKTOK_URL = "#";
 const LOCATION_URL = "#";
 
+const SHOPEE_URL = "ISI_LINK_SHOPEE";
+const TIKTOK_SHOP_URL = "ISI_LINK_TIKTOK";
+const LAZADA_URL = "ISI_LINK_LAZADA";
+
 const CACHE_KEY = "dutaled_produk_v4";
 const CART_KEY = "dutaled_cart_v4";
 
+/* Cache berlaku 30 menit */
+const CACHE_TIME = 1000 * 60 * 30;
+
 
 /* =========================================================
-   DATA
-   ========================================================= */
+DATA
+========================================================= */
 
 let products = [];
 let cart = [];
@@ -62,8 +74,8 @@ let selectedProductId = "";
 
 
 /* =========================================================
-   ELEMENT
-   ========================================================= */
+ELEMENT
+========================================================= */
 
 let productGrid;
 let categoryBar;
@@ -83,15 +95,18 @@ let checkoutButton;
 
 
 /* =========================================================
-   START
-   ========================================================= */
+START
+========================================================= */
 
 document.addEventListener("DOMContentLoaded", init);
 
 
 async function init() {
 
-  // Ambil elemen HTML
+  /* -----------------------------------------
+  Ambil elemen HTML
+  ----------------------------------------- */
+
   productGrid = document.getElementById("productGrid");
   categoryBar = document.getElementById("categoryBar");
   searchInput = document.getElementById("searchInput");
@@ -108,25 +123,44 @@ async function init() {
   cartTotal = document.getElementById("cartTotal");
   checkoutButton = document.getElementById("checkoutButton");
 
-  // URL
+
+  /* -----------------------------------------
+  Baca URL
+  ----------------------------------------- */
+
   loadSpecialPromo();
   loadSelectedProduct();
 
-  // Setup
+
+  /* -----------------------------------------
+  Setup
+  ----------------------------------------- */
+
   setupLinks();
+  setupMarketplaceLinks();
   setupSearch();
   setupPromoButton();
   setupCartButton();
 
-  // Cart
+
+  /* -----------------------------------------
+  Keranjang
+  ----------------------------------------- */
+
   loadCart();
   renderCart();
 
-  /*
-   * =====================================================
-   * 1. TAMPILKAN CACHE SECEPAT MUNGKIN
-   * =====================================================
-   */
+
+  /* -----------------------------------------
+  Loading
+  ----------------------------------------- */
+
+  showLoading(true);
+
+
+  /* =====================================================
+  LOAD CACHE TERLEBIH DAHULU
+  ===================================================== */
 
   const cached = loadCache();
 
@@ -136,25 +170,16 @@ async function init() {
 
     renderCategories();
     renderProducts();
+
+    showStatus("Katalog tersimpan");
+
     showSelectedProduct();
-
-    showStatus("Katalog siap");
-
-    // HILANGKAN loading segera
-    showLoading(false);
-
-  } else {
-
-    // Kalau belum ada cache
-    showLoading(true);
-    showStatus("Memuat produk...");
   }
 
-  /*
-   * =====================================================
-   * 2. AMBIL DATA GOOGLE SHEET DI BACKGROUND
-   * =====================================================
-   */
+
+  /* =====================================================
+  LOAD API
+  ===================================================== */
 
   try {
 
@@ -169,13 +194,17 @@ async function init() {
       renderCategories();
       renderProducts();
 
-      showSelectedProduct();
-
       showStatus("Katalog terbaru");
 
-    } else if (!products.length) {
+      showSelectedProduct();
 
-      showStatus("Produk belum tersedia");
+    } else {
+
+      if (!products.length) {
+
+        showStatus("Produk belum tersedia");
+
+      }
 
     }
 
@@ -190,24 +219,20 @@ async function init() {
 
       showStatus("Mode offline");
 
-    } else {
-
-      showStatus("Menggunakan katalog tersimpan");
-
     }
 
-  } finally {
-
-    showLoading(false);
-
   }
+
+
+  showLoading(false);
 
   renderCart();
 }
 
+
 /* =========================================================
-   URL PRODUK
-   ========================================================= */
+URL PRODUK
+========================================================= */
 
 function loadSelectedProduct() {
 
@@ -224,8 +249,8 @@ function loadSelectedProduct() {
 
 
 /* =========================================================
-   PROMO URL
-   ========================================================= */
+PROMO URL
+========================================================= */
 
 function loadSpecialPromo() {
 
@@ -250,11 +275,14 @@ function loadSpecialPromo() {
   ) {
 
     specialDiscount = discount;
-    specialPromoCode = String(discount);
+
+    specialPromoCode =
+      String(discount);
 
   } else {
 
     specialDiscount = 0;
+
     specialPromoCode = "";
 
   }
@@ -262,68 +290,59 @@ function loadSpecialPromo() {
 
 
 /* =========================================================
-   GOOGLE SHEET / API
-   ========================================================= */
+GOOGLE SHEET / API
+========================================================= */
 
 async function loadFromGoogle() {
 
-  const controller =
-    new AbortController();
-
-  const timeout =
-    setTimeout(() => {
-      controller.abort();
-    }, 5000);
-
-  try {
-
-    const response = await fetch(
-      API_URL,
+  const response =
+    await fetch(
+      API_URL +
+      "?t=" +
+      Date.now(),
       {
         method: "GET",
-        cache: "default",
-        signal: controller.signal
+        cache: "no-store"
       }
     );
 
-    if (!response.ok) {
+  if (!response.ok) {
 
-      throw new Error(
-        "HTTP " + response.status
-      );
-
-    }
-
-    const data =
-      await response.json();
-
-    const rows =
-      Array.isArray(data)
-        ? data
-        : data.data;
-
-    if (!Array.isArray(rows)) {
-
-      throw new Error(
-        "Format data API tidak valid"
-      );
-
-    }
-
-    return rows
-      .map(normalizeProduct)
-      .filter(product => product.nama);
-
-  } finally {
-
-    clearTimeout(timeout);
+    throw new Error(
+      "HTTP " +
+      response.status
+    );
 
   }
+
+  const data =
+    await response.json();
+
+  const rows =
+    Array.isArray(data)
+      ? data
+      : data.data;
+
+  if (!Array.isArray(rows)) {
+
+    throw new Error(
+      "Format data API tidak valid"
+    );
+
+  }
+
+  return rows
+    .map(normalizeProduct)
+    .filter(
+      product =>
+        product.nama
+    );
 }
 
+
 /* =========================================================
-   NORMALISASI PRODUK
-   ========================================================= */
+NORMALISASI PRODUK
+========================================================= */
 
 function normalizeProduct(row) {
 
@@ -413,8 +432,8 @@ function normalizeProduct(row) {
 
 
 /* =========================================================
-   HELPER VALUE
-   ========================================================= */
+HELPER VALUE
+========================================================= */
 
 function value(v) {
 
@@ -432,8 +451,8 @@ function value(v) {
 
 
 /* =========================================================
-   HELPER NUMBER
-   ========================================================= */
+HELPER NUMBER
+========================================================= */
 
 function number(v) {
 
@@ -456,8 +475,8 @@ function number(v) {
 
 
 /* =========================================================
-   KATEGORI
-   ========================================================= */
+KATEGORI
+========================================================= */
 
 function renderCategories() {
 
@@ -465,9 +484,7 @@ function renderCategories() {
     return;
   }
 
-
   const categories = ["Semua"];
-
 
   products.forEach(
     product => {
@@ -476,7 +493,6 @@ function renderCategories() {
         String(
           product.kategori || ""
         ).trim();
-
 
       if (
         category &&
@@ -490,9 +506,7 @@ function renderCategories() {
     }
   );
 
-
   categoryBar.innerHTML = "";
-
 
   categories.forEach(
     category => {
@@ -505,20 +519,19 @@ function renderCategories() {
       button.className =
         "category-button";
 
-
       if (
         category ===
         currentCategory
       ) {
 
-        button.classList.add("active");
+        button.classList.add(
+          "active"
+        );
 
       }
 
-
       button.textContent =
         category;
-
 
       button.addEventListener(
         "click",
@@ -533,7 +546,6 @@ function renderCategories() {
         }
       );
 
-
       categoryBar.appendChild(
         button
       );
@@ -544,15 +556,14 @@ function renderCategories() {
 
 
 /* =========================================================
-   SEARCH
-   ========================================================= */
+SEARCH
+========================================================= */
 
 function setupSearch() {
 
   if (!searchInput) {
     return;
   }
-
 
   searchInput.addEventListener(
     "input",
@@ -565,7 +576,6 @@ function setupSearch() {
           .trim()
           .toLowerCase();
 
-
       renderProducts();
 
     }
@@ -574,8 +584,8 @@ function setupSearch() {
 
 
 /* =========================================================
-   FILTER
-   ========================================================= */
+FILTER
+========================================================= */
 
 function getFilteredProducts() {
 
@@ -590,31 +600,26 @@ function getFilteredProducts() {
           .toLowerCase() ===
         currentCategory.toLowerCase();
 
-
       const nama =
         String(
           product.nama || ""
         ).toLowerCase();
-
 
       const kategori =
         String(
           product.kategori || ""
         ).toLowerCase();
 
-
       const deskripsi =
         String(
           product.deskripsi || ""
         ).toLowerCase();
-
 
       const searchOK =
         !searchText ||
         nama.includes(searchText) ||
         kategori.includes(searchText) ||
         deskripsi.includes(searchText);
-
 
       return (
         categoryOK &&
@@ -627,8 +632,8 @@ function getFilteredProducts() {
 
 
 /* =========================================================
-   HARGA PRODUK
-   ========================================================= */
+HARGA PRODUK
+========================================================= */
 
 function getProductPrice(product) {
 
@@ -668,14 +673,13 @@ function getProductPrice(product) {
 
   }
 
-
   return hargaJual;
 }
 
 
 /* =========================================================
-   RENDER PRODUK
-   ========================================================= */
+RENDER PRODUK
+========================================================= */
 
 function renderProducts() {
 
@@ -683,15 +687,14 @@ function renderProducts() {
     return;
   }
 
-
   let list =
     getFilteredProducts();
 
 
   /* -----------------------------------------
-     Jika URL ?id=123
-     tampilkan produk tersebut saja
-     ----------------------------------------- */
+  Jika URL ?id=123
+  tampilkan produk tersebut saja
+  ----------------------------------------- */
 
   if (selectedProductId) {
 
@@ -701,7 +704,6 @@ function renderProducts() {
           String(product.id) ===
           String(selectedProductId)
       );
-
 
     if (selected) {
 
@@ -748,8 +750,8 @@ function renderProducts() {
 
 
 /* =========================================================
-   CARD PRODUK
-   ========================================================= */
+CARD PRODUK
+========================================================= */
 
 function createProductCard(product) {
 
@@ -761,8 +763,8 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     3 GAMBAR
-     ----------------------------------------- */
+  3 GAMBAR
+  ----------------------------------------- */
 
   const images = [
     product.gambar1,
@@ -786,25 +788,23 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     HARGA
-     ----------------------------------------- */
+  HARGA
+  ----------------------------------------- */
 
   const hargaJual =
     Number(
       product.hargaJual
     ) || 0;
 
-
   const hargaTampil =
     getProductPrice(product);
 
 
   /* -----------------------------------------
-     DISKON
-     ----------------------------------------- */
+  DISKON
+  ----------------------------------------- */
 
   let discountHTML = "";
-
 
   if (
     specialDiscount > 0 &&
@@ -824,12 +824,10 @@ function createProductCard(product) {
       hargaJual > 0 &&
       product.hargaDiskon < hargaJual;
 
-
     if (hasDiscount) {
 
       let persen =
         Number(product.diskon) || 0;
-
 
       if (!persen) {
 
@@ -845,7 +843,6 @@ function createProductCard(product) {
 
       }
 
-
       discountHTML = `
         <span class="discount-badge">
           -${persen}%
@@ -858,11 +855,10 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     HARGA HTML
-     ----------------------------------------- */
+  HARGA HTML
+  ----------------------------------------- */
 
   let priceHTML = "";
-
 
   if (
     hargaTampil < hargaJual
@@ -890,8 +886,8 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     CARD HTML
-     ----------------------------------------- */
+  CARD HTML
+  ----------------------------------------- */
 
   card.innerHTML = `
 
@@ -988,7 +984,7 @@ function createProductCard(product) {
         <button
           type="button"
           class="share-fb"
-          title="Bagikan Facebook"
+          title="Bagikan"
         >
           f
         </button>
@@ -1010,8 +1006,8 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     GALERI
-     ----------------------------------------- */
+  GALERI
+  ----------------------------------------- */
 
   setupProductGallery(
     card,
@@ -1020,14 +1016,13 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     KERANJANG
-     ----------------------------------------- */
+  KERANJANG
+  ----------------------------------------- */
 
   const buyButton =
     card.querySelector(
       ".buy-button"
     );
-
 
   buyButton?.addEventListener(
     "click",
@@ -1040,14 +1035,13 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     WHATSAPP
-     ----------------------------------------- */
+  WHATSAPP
+  ----------------------------------------- */
 
   const shareWA =
     card.querySelector(
       ".share-wa"
     );
-
 
   shareWA?.addEventListener(
     "click",
@@ -1056,16 +1050,13 @@ function createProductCard(product) {
       const link =
         getProductLink(product);
 
-
       const harga =
         getProductPrice(product);
-
 
       const message =
         `${product.nama}\n` +
         `${formatRupiah(harga)}\n` +
         `${link}`;
-
 
       openWhatsApp(message);
 
@@ -1074,14 +1065,13 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     FACEBOOK / SHARE
-     ----------------------------------------- */
+  SHARE
+  ----------------------------------------- */
 
   const shareFB =
     card.querySelector(
       ".share-fb"
     );
-
 
   shareFB?.addEventListener(
     "click",
@@ -1090,10 +1080,8 @@ function createProductCard(product) {
       const link =
         getProductLink(product);
 
-
       const harga =
         getProductPrice(product);
-
 
       const text =
         `${product.nama}\n` +
@@ -1160,14 +1148,13 @@ function createProductCard(product) {
 
 
   /* -----------------------------------------
-     COPY LINK
-     ----------------------------------------- */
+  COPY LINK
+  ----------------------------------------- */
 
   const shareCopy =
     card.querySelector(
       ".share-copy"
     );
-
 
   shareCopy?.addEventListener(
     "click",
@@ -1176,13 +1163,10 @@ function createProductCard(product) {
       const link =
         getProductLink(product);
 
-
       await copyText(link);
-
 
       shareCopy.textContent =
         "✓";
-
 
       setTimeout(
         () => {
@@ -1203,8 +1187,8 @@ function createProductCard(product) {
 
 
 /* =========================================================
-   GALERI PRODUK
-   ========================================================= */
+GALERI PRODUK
+========================================================= */
 
 function setupProductGallery(
   card,
@@ -1216,7 +1200,6 @@ function setupProductGallery(
       ".product-gallery"
     );
 
-
   if (!gallery) {
     return;
   }
@@ -1227,12 +1210,10 @@ function setupProductGallery(
       ".gallery-track"
     );
 
-
   const slides =
     gallery.querySelectorAll(
       ".gallery-slide"
     );
-
 
   const dots =
     gallery.querySelectorAll(
@@ -1256,10 +1237,6 @@ function setupProductGallery(
   let endX = 0;
 
 
-  /* -----------------------------------------
-     Tampilkan gambar
-     ----------------------------------------- */
-
   function showImage(index) {
 
     if (index < 0) {
@@ -1269,7 +1246,6 @@ function setupProductGallery(
 
     }
 
-
     if (
       index >=
       slides.length
@@ -1278,7 +1254,6 @@ function setupProductGallery(
       index = 0;
 
     }
-
 
     current = index;
 
@@ -1301,10 +1276,6 @@ function setupProductGallery(
   }
 
 
-  /* -----------------------------------------
-     SWIPE TOUCH
-     ----------------------------------------- */
-
   gallery.addEventListener(
     "touchstart",
     event => {
@@ -1316,7 +1287,6 @@ function setupProductGallery(
         return;
 
       }
-
 
       startX =
         event.touches[0].clientX;
@@ -1339,7 +1309,6 @@ function setupProductGallery(
         return;
 
       }
-
 
       endX =
         event.changedTouches[0].clientX;
@@ -1381,10 +1350,6 @@ function setupProductGallery(
   );
 
 
-  /* -----------------------------------------
-     KLIK DOT
-     ----------------------------------------- */
-
   dots.forEach(
     (dot, index) => {
 
@@ -1403,16 +1368,13 @@ function setupProductGallery(
   );
 
 
-  /* -----------------------------------------
-     KLIK FOTO = ZOOM
-     ----------------------------------------- */
-
   slides.forEach(
     (slide, index) => {
 
       const img =
-        slide.querySelector("img");
-
+        slide.querySelector(
+          "img"
+        );
 
       if (!img) {
         return;
@@ -1440,12 +1402,8 @@ function setupProductGallery(
 
 
 /* =========================================================
-   ZOOM FOTO
-   Klik 1x = zoom
-   Klik 2x = kembali
-   Klik luar = tutup
-   ESC = tutup
-   ========================================================= */
+ZOOM FOTO
+========================================================= */
 
 function openImageZoom(
   images,
@@ -1460,7 +1418,6 @@ function openImageZoom(
     document.createElement(
       "div"
     );
-
 
   overlay.className =
     "image-zoom-overlay";
@@ -1498,12 +1455,6 @@ function openImageZoom(
   }
 
 
-  /* -----------------------------------------
-     KLIK GAMBAR
-     1x = zoom
-     2x = kembali normal
-     ----------------------------------------- */
-
   image.addEventListener(
     "click",
     event => {
@@ -1517,10 +1468,6 @@ function openImageZoom(
     }
   );
 
-
-  /* -----------------------------------------
-     KLIK LUAR = TUTUP
-     ----------------------------------------- */
 
   overlay.addEventListener(
     "click",
@@ -1538,10 +1485,6 @@ function openImageZoom(
     }
   );
 
-
-  /* -----------------------------------------
-     ESC = TUTUP
-     ----------------------------------------- */
 
   function escHandler(event) {
 
@@ -1571,8 +1514,8 @@ function openImageZoom(
 
 
 /* =========================================================
-   LINK PRODUK UNIK
-   ========================================================= */
+LINK PRODUK UNIK
+========================================================= */
 
 function getProductLink(product) {
 
@@ -1582,12 +1525,8 @@ function getProductLink(product) {
     );
 
 
-  /* Hapus parameter */
-
   url.search = "";
 
-
-  /* ID produk */
 
   if (product.id) {
 
@@ -1598,8 +1537,6 @@ function getProductLink(product) {
 
   }
 
-
-  /* Promo */
 
   if (
     specialDiscount > 0
@@ -1615,14 +1552,13 @@ function getProductLink(product) {
 
   url.hash = "";
 
-
   return url.toString();
 }
 
 
 /* =========================================================
-   TAMPILKAN PRODUK DARI LINK
-   ========================================================= */
+TAMPILKAN PRODUK DARI LINK
+========================================================= */
 
 function showSelectedProduct() {
 
@@ -1681,8 +1617,8 @@ function showSelectedProduct() {
 
 
 /* =========================================================
-   KERANJANG BUTTON
-   ========================================================= */
+KERANJANG BUTTON
+========================================================= */
 
 function setupCartButton() {
 
@@ -1729,8 +1665,8 @@ function setupCartButton() {
 
 
 /* =========================================================
-   BUKA KERANJANG
-   ========================================================= */
+BUKA KERANJANG
+========================================================= */
 
 function openCart() {
 
@@ -1738,21 +1674,20 @@ function openCart() {
     "show"
   );
 
-
   cartOverlay?.classList.remove(
     "hidden"
   );
 
-
   document.body.classList.add(
     "cart-open"
   );
+
 }
 
 
 /* =========================================================
-   TUTUP KERANJANG
-   ========================================================= */
+TUTUP KERANJANG
+========================================================= */
 
 function closeCart() {
 
@@ -1760,21 +1695,20 @@ function closeCart() {
     "show"
   );
 
-
   cartOverlay?.classList.add(
     "hidden"
   );
 
-
   document.body.classList.remove(
     "cart-open"
   );
+
 }
 
 
 /* =========================================================
-   TAMBAH KERANJANG
-   ========================================================= */
+TAMBAH KERANJANG
+========================================================= */
 
 function addToCart(product) {
 
@@ -1831,12 +1765,13 @@ function addToCart(product) {
   showCartMessage(
     product.nama
   );
+
 }
 
 
 /* =========================================================
-   TAMBAH JUMLAH
-   ========================================================= */
+TAMBAH JUMLAH
+========================================================= */
 
 function increaseCart(id) {
 
@@ -1858,12 +1793,13 @@ function increaseCart(id) {
   saveCart();
 
   renderCart();
+
 }
 
 
 /* =========================================================
-   KURANG
-   ========================================================= */
+KURANG
+========================================================= */
 
 function decreaseCart(id) {
 
@@ -1900,12 +1836,13 @@ function decreaseCart(id) {
   saveCart();
 
   renderCart();
+
 }
 
 
 /* =========================================================
-   HAPUS
-   ========================================================= */
+HAPUS
+========================================================= */
 
 function removeCart(id) {
 
@@ -1920,20 +1857,19 @@ function removeCart(id) {
   saveCart();
 
   renderCart();
+
 }
 
 
 /* =========================================================
-   HARGA KERANJANG
-   ========================================================= */
+HARGA KERANJANG
+========================================================= */
 
 function getCartPrice(item) {
 
   const hargaJual =
     Number(item.harga) || 0;
 
-
-  /* Promo URL */
 
   if (
     specialDiscount > 0
@@ -1951,8 +1887,6 @@ function getCartPrice(item) {
   }
 
 
-  /* Diskon Sheet */
-
   if (
     item.hargaDiskon > 0 &&
     item.hargaDiskon < hargaJual
@@ -1968,8 +1902,8 @@ function getCartPrice(item) {
 
 
 /* =========================================================
-   RENDER CART
-   ========================================================= */
+RENDER CART
+========================================================= */
 
 function renderCart() {
 
@@ -1992,6 +1926,7 @@ function renderCart() {
     updateCartTotal();
 
     return;
+
   }
 
 
@@ -2092,7 +2027,6 @@ function renderCart() {
             const id =
               button.dataset.id;
 
-
             const action =
               button.dataset.action;
 
@@ -2131,12 +2065,13 @@ function renderCart() {
 
 
   updateCartTotal();
+
 }
 
 
 /* =========================================================
-   TOTAL
-   ========================================================= */
+TOTAL
+========================================================= */
 
 function getCartTotal() {
 
@@ -2154,12 +2089,13 @@ function getCartTotal() {
     },
     0
   );
+
 }
 
 
 /* =========================================================
-   JUMLAH CART
-   ========================================================= */
+JUMLAH CART
+========================================================= */
 
 function getCartCount() {
 
@@ -2174,18 +2110,18 @@ function getCartCount() {
     },
     0
   );
+
 }
 
 
 /* =========================================================
-   UPDATE TOTAL
-   ========================================================= */
+UPDATE TOTAL
+========================================================= */
 
 function updateCartTotal() {
 
   const total =
     getCartTotal();
-
 
   const count =
     getCartCount();
@@ -2205,12 +2141,13 @@ function updateCartTotal() {
       formatRupiah(total);
 
   }
+
 }
 
 
 /* =========================================================
-   CHECKOUT WHATSAPP
-   ========================================================= */
+CHECKOUT WHATSAPP
+========================================================= */
 
 function checkoutWhatsApp() {
 
@@ -2221,6 +2158,7 @@ function checkoutWhatsApp() {
     );
 
     return;
+
   }
 
 
@@ -2242,7 +2180,6 @@ function checkoutWhatsApp() {
 
       message +=
         `${index + 1}. ${item.nama}\n`;
-
 
       message +=
         `   ${item.qty} x ${formatRupiah(harga)} = ${formatRupiah(subtotal)}\n\n`;
@@ -2268,12 +2205,13 @@ function checkoutWhatsApp() {
 
 
   openWhatsApp(message);
+
 }
 
 
 /* =========================================================
-   SAVE CART
-   ========================================================= */
+SAVE CART
+========================================================= */
 
 function saveCart() {
 
@@ -2292,12 +2230,13 @@ function saveCart() {
     );
 
   }
+
 }
 
 
 /* =========================================================
-   LOAD CART
-   ========================================================= */
+LOAD CART
+========================================================= */
 
 function loadCart() {
 
@@ -2314,6 +2253,7 @@ function loadCart() {
       cart = [];
 
       return;
+
     }
 
 
@@ -2326,18 +2266,18 @@ function loadCart() {
         ? parsed
         : [];
 
-
   } catch {
 
     cart = [];
 
   }
+
 }
 
 
 /* =========================================================
-   CART MESSAGE
-   ========================================================= */
+CART MESSAGE
+========================================================= */
 
 function showCartMessage(
   productName
@@ -2383,12 +2323,13 @@ function showCartMessage(
     },
     1800
   );
+
 }
 
 
 /* =========================================================
-   WHATSAPP
-   ========================================================= */
+WHATSAPP
+========================================================= */
 
 function whatsappLink(message) {
 
@@ -2398,6 +2339,7 @@ function whatsappLink(message) {
     "?text=" +
     encodeURIComponent(message)
   );
+
 }
 
 
@@ -2407,12 +2349,13 @@ function openWhatsApp(message) {
     whatsappLink(message),
     "_blank"
   );
+
 }
 
 
 /* =========================================================
-   COPY TEXT
-   ========================================================= */
+COPY TEXT
+========================================================= */
 
 async function copyText(text) {
 
@@ -2435,7 +2378,6 @@ async function copyText(text) {
     throw new Error(
       "Clipboard API tidak tersedia"
     );
-
 
   } catch {
 
@@ -2475,12 +2417,13 @@ async function copyText(text) {
     textarea.remove();
 
   }
+
 }
 
 
 /* =========================================================
-   LINK MENU
-   ========================================================= */
+LINK MENU
+========================================================= */
 
 function setupLinks() {
 
@@ -2592,12 +2535,63 @@ function setupLinks() {
       LOCATION_URL;
 
   }
+
 }
 
 
 /* =========================================================
-   MENU PROMO
-   ========================================================= */
+MARKETPLACE
+========================================================= */
+
+function setupMarketplaceLinks() {
+
+  const shopee =
+    document.getElementById(
+      "shopee"
+    );
+
+
+  const tiktok =
+    document.getElementById(
+      "tiktok"
+    );
+
+
+  const lazada =
+    document.getElementById(
+      "lazada"
+    );
+
+
+  if (shopee) {
+
+    shopee.href =
+      SHOPEE_URL;
+
+  }
+
+
+  if (tiktok) {
+
+    tiktok.href =
+      TIKTOK_SHOP_URL;
+
+  }
+
+
+  if (lazada) {
+
+    lazada.href =
+      LAZADA_URL;
+
+  }
+
+}
+
+
+/* =========================================================
+MENU PROMO
+========================================================= */
 
 function setupPromoButton() {
 
@@ -2618,8 +2612,6 @@ function setupPromoButton() {
 
       event.preventDefault();
 
-
-      /* Hapus mode produk tunggal */
 
       selectedProductId = "";
 
@@ -2703,12 +2695,13 @@ function setupPromoButton() {
 
     }
   );
+
 }
 
 
 /* =========================================================
-   FORMAT RUPIAH
-   ========================================================= */
+FORMAT RUPIAH
+========================================================= */
 
 function formatRupiah(value) {
 
@@ -2722,21 +2715,50 @@ function formatRupiah(value) {
   ).format(
     Number(value) || 0
   );
+
 }
 
 
 /* =========================================================
-   CACHE
-   ========================================================= */
+CACHE
+========================================================= */
+
+/*
+  CACHE BARU
+
+  Format:
+
+  {
+    time: 123456789,
+    data: [...]
+  }
+
+  Cache lama berupa:
+
+  [...]
+
+  tetap bisa dibaca.
+*/
+
 
 function saveCache(data) {
 
   try {
 
+    const cacheData = {
+
+      time: Date.now(),
+
+      data: data
+
+    };
+
+
     localStorage.setItem(
       CACHE_KEY,
-      JSON.stringify(data)
+      JSON.stringify(cacheData)
     );
+
 
   } catch (error) {
 
@@ -2746,6 +2768,7 @@ function saveCache(data) {
     );
 
   }
+
 }
 
 
@@ -2753,37 +2776,101 @@ function loadCache() {
 
   try {
 
-    const data =
+    const raw =
       localStorage.getItem(
         CACHE_KEY
       );
 
 
-    if (!data) {
+    if (!raw) {
+
       return [];
+
     }
 
 
     const parsed =
-      JSON.parse(data);
+      JSON.parse(raw);
 
 
-    return Array.isArray(parsed)
-      ? parsed
-      : [];
+    /*
+     * Cache format baru
+     */
+
+    if (
+      parsed &&
+      Array.isArray(
+        parsed.data
+      )
+    ) {
+
+      /*
+       * Cek umur cache
+       */
+
+      if (
+        parsed.time &&
+        (
+          Date.now() -
+          Number(parsed.time)
+        ) > CACHE_TIME
+      ) {
+
+        console.log(
+          "Cache sudah lebih dari 30 menit"
+        );
+
+        /*
+         * Cache tetap dikembalikan
+         * agar produk langsung tampil.
+         *
+         * API akan memperbarui
+         * setelahnya.
+         */
+
+        return parsed.data;
+
+      }
 
 
-  } catch {
+      return parsed.data;
+
+    }
+
+
+    /*
+     * Kompatibel dengan
+     * cache versi lama
+     */
+
+    if (
+      Array.isArray(parsed)
+    ) {
+
+      return parsed;
+
+    }
+
+
+    return [];
+
+  } catch (error) {
+
+    console.warn(
+      "Cache tidak valid:",
+      error
+    );
 
     return [];
 
   }
+
 }
 
 
 /* =========================================================
-   LOADING
-   ========================================================= */
+LOADING
+========================================================= */
 
 function showLoading(show) {
 
@@ -2796,12 +2883,13 @@ function showLoading(show) {
     show
       ? "block"
       : "none";
+
 }
 
 
 /* =========================================================
-   STATUS
-   ========================================================= */
+STATUS
+========================================================= */
 
 function showStatus(text) {
 
@@ -2811,12 +2899,13 @@ function showStatus(text) {
       text;
 
   }
+
 }
 
 
 /* =========================================================
-   ESCAPE HTML
-   ========================================================= */
+ESCAPE HTML
+========================================================= */
 
 function escapeHTML(value) {
 
@@ -2833,8 +2922,8 @@ function escapeHTML(value) {
 
 
 /* =========================================================
-   EFEK GOYANG KERANJANG
-   ========================================================= */
+EFEK GOYANG KERANJANG
+========================================================= */
 
 function shakeCart() {
 
@@ -2917,50 +3006,55 @@ function shakeCart() {
   }
 
 }
+
+
 /* =====================================================
-   PWA - DUTA LED
+PWA - DUTA LED
 ===================================================== */
 
-if ("serviceWorker" in navigator) {
+if (
+  "serviceWorker" in
+  navigator
+) {
 
-  window.addEventListener("load", function () {
+  window.addEventListener(
+    "load",
+    function () {
 
-    navigator.serviceWorker
-      .register("./sw.js")
-      .then(function (registration) {
+      navigator.serviceWorker
+        .register("./sw.js")
+        .then(
+          function (registration) {
 
-        console.log(
-          "Duta LED PWA aktif:",
-          registration.scope
+            console.log(
+              "Duta LED PWA aktif:",
+              registration.scope
+            );
+
+          }
+        )
+        .catch(
+          function (error) {
+
+            console.error(
+              "Duta LED PWA gagal:",
+              error
+            );
+
+          }
         );
 
-      })
-      .catch(function (error) {
-
-        console.error(
-          "Duta LED PWA gagal:",
-          error
-        );
-
-      });
-
-  });
+    }
+  );
 
 }
+
+
 /* =====================================================
-   INSTALL PROMPT
+INSTALL PROMPT
 ===================================================== */
 
 let deferredPrompt = null;
-
-const installPWA =
-  document.getElementById("installPWA");
-
-const installButton =
-  document.getElementById("installButton");
-
-const installClose =
-  document.getElementById("installClose");
 
 
 window.addEventListener(
@@ -2971,14 +3065,30 @@ window.addEventListener(
 
     deferredPrompt = event;
 
-    // Jangan tampilkan kalau sudah pernah ditutup
+
+    const installPWA =
+      document.getElementById(
+        "installPWA"
+      );
+
+
+    /*
+     * Jangan tampilkan jika
+     * sudah pernah ditutup
+     */
+
     if (
-      localStorage.getItem("dutaled_install_closed")
-      !== "1"
+      localStorage.getItem(
+        "dutaled_install_closed"
+      ) !== "1"
     ) {
 
       if (installPWA) {
-        installPWA.classList.remove("hidden");
+
+        installPWA.classList.remove(
+          "hidden"
+        );
+
       }
 
     }
@@ -2987,58 +3097,107 @@ window.addEventListener(
 );
 
 
-if (installButton) {
+/* =========================================================
+INSTALL BUTTON
+========================================================= */
 
-  installButton.addEventListener(
-    "click",
-    async function () {
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
 
-      if (!deferredPrompt) {
-        return;
-      }
-
-      deferredPrompt.prompt();
-
-      const result =
-        await deferredPrompt.userChoice;
-
-      console.log(
-        "Install Duta LED:",
-        result.outcome
+    const installPWA =
+      document.getElementById(
+        "installPWA"
       );
 
-      deferredPrompt = null;
 
-      if (installPWA) {
-        installPWA.classList.add("hidden");
-      }
-
-    }
-  );
-
-}
-
-
-if (installClose) {
-
-  installClose.addEventListener(
-    "click",
-    function () {
-
-      localStorage.setItem(
-        "dutaled_install_closed",
-        "1"
+    const installButton =
+      document.getElementById(
+        "installButton"
       );
 
-      if (installPWA) {
-        installPWA.classList.add("hidden");
-      }
+
+    const installClose =
+      document.getElementById(
+        "installClose"
+      );
+
+
+    if (installButton) {
+
+      installButton.addEventListener(
+        "click",
+        async function () {
+
+          if (!deferredPrompt) {
+
+            return;
+
+          }
+
+
+          deferredPrompt.prompt();
+
+
+          const result =
+            await deferredPrompt.userChoice;
+
+
+          console.log(
+            "Install Duta LED:",
+            result.outcome
+          );
+
+
+          deferredPrompt = null;
+
+
+          if (installPWA) {
+
+            installPWA.classList.add(
+              "hidden"
+            );
+
+          }
+
+        }
+      );
 
     }
-  );
 
-}
 
+    if (installClose) {
+
+      installClose.addEventListener(
+        "click",
+        function () {
+
+          localStorage.setItem(
+            "dutaled_install_closed",
+            "1"
+          );
+
+
+          if (installPWA) {
+
+            installPWA.classList.add(
+              "hidden"
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+PWA INSTALLED
+========================================================= */
 
 window.addEventListener(
   "appinstalled",
@@ -3048,197 +3207,29 @@ window.addEventListener(
       "Duta LED berhasil di-install"
     );
 
+
     localStorage.setItem(
       "dutaled_installed",
       "1"
     );
 
+
+    const installPWA =
+      document.getElementById(
+        "installPWA"
+      );
+
+
     if (installPWA) {
-      installPWA.classList.add("hidden");
+
+      installPWA.classList.add(
+        "hidden"
+      );
+
     }
+
 
     deferredPrompt = null;
 
   }
 );
-const SHOPEE_URL = "ISI_LINK_SHOPEE";
-const TIKTOK_URL = "ISI_LINK_TIKTOK";
-const LAZADA_URL = "ISI_LINK_LAZADA";
-
-const shopee = document.getElementById("shopee");
-const tiktok = document.getElementById("tiktok");
-const lazada = document.getElementById("lazada");
-
-if (shopee) {
-  shopee.href = SHOPEE_URL;
-}
-
-if (tiktok) {
-  tiktok.href = TIKTOK_URL;
-}
-
-if (lazada) {
-  lazada.href = LAZADA_URL;
-}
-/* =========================================================
-CACHE PRODUK - FAST LOAD
-========================================================= */
-
-const CACHE_TIME =
-  1000 * 60 * 30; // 30 menit
-
-
-function saveCache(data) {
-
-  try {
-
-    const cacheData = {
-
-      time: Date.now(),
-
-      data: data
-
-    };
-
-    localStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify(cacheData)
-    );
-
-  } catch (error) {
-
-    console.warn(
-      "Cache gagal:",
-      error
-    );
-
-  }
-
-}
-
-
-function loadCache() {
-
-  try {
-
-    const raw =
-      localStorage.getItem(
-        CACHE_KEY
-      );
-
-    if (!raw) {
-
-      return [];
-
-    }
-
-    const parsed =
-      JSON.parse(raw);
-
-
-    /*
-     * CACHE FORMAT BARU
-     */
-
-    if (
-      parsed &&
-      Array.isArray(parsed.data)
-    ) {
-
-      return parsed.data;
-
-    }
-
-
-    /*
-     * KOMPATIBEL DENGAN
-     * CACHE VERSI LAMA
-     */
-
-    if (
-      Array.isArray(parsed)
-    ) {
-
-      return parsed;
-
-    }
-
-
-    return [];
-
-  } catch (error) {
-
-    console.warn(
-      "Cache tidak valid:",
-      error
-    );
-
-    return [];
-
-  }
-
-}
-
-
-/*
- * CEK UMUR CACHE
- *
- * true  = cache masih baru
- * false = cache sudah lama
- */
-
-function isCacheFresh() {
-
-  try {
-
-    const raw =
-      localStorage.getItem(
-        CACHE_KEY
-      );
-
-    if (!raw) {
-
-      return false;
-
-    }
-
-    const parsed =
-      JSON.parse(raw);
-
-    /*
-     * Cache lama
-     */
-
-    if (
-      Array.isArray(parsed)
-    ) {
-
-      return false;
-
-    }
-
-    /*
-     * Cache baru
-     */
-
-    if (
-      !parsed ||
-      !parsed.time
-    ) {
-
-      return false;
-
-    }
-
-    return (
-      Date.now() -
-      Number(parsed.time)
-    ) < CACHE_TIME;
-
-  } catch {
-
-    return false;
-
-  }
-
-}
