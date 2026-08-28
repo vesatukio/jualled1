@@ -6,12 +6,22 @@
 <meta name="theme-color" content="#ff7200">
 <title>Affiliate Content Generator | Duta LED</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f6f8;color:#222}.wrap{max-width:900px;margin:auto;padding:18px}.top{background:#fff;padding:18px;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 10px #0000000d}.top h1{margin:0 0 6px;font-size:24px}.top p{margin:0;color:#666}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:#fff;padding:16px;border-radius:16px;box-shadow:0 2px 10px #0000000d}.card h2{font-size:17px;margin:0 0 14px}label{display:block;font-size:13px;font-weight:700;margin:11px 0 5px}input,textarea,select{width:100%;border:1px solid #ddd;border-radius:10px;padding:11px;font:inherit;background:#fff}textarea{min-height:90px;resize:vertical}.btn{border:0;border-radius:10px;padding:12px 15px;font-weight:700;cursor:pointer}.primary{background:#ff7200;color:#fff;width:100%;margin-top:14px}.secondary{background:#eee;color:#222}.row{display:flex;gap:8px}.row>*{flex:1}.output{margin-top:14px}.out{border:1px solid #e5e5e5;border-radius:12px;padding:13px;margin-top:10px;background:#fafafa}.out-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.out strong{font-size:14px}.copy{padding:7px 10px;font-size:12px}.content{white-space:pre-wrap;line-height:1.55;margin-top:9px;font-size:14px}.preview{display:none;margin-top:12px}.preview img{max-width:180px;max-height:180px;border-radius:10px;object-fit:cover}.hint{font-size:12px;color:#777;margin-top:5px}@media(max-width:700px){.grid{grid-template-columns:1fr}.wrap{padding:10px}.top h1{font-size:21px}}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f6f8;color:#222}.wrap{max-width:960px;margin:auto;padding:18px}.top{background:#fff;padding:18px;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 10px #0000000d}.top h1{margin:0 0 6px;font-size:24px}.top p{margin:0;color:#666}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:#fff;padding:16px;border-radius:16px;box-shadow:0 2px 10px #0000000d}.card h2{font-size:17px;margin:0 0 14px}label{display:block;font-size:13px;font-weight:700;margin:11px 0 5px}input,textarea,select{width:100%;border:1px solid #ddd;border-radius:10px;padding:11px;font:inherit;background:#fff}textarea{min-height:90px;resize:vertical}.btn{border:0;border-radius:10px;padding:12px 15px;font-weight:700;cursor:pointer}.primary{background:#ff7200;color:#fff;width:100%;margin-top:14px}.secondary{background:#eee;color:#222}.row{display:flex;gap:8px}.row>*{flex:1}.output{margin-top:14px}.out{border:1px solid #e5e5e5;border-radius:12px;padding:13px;margin-top:10px;background:#fafafa}.out-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.out strong{font-size:14px}.copy{padding:7px 10px;font-size:12px}.content{white-space:pre-wrap;line-height:1.55;margin-top:9px;font-size:14px}.preview{display:none;margin-top:12px}.preview img{max-width:180px;max-height:180px;border-radius:10px;object-fit:cover}.hint{font-size:12px;color:#777;margin-top:5px}.status{font-size:12px;margin-top:8px;color:#666}.affiliate-picker{background:#fff4e8;border:1px solid #ffd3a8;border-radius:12px;padding:12px;margin-bottom:14px}.affiliate-picker strong{display:block;margin-bottom:7px}.load-row{display:flex;gap:8px}.load-row select{flex:1}.load-row button{white-space:nowrap}.hidden{display:none!important}@media(max-width:700px){.grid{grid-template-columns:1fr}.wrap{padding:10px}.top h1{font-size:21px}.load-row{flex-direction:column}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><h1>🛍️ Affiliate Content Generator</h1><p>Masukkan data produk affiliate, lalu buat caption siap posting untuk Facebook, TikTok, WhatsApp, dan marketplace.</p></div>
+  <div class="top"><h1>🛍️ Affiliate Content Generator</h1><p>Ambil data produk affiliate dari Google Sheet, lalu buat konten siap posting untuk Facebook, TikTok, WhatsApp, dan marketplace.</p></div>
+
+  <section class="affiliate-picker">
+    <strong>📋 Ambil Produk Affiliate dari Google Sheet</strong>
+    <div class="load-row">
+      <select id="productSelect"><option value="">Klik "Muat Produk" terlebih dahulu</option></select>
+      <button class="btn secondary" type="button" onclick="loadAffiliateProducts()">🔄 Muat Produk</button>
+    </div>
+    <div class="status" id="loadStatus">Belum memuat data.</div>
+  </section>
+
   <div class="grid">
     <section class="card">
       <h2>📦 Data Produk</h2>
@@ -28,21 +38,43 @@
       <label>Platform utama</label><select id="platform"><option>Facebook</option><option>TikTok</option><option>WhatsApp</option><option>Shopee</option></select>
       <label>Gaya</label><select id="tone"><option>Menjual tapi natural</option><option>Singkat dan langsung</option><option>Problem-solution</option><option>Promo / harga murah</option></select>
       <label>Kata tambahan (opsional)</label><textarea id="extra" placeholder="Misalnya: cocok untuk stok warung listrik, harga eceran, bisa beli sedikit."></textarea>
-      <button class="btn primary" onclick="generate()">✨ Generate Konten</button>
-      <button class="btn secondary" style="width:100%;margin-top:8px" onclick="resetForm()">Reset</button>
+      <button class="btn primary" type="button" onclick="generate()">✨ Generate Konten</button>
+      <button class="btn secondary" style="width:100%;margin-top:8px" type="button" onclick="resetForm()">Reset</button>
     </section>
   </div>
   <section class="card output" id="output" style="display:none"><h2>📝 Hasil Konten</h2><div id="results"></div></section>
 </div>
 <script>
 const $=id=>document.getElementById(id);
-function rupiah(v){let n=String(v||'').replace(/[^0-9]/g,'');return n?'Rp'+Number(n).toLocaleString('id-ID'):'Harga cek link';}
-function clean(v){return String(v||'').trim();}
+const API_URL="https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
+let affiliateProducts=[];
+function clean(v){return String(v??'').trim();}
+function rupiah(v){let n=String(v??'').replace(/[^0-9]/g,'');return n?'Rp'+Number(n).toLocaleString('id-ID'):'Harga cek link';}
+function number(v){let n=String(v??'').replace(/[^0-9.-]/g,'');return Number(n)||0;}
+function first(row,names){for(const n of names){if(row[n]!==undefined&&row[n]!==null&&clean(row[n]))return row[n];}return '';}
+function isAffiliate(row){const jenis=clean(first(row,['jenis','Jenis','JENIS','tipe','Tipe','TIPE','sumber','Sumber','SUMBER','status','Status'])).toLowerCase();const flag=clean(first(row,['affiliate','Affiliate','AFFILIATE','isAffiliate','is_affiliate'])).toLowerCase();const link=clean(first(row,['link affiliate','Link Affiliate','linkAffiliate','affiliateLink','affiliate_link','link','Link']));return flag==='ya'||flag==='yes'||flag==='true'||flag==='1'||jenis.includes('affiliate')||jenis.includes('affil')||(link&&/(shopee|tiktok|lazada|tokopedia)/i.test(link));}
+function normalizeAffiliate(row,i){return{id:clean(first(row,['ID','id','Id']))||String(i+1),name:clean(first(row,['nama','Nama','NAMA','name','Name'])),price:number(first(row,['harga jual','hargaJual','HargaJual','harga','Harga','price','Price'])),oldPrice:number(first(row,['harga coret','hargaCoret','HargaCoret','harga normal','hargaNormal','oldPrice'])),link:clean(first(row,['link affiliate','Link Affiliate','linkAffiliate','affiliateLink','affiliate_link','link','Link'])),category:clean(first(row,['kategori','Kategori','KATEGORI','category','Category']))||'produk pilihan',features:clean(first(row,['deskripsi','Deskripsi','DESKRIPSI','deskripsi affiliate','spesifikasi','Spesifikasi','features','Features'])),image:clean(first(row,['gambar1','Gambar1','gambar','Gambar','image','Image','foto','Foto']))};}
+async function loadAffiliateProducts(){
+  $('loadStatus').textContent='Memuat data dari Google Sheet...';
+  try{
+    const res=await fetch(API_URL+'?t='+Date.now(),{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const rows=Array.isArray(data)?data:(Array.isArray(data.data)?data.data:[]);
+    affiliateProducts=rows.map(normalizeAffiliate).filter((p,i)=>p.name&&isAffiliate(rows[i]));
+    const select=$('productSelect');select.innerHTML='<option value="">-- Pilih produk affiliate --</option>';
+    affiliateProducts.forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=p.name+(p.price?' — '+rupiah(p.price):'');select.appendChild(o);});
+    $('loadStatus').textContent=affiliateProducts.length?'Ditemukan '+affiliateProducts.length+' produk affiliate.':'Data berhasil dibaca, tetapi belum ada produk yang terdeteksi sebagai affiliate.';
+  }catch(e){console.error(e);$('loadStatus').textContent='Gagal memuat Google Sheet. Pastikan API dapat diakses dan kolom affiliate/link affiliate tersedia.';}
+}
+$('productSelect').addEventListener('change',()=>{const i=$('productSelect').value;if(i==='')return;const p=affiliateProducts[Number(i)];if(!p)return;$('name').value=p.name;$('price').value=p.price||'';$('oldPrice').value=p.oldPrice||'';$('link').value=p.link;$('category').value=p.category;$('features').value=p.features;$('image').value=p.image;updatePreview();});
+function updatePreview(){const v=clean($('image').value);if(v){$('previewImg').src=v;$('preview').style.display='block';}else $('preview').style.display='none';}
 function makeData(){return{name:clean($('name').value),price:rupiah($('price').value),oldPrice:rupiah($('oldPrice').value),link:clean($('link').value)||'[LINK AFFILIATE]',category:clean($('category').value)||'produk pilihan',features:clean($('features').value)||'praktis dan mudah digunakan',target:clean($('target').value)||'calon pembeli',platform:$('platform').value,tone:$('tone').value,extra:clean($('extra').value)};}
-function generate(){const d=makeData();if(!d.name){alert('Isi nama produk terlebih dahulu.');$('name').focus();return;}const priceLine=d.oldPrice!=='Harga cek link'&&d.oldPrice!==d.price?`💰 Sekarang ${d.price} (sebelumnya ${d.oldPrice})`:`💰 ${d.price}`;const extra=d.extra?`\n\n${d.extra}`:'';const hooks=[`🔥 Lagi cari ${d.name}?`,`💡 Barang sederhana, tapi berguna: ${d.name}`,`Jangan beli sebelum lihat ${d.name} ini!`];const fb=`${hooks[0]}\n\n${priceLine}\n\n${d.features}\n\nCocok untuk ${d.target}.${extra}\n\n🛒 Cek produknya:\n${d.link}\n\n#${d.category.replace(/[^a-zA-Z0-9]+/g,'')} #affiliate #rekomendasi #belanjaonline`;const tt=`${hooks[1]}\n\n${d.features}\n\n${priceLine}\n\nKalau kamu ${d.target}, produk ini layak dicek.${extra}\n\n👉 Link produk: ${d.link}\n\n#fyp #racunbelanja #rekomendasi #${d.category.replace(/[^a-zA-Z0-9]+/g,'')}`;const wa=`🛍️ ${d.name}\n\n${priceLine}\n${d.features}${extra}\n\n👉 Cek di sini:\n${d.link}`;const title=`${d.name} | ${d.price} | ${d.category}`;const script=`HOOK: ${hooks[2]}\n\nMASALAH: Banyak orang mencari produk yang praktis dan tidak mau ribet.\n\nSOLUSI: ${d.name} — ${d.features}.\n\nHARGA: ${priceLine}\n\nCTA: Cek detail dan harga di link berikut: ${d.link}\n\nTARGET: ${d.target}`;render([{t:'Facebook',c:fb},{t:'TikTok',c:tt},{t:'WhatsApp',c:wa},{t:'Judul Produk',c:title},{t:'Script Video 15–30 detik',c:script}]);}
-function render(items){$('output').style.display='block';$('results').innerHTML=items.map((x,i)=>`<div class="out"><div class="out-head"><strong>${x.t}</strong><button class="btn secondary copy" onclick="copyText(${i})">Copy</button></div><div class="content" id="c${i}"></div></div>`).join('');items.forEach((x,i)=>{$('c'+i).textContent=x.c;});$('output').scrollIntoView({behavior:'smooth',block:'start'});window.generated=items;}
+function generate(){const d=makeData();if(!d.name){alert('Isi nama produk terlebih dahulu.');$('name').focus();return;}const priceLine=d.oldPrice!=='Harga cek link'&&d.oldPrice!==d.price?`💰 Sekarang ${d.price} (sebelumnya ${d.oldPrice})`:`💰 ${d.price}`;const extra=d.extra?`\n\n${d.extra}`:'';const tag=d.category.toLowerCase().replace(/[^a-z0-9]+/g,'');const hooks=[`🔥 Lagi cari ${d.name}?`,`💡 Barang sederhana, tapi berguna: ${d.name}`,`Jangan beli sebelum lihat ${d.name} ini!`];const fb=`${hooks[0]}\n\n${priceLine}\n\n${d.features}\n\nCocok untuk ${d.target}.${extra}\n\n🛒 Cek produknya:\n${d.link}\n\n#${tag} #affiliate #rekomendasi #belanjaonline`;const tt=`${hooks[1]}\n\n${d.features}\n\n${priceLine}\n\nKalau kamu ${d.target}, produk ini layak dicek.${extra}\n\n👉 Link produk: ${d.link}\n\n#fyp #racunbelanja #rekomendasi #${tag}`;const wa=`🛍️ ${d.name}\n\n${priceLine}\n${d.features}${extra}\n\n👉 Cek di sini:\n${d.link}`;const title=`${d.name} | ${d.price} | ${d.category}`;const script=`HOOK: ${hooks[2]}\n\nMASALAH: Banyak orang mencari produk yang praktis dan tidak mau ribet.\n\nSOLUSI: ${d.name} — ${d.features}.\n\nHARGA: ${priceLine}\n\nCTA: Cek detail dan harga di link berikut: ${d.link}\n\nTARGET: ${d.target}`;render([{t:'Facebook',c:fb},{t:'TikTok',c:tt},{t:'WhatsApp',c:wa},{t:'Judul Produk',c:title},{t:'Script Video 15–30 detik',c:script}]);}
+function render(items){$('output').style.display='block';$('results').innerHTML=items.map((x,i)=>`<div class="out"><div class="out-head"><strong>${x.t}</strong><button class="btn secondary copy" type="button" onclick="copyText(${i})">Copy</button></div><div class="content" id="c${i}"></div></div>`).join('');items.forEach((x,i)=>{$('c'+i).textContent=x.c;});$('output').scrollIntoView({behavior:'smooth',block:'start'});window.generated=items;}
 function copyText(i){navigator.clipboard.writeText(window.generated[i].c).then(()=>alert('Konten disalin.')).catch(()=>alert('Gagal menyalin otomatis.'));}
-function resetForm(){$('name').value='';$('price').value='';$('oldPrice').value='';$('link').value='';$('category').value='';$('features').value='';$('image').value='';$('extra').value='';$('output').style.display='none';$('preview').style.display='none';}
-$('image').addEventListener('input',()=>{const v=clean($('image').value);if(v){$('previewImg').src=v;$('preview').style.display='block';}else $('preview').style.display='none';});
+function resetForm(){$('name').value='';$('price').value='';$('oldPrice').value='';$('link').value='';$('category').value='';$('features').value='';$('image').value='';$('extra').value='';$('output').style.display='none';$('preview').style.display='none';$('productSelect').value='';}
+$('image').addEventListener('input',updatePreview);
 </script>
-</body></html>
+</body>
+</html>
