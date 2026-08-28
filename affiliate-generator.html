@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ff7200">
+<title>Affiliate Content Generator | Duta LED</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f6f8;color:#222}.wrap{max-width:900px;margin:auto;padding:18px}.top{background:#fff;padding:18px;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 10px #0000000d}.top h1{margin:0 0 6px;font-size:24px}.top p{margin:0;color:#666}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:#fff;padding:16px;border-radius:16px;box-shadow:0 2px 10px #0000000d}.card h2{font-size:17px;margin:0 0 14px}label{display:block;font-size:13px;font-weight:700;margin:11px 0 5px}input,textarea,select{width:100%;border:1px solid #ddd;border-radius:10px;padding:11px;font:inherit;background:#fff}textarea{min-height:90px;resize:vertical}.btn{border:0;border-radius:10px;padding:12px 15px;font-weight:700;cursor:pointer}.primary{background:#ff7200;color:#fff;width:100%;margin-top:14px}.secondary{background:#eee;color:#222}.row{display:flex;gap:8px}.row>*{flex:1}.output{margin-top:14px}.out{border:1px solid #e5e5e5;border-radius:12px;padding:13px;margin-top:10px;background:#fafafa}.out-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.out strong{font-size:14px}.copy{padding:7px 10px;font-size:12px}.content{white-space:pre-wrap;line-height:1.55;margin-top:9px;font-size:14px}.preview{display:none;margin-top:12px}.preview img{max-width:180px;max-height:180px;border-radius:10px;object-fit:cover}.hint{font-size:12px;color:#777;margin-top:5px}@media(max-width:700px){.grid{grid-template-columns:1fr}.wrap{padding:10px}.top h1{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>🛍️ Affiliate Content Generator</h1><p>Masukkan data produk affiliate, lalu buat caption siap posting untuk Facebook, TikTok, WhatsApp, dan marketplace.</p></div>
+  <div class="grid">
+    <section class="card">
+      <h2>📦 Data Produk</h2>
+      <label>Nama produk</label><input id="name" placeholder="Contoh: Fitting Lampu Kabel 3 Meter">
+      <div class="row"><div><label>Harga</label><input id="price" placeholder="12500" inputmode="numeric"></div><div><label>Harga coret (opsional)</label><input id="oldPrice" placeholder="18000" inputmode="numeric"></div></div>
+      <label>Link affiliate</label><input id="link" placeholder="Tempel link affiliate di sini">
+      <label>Kategori</label><input id="category" placeholder="Perlengkapan rumah / listrik">
+      <label>Keunggulan / spesifikasi</label><textarea id="features" placeholder="Kabel 3 meter, siap pakai, cocok untuk kamar dan teras..."></textarea>
+      <label>URL gambar (opsional)</label><input id="image" placeholder="https://..."><div class="preview" id="preview"><img id="previewImg" alt="Preview produk"></div>
+    </section>
+    <section class="card">
+      <h2>🎯 Gaya Konten</h2>
+      <label>Target pembeli</label><input id="target" value="pemilik rumah, kos, toko">
+      <label>Platform utama</label><select id="platform"><option>Facebook</option><option>TikTok</option><option>WhatsApp</option><option>Shopee</option></select>
+      <label>Gaya</label><select id="tone"><option>Menjual tapi natural</option><option>Singkat dan langsung</option><option>Problem-solution</option><option>Promo / harga murah</option></select>
+      <label>Kata tambahan (opsional)</label><textarea id="extra" placeholder="Misalnya: cocok untuk stok warung listrik, harga eceran, bisa beli sedikit."></textarea>
+      <button class="btn primary" onclick="generate()">✨ Generate Konten</button>
+      <button class="btn secondary" style="width:100%;margin-top:8px" onclick="resetForm()">Reset</button>
+    </section>
+  </div>
+  <section class="card output" id="output" style="display:none"><h2>📝 Hasil Konten</h2><div id="results"></div></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function rupiah(v){let n=String(v||'').replace(/[^0-9]/g,'');return n?'Rp'+Number(n).toLocaleString('id-ID'):'Harga cek link';}
+function clean(v){return String(v||'').trim();}
+function makeData(){return{name:clean($('name').value),price:rupiah($('price').value),oldPrice:rupiah($('oldPrice').value),link:clean($('link').value)||'[LINK AFFILIATE]',category:clean($('category').value)||'produk pilihan',features:clean($('features').value)||'praktis dan mudah digunakan',target:clean($('target').value)||'calon pembeli',platform:$('platform').value,tone:$('tone').value,extra:clean($('extra').value)};}
+function generate(){const d=makeData();if(!d.name){alert('Isi nama produk terlebih dahulu.');$('name').focus();return;}const priceLine=d.oldPrice!=='Harga cek link'&&d.oldPrice!==d.price?`💰 Sekarang ${d.price} (sebelumnya ${d.oldPrice})`:`💰 ${d.price}`;const extra=d.extra?`\n\n${d.extra}`:'';const hooks=[`🔥 Lagi cari ${d.name}?`,`💡 Barang sederhana, tapi berguna: ${d.name}`,`Jangan beli sebelum lihat ${d.name} ini!`];const fb=`${hooks[0]}\n\n${priceLine}\n\n${d.features}\n\nCocok untuk ${d.target}.${extra}\n\n🛒 Cek produknya:\n${d.link}\n\n#${d.category.replace(/[^a-zA-Z0-9]+/g,'')} #affiliate #rekomendasi #belanjaonline`;const tt=`${hooks[1]}\n\n${d.features}\n\n${priceLine}\n\nKalau kamu ${d.target}, produk ini layak dicek.${extra}\n\n👉 Link produk: ${d.link}\n\n#fyp #racunbelanja #rekomendasi #${d.category.replace(/[^a-zA-Z0-9]+/g,'')}`;const wa=`🛍️ ${d.name}\n\n${priceLine}\n${d.features}${extra}\n\n👉 Cek di sini:\n${d.link}`;const title=`${d.name} | ${d.price} | ${d.category}`;const script=`HOOK: ${hooks[2]}\n\nMASALAH: Banyak orang mencari produk yang praktis dan tidak mau ribet.\n\nSOLUSI: ${d.name} — ${d.features}.\n\nHARGA: ${priceLine}\n\nCTA: Cek detail dan harga di link berikut: ${d.link}\n\nTARGET: ${d.target}`;render([{t:'Facebook',c:fb},{t:'TikTok',c:tt},{t:'WhatsApp',c:wa},{t:'Judul Produk',c:title},{t:'Script Video 15–30 detik',c:script}]);}
+function render(items){$('output').style.display='block';$('results').innerHTML=items.map((x,i)=>`<div class="out"><div class="out-head"><strong>${x.t}</strong><button class="btn secondary copy" onclick="copyText(${i})">Copy</button></div><div class="content" id="c${i}"></div></div>`).join('');items.forEach((x,i)=>{$('c'+i).textContent=x.c;});$('output').scrollIntoView({behavior:'smooth',block:'start'});window.generated=items;}
+function copyText(i){navigator.clipboard.writeText(window.generated[i].c).then(()=>alert('Konten disalin.')).catch(()=>alert('Gagal menyalin otomatis.'));}
+function resetForm(){$('name').value='';$('price').value='';$('oldPrice').value='';$('link').value='';$('category').value='';$('features').value='';$('image').value='';$('extra').value='';$('output').style.display='none';$('preview').style.display='none';}
+$('image').addEventListener('input',()=>{const v=clean($('image').value);if(v){$('previewImg').src=v;$('preview').style.display='block';}else $('preview').style.display='none';});
+</script>
+</body></html>
