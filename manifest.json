@@ -1,7 +1,7 @@
 {
-  "name": "Duta LED | Listrik & Elektronik",
+  "name": "Duta LED | Toko LED & Sparepart",
   "short_name": "Duta LED",
-  "description": "Lampu LED, modul LED dan sparepart dengan harga terjangkau.",
+  "description": "Toko LED, modul LED, sparepart dan katalog belanja Duta LED.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,18 +9,9 @@
   "theme_color": "#ff7200",
   "orientation": "portrait",
   "lang": "id-ID",
+  "categories": ["shopping", "business"],
   "icons": [
-    {
-      "src": "./image/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "./image/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    {"src":"./image/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./image/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }
