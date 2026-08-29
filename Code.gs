@@ -1,14 +1,175 @@
-const SHEET_NAME="PRODUK",AFFILIATE_SHEET_NAME="AFFILIATE",ORDER_SHEET_NAME="PESANAN",ADMIN_EMAIL="vesatukio@gmail.com",ADMIN_WA="083157925577",ADMIN_KEY_PROPERTY="DUTALED_ADMIN_KEY";
-function getAdminKey(){return PropertiesService.getScriptProperties().getProperty(ADMIN_KEY_PROPERTY)||""}
-function doGet(e){var a=e&&e.parameter&&e.parameter.action?String(e.parameter.action):"produk";if(a==="test")return json({success:true,message:"Duta LED API aktif"});if(a==="produk")return json({success:true,data:getProduk()});if(a==="affiliate")return json({success:true,data:getAffiliate()});if(a==="resolveAffiliate"){var u=e.parameter.url||"";try{return json({success:true,data:resolveAffiliate(u)})}catch(x){return json({success:false,message:String(x.message||x)})}}return json({success:false,message:"Action tidak ditemukan: "+a})}
-function doPost(e){try{var b={},raw=e&&e.postData&&e.postData.contents||"";if(raw){try{b=JSON.parse(raw)}catch(x){b=e.parameter||{}}}else b=e.parameter||{};var a=String(b.action||"");if(a==="createOrder")return json({success:true,data:createOrder(b.data||{})});if(a==="createProduct"||a==="updateProduct"){requireAdmin(b.key);var d=b.data||{};if(typeof d==="string")d=JSON.parse(d);return json({success:true,data:saveProduct(d,a==="updateProduct")})}if(a==="saveProducts"){requireAdmin(b.key);var ps=b.products||[];if(typeof ps==="string")ps=JSON.parse(ps);return json({success:true,data:saveProducts(ps)})}return json({success:false,message:"Action POST tidak ditemukan: "+a})}catch(err){return json({success:false,message:String(err.message||err)})}}
-function requireAdmin(k){var c=getAdminKey();if(!c)throw Error("Kunci admin belum dikonfigurasi di Apps Script");if(String(k||"")!==c)throw Error("Kunci admin salah")}
-function saveProducts(ps){if(!Array.isArray(ps)||!ps.length)throw Error("Tidak ada produk untuk disimpan");var results=[];ps.forEach(function(p){results.push(saveProduct(p,String(p.id||"").trim()!==""))});return{count:results.length,results:results,message:results.length+" produk berhasil diproses"}}
-function saveProduct(d,upd){var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);if(!sh)throw Error("Sheet PRODUK tidak ditemukan");var n=String(d.nama||"").trim();if(!n)throw Error("Nama produk wajib diisi");var id=String(d.id||"").trim();var modal=Number(d.hargaModal||0)||0;var normal=Number(d.hargaJual||0)||0;var sale=Number(d.hargaDiskon||0)||0;var dis=normal>0&&sale>0&&sale<normal?Math.round((normal-sale)/normal*100):0;var laba=String(d.laba||"").trim();var row=[id,n,String(d.kategori||"").trim(),modal,laba,normal,dis,sale,String(d.deskripsi||"").trim(),String(d.gambar1||"").trim(),String(d.gambar2||"").trim(),String(d.gambar3||"").trim()];if(!upd){id=nextProductId(sh);row[0]=id;sh.insertRowBefore(2);sh.getRange(2,1,1,12).setValues([row]);return{id:id,message:"Produk berhasil ditambahkan",diskon:dis}}if(!id)throw Error("ID produk tidak ada");var last=sh.getLastRow(),ids=last<2?[]:sh.getRange(2,1,last-1,1).getDisplayValues();for(var i=0;i<ids.length;i++){if(String(ids[i][0]).trim()===id){sh.getRange(i+2,1,1,12).setValues([row]);return{id:id,message:"Produk berhasil diperbarui",diskon:dis}}}throw Error("ID produk tidak ditemukan: "+id)}
-function nextProductId(sh){var last=sh.getLastRow();if(last<2)return"1";var vals=sh.getRange(2,1,last-1,1).getDisplayValues(),max=0;vals.forEach(function(r){var n=parseInt(String(r[0]).replace(/[^0-9]/g,""),10);if(!isNaN(n)&&n>max)max=n});return String(max+1)}
-function createOrder(d){if(!d||!d.orderNo)throw Error("Nomor pesanan tidak ada");var c=d.customer||{};if(!String(c.nama||"").trim())throw Error("Nama pembeli wajib diisi");if(!String(c.wa||"").trim())throw Error("Nomor HP wajib diisi");if(!String(c.alamat||"").trim())throw Error("Alamat wajib diisi");var items=Array.isArray(d.items)?d.items:[];if(!items.length)throw Error("Keranjang kosong");var ss=SpreadsheetApp.getActiveSpreadsheet(),sh=ss.getSheetByName(ORDER_SHEET_NAME)||ss.insertSheet(ORDER_SHEET_NAME);if(sh.getLastRow()===0)sh.appendRow(["orderNo","createdAt","nama","wa","alamat","kota","pengiriman","pembayaran","items","subtotal","ongkir","total","status"]);var ex=sh.getRange(1,1,Math.max(sh.getLastRow(),1),1).getDisplayValues().map(function(r){return String(r[0])});if(ex.indexOf(String(d.orderNo))>=0)throw Error("Nomor pesanan sudah digunakan");var sub=Number(d.subtotal||0)||0;sh.appendRow([String(d.orderNo),new Date(),String(c.nama).trim(),String(c.wa).trim(),String(c.alamat).trim(),String(c.kota||"").trim(),String(c.pengiriman||"").trim(),"COD",JSON.stringify(items),sub,"Ongkir dibayar manual / COD",sub,"BARU"]);try{MailApp.sendEmail(ADMIN_EMAIL,"🔔 Pesanan Baru "+d.orderNo+" - Duta LED","Pesanan baru "+d.orderNo+"\nPembeli: "+c.nama+"\nHP: "+c.wa+"\nAlamat: "+c.alamat+"\nTotal produk: "+formatRupiah(sub)+"\nPembayaran: COD\nOngkir: dibayar manual / COD")}catch(x){}return{orderNo:String(d.orderNo),status:"BARU",message:"Pesanan berhasil diterima"}}
-function getProduk(){var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);if(!sh||sh.getLastRow()<2)return[];var d=sh.getRange(2,1,sh.getLastRow()-1,12).getDisplayValues();return d.filter(function(r){return String(r[1]).trim()}).map(function(r){return{id:String(r[0]).trim(),nama:String(r[1]).trim(),kategori:String(r[2]).trim(),hargaModal:toNumber(r[3]),laba:String(r[4]).trim(),hargaJual:toNumber(r[5]),hargaCoret:toNumber(r[5]),diskon:toNumber(r[6]),hargaDiskon:toNumber(r[7]),deskripsi:String(r[8]).trim(),gambar1:String(r[9]).trim(),gambar2:String(r[10]).trim(),gambar3:String(r[11]).trim()}})}
-function getAffiliate(){var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AFFILIATE_SHEET_NAME);if(!sh||sh.getLastRow()<2)return[];var d=sh.getRange(2,1,sh.getLastRow()-1,11).getDisplayValues();return d.filter(function(r){return String(r[1]).trim()&&String(r[7]).trim()&&String(r[9]).trim().toUpperCase()==="YA"&&String(r[10]).trim().toUpperCase()==="YA"}).map(function(r){return{id:String(r[0]).trim(),nama:String(r[1]).trim(),kategori:String(r[2]).trim(),harga:toNumber(r[3]),hargaCoret:toNumber(r[4]),deskripsi:String(r[5]).trim(),gambar:String(r[6]).trim(),linkAffiliate:String(r[7]).trim(),platform:String(r[8]).trim()}})}
-function toNumber(v){return Number(String(v||"").replace(/Rp/gi,"").replace(/\s/g,"").replace(/[^\d-]/g,""))||0}function formatRupiah(n){return"Rp"+Number(n||0).toLocaleString("id-ID")}function json(d){return ContentService.createTextOutput(JSON.stringify(d)).setMimeType(ContentService.MimeType.JSON)}
-function resolveAffiliate(u){u=String(u||"").trim();if(!u)throw Error("Link affiliate kosong");if(!/^https?:\/\//i.test(u))throw Error("Format link tidak valid");var r=UrlFetchApp.fetch(u,{followRedirects:true,muteHttpExceptions:true,headers:{"User-Agent":"Mozilla/5.0"}});if(r.getResponseCode()>=400)throw Error("Shopee mengembalikan HTTP "+r.getResponseCode());var h=r.getContentText();return{nama:extractMeta(h,"og:title")||extractTitle(h)||"Produk Shopee",harga:extractPrice(h),hargaCoret:0,deskripsi:extractMeta(h,"og:description")||"",gambar:extractMeta(h,"og:image")||"",linkAffiliate:u,platform:"Shopee"}}
-function extractMeta(h,n){var m=String(h).match(new RegExp("<meta[^>]+(?:property|name)=[\\\"']"+n+"[\\\"'][^>]+content=[\\\"']([^\\\"']+)[\\\"']","i"));return m&&m[1]?decodeHtml(m[1]):""}function extractTitle(h){var m=String(h).match(/<title[^>]*>([\s\S]*?)<\/title>/i);return m&&m[1]?decodeHtml(m[1].replace(/\s+/g," ").trim()):""}function extractPrice(h){var p=[/"price"\s*:\s*"?([0-9.,]+)"?/i,/"priceValue"\s*:\s*"?([0-9.,]+)"?/i,/"finalPrice"\s*:\s*"?([0-9.,]+)"?/i,/Rp\s*([0-9.]+)/i];for(var i=0;i<p.length;i++){var m=String(h).match(p[i]);if(m&&m[1]){var n=normalizePrice(m[1]);if(n>0)return n}}return 0}function normalizePrice(v){return Number(String(v||"").replace(/[^\d]/g,""))||0}function decodeHtml(t){return String(t||"").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,"<").replace(/&gt;/g,">")}
+const SHEET_NAME = 'PRODUK';
+const AFFILIATE_SHEET_NAME = 'AFFILIATE';
+const ADMIN_KEY_PROPERTY = 'DUTALED_ADMIN_KEY';
+
+function doGet(e) {
+  const action = e && e.parameter && e.parameter.action ? String(e.parameter.action) : 'produk';
+  try {
+    if (action === 'test') return json({ success: true, message: 'Duta LED API aktif' });
+    if (action === 'produk') return json({ success: true, data: getProduk() });
+    if (action === 'affiliate') return json({ success: true, data: getAffiliate() });
+    return json({ success: false, message: 'Action tidak ditemukan: ' + action });
+  } catch (err) {
+    return json({ success: false, message: String(err.message || err) });
+  }
+}
+
+function doPost(e) {
+  try {
+    const p = e && e.parameter ? e.parameter : {};
+    const action = String(p.action || '');
+
+    if (action !== 'createProduct' && action !== 'updateProduct') {
+      return json({ success: false, message: 'Action POST tidak valid: ' + action });
+    }
+
+    const savedKey = PropertiesService.getScriptProperties().getProperty(ADMIN_KEY_PROPERTY);
+    if (!savedKey) throw new Error('DUTALED_ADMIN_KEY belum dibuat di Script Properties.');
+    if (String(p.key || '') !== String(savedKey)) throw new Error('Kunci admin salah.');
+
+    let data = {};
+    if (p.data) {
+      try { data = JSON.parse(p.data); }
+      catch (err) { throw new Error('Data produk tidak valid.'); }
+    }
+
+    const result = action === 'createProduct'
+      ? tambahProduk(data)
+      : updateProduk(data);
+
+    return json({ success: true, data: result });
+  } catch (err) {
+    return json({ success: false, message: String(err.message || err) });
+  }
+}
+
+function getSheet() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  if (!sheet) throw new Error('Sheet PRODUK tidak ditemukan.');
+  return sheet;
+}
+
+function getProduk() {
+  const sheet = getSheet();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  const data = sheet.getRange(2, 1, lastRow - 1, 12).getDisplayValues();
+  return data.filter(r => String(r[1]).trim() !== '').map(r => ({
+    id: String(r[0]).trim(),
+    nama: String(r[1]).trim(),
+    kategori: String(r[2]).trim(),
+    hargaModal: toNumber(r[3]),
+    laba: String(r[4]).trim(),
+    hargaJual: toNumber(r[5]),
+    diskon: toNumber(r[6]),
+    hargaDiskon: toNumber(r[7]),
+    deskripsi: String(r[8]).trim(),
+    gambar1: String(r[9]).trim(),
+    gambar2: String(r[10]).trim(),
+    gambar3: String(r[11]).trim()
+  }));
+}
+
+function tambahProduk(d) {
+  const sheet = getSheet();
+  const nama = String(d.nama || '').trim();
+  if (!nama) throw new Error('Nama produk wajib diisi.');
+
+  const hargaJual = toNumber(d.hargaJual);
+  const hargaDiskon = toNumber(d.hargaDiskon);
+  const diskon = hitungDiskon(hargaJual, hargaDiskon);
+  const id = buatIdBaru(sheet);
+
+  const row = buatBaris(d, id, diskon);
+  sheet.insertRowBefore(2);
+  sheet.getRange(2, 1, 1, 12).setValues([row]);
+  SpreadsheetApp.flush();
+
+  return { id: id, nama: nama, diskon: diskon, message: 'Produk berhasil ditambahkan.' };
+}
+
+function updateProduk(d) {
+  const sheet = getSheet();
+  const id = String(d.id || '').trim();
+  const nama = String(d.nama || '').trim();
+  if (!id) throw new Error('ID produk wajib ada untuk edit.');
+  if (!nama) throw new Error('Nama produk wajib diisi.');
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) throw new Error('Produk belum ada.');
+
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getDisplayValues();
+  for (let i = 0; i < ids.length; i++) {
+    if (String(ids[i][0]).trim() === id) {
+      const hargaJual = toNumber(d.hargaJual);
+      const hargaDiskon = toNumber(d.hargaDiskon);
+      const diskon = hitungDiskon(hargaJual, hargaDiskon);
+      sheet.getRange(i + 2, 1, 1, 12).setValues([buatBaris(d, id, diskon)]);
+      SpreadsheetApp.flush();
+      return { id: id, nama: nama, diskon: diskon, message: 'Produk berhasil diperbarui.' };
+    }
+  }
+  throw new Error('ID produk tidak ditemukan: ' + id);
+}
+
+function buatBaris(d, id, diskon) {
+  return [
+    id,
+    String(d.nama || '').trim(),
+    String(d.kategori || '').trim(),
+    toNumber(d.hargaModal),
+    String(d.laba || '').trim(),
+    toNumber(d.hargaJual),
+    diskon,
+    toNumber(d.hargaDiskon),
+    String(d.deskripsi || '').trim(),
+    String(d.gambar1 || '').trim(),
+    String(d.gambar2 || '').trim(),
+    String(d.gambar3 || '').trim()
+  ];
+}
+
+function hitungDiskon(hargaJual, hargaDiskon) {
+  if (hargaJual > 0 && hargaDiskon > 0 && hargaDiskon < hargaJual) {
+    return Math.round(((hargaJual - hargaDiskon) / hargaJual) * 100);
+  }
+  return 0;
+}
+
+function buatIdBaru(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return '1';
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getDisplayValues();
+  let max = 0;
+  ids.forEach(r => {
+    const n = parseInt(String(r[0]).replace(/[^0-9]/g, ''), 10);
+    if (!isNaN(n) && n > max) max = n;
+  });
+  return String(max + 1);
+}
+
+function getAffiliate() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AFFILIATE_SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 11).getDisplayValues();
+  return data.filter(r => {
+    return String(r[1]).trim() !== '' &&
+      String(r[7]).trim() !== '' &&
+      String(r[9]).trim().toUpperCase() === 'YA' &&
+      String(r[10]).trim().toUpperCase() === 'YA';
+  }).map(r => ({
+    id: String(r[0]).trim(), nama: String(r[1]).trim(), kategori: String(r[2]).trim(),
+    harga: toNumber(r[3]), hargaCoret: toNumber(r[4]), deskripsi: String(r[5]).trim(),
+    gambar: String(r[6]).trim(), linkAffiliate: String(r[7]).trim(), platform: String(r[8]).trim()
+  }));
+}
+
+function toNumber(value) {
+  const text = String(value || '').replace(/Rp/gi, '').replace(/\s/g, '').replace(/[^\d-]/g, '');
+  return Number(text) || 0;
+}
+
+function json(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
