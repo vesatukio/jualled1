@@ -4,15 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ff7200">
-  <meta name="description" content="Rekomendasi produk pilihan melalui link affiliate marketplace.">
-  <title>Produk Affiliate | Duta LED</title>
+  <meta name="description" content="Tambah produk affiliate Shopee dan tampilkan katalog otomatis.">
+  <title>Affiliate Generator | Duta LED</title>
   <link rel="stylesheet" href="affiliate-generator.css">
 </head>
 <body>
 <header class="topbar"><div class="container topbar-inner"><a href="/" class="brand"><b>D</b><span><strong>Duta LED</strong><small>Listrik & Elektronik</small></span></a><a href="/" class="back">← Kembali ke Toko</a></div></header>
 <main>
-<section class="hero"><div class="container"><span>REKOMENDASI PILIHAN</span><h1>Produk Affiliate</h1><p>Temukan produk pilihan dan beli langsung melalui marketplace.</p></div></section>
+<section class="hero"><div class="container"><span>AFFILIATE GENERATOR</span><h1>Paste Link → Ambil Produk</h1><p>Tempel link affiliate Shopee, ambil data produk otomatis, lalu simpan ke sheet AFFILIATE.</p></div></section>
 <section class="catalog"><div class="container">
+<div class="import-box">
+  <h2>➕ Tambah Produk Affiliate</h2>
+  <p>Tempel link pendek atau link produk Shopee. Link affiliate asli tetap disimpan.</p>
+  <div class="import-row"><input id="affiliateLinkInput" type="url" placeholder="https://s.shopee.co.id/6L416PkBgP"><button id="fetchProductButton" type="button">✨ Ambil Produk</button></div>
+  <div id="importStatus" class="import-status"></div>
+  <div id="editorBox" class="editor hidden">
+    <div class="editor-grid">
+      <label>Nama Produk<input id="editNama" type="text"></label>
+      <label>Kategori<input id="editKategori" type="text" placeholder="Contoh: Fitting Lampu"></label>
+      <label>Harga<input id="editHarga" type="number" inputmode="numeric"></label>
+      <label>Harga Coret<input id="editHargaCoret" type="number" inputmode="numeric"></label>
+      <label>Platform<input id="editPlatform" type="text" value="Shopee"></label>
+      <label>URL Gambar<input id="editGambar" type="url"></label>
+      <label class="full">Deskripsi<textarea id="editDeskripsi" rows="3"></textarea></label>
+    </div>
+    <div class="editor-actions"><button id="saveProductButton" type="button" class="save">💾 Simpan ke AFFILIATE</button><button id="cancelEditButton" type="button" class="cancel">Batal</button></div>
+  </div>
+</div>
 <div class="toolbar"><label class="search"><span>🔍</span><input id="searchInput" type="search" placeholder="Cari produk affiliate..." autocomplete="off"></label><button id="refreshButton" type="button">↻ Refresh</button></div>
 <div id="categoryBar" class="categories"></div>
 <div id="statusBox" class="status">Memuat produk affiliate...</div>
