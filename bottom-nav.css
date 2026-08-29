@@ -1,12 +1,15 @@
-/* Duta LED - 4 menu navigasi bawah */
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;height:64px;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(255,255,255,.98);border-top:1px solid #e5e5e5;box-shadow:0 -3px 15px rgba(0,0,0,.08);z-index:9999;padding-bottom:env(safe-area-inset-bottom)}
-.bottom-nav-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;color:#777;font:inherit;text-decoration:none;cursor:pointer;min-width:0}
-.bottom-nav-item span{position:relative;font-size:21px;line-height:1.1}
-.bottom-nav-item strong{font-size:10px;font-weight:700;line-height:1.2}
-.bottom-nav-item.active{color:#ff7200}
-.bottom-nav-item i{position:absolute;top:-7px;right:-11px;min-width:16px;height:16px;padding:0 4px;border-radius:10px;background:#e53935;color:#fff;font-size:9px;font-style:normal;display:flex;align-items:center;justify-content:center;font-weight:800}
-body{padding-bottom:74px}
-.footer{padding-bottom:85px}
-.floating-cart{bottom:82px!important}
-.floating-wa{bottom:82px!important}
-@media(min-width:700px){.bottom-nav{max-width:600px;left:50%;right:auto;transform:translateX(-50%);border-left:1px solid #e5e5e5;border-right:1px solid #e5e5e5}.floating-cart{bottom:82px!important}.floating-wa{bottom:82px!important}}
+/* Duta LED — Floating bottom navigation, mobile-first */
+.bottom-nav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));height:64px;display:grid;grid-template-columns:repeat(4,1fr);align-items:stretch;padding:5px;box-sizing:border-box;background:rgba(255,255,255,.94);border:1px solid rgba(0,0,0,.07);border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:99999}
+.bottom-nav-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;border-radius:17px;background:transparent;color:#707070;font:inherit;text-decoration:none;cursor:pointer;min-width:0;-webkit-tap-highlight-color:transparent;transition:transform .16s ease,background .16s ease,color .16s ease}
+.bottom-nav-item:active{transform:scale(.94)}
+.bottom-nav-item span{position:relative;width:30px;height:27px;display:flex;align-items:center;justify-content:center;font-size:21px;line-height:1}
+.bottom-nav-item strong{font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap}
+.bottom-nav-item.active{color:#ff7200;background:rgba(255,114,0,.10)}
+.bottom-nav-item.active span{transform:translateY(-1px)}
+.bottom-nav-item i{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:10px;background:#e53935;color:#fff;font-size:9px;font-style:normal;display:flex;align-items:center;justify-content:center;font-weight:800;border:2px solid #fff}
+body{padding-bottom:94px}
+.footer{padding-bottom:105px}
+.floating-cart{bottom:94px!important}.floating-wa{bottom:94px!important}
+@media(max-width:360px){.bottom-nav{left:8px;right:8px;height:61px;border-radius:20px}.bottom-nav-item strong{font-size:9px}.bottom-nav-item span{font-size:20px}}
+@media(min-width:700px){.bottom-nav{left:50%;right:auto;width:min(560px,calc(100% - 32px));transform:translateX(-50%);bottom:16px}.floating-cart{bottom:96px!important}.floating-wa{bottom:96px!important}}
+@media(prefers-reduced-motion:reduce){.bottom-nav-item{transition:none}}
