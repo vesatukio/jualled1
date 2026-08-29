@@ -1,27 +1,9 @@
-/* Inject a Promosikan button into product cards without changing app.js */
+/* Duta LED UI enhancements: product promotion + banner loader + one-tap image zoom */
 (function(){
-  function inject(){
-    document.querySelectorAll('.product-card').forEach(card=>{
-      if(card.querySelector('.poster-open')) return;
-      const share=card.querySelector('.product-share');
-      if(!share) return;
-      const btn=document.createElement('button');
-      btn.type='button'; btn.className='poster-open'; btn.title='Buat posting Facebook/TikTok'; btn.textContent='📣 Promosikan';
-      share.appendChild(btn);
-      btn.addEventListener('click',function(e){
-        e.preventDefault(); e.stopPropagation();
-        const name=card.querySelector('.product-name')?.textContent.trim()||'';
-        const product=(window.products||[]).find(p=>String(p.nama||'').trim()===name);
-        if(window.DutaPoster&&product){window.DutaPoster.open(product);return;}
-        /* app.js keeps products private; recover basic card data safely for the poster */
-        const price=card.querySelector('.price')?.textContent.trim()||'';
-        const old=card.querySelector('.old-price')?.textContent.trim()||'';
-        const img=card.querySelector('.gallery-slide img')?.src||'';
-        window.DutaPoster?.open({id:'',nama:name,hargaJual:Number(price.replace(/[^0-9]/g,''))||0,hargaDiskon:old?Number(price.replace(/[^0-9]/g,'')):0,deskripsi:'Produk Duta LED untuk kebutuhan rumah, toko, teknisi, dan usaha.',gambar1:img});
-      });
-    });
-  }
-  document.addEventListener('DOMContentLoaded',inject);
-  const observer=new MutationObserver(inject);
-  observer.observe(document.body,{childList:true,subtree:true});
+  'use strict';
+  function injectPromo(){document.querySelectorAll('.product-card').forEach(card=>{if(card.querySelector('.poster-open'))return;const share=card.querySelector('.product-share');if(!share)return;const btn=document.createElement('button');btn.type='button';btn.className='poster-open';btn.title='Buat poster produk';btn.textContent='📣';share.appendChild(btn);btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();const name=card.querySelector('.product-name')?.textContent.trim()||'';const priceText=card.querySelector('.price')?.textContent.trim()||'';const img=card.querySelector('.gallery-slide img')?.src||'';const product=(Array.isArray(window.products)?window.products:[]).find(p=>String(p.nama||'').trim()===name)||{id:'',nama:name,hargaJual:Number(priceText.replace(/[^0-9]/g,''))||0,hargaDiskon:0,deskripsi:'Produk Duta LED untuk kebutuhan rumah, toko, teknisi, dan usaha.',gambar1:img};window.DutaPoster?.open(product);});});}
+  async function loadBanners(){const host=document.getElementById('heroSlides'),dots=document.getElementById('heroDots');if(!host)return;try{const r=await fetch('./banner.json?t='+Date.now(),{cache:'no-store'}),b=await r.json();if(!Array.isArray(b)||!b.length)return;host.innerHTML=b.map((x,i)=>`<a class="hero-slide ${i===0?'active':''}" href="${safe(x.link||'#produk')}"><img src="${safe(x.image)}" alt="${safe(x.title||'Promo Duta LED')}" loading="${i?'lazy':'eager'}"></a>`).join('');if(dots)dots.innerHTML=b.map((_,i)=>`<button type="button" class="hero-dot ${i===0?'active':''}" aria-label="Banner ${i+1}"></button>`).join('');const items=[...host.querySelectorAll('.hero-slide')],ds=[...(dots?.children||[])];let i=0,timer;function show(n){i=(n+items.length)%items.length;items.forEach((x,k)=>x.classList.toggle('active',k===i));ds.forEach((x,k)=>x.classList.toggle('active',k===i));}function restart(){clearInterval(timer);timer=setInterval(()=>show(i+1),4500)}document.getElementById('heroPrev')?.addEventListener('click',()=>{show(i-1);restart()});document.getElementById('heroNext')?.addEventListener('click',()=>{show(i+1);restart()});ds.forEach((d,k)=>d.addEventListener('click',()=>{show(k);restart()}));restart();}catch(e){console.warn('banner.json tidak dapat dimuat:',e)}}
+  function safe(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  function fixZoom(){document.addEventListener('click',function(e){const img=e.target.closest?.('.image-zoom-overlay .zoom-image');if(!img)return;e.preventDefault();e.stopImmediatePropagation();img.classList.toggle('zoom-normal');},true)}
+  function boot(){injectPromo();loadBanners();fixZoom()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();new MutationObserver(injectPromo).observe(document.documentElement,{childList:true,subtree:true});
 })();
