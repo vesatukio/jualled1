@@ -1,10 +1,11 @@
-const CACHE_NAME = "dutaled-v1";
+const CACHE_NAME = "dutaled-v2";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
+  "./affiliate-generator.js",
   "./manifest.json",
   "./image/no-image.png",
   "./image/icon-192.png",
@@ -31,17 +32,52 @@ self.addEventListener("activate", event => {
   );
 });
 
+/*
+  index.html belum perlu diubah manual.
+  app.js digabung dengan affiliate-generator.js saat browser meminta app.js.
+  Dengan begitu Affiliate Generator ikut dimuat tanpa mengganggu app.js lama.
+*/
 self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
 
-  if (event.request.method !== "GET") {
+  const url = new URL(event.request.url);
+
+  if (url.pathname.endsWith("/app.js")) {
+    event.respondWith(loadCombinedApp(event.request));
     return;
   }
 
   event.respondWith(
-    caches.match(event.request)
-      .then(cached => {
-        return cached || fetch(event.request);
-      })
+    caches.match(event.request).then(cached => {
+      return cached || fetch(event.request);
+    })
   );
-
 });
+
+async function loadCombinedApp(request) {
+  const cache = await caches.open(CACHE_NAME);
+
+  let appResponse = await cache.match(request);
+  if (!appResponse) {
+    appResponse = await fetch(request);
+  }
+
+  let affiliateResponse = await cache.match("./affiliate-generator.js");
+  if (!affiliateResponse) {
+    affiliateResponse = await fetch(new URL("./affiliate-generator.js", request.url));
+  }
+
+  const appCode = await appResponse.text();
+  const affiliateCode = await affiliateResponse.text();
+
+  return new Response(
+    appCode + "\n\n/* ===== DUTA LED AFFILIATE GENERATOR ===== */\n" + affiliateCode,
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Cache-Control": "no-cache"
+      }
+    }
+  );
+}
