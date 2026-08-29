@@ -3,6 +3,7 @@ const AFFILIATE_SHEET_NAME = "AFFILIATE";
 const ORDER_SHEET_NAME = "PESANAN";
 const ADMIN_EMAIL = "vesatukio@gmail.com";
 const ADMIN_WA = "083157925577";
+const ADMIN_KEY = "GANTI_DENGAN_KUNCI_ADMIN_UNIK";
 
 function doGet(e) {
   var action = "produk";
@@ -22,8 +23,13 @@ function doGet(e) {
 function doPost(e) {
   try {
     var body = JSON.parse((e && e.postData && e.postData.contents) || "{}");
-    if (String(body.action || "") === "createOrder") return json({success:true,data:createOrder(body.data || {})});
-    return json({success:false,message:"Action POST tidak ditemukan: " + String(body.action || "")});
+    var action = String(body.action || "");
+    if (action === "createOrder") return json({success:true,data:createOrder(body.data || {})});
+    if (action === "createProduct" || action === "updateProduct") {
+      if (String(body.key || "") !== ADMIN_KEY) throw new Error("Kunci admin salah");
+      return json({success:true,data:saveProduct(body.data || {}, action === "updateProduct")});
+    }
+    return json({success:false,message:"Action POST tidak ditemukan: " + action});
   } catch (err) { return json({success:false,message:String(err.message || err)}); }
 }
 
@@ -48,12 +54,38 @@ function createOrder(data) {
   return {orderNo:order.orderNo,status:"BARU",message:"Pesanan berhasil diterima"};
 }
 
+function saveProduct(data, isUpdate) {
+  var ss=SpreadsheetApp.getActiveSpreadsheet();
+  var sh=ss.getSheetByName(SHEET_NAME);
+  if(!sh) throw new Error("Sheet PRODUK tidak ditemukan");
+  var name=String(data.nama||"").trim();
+  if(!name) throw new Error("Nama produk wajib diisi");
+  var id=String(data.id||"").trim();
+  if(!isUpdate) {
+    if(!id) id="P"+new Date().getTime().toString().slice(-8);
+    sh.appendRow([id,name,String(data.kategori||"").trim(),Number(data.stok||0),Number(data.hargaModal||0),Number(data.hargaJual||0),Number(data.diskon||0),Number(data.hargaDiskon||0),String(data.deskripsi||"").trim(),String(data.gambar1||"").trim(),String(data.gambar2||"").trim(),String(data.gambar3||"").trim()]);
+    return {id:id,message:"Produk berhasil ditambahkan"};
+  }
+  if(!id) throw new Error("ID produk tidak ada");
+  var last=sh.getLastRow();
+  if(last<2) throw new Error("Produk tidak ditemukan");
+  var ids=sh.getRange(2,1,last-1,1).getDisplayValues();
+  for(var i=0;i<ids.length;i++) {
+    if(String(ids[i][0]).trim()===id) {
+      var row=i+2;
+      var old=sh.getRange(row,1,1,12).getValues()[0];
+      sh.getRange(row,1,1,12).setValues([[id,name,String(data.kategori||"").trim(),Number(data.stok||0),old[4],Number(data.hargaJual||0),Number(data.diskon||0),Number(data.hargaDiskon||0),String(data.deskripsi||"").trim(),String(data.gambar1||"").trim(),String(data.gambar2||"").trim(),String(data.gambar3||"").trim()]]);
+      return {id:id,message:"Produk berhasil diperbarui"};
+    }
+  }
+  throw new Error("ID produk tidak ditemukan");
+}
+
 function notifyAdminNewOrder(order) {
   var itemText=order.items.map(function(i){return (i.nama||"Produk")+" x"+(Number(i.qty)||1)+" — "+formatRupiah((Number(i.hargaTampil??i.hargaDiskon??i.hargaJual??i.harga??0)||0)*(Number(i.qty)||1));}).join("\n");
   var subject="🔔 Pesanan Baru " + order.orderNo + " - Duta LED";
   var body="PESANAN BARU DUTA LED\n\nNo: "+order.orderNo+"\nPembeli: "+order.nama+"\nHP/WA: "+order.wa+"\nAlamat: "+order.alamat+"\nKota: "+order.kota+"\nPengiriman: "+order.pengiriman+"\nPembayaran: "+order.pembayaran+"\n\nProduk:\n"+itemText+"\n\nTotal Produk: "+formatRupiah(order.total)+"\nOngkir: dibayar manual / COD\nStatus: BARU\n\nOrder dibuat melalui website Duta LED.";
   try { MailApp.sendEmail(ADMIN_EMAIL,subject,body); } catch(err) { console.log("Email notifikasi gagal: "+err); }
-  // WhatsApp admin: dibuat sebagai tautan konsultasi/notifikasi manual, bukan dikirim otomatis.
   console.log("Admin WA notification target: "+ADMIN_WA);
 }
 function formatRupiah(n){return "Rp"+Number(n||0).toLocaleString("id-ID");}
@@ -61,7 +93,7 @@ function formatRupiah(n){return "Rp"+Number(n||0).toLocaleString("id-ID");}
 function getProduk() {
   var sheet=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME); if(!sheet||sheet.getLastRow()<2)return[];
   var data=sheet.getRange(2,1,sheet.getLastRow()-1,12).getDisplayValues();
-  return data.filter(function(row){return String(row[1]).trim()!=="";}).map(function(row){return{id:String(row[0]).trim(),nama:String(row[1]).trim(),kategori:String(row[2]).trim(),hargaJual:toNumber(row[5]),diskon:toNumber(row[6]),hargaDiskon:toNumber(row[7]),deskripsi:String(row[8]).trim(),gambar1:String(row[9]).trim(),gambar2:String(row[10]).trim(),gambar3:String(row[11]).trim()};});
+  return data.filter(function(row){return String(row[1]).trim()!=="";}).map(function(row){return{id:String(row[0]).trim(),nama:String(row[1]).trim(),kategori:String(row[2]).trim(),stok:toNumber(row[3]),hargaJual:toNumber(row[5]),diskon:toNumber(row[6]),hargaDiskon:toNumber(row[7]),deskripsi:String(row[8]).trim(),gambar1:String(row[9]).trim(),gambar2:String(row[10]).trim(),gambar3:String(row[11]).trim()};});
 }
 function getAffiliate() {
   var sheet=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AFFILIATE_SHEET_NAME); if(!sheet||sheet.getLastRow()<2)return[];
