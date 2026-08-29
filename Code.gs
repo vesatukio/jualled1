@@ -3,7 +3,11 @@ const AFFILIATE_SHEET_NAME = "AFFILIATE";
 const ORDER_SHEET_NAME = "PESANAN";
 const ADMIN_EMAIL = "vesatukio@gmail.com";
 const ADMIN_WA = "083157925577";
-const ADMIN_KEY = "GANTI_DENGAN_KUNCI_ADMIN_UNIK";
+const ADMIN_KEY_PROPERTY = "DUTALED_ADMIN_KEY";
+
+function getAdminKey() {
+  return PropertiesService.getScriptProperties().getProperty(ADMIN_KEY_PROPERTY) || "";
+}
 
 function doGet(e) {
   var action = "produk";
@@ -26,7 +30,9 @@ function doPost(e) {
     var action = String(body.action || "");
     if (action === "createOrder") return json({success:true,data:createOrder(body.data || {})});
     if (action === "createProduct" || action === "updateProduct") {
-      if (String(body.key || "") !== ADMIN_KEY) throw new Error("Kunci admin salah");
+      var configuredKey = getAdminKey();
+      if (!configuredKey) throw new Error("Kunci admin belum dikonfigurasi di Apps Script");
+      if (String(body.key || "") !== configuredKey) throw new Error("Kunci admin salah");
       return json({success:true,data:saveProduct(body.data || {}, action === "updateProduct")});
     }
     return json({success:false,message:"Action POST tidak ditemukan: " + action});
@@ -48,8 +54,8 @@ function createOrder(data) {
   var existing=sh.getRange(1,1,Math.max(sh.getLastRow(),1),1).getDisplayValues().map(function(r){return String(r[0]);});
   if (existing.indexOf(String(data.orderNo))!==-1) throw new Error("Nomor pesanan sudah digunakan");
   var shippingNote="Ongkir dibayar manual / COD";
-  sh.appendRow([String(data.orderNo),new Date(),String(customer.nama).trim(),String(customer.wa).trim(),String(customer.alamat).trim(),String(customer.kota||"").trim(),String(customer.pengiriman||"").trim(),String(customer.pembayaran||data.payment||"").trim(),JSON.stringify(items),subtotal,shippingNote,subtotal,"BARU"]);
-  var order={orderNo:String(data.orderNo),nama:String(customer.nama).trim(),wa:String(customer.wa).trim(),alamat:String(customer.alamat).trim(),kota:String(customer.kota||"").trim(),pengiriman:String(customer.pengiriman||"").trim(),pembayaran:String(customer.pembayaran||data.payment||"").trim(),items:items,subtotal:subtotal,ongkir:shippingNote,total:subtotal,status:"BARU"};
+  sh.appendRow([String(data.orderNo),new Date(),String(customer.nama).trim(),String(customer.wa).trim(),String(customer.alamat).trim(),String(customer.kota||"").trim(),String(customer.pengiriman||"").trim(),"COD",JSON.stringify(items),subtotal,shippingNote,subtotal,"BARU"]);
+  var order={orderNo:String(data.orderNo),nama:String(customer.nama).trim(),wa:String(customer.wa).trim(),alamat:String(customer.alamat).trim(),kota:String(customer.kota||"").trim(),pengiriman:String(customer.pengiriman||"").trim(),pembayaran:"COD",items:items,subtotal:subtotal,ongkir:shippingNote,total:subtotal,status:"BARU"};
   notifyAdminNewOrder(order);
   return {orderNo:order.orderNo,status:"BARU",message:"Pesanan berhasil diterima"};
 }
@@ -84,7 +90,7 @@ function saveProduct(data, isUpdate) {
 function notifyAdminNewOrder(order) {
   var itemText=order.items.map(function(i){return (i.nama||"Produk")+" x"+(Number(i.qty)||1)+" — "+formatRupiah((Number(i.hargaTampil??i.hargaDiskon??i.hargaJual??i.harga??0)||0)*(Number(i.qty)||1));}).join("\n");
   var subject="🔔 Pesanan Baru " + order.orderNo + " - Duta LED";
-  var body="PESANAN BARU DUTA LED\n\nNo: "+order.orderNo+"\nPembeli: "+order.nama+"\nHP/WA: "+order.wa+"\nAlamat: "+order.alamat+"\nKota: "+order.kota+"\nPengiriman: "+order.pengiriman+"\nPembayaran: "+order.pembayaran+"\n\nProduk:\n"+itemText+"\n\nTotal Produk: "+formatRupiah(order.total)+"\nOngkir: dibayar manual / COD\nStatus: BARU\n\nOrder dibuat melalui website Duta LED.";
+  var body="PESANAN BARU DUTA LED\n\nNo: "+order.orderNo+"\nPembeli: "+order.nama+"\nHP/WA: "+order.wa+"\nAlamat: "+order.alamat+"\nKota: "+order.kota+"\nPengiriman: "+order.pengiriman+"\nPembayaran: COD\n\nProduk:\n"+itemText+"\n\nTotal Produk: "+formatRupiah(order.total)+"\nOngkir: dibayar manual / COD\nStatus: BARU\n\nOrder dibuat melalui website Duta LED.";
   try { MailApp.sendEmail(ADMIN_EMAIL,subject,body); } catch(err) { console.log("Email notifikasi gagal: "+err); }
   console.log("Admin WA notification target: "+ADMIN_WA);
 }
