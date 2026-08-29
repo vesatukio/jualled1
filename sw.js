@@ -1,7 +1,5 @@
-const CACHE_NAME = "dutaled-v3";
-const APP_FILES = [
-  "./","./index.html","./style.css","./app.js","./seo.js","./checkout.js","./dynamic-home.js","./product-poster.js","./product-poster-connect.js","./image-zoom-enhancer.js","./universal-tools.js","./universal-tools.css","./product-poster.css","./checkout.css","./dynamic.css","./manifest.json","./config.js","./image/no-image.png","./image/icon-192.png","./image/icon-512.png"
-];
-self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_FILES).catch(()=>{})).then(()=>self.skipWaiting())));
-self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener("fetch",event=>{if(event.request.method!=="GET")return;const u=new URL(event.request.url);if(u.origin!==location.origin)return;event.respondWith(caches.match(event.request).then(cached=>{const network=fetch(event.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE_NAME).then(c=>c.put(event.request,copy))}return r}).catch(()=>cached);return cached||network}))});
+const CACHE_NAME = "dutaled-v4";
+const APP_FILES = ["./","./index.html","./style.css","./dynamic.css","./checkout.css","./product-poster.css","./product-core-fix.css","./universal-tools.css","./app.js","./seo.js","./checkout.js","./dynamic-home.js","./product-poster.js","./product-poster-connect.js","./image-zoom-enhancer.js","./product-core-fix.js","./universal-tools.js","./manifest.json","./config.js","./image/no-image.png","./image/icon-192.png","./image/icon-512.png","./banner.json"];
+self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_FILES).catch(()=>{})).then(()=>self.skipWaiting())));
+self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;const u=new URL(e.request.url);if(u.origin!==location.origin)return;e.respondWith(caches.match(e.request).then(cached=>{const fresh=fetch(e.request).then(r=>{if(r.ok)caches.open(CACHE_NAME).then(c=>c.put(e.request,r.clone()));return r}).catch(()=>cached);return cached||fresh}))});
