@@ -1,15 +1,16 @@
-/* Duta LED — Floating bottom navigation, mobile-first */
-.bottom-nav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));height:64px;display:grid;grid-template-columns:repeat(4,1fr);align-items:stretch;padding:5px;box-sizing:border-box;background:rgba(255,255,255,.94);border:1px solid rgba(0,0,0,.07);border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:99999}
-.bottom-nav-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;border-radius:17px;background:transparent;color:#707070;font:inherit;text-decoration:none;cursor:pointer;min-width:0;-webkit-tap-highlight-color:transparent;transition:transform .16s ease,background .16s ease,color .16s ease}
+/* Duta LED — professional floating bottom navigation */
+.bottom-nav{position:fixed!important;left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;width:auto!important;height:66px!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;align-items:stretch!important;padding:5px!important;box-sizing:border-box!important;background:rgba(255,255,255,.96)!important;border:1px solid rgba(0,0,0,.08)!important;border-radius:23px!important;box-shadow:0 10px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;z-index:2147483000!important;visibility:visible!important;opacity:1!important}
+.bottom-nav-item{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;border:0!important;border-radius:17px!important;background:transparent!important;color:#707070!important;font:inherit!important;text-decoration:none!important;cursor:pointer!important;min-width:0!important;pointer-events:auto!important;-webkit-tap-highlight-color:transparent;transition:transform .16s ease,background .16s ease,color .16s ease}
 .bottom-nav-item:active{transform:scale(.94)}
-.bottom-nav-item span{position:relative;width:30px;height:27px;display:flex;align-items:center;justify-content:center;font-size:21px;line-height:1}
+.bottom-nav-item span{position:relative;width:30px;height:28px;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1}
 .bottom-nav-item strong{font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap}
-.bottom-nav-item.active{color:#ff7200;background:rgba(255,114,0,.10)}
-.bottom-nav-item.active span{transform:translateY(-1px)}
-.bottom-nav-item i{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:10px;background:#e53935;color:#fff;font-size:9px;font-style:normal;display:flex;align-items:center;justify-content:center;font-weight:800;border:2px solid #fff}
-body{padding-bottom:94px}
-.footer{padding-bottom:105px}
-.floating-cart{bottom:94px!important}.floating-wa{bottom:94px!important}
-@media(max-width:360px){.bottom-nav{left:8px;right:8px;height:61px;border-radius:20px}.bottom-nav-item strong{font-size:9px}.bottom-nav-item span{font-size:20px}}
-@media(min-width:700px){.bottom-nav{left:50%;right:auto;width:min(560px,calc(100% - 32px));transform:translateX(-50%);bottom:16px}.floating-cart{bottom:96px!important}.floating-wa{bottom:96px!important}}
+.bottom-nav-item.active{color:#ff7200!important;background:rgba(255,114,0,.10)!important}
+.bottom-nav-item i{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:10px;background:#e53935;color:#fff;font-size:9px;font-style:normal;display:flex;align-items:center;justify-content:center;font-weight:800;border:2px solid #fff}
+body{padding-bottom:100px!important}
+.footer{padding-bottom:110px!important}
+/* Floating action buttons sit above and never cover the bottom navigation. */
+.floating-cart{position:fixed!important;right:16px!important;bottom:calc(88px + env(safe-area-inset-bottom))!important;z-index:2147483001!important}
+.floating-wa{position:fixed!important;right:16px!important;bottom:calc(156px + env(safe-area-inset-bottom))!important;z-index:2147483001!important}
+@media(max-width:360px){.bottom-nav{left:8px!important;right:8px!important;height:62px!important;border-radius:21px!important}.bottom-nav-item strong{font-size:9px}.bottom-nav-item span{font-size:20px}.floating-cart{right:12px!important;bottom:calc(84px + env(safe-area-inset-bottom))!important}.floating-wa{right:12px!important;bottom:calc(148px + env(safe-area-inset-bottom))!important}}
+@media(min-width:700px){.bottom-nav{left:50%!important;right:auto!important;width:min(560px,calc(100% - 32px))!important;transform:translateX(-50%)!important;bottom:16px!important}.floating-cart{right:24px!important;bottom:98px!important}.floating-wa{right:24px!important;bottom:166px!important}}
 @media(prefers-reduced-motion:reduce){.bottom-nav-item{transition:none}}
