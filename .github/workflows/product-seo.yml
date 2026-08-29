@@ -1,0 +1,31 @@
+name: Product SEO Pages
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 1 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate product pages
+        run: python scripts/generate_products.py
+
+      - name: Commit generated SEO pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add produk sitemap.xml
+          if git diff --cached --quiet; then
+            echo "No SEO changes"
+          else
+            git commit -m "Update product SEO pages"
+            git push
+          fi
