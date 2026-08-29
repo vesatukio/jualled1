@@ -1,73 +1,13 @@
-const SHEET_NAME = "PRODUK";
-const AFFILIATE_SHEET_NAME = "AFFILIATE";
-const ORDER_SHEET_NAME = "PESANAN";
-const ADMIN_EMAIL = "vesatukio@gmail.com";
-const ADMIN_WA = "083157925577";
-const ADMIN_KEY_PROPERTY = "DUTALED_ADMIN_KEY";
-
-function getAdminKey(){return PropertiesService.getScriptProperties().getProperty(ADMIN_KEY_PROPERTY)||"";}
-
-function doGet(e){
-  var action=e&&e.parameter&&e.parameter.action?String(e.parameter.action):"produk";
-  if(action==="test")return json({success:true,message:"Duta LED API aktif"});
-  if(action==="produk")return json({success:true,data:getProduk()});
-  if(action==="affiliate")return json({success:true,data:getAffiliate()});
-  if(action==="resolveAffiliate"){
-    var url=e&&e.parameter&&e.parameter.url?String(e.parameter.url).trim():"";
-    if(!url)return json({success:false,message:"URL affiliate belum diisi"});
-    try{return json({success:true,data:resolveAffiliate(url)});}catch(err){return json({success:false,message:String(err.message||err)});}
-  }
-  return json({success:false,message:"Action tidak ditemukan: "+action});
-}
-
-function doPost(e){
-  try{
-    var body={};
-    var raw=(e&&e.postData&&e.postData.contents)||"";
-    if(raw){try{body=JSON.parse(raw);}catch(x){body=e.parameter||{};}}
-    else body=e.parameter||{};
-    var action=String(body.action||"");
-    if(action==="createOrder")return json({success:true,data:createOrder(body.data||{})});
-    if(action==="createProduct"||action==="updateProduct"){
-      requireAdmin(body.key);
-      var data=body.data||{}; if(typeof data==="string")data=JSON.parse(data);
-      return json({success:true,data:saveProduct(data,action==="updateProduct")});
-    }
-    if(action==="saveProducts"){
-      requireAdmin(body.key);
-      var products=body.products||[]; if(typeof products==="string")products=JSON.parse(products);
-      return json({success:true,data:saveProducts(Array.isArray(products)?products:[])});
-    }
-    return json({success:false,message:"Action POST tidak ditemukan: "+action});
-  }catch(err){return json({success:false,message:String(err.message||err)});}
-}
-function requireAdmin(key){var configured=getAdminKey();if(!configured)throw new Error("Kunci admin belum dikonfigurasi di Apps Script");if(String(key||"")!==configured)throw new Error("Kunci admin salah");}
-function saveProducts(products){if(!products.length)throw new Error("Tidak ada produk untuk disimpan");var results=[];products.forEach(function(p){results.push(saveProduct(p,String(p.id||"").trim()!==""));});return{count:results.length,results:results,message:results.length+" produk berhasil diproses"};}
-
-function saveProduct(data,isUpdate){
-  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);if(!sh)throw new Error("Sheet PRODUK tidak ditemukan");
-  var name=String(data.nama||"").trim();if(!name)throw new Error("Nama produk wajib diisi");
-  var id=String(data.id||"").trim();
-  var hargaCoret=Number(data.hargaCoret||0)||0;
-  var hargaJual=Number(data.hargaDiskon||data.hargaJual||0)||0;
-  var diskon=(hargaCoret>0&&hargaJual>0&&hargaJual<hargaCoret)?Math.round((hargaCoret-hargaJual)/hargaCoret*100):0;
-  var rowData=[id,name,String(data.kategori||"").trim(),Number(data.stok||0)||0,Number(data.hargaModal||0)||0,hargaCoret,diskon,hargaJual,String(data.deskripsi||"").trim(),String(data.gambar1||"").trim(),String(data.gambar2||"").trim(),String(data.gambar3||"").trim()];
-  if(!isUpdate){id="P"+new Date().getTime().toString().slice(-8);rowData[0]=id;sh.appendRow(rowData);return{id:id,message:"Produk berhasil ditambahkan",diskon:diskon};}
-  if(!id)throw new Error("ID produk tidak ada");
-  var last=sh.getLastRow();if(last<2)throw new Error("Produk tidak ditemukan");
-  var ids=sh.getRange(2,1,last-1,1).getDisplayValues();
-  for(var i=0;i<ids.length;i++)if(String(ids[i][0]).trim()===id){rowData[0]=id;rowData[4]=sh.getRange(i+2,5).getValue();sh.getRange(i+2,1,1,12).setValues([rowData]);return{id:id,message:"Produk berhasil diperbarui",diskon:diskon};}
-  throw new Error("ID produk tidak ditemukan: "+id);
-}
-
-function getProduk(){var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);if(!sh||sh.getLastRow()<2)return[];var d=sh.getRange(2,1,sh.getLastRow()-1,12).getDisplayValues();return d.filter(function(r){return String(r[1]).trim()!=="";}).map(function(r){return{id:String(r[0]).trim(),nama:String(r[1]).trim(),kategori:String(r[2]).trim(),stok:toNumber(r[3]),hargaModal:toNumber(r[4]),hargaCoret:toNumber(r[5]),diskon:toNumber(r[6]),hargaDiskon:toNumber(r[7]),hargaJual:toNumber(r[7]),deskripsi:String(r[8]).trim(),gambar1:String(r[9]).trim(),gambar2:String(r[10]).trim(),gambar3:String(r[11]).trim()};});}
-function getAffiliate(){var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AFFILIATE_SHEET_NAME);if(!sh||sh.getLastRow()<2)return[];var d=sh.getRange(2,1,sh.getLastRow()-1,11).getDisplayValues();return d.filter(function(r){return String(r[1]).trim()!==""&&String(r[7]).trim()!==""&&String(r[9]).trim().toUpperCase()==="YA"&&String(r[10]).trim().toUpperCase()==="YA";}).map(function(r){return{id:String(r[0]).trim(),nama:String(r[1]).trim(),kategori:String(r[2]).trim(),harga:toNumber(r[3]),hargaCoret:toNumber(r[4]),deskripsi:String(r[5]).trim(),gambar:String(r[6]).trim(),linkAffiliate:String(r[7]).trim(),platform:String(r[8]).trim(),affiliate:String(r[9]).trim(),aktif:String(r[10]).trim()};});}
-function toNumber(v){return Number(String(v||"").replace(/Rp/gi,"").replace(/\s/g,"").replace(/[^\d-]/g,""))||0;}
-function json(d){return ContentService.createTextOutput(JSON.stringify(d)).setMimeType(ContentService.MimeType.JSON);}
-function createOrder(data){throw new Error("Gunakan versi order yang sudah terpasang sebelumnya");}
-function resolveAffiliate(shortUrl){shortUrl=String(shortUrl||"").trim();if(!shortUrl)throw new Error("Link affiliate kosong");var response=UrlFetchApp.fetch(shortUrl,{followRedirects:true,muteHttpExceptions:true,headers:{"User-Agent":"Mozilla/5.0"}});if(response.getResponseCode()>=400)throw new Error("Shopee mengembalikan HTTP "+response.getResponseCode());var html=response.getContentText();return{nama:extractMeta(html,"og:title")||extractTitle(html)||"Produk Shopee",harga:extractPrice(html),hargaCoret:0,deskripsi:extractMeta(html,"og:description")||"",gambar:extractMeta(html,"og:image")||"",linkAffiliate:shortUrl,platform:"Shopee"};}
-function extractMeta(html,name){var m=String(html).match(new RegExp("<meta[^>]+(?:property|name)=[\\\"']"+name+"[\\\"'][^>]+content=[\\\"']([^\\\"']+)[\\\"']","i"));return m&&m[1]?decodeHtml(m[1]):"";}
-function extractTitle(html){var m=String(html).match(/<title[^>]*>([\s\S]*?)<\/title>/i);return m&&m[1]?decodeHtml(m[1].replace(/\s+/g," ").trim()):"";}
-function extractPrice(html){var p=[/"price"\s*:\s*"?([0-9.,]+)"?/i,/"priceValue"\s*:\s*"?([0-9.,]+)"?/i,/"finalPrice"\s*:\s*"?([0-9.,]+)"?/i,/Rp\s*([0-9.]+)/i];for(var i=0;i<p.length;i++){var m=String(html).match(p[i]);if(m&&m[1]){var n=normalizePrice(m[1]);if(n>0)return n;}}return 0;}
-function normalizePrice(v){return Number(String(v||"").replace(/[^\d]/g,""))||0;}
-function decodeHtml(t){return String(t||"").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,"<").replace(/&gt;/g,">");}
+const SHEET_NAME="PRODUK",AFFILIATE_SHEET_NAME="AFFILIATE",ORDER_SHEET_NAME="PESANAN",ADMIN_EMAIL="vesatukio@gmail.com",ADMIN_WA="083157925577",ADMIN_KEY_PROPERTY="DUTALED_ADMIN_KEY";
+function getAdminKey(){return PropertiesService.getScriptProperties().getProperty(ADMIN_KEY_PROPERTY)||""}
+function doGet(e){var a=e&&e.parameter&&e.parameter.action?String(e.parameter.action):"produk";if(a==="test")return json({success:true,message:"Duta LED API aktif"});if(a==="produk")return json({success:true,data:getProduk()});if(a==="affiliate")return json({success:true,data:getAffiliate()});if(a==="resolveAffiliate"){var u=e.parameter.url||"";try{return json({success:true,data:resolveAffiliate(u)})}catch(x){return json({success:false,message:String(x.message||x)})}}return json({success:false,message:"Action tidak ditemukan: "+a})}
+function doPost(e){try{var b={},raw=e&&e.postData&&e.postData.contents||"";if(raw){try{b=JSON.parse(raw)}catch(x){b=e.parameter||{}}}else b=e.parameter||{};var a=String(b.action||"");if(a==="createOrder")return json({success:true,data:createOrder(b.data||{})});if(a==="createProduct"||a==="updateProduct"){requireAdmin(b.key);var d=b.data||{};if(typeof d==="string")d=JSON.parse(d);return json({success:true,data:saveProduct(d,a==="updateProduct")})}if(a==="saveProducts"){requireAdmin(b.key);var ps=b.products||[];if(typeof ps==="string")ps=JSON.parse(ps);return json({success:true,data:saveProducts(ps)})}return json({success:false,message:"Action POST tidak ditemukan: "+a})}catch(err){return json({success:false,message:String(err.message||err)})}}
+function requireAdmin(k){var c=getAdminKey();if(!c)throw Error("Kunci admin belum dikonfigurasi di Apps Script");if(String(k||"")!==c)throw Error("Kunci admin salah")}
+function saveProducts(ps){if(!ps.length)throw Error("Tidak ada produk untuk disimpan");var r=[];ps.forEach(function(p){r.push(saveProduct(p,String(p.id||"").trim()!==""))});return{count:r.length,results:r,message:r.length+" produk berhasil diproses"}}
+function saveProduct(d,upd){var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);if(!sh)throw Error("Sheet PRODUK tidak ditemukan");var n=String(d.nama||"").trim();if(!n)throw Error("Nama produk wajib diisi");var id=String(d.id||"").trim(),coret=Number(d.hargaCoret||0)||0,jual=Number(d.hargaDiskon||d.hargaJual||0)||0,dis=coret>0&&jual>0&&jual<coret?Math.round((coret-jual)/coret*100):0;var row=[id,n,String(d.kategori||"").trim(),Number(d.stok||0)||0,Number(d.hargaModal||0)||0,coret,dis,jual,String(d.deskripsi||"").trim(),String(d.gambar1||"").trim(),String(d.gambar2||"").trim(),String(d.gambar3||"").trim()];if(!upd){id="P"+new Date().getTime().toString().slice(-8);row[0]=id;sh.appendRow(row);return{id:id,message:"Produk berhasil ditambahkan",diskon:dis}}if(!id)throw Error("ID produk tidak ada");var last=sh.getLastRow(),ids=last<2?[]:sh.getRange(2,1,last-1,1).getDisplayValues();for(var i=0;i<ids.length;i++)if(String(ids[i][0]).trim()===id){row[0]=id;row[4]=sh.getRange(i+2,5).getValue();sh.getRange(i+2,1,1,12).setValues([row]);return{id:id,message:"Produk berhasil diperbarui",diskon:dis}}throw Error("ID produk tidak ditemukan: "+id)}
+function createOrder(d){if(!d||!d.orderNo)throw Error("Nomor pesanan tidak ada");var c=d.customer||{};if(!String(c.nama||"").trim())throw Error("Nama pembeli wajib diisi");if(!String(c.wa||"").trim())throw Error("Nomor HP wajib diisi");if(!String(c.alamat||"").trim())throw Error("Alamat wajib diisi");var items=Array.isArray(d.items)?d.items:[];if(!items.length)throw Error("Keranjang kosong");var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ORDER_SHEET_NAME)||SpreadsheetApp.getActiveSpreadsheet().insertSheet(ORDER_SHEET_NAME);if(sh.getLastRow()===0)sh.appendRow(["orderNo","createdAt","nama","wa","alamat","kota","pengiriman","pembayaran","items","subtotal","ongkir","total","status"]);var ex=sh.getRange(1,1,Math.max(sh.getLastRow(),1),1).getDisplayValues().map(function(r){return String(r[0])});if(ex.indexOf(String(d.orderNo))>=0)throw Error("Nomor pesanan sudah digunakan");var sub=Number(d.subtotal||0)||0,ong="Ongkir dibayar manual / COD";sh.appendRow([String(d.orderNo),new Date(),String(c.nama).trim(),String(c.wa).trim(),String(c.alamat).trim(),String(c.kota||"").trim(),String(c.pengiriman||"").trim(),"COD",JSON.stringify(items),sub,ong,sub,"BARU"]);var o={orderNo:String(d.orderNo),nama:String(c.nama).trim(),wa:String(c.wa).trim(),alamat:String(c.alamat).trim(),kota:String(c.kota||"").trim(),pengiriman:String(c.pengiriman||"").trim(),items:items,total:sub};try{MailApp.sendEmail(ADMIN_EMAIL,"🔔 Pesanan Baru "+o.orderNo+" - Duta LED","Pesanan baru "+o.orderNo+"\nPembeli: "+o.nama+"\nHP: "+o.wa+"\nAlamat: "+o.alamat+"\nTotal produk: "+formatRupiah(sub)+"\nPembayaran: COD\nOngkir: dibayar manual / COD")}catch(x){}return{orderNo:o.orderNo,status:"BARU",message:"Pesanan berhasil diterima"}}
+function getProduk(){var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);if(!sh||sh.getLastRow()<2)return[];var d=sh.getRange(2,1,sh.getLastRow()-1,12).getDisplayValues();return d.filter(r=>String(r[1]).trim()).map(r=>({id:String(r[0]).trim(),nama:String(r[1]).trim(),kategori:String(r[2]).trim(),stok:toNumber(r[3]),hargaModal:toNumber(r[4]),hargaCoret:toNumber(r[5]),diskon:toNumber(r[6]),hargaDiskon:toNumber(r[7]),hargaJual:toNumber(r[7]),deskripsi:String(r[8]).trim(),gambar1:String(r[9]).trim(),gambar2:String(r[10]).trim(),gambar3:String(r[11]).trim()}))}
+function getAffiliate(){var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AFFILIATE_SHEET_NAME);if(!sh||sh.getLastRow()<2)return[];var d=sh.getRange(2,1,sh.getLastRow()-1,11).getDisplayValues();return d.filter(r=>String(r[1]).trim()&&String(r[7]).trim()&&String(r[9]).trim().toUpperCase()==="YA"&&String(r[10]).trim().toUpperCase()==="YA").map(r=>({id:String(r[0]).trim(),nama:String(r[1]).trim(),kategori:String(r[2]).trim(),harga:toNumber(r[3]),hargaCoret:toNumber(r[4]),deskripsi:String(r[5]).trim(),gambar:String(r[6]).trim(),linkAffiliate:String(r[7]).trim(),platform:String(r[8]).trim()}))}
+function toNumber(v){return Number(String(v||"").replace(/Rp/gi,"").replace(/\s/g,"").replace(/[^\d-]/g,""))||0}function formatRupiah(n){return"Rp"+Number(n||0).toLocaleString("id-ID")}function json(d){return ContentService.createTextOutput(JSON.stringify(d)).setMimeType(ContentService.MimeType.JSON)}
+function resolveAffiliate(u){u=String(u||"").trim();if(!u)throw Error("Link affiliate kosong");if(!/^https?:\/\//i.test(u))throw Error("Format link tidak valid");var r=UrlFetchApp.fetch(u,{followRedirects:true,muteHttpExceptions:true,headers:{"User-Agent":"Mozilla/5.0"}});if(r.getResponseCode()>=400)throw Error("Shopee mengembalikan HTTP "+r.getResponseCode());var h=r.getContentText();return{nama:extractMeta(h,"og:title")||extractTitle(h)||"Produk Shopee",harga:extractPrice(h),hargaCoret:0,deskripsi:extractMeta(h,"og:description")||"",gambar:extractMeta(h,"og:image")||"",linkAffiliate:u,platform:"Shopee"}}
+function extractMeta(h,n){var m=String(h).match(new RegExp("<meta[^>]+(?:property|name)=[\\\"']"+n+"[\\\"'][^>]+content=[\\\"']([^\\\"']+)[\\\"']","i"));return m&&m[1]?decodeHtml(m[1]):""}function extractTitle(h){var m=String(h).match(/<title[^>]*>([\s\S]*?)<\/title>/i);return m&&m[1]?decodeHtml(m[1].replace(/\s+/g," ").trim()):""}function extractPrice(h){var p=[/"price"\s*:\s*"?([0-9.,]+)"?/i,/"priceValue"\s*:\s*"?([0-9.,]+)"?/i,/"finalPrice"\s*:\s*"?([0-9.,]+)"?/i,/Rp\s*([0-9.]+)/i];for(var i=0;i<p.length;i++){var m=String(h).match(p[i]);if(m&&m[1]){var n=normalizePrice(m[1]);if(n>0)return n}}return 0}function normalizePrice(v){return Number(String(v||"").replace(/[^\d]/g,""))||0}function decodeHtml(t){return String(t||"").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,"<").replace(/&gt;/g,">")}
