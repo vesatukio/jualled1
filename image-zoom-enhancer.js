@@ -1,17 +1,6 @@
-/* One-tap large zoom + second tap returns; supports image 1/2/3 in zoom view */
-(function(){
-  function enhance(overlay){
-    const img=overlay.querySelector('.zoom-image'); if(!img||overlay.dataset.enhanced)return; overlay.dataset.enhanced='1';
-    img.classList.remove('zoomed');
-    const dots=document.createElement('div');dots.className='zoom-dots';
-    const currentSrc=img.getAttribute('src');
-    const sources=[currentSrc];
-    const card=document.querySelector('.product-card');
-    if(card){card.querySelectorAll('.gallery-slide img').forEach(x=>{const s=x.getAttribute('src');if(s&&!sources.includes(s))sources.push(s);});}
-    sources.slice(0,3).forEach((src,i)=>{const b=document.createElement('button');b.type='button';b.className='zoom-dot'+(i===0?' active':'');b.onclick=e=>{e.stopPropagation();img.src=src;img.classList.remove('zoomed');dots.querySelectorAll('button').forEach((d,k)=>d.classList.toggle('active',k===i));};dots.appendChild(b);});
-    overlay.appendChild(dots);
-    let sx=0;overlay.addEventListener('touchstart',e=>{sx=e.changedTouches[0]?.clientX||0},{passive:true});overlay.addEventListener('touchend',e=>{const dx=(e.changedTouches[0]?.clientX||0)-sx;if(Math.abs(dx)<45)return;let n=sources.indexOf(img.src);if(n<0)n=0;n=(n+(dx<0?1:-1)+sources.length)%sources.length;img.src=sources[n];img.classList.remove('zoomed');dots.querySelectorAll('button').forEach((d,k)=>d.classList.toggle('active',k===n));},{passive:true});
-  }
-  const ob=new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1){if(n.classList?.contains('image-zoom-overlay'))enhance(n);n.querySelectorAll?.('.image-zoom-overlay').forEach(enhance);}}));
-  document.addEventListener('DOMContentLoaded',()=>ob.observe(document.body,{childList:true,subtree:true}));
+/* DUTA LED - one tap fullscreen, second tap normal; gallery 1/2/3 */
+(function(){'use strict';
+function open(images,start){let i=start||0;const o=document.createElement('div');o.className='image-zoom-overlay';o.innerHTML='<button class="zoom-close" type="button" aria-label="Tutup">×</button><button class="zoom-prev" type="button" aria-label="Sebelumnya">‹</button><img class="zoom-image" src="" alt="Zoom produk" draggable="false"><button class="zoom-next" type="button" aria-label="Berikutnya">›</button><div class="zoom-dots"></div>';document.body.appendChild(o);const img=o.querySelector('.zoom-image'),dots=o.querySelector('.zoom-dots');function render(){img.src=images[i];img.classList.remove('zoom-normal');dots.innerHTML=images.map((_,n)=>'<button type="button" class="zoom-dot '+(n===i?'active':'')+'" aria-label="Gambar '+(n+1)+'"></button>').join('');dots.querySelectorAll('.zoom-dot').forEach((b,n)=>b.onclick=e=>{e.stopPropagation();i=n;render()});}function close(){o.remove();document.removeEventListener('keydown',key)}function key(e){if(e.key==='Escape')close();if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1)}function move(d){i=(i+d+images.length)%images.length;render()}render();o.querySelector('.zoom-close').onclick=close;o.querySelector('.zoom-prev').onclick=e=>{e.stopPropagation();move(-1)};o.querySelector('.zoom-next').onclick=e=>{e.stopPropagation();move(1)};img.onclick=e=>{e.stopPropagation();img.classList.toggle('zoom-normal')};o.onclick=e=>{if(e.target===o)close()};let sx=0;o.ontouchstart=e=>{sx=e.changedTouches[0]?.clientX||0};o.ontouchend=e=>{const dx=(e.changedTouches[0]?.clientX||0)-sx;if(Math.abs(dx)>45)move(dx<0?1:-1)};document.addEventListener('keydown',key);}
+function intercept(e){const img=e.target.closest?.('.product-card .gallery-slide img');if(!img)return;const gallery=img.closest('.product-gallery');if(!gallery)return;const images=[...gallery.querySelectorAll('.gallery-slide img')].map(x=>x.currentSrc||x.src).filter(Boolean).slice(0,3);const index=Math.max(0,[...gallery.querySelectorAll('.gallery-slide img')].indexOf(img));if(!images.length)return;e.preventDefault();e.stopImmediatePropagation();open(images,index);}
+document.addEventListener('click',intercept,true);
 })();
