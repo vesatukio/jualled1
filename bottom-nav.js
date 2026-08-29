@@ -2,13 +2,12 @@
 (function(){
   'use strict';
   function init(){
-    var items=document.querySelectorAll('.bottom-nav-item');
+    var items=document.querySelectorAll('.bottom-nav-item[data-nav]');
     if(!items.length)return;
     items.forEach(function(el){
       el.addEventListener('click',function(e){
-        var nav=el.getAttribute('data-nav');
-        if(!nav)return;
         e.preventDefault();
+        var nav=el.getAttribute('data-nav');
         items.forEach(function(x){x.classList.remove('active');});
         el.classList.add('active');
         if(nav==='home'){
