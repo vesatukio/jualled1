@@ -1,0 +1,12 @@
+/* Duta LED Public Promotion API - Google Apps Script
+ * Deploy as Web App. Spreadsheet ID and API key should be stored in Script Properties.
+ */
+const PUB_SHEET = 'PUBLIKASI';
+function doGet(e){const a=e&&e.parameter&&e.parameter.action||'test';try{if(a==='test')return out({success:true,service:'publikasi'});if(a==='get'){const slug=String(e.parameter.slug||'').trim();return out({success:true,data:getBySlug(slug)});}return out({success:false,error:'Action tidak dikenal'});}catch(err){return out({success:false,error:String(err)});}}
+function doPost(e){try{const d=JSON.parse(e.postData.contents||'{}');if(d.action!=='create')return out({success:false,error:'Action tidak dikenal'});return out({success:true,data:createPub(d.data||{})});}catch(err){return out({success:false,error:String(err)});}}
+function ss(){const id=PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');if(!id)throw new Error('SPREADSHEET_ID belum diset');return SpreadsheetApp.openById(id);}
+function sh(){const s=ss().getSheetByName(PUB_SHEET)||ss().insertSheet(PUB_SHEET);if(s.getLastRow()===0)s.appendRow(['id','slug','type','nama','kategori','deskripsi','harga','whatsapp','gambar','lokasi','createdAt','status']);return s;}
+function slugify(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,70);}
+function createPub(d){const s=sh();let slug=slugify(d.nama);if(!slug)throw new Error('Nama wajib diisi');const values=s.getDataRange().getValues();const exists=values.some((r,i)=>i>0&&r[1]===slug);if(exists)slug+='-'+Date.now().toString().slice(-5);const id='P'+Date.now();s.appendRow([id,slug,d.type||'produk',d.nama||'',d.kategori||'',d.deskripsi||'',d.harga||'',d.whatsapp||'',d.gambar||'',d.lokasi||'',new Date(),'PUBLISHED']);return {id,slug,type:d.type||'produk',nama:d.nama,kategori:d.kategori,deskripsi:d.deskripsi,harga:d.harga,whatsapp:d.whatsapp,gambar:d.gambar,lokasi:d.lokasi,url:'promosi.html?slug='+encodeURIComponent(slug)};}
+function getBySlug(slug){const v=sh().getDataRange().getValues();const i=v.findIndex((r,n)=>n>0&&r[1]===slug);if(i<0)return null;const r=v[i];return {id:r[0],slug:r[1],type:r[2],nama:r[3],kategori:r[4],deskripsi:r[5],harga:r[6],whatsapp:r[7],gambar:r[8],lokasi:r[9],createdAt:r[10],status:r[11]};}
+function out(o){return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);}
