@@ -41,4 +41,17 @@
     document.getElementById("orderModal").classList.remove("hidden");
   };
   window.addEventListener("DOMContentLoaded",()=>{const s=document.createElement("style");s.textContent=`.ao-head{display:flex;justify-content:space-between;margin-bottom:12px}.ao-muted{font-size:12px;color:#6b7585;margin-top:4px}.ao-customer,.ao-info{padding:12px;background:#f7f9fc;border-radius:10px;margin:8px 0;font-size:13px;line-height:1.65}.ao-status-box{margin-top:15px;padding:14px;background:#f5f9ff;border:1px solid #d8e6fb;border-radius:12px}.ao-status-box h3{margin:0 0 12px;font-size:15px}.ao-status-box label{display:block;font-size:12px;font-weight:800;margin:9px 0}.ao-status-box select,.ao-status-box input{display:block;width:100%;margin-top:5px;padding:11px;border:1px solid #d8dee7;border-radius:9px;background:#fff;font-size:14px}.ao-help{font-weight:400;color:#788395}.ao-status-box button{width:100%;margin-top:9px}.ao-total{display:flex;justify-content:space-between;gap:10px;margin-top:12px;padding:12px;background:#fff;border-radius:10px;font-size:13px}.ao-total b{font-size:16px}.ao-ok{margin-top:8px;color:#16804b;font-size:12px;font-weight:800}.ao-error{margin-top:8px;color:#b42318;font-size:12px;font-weight:800}`;document.head.appendChild(s);});
+  // Akun/Admin: email tidak ditampilkan kecuali memang tersimpan di perangkat.
+  // Saran & Masukan disimpan ke Supabase.
+  window.addEventListener("DOMContentLoaded",()=>{
+    const emailInput=document.getElementById("adminEmail");
+    const savedEmail=(()=>{try{return localStorage.getItem("dutaled_customer_email")||localStorage.getItem("email")||localStorage.getItem("customer_email")||""}catch(e){return""}})();
+    if(emailInput){emailInput.value=savedEmail;emailInput.placeholder="Email admin";}
+    const host=document.querySelector(".loginbox");
+    if(!host||document.getElementById("adminFeedback"))return;
+    const box=document.createElement("div");box.id="adminFeedback";box.style.cssText="margin-top:18px;padding-top:16px;border-top:1px solid #edf0f4";
+    box.innerHTML=`<h3 style="margin:0 0 5px;font-size:16px">💬 Saran & Masukan Web</h3><p style="margin:0 0 10px;color:#6b7585;font-size:12px">Bantu kami memperbaiki web Duta LED.</p>${savedEmail?`<small style="color:#6b7585">Email tersimpan: ${esc(savedEmail)}</small>`:""}<textarea id="webFeedback" rows="4" maxlength="2000" placeholder="Tulis saran, kritik, atau kendala..." style="width:100%;margin-top:8px;padding:10px;border:1px solid #d8dee7;border-radius:9px;resize:vertical"></textarea><button id="sendWebFeedback" type="button" class="btn primary" style="margin-top:8px;width:100%">Kirim Saran</button><div id="feedbackMsg" style="margin-top:7px;font-size:12px"></div>`;
+    host.appendChild(box);
+    document.getElementById("sendWebFeedback").onclick=async()=>{const text=document.getElementById("webFeedback").value.trim(),msg=document.getElementById("feedbackMsg"),btn=document.getElementById("sendWebFeedback");if(text.length<3){msg.textContent="Tulis minimal 3 karakter.";return}btn.disabled=true;btn.textContent="Mengirim...";try{const {error}=await db.from("saran_masukan").insert({pesan:text,email:savedEmail||null});if(error)throw error;document.getElementById("webFeedback").value="";msg.textContent="✓ Saran berhasil dikirim. Terima kasih 🙏"}catch(e){msg.textContent="Gagal mengirim saran: "+(e.message||"coba lagi")}finally{btn.disabled=false;btn.textContent="Kirim Saran"}};
+  });
 })();
