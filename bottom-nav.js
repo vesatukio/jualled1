@@ -1,4 +1,4 @@
-/* Duta LED — reliable bottom navigation */
+/* Duta LED — bottom navigation */
 (function(){
   'use strict';
   function init(){
@@ -14,7 +14,8 @@
           document.getElementById('ordersPage')?.remove();
           window.scrollTo({top:0,behavior:'smooth'});
         }else if(nav==='cart'){
-          var b=document.getElementById('cartButton');if(b)b.click();
+          var b=document.getElementById('cartButton');
+          if(b)b.click();
         }else if(nav==='orders'){
           if(typeof window.showOrders==='function') window.showOrders();
         }else if(nav==='account'){
