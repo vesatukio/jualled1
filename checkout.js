@@ -23,7 +23,7 @@
   async function rpc(name,body){
     const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+name,{method:"POST",headers,body:JSON.stringify(body),cache:"no-store"});
     let j=null;try{j=await r.json()}catch(_){}
-    if(!r.ok)throw new Error(j?.message||j?.hint||j?.details||j?.error||("HTTP "+r.status));
+    if(!r.ok)throw new Error(j?.message||j?.hint||j?.details||j?.error||( "HTTP "+r.status));
     return j;
   }
 
@@ -72,24 +72,29 @@
       let old=[];try{old=JSON.parse(localStorage.getItem("dutaled_orders")||"[]")||[]}catch(_){}
       localStorage.setItem("dutaled_orders",JSON.stringify([order,...old].slice(0,50)));
 
-      // Order berhasil: kosongkan keranjang dan semua indikatornya.
+      // Pesanan SUDAH masuk database Supabase. WhatsApp TIDAK digunakan untuk checkout.
+      // Setelah database mengonfirmasi berhasil, baru kosongkan keranjang.
       localStorage.removeItem(CART_KEY);
       syncCartUI();
       closeCheckout();
       showSuccess(order);
       document.dispatchEvent(new CustomEvent("dutaled:order-created",{detail:order}));
-    }catch(err){console.error("Supabase order RPC error",err);alert("Pesanan gagal disimpan: "+(err.message||err));}
-    finally{if(btn){btn.disabled=false;btn.textContent="Buat Pesanan"}}
+    }catch(err){
+      console.error("Supabase order RPC error",err);
+      alert("Pesanan gagal disimpan: "+(err.message||err));
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent="Buat Pesanan"}
+    }
   }
 
   function showSuccess(o){
-    document.body.insertAdjacentHTML("beforeend",`<div class="order-success" id="orderSuccess"><div class="order-success-box"><div class="order-success-icon">✓</div><h2>Pesanan berhasil dibuat</h2><p>Nomor pesanan:</p><strong class="order-number">${esc(o.orderNo)}</strong><p>Status: <b>${esc(o.status)}</b></p><p class="order-note">Total produk: <b>${rupiah(o.total)}</b><br>Pesanan sudah tercatat di sistem Duta LED.<br><br>WhatsApp hanya digunakan untuk konsultasi.</p><button type="button" id="closeOrderSuccess" class="checkout-submit">Selesai</button></div></div>`);
+    document.body.insertAdjacentHTML("beforeend",`<div class="order-success" id="orderSuccess"><div class="order-success-box"><div class="order-success-icon">✓</div><h2>Pesanan berhasil dibuat</h2><p>Nomor pesanan:</p><strong class="order-number">${esc(o.orderNo)}</strong><p>Status: <b>${esc(o.status)}</b></p><p class="order-note">Total produk: <b>${rupiah(o.total)}</b><br>Pesanan sudah tercatat di database Duta LED.<br><br>WhatsApp hanya digunakan untuk konsultasi.</p><button type="button" id="closeOrderSuccess" class="checkout-submit">Selesai</button></div></div>`);
     document.getElementById("closeOrderSuccess")?.addEventListener("click",()=>document.getElementById("orderSuccess")?.remove());
   }
 
   function buildCheckoutModal(){
     if(document.getElementById("checkoutModal"))return;
-    document.body.insertAdjacentHTML("beforeend",`<div id="checkoutModal" class="checkout-modal" aria-hidden="true"><div class="checkout-backdrop" data-checkout-close></div><section class="checkout-dialog" role="dialog" aria-modal="true" aria-label="Checkout Duta LED"><header><div><small>CHECKOUT WEBSITE</small><h2>Buat Pesanan</h2></div><button type="button" class="checkout-x" data-checkout-close>×</button></header><form id="checkoutForm"><div class="checkout-grid"><div class="checkout-form-side"><h3>Data Pembeli</h3><label>Nama lengkap<input name="nama" required autocomplete="name" placeholder="Nama penerima"></label><label>Nomor HP / WhatsApp<input name="wa" required inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxxxx"></label><label>Alamat lengkap<textarea name="alamat" required placeholder="Desa, jalan, nomor rumah"></textarea></label><label>Kota / Kecamatan<input name="kota" required placeholder="Contoh: Subah, Batang"></label><h3>Pengiriman</h3><select name="pengiriman"><option>JNE / J&T</option><option>SiCepat</option><option>POS Indonesia</option><option>Ambil di toko</option></select><h3>Pembayaran</h3><select name="pembayaran"><option>Transfer Bank</option><option>QRIS</option><option>COD jika tersedia</option></select></div><aside class="checkout-summary"><h3>Ringkasan Pesanan</h3><div id="checkoutItems"></div><div class="checkout-total"><span>Total Produk</span><b id="checkoutSubtotal">Rp0</b></div><p class="shipping-note">🚚 <b>Ongkir dibayar manual / COD.</b><br>Ongkir tidak ditambahkan ke total produk.</p><div class="checkout-grand"><span>Total Produk</span><strong id="checkoutGrandTotal">Rp0</strong></div><button type="submit" class="checkout-submit">Buat Pesanan</button><small>Pesanan dibuat langsung di website. WhatsApp hanya untuk konsultasi.</small></aside></div></form></section></div>`);
+    document.body.insertAdjacentHTML("beforeend",`<div id="checkoutModal" class="checkout-modal" aria-hidden="true"><div class="checkout-backdrop" data-checkout-close></div><section class="checkout-dialog" role="dialog" aria-modal="true" aria-label="Checkout Duta LED"><header><div><small>CHECKOUT WEBSITE</small><h2>Buat Pesanan</h2></div><button type="button" class="checkout-x" data-checkout-close>×</button></header><form id="checkoutForm"><div class="checkout-grid"><div class="checkout-form-side"><h3>Data Pembeli</h3><label>Nama lengkap<input name="nama" required autocomplete="name" placeholder="Nama penerima"></label><label>Nomor HP / WhatsApp<input name="wa" required inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxxxx"></label><label>Alamat lengkap<textarea name="alamat" required placeholder="Desa, jalan, nomor rumah"></textarea></label><label>Kota / Kecamatan<input name="kota" required placeholder="Contoh: Subah, Batang"></label><h3>Pengiriman</h3><select name="pengiriman"><option>JNE / J&T</option><option>SiCepat</option><option>POS Indonesia</option><option>Ambil di toko</option></select><h3>Pembayaran</h3><select name="pembayaran"><option>Transfer Bank</option><option>QRIS</option><option>COD jika tersedia</option></select></div><aside class="checkout-summary"><h3>Ringkasan Pesanan</h3><div id="checkoutItems"></div><div class="checkout-total"><span>Total Produk</span><b id="checkoutSubtotal">Rp0</b></div><p class="shipping-note">🚚 <b>Ongkir dibayar manual / COD.</b><br>Ongkir tidak ditambahkan ke total produk.</p><div class="checkout-grand"><span>Total Produk</span><strong id="checkoutGrandTotal">Rp0</strong></div><button type="submit" class="checkout-submit">Buat Pesanan</button><small>Pesanan dibuat langsung di website/database. WhatsApp hanya untuk konsultasi.</small></aside></div></form></section></div>`);
     document.querySelectorAll("[data-checkout-close]").forEach(x=>x.addEventListener("click",closeCheckout));
     document.getElementById("checkoutForm")?.addEventListener("submit",submitOrder);
   }
