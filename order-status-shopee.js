@@ -1,0 +1,18 @@
+(function(){
+'use strict';
+const URL='https://opgeeqnucxrdqcgwcuge.supabase.co/rest/v1/pesanan';
+const KEY='sb_publishable_uqah55SK8ZjyugWprFnFMA_QnyVdCLA';
+const STEPS=['Menunggu Pembayaran','Diproses','Dikemas','Dikirim','Selesai'];
+const norm=s=>String(s||'').toLowerCase();
+function stepIndex(s){const x=norm(s);if(x.includes('batal'))return -1;if(x.includes('selesai'))return 4;if(x.includes('kirim'))return 3;if(x.includes('kemas'))return 2;if(x.includes('proses'))return 1;return 0}
+function timeline(status){const idx=stepIndex(status);return `<div class="shopee-timeline"><div class="shopee-line"></div>${STEPS.map((s,i)=>{const active=idx>=i;return `<div class="shopee-step ${active?'active':''} ${i===idx?'current':''}"><div class="shopee-node">${active?'✓':i+1}</div><div class="shopee-step-text"><strong>${s}</strong><small>${i===0?'Pesanan dibuat':i===1?'Pesanan sedang diproses':i===2?'Pesanan sedang disiapkan':i===3?'Pesanan dalam perjalanan':'Pesanan selesai'}</small></div></div>`}).join('')}</div>`}
+function decorate(root,status){const card=root.querySelector('.status-card');if(!card)return;const title=card.querySelector('.order-status strong');if(title)title.textContent=status||'Menunggu Pembayaran';let old=card.querySelector('.shopee-timeline');if(old)old.remove();card.insertAdjacentHTML('beforeend',timeline(status));}
+async function refreshOrder(o){try{if(!o?.orderNo||!o?.customer?.wa)return;const u=new URLSearchParams({select:'order_id,status,total_harga,created_at',order_id:'eq.'+o.orderNo,no_hp:'eq.'+o.customer.wa});const r=await fetch(URL+'?'+u,{headers:{apikey:KEY,Authorization:'Bearer '+KEY},cache:'no-store'});if(!r.ok)return;const a=await r.json();if(!a?.[0])return;const s=a[0].status||o.status;if(s&&s!==o.status){o.status=s;localStorage.setItem('dutaled_last_order',JSON.stringify(o));let all=[];try{all=JSON.parse(localStorage.getItem('dutaled_orders')||'[]')||[]}catch(_){}const ix=all.findIndex(x=>x.orderNo===o.orderNo);if(ix>=0){all[ix]=o;localStorage.setItem('dutaled_orders',JSON.stringify(all))}}decorate(document.getElementById('orderSuccess')||document,s)}catch(_){} }
+function currentOrder(){try{return JSON.parse(localStorage.getItem('dutaled_last_order')||'null')}catch(_){return null}}
+function decorateSuccess(){const root=document.getElementById('orderSuccess');if(!root)return;const o=currentOrder();if(o)decorate(root,o.status||'Menunggu Pembayaran');}
+function decorateOrders(){document.querySelectorAll('.order-list-card').forEach(card=>{if(card.querySelector('.shopee-mini-timeline'))return;const badge=card.querySelector('.order-badge');const status=badge?.textContent||'Menunggu Pembayaran';const idx=stepIndex(status);card.insertAdjacentHTML('beforeend',`<div class="shopee-mini-timeline">${STEPS.map((s,i)=>`<span class="${idx>=i?'active':''}"><i>${idx>=i?'✓':i+1}</i><small>${s.replace('Menunggu Pembayaran','Menunggu').replace(' ','<br>')}</small></span>`).join('')}</div>`);});}
+let lastOrderNo='';
+const observer=new MutationObserver(()=>{decorateSuccess();decorateOrders();const o=currentOrder();if(o&&o.orderNo&&o.orderNo!==lastOrderNo){lastOrderNo=o.orderNo;refreshOrder(o);}});
+function init(){observer.observe(document.body,{childList:true,subtree:true});decorateSuccess();decorateOrders();setInterval(()=>{const o=currentOrder();if(o&&document.getElementById('orderSuccess'))refreshOrder(o);},15000);}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
