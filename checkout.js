@@ -20,15 +20,17 @@
     const data=Object.fromEntries(new FormData(form).entries()),total=totalCart(cart),orderNo="DL"+new Date().toISOString().replace(/\D/g,"").slice(0,14)+Math.floor(Math.random()*90+10);
     const btn=form.querySelector(".checkout-submit");if(btn){btn.disabled=true;btn.textContent="Menyimpan pesanan..."}
     try{
-      const payload={nomor_pesanan:orderNo,nama_pelanggan:data.nama,no_hp:data.wa,alamat:data.alamat,kota:data.kota,pengiriman:data.pengiriman,pembayaran:data.pembayaran,subtotal:total,total:total,status:"BARU"};
+      /* Match the EXISTING Supabase schema exactly. */
+      const payload={order_id:orderNo,nama_pembeli:data.nama,no_hp:data.wa,alamat:data.alamat,kecamatan:data.kota||null,metode_pengiriman:data.pengiriman||null,metode_pembayaran:data.pembayaran||null,total_harga:total,status:"Menunggu Pembayaran"};
       const {data:created,error}=await db.from("pesanan").insert(payload).select("*").single();
       if(error)throw error;
-      const details=cart.map(i=>({pesanan_id:created.id,produk_id:Number(i.id)||null,nama_produk:i.nama||"Produk",qty:Number(i.qty)||1,harga:Number(getPrice(i))||0,subtotal:Number(getPrice(i))*(Number(i.qty)||1)}));
+      const details=cart.map(i=>({pesanan_id:created.id,produk_id:Number(i.id)||null,nama_produk:i.nama||"Produk",qty:Number(i.qty)||1,harga_saat_beli:Number(getPrice(i))||0}));
       const {error:detailError}=await db.from("detail_pesanan").insert(details);
       if(detailError){await db.from("pesanan").delete().eq("id",created.id);throw detailError}
-      const order={id:created.id,orderNo:created.nomor_pesanan||orderNo,createdAt:created.created_at||new Date().toISOString(),customer:data,items:cart,subtotal:total,total:total,payment:data.pembayaran,status:created.status||"BARU"};
+      const order={id:created.id,orderNo:created.order_id||orderNo,createdAt:created.created_at||new Date().toISOString(),customer:data,items:cart,total:total,payment:data.pembayaran,status:created.status||"Menunggu Pembayaran"};
       localStorage.setItem("dutaled_last_order",JSON.stringify(order));
-      localStorage.setItem("dutaled_orders",JSON.stringify([order,...JSON.parse(localStorage.getItem("dutaled_orders")||"[]")].slice(0,50)));
+      let old=[];try{old=JSON.parse(localStorage.getItem("dutaled_orders")||"[]")||[]}catch(_){}
+      localStorage.setItem("dutaled_orders",JSON.stringify([order,...old].slice(0,50)));
       closeCheckout();showSuccess(order);localStorage.removeItem(CART_KEY);document.dispatchEvent(new CustomEvent("dutaled:order-created",{detail:order}));
     }catch(err){console.error("Supabase order error",err);alert("Pesanan gagal disimpan: "+(err.message||err));}
     finally{if(btn){btn.disabled=false;btn.textContent="Buat Pesanan"}}
