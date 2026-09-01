@@ -10,6 +10,13 @@
   const totalCart=c=>c.reduce((s,i)=>s+getPrice(i)*(Number(i.qty)||1),0);
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 
+  function closeCartPanel(){
+    const close=document.getElementById("cartClose");
+    if(close) close.click();
+    document.getElementById("cartOverlay")?.classList.add("hidden");
+    document.getElementById("cartPanel")?.classList.remove("show","open","active");
+  }
+
   function syncCartUI(){
     const countEls=[document.getElementById("cartCount"),document.getElementById("bottomCartCount")].filter(Boolean);
     countEls.forEach(el=>el.textContent="0");
@@ -23,7 +30,7 @@
   async function rpc(name,body){
     const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+name,{method:"POST",headers,body:JSON.stringify(body),cache:"no-store"});
     let j=null;try{j=await r.json()}catch(_){}
-    if(!r.ok)throw new Error(j?.message||j?.hint||j?.details||j?.error||( "HTTP "+r.status));
+    if(!r.ok)throw new Error(j?.message||j?.hint||j?.details||j?.error||("HTTP "+r.status));
     return j;
   }
 
@@ -44,10 +51,20 @@
   function openCheckout(){
     const cart=getCart();
     if(!cart.length){alert("Keranjang masih kosong.");return false;}
+
+    // Penting: panel keranjang harus ditutup dahulu agar form checkout
+    // tidak tertutup/tertindih panel keranjang di HP/PWA.
+    closeCartPanel();
+
     if(!document.getElementById("checkoutModal")) buildCheckoutModal();
     renderSummary();
     const modal=document.getElementById("checkoutModal");
-    if(modal){modal.classList.add("show");modal.setAttribute("aria-hidden","false");document.body.classList.add("checkout-open");}
+    if(modal){
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden","false");
+      document.body.classList.add("checkout-open");
+      setTimeout(()=>document.querySelector("#checkoutModal input[name='nama']")?.focus(),80);
+    }
     return true;
   }
   window.openCheckout=openCheckout;
@@ -72,8 +89,6 @@
       let old=[];try{old=JSON.parse(localStorage.getItem("dutaled_orders")||"[]")||[]}catch(_){}
       localStorage.setItem("dutaled_orders",JSON.stringify([order,...old].slice(0,50)));
 
-      // Pesanan SUDAH masuk database Supabase. WhatsApp TIDAK digunakan untuk checkout.
-      // Setelah database mengonfirmasi berhasil, baru kosongkan keranjang.
       localStorage.removeItem(CART_KEY);
       syncCartUI();
       closeCheckout();
@@ -88,6 +103,7 @@
   }
 
   function showSuccess(o){
+    document.getElementById("orderSuccess")?.remove();
     document.body.insertAdjacentHTML("beforeend",`<div class="order-success" id="orderSuccess"><div class="order-success-box"><div class="order-success-icon">✓</div><h2>Pesanan berhasil dibuat</h2><p>Nomor pesanan:</p><strong class="order-number">${esc(o.orderNo)}</strong><p>Status: <b>${esc(o.status)}</b></p><p class="order-note">Total produk: <b>${rupiah(o.total)}</b><br>Pesanan sudah tercatat di database Duta LED.<br><br>WhatsApp hanya digunakan untuk konsultasi.</p><button type="button" id="closeOrderSuccess" class="checkout-submit">Selesai</button></div></div>`);
     document.getElementById("closeOrderSuccess")?.addEventListener("click",()=>document.getElementById("orderSuccess")?.remove());
   }
