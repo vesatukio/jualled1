@@ -28,8 +28,9 @@
             if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
           }
         }else if(nav==='account'){
-          var c=document.querySelector('.contact');
-          if(c)c.scrollIntoView({behavior:'smooth',block:'start'});
+          // Akun Toko = Admin. Gunakan URL relatif agar tetap bekerja
+          // pada custom domain, GitHub Pages, dan saat PWA dibuka standalone.
+          window.location.href='./admin.html';
         }
       });
     });
