@@ -1,4 +1,4 @@
-/* Duta LED — Share Produk v3 */
+/* Duta LED — Share Produk v4 */
 (function(){
   'use strict';
   const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
@@ -53,24 +53,35 @@
   function addButtons(){
     document.querySelectorAll('.product-card').forEach(card=>{
       const imageWrap=card.querySelector('.product-image,.product-img');
-      /* Semua tombol share yang bukan overlay gambar dihapus. */
-      card.querySelectorAll('.product-share-btn').forEach(btn=>{
-        if(!imageWrap || btn.parentElement!==imageWrap)btn.remove();
-      });
       let btn=imageWrap?.querySelector('.product-share-btn');
+      if(imageWrap){
+        /* Hapus hanya tombol share lama yang berada di luar gambar. */
+        card.querySelectorAll('.product-share-btn').forEach(old=>{
+          if(old!==btn && old.parentElement!==imageWrap) old.remove();
+        });
+      }else{
+        /* Jika tidak ada wrapper gambar, jangan hapus tombol lalu membuatnya lagi. */
+        btn=card.querySelector('.product-share-btn');
+      }
       if(!btn){
         btn=document.createElement('button');
         btn.type='button';
         btn.className='product-share-btn';
         btn.textContent='↗ Bagikan';
-        if(imageWrap) imageWrap.appendChild(btn);
-        else card.insertBefore(btn,card.firstChild);
+        (imageWrap||card).appendChild(btn);
       }
       const p=findProductForCard(card);
-      if(!p)return;
-      btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};
+      if(p) btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};
     });
   }
-  function init(){addButtons();new MutationObserver(addButtons).observe(document.body,{childList:true,subtree:true});}
+  function init(){
+    addButtons();
+    let timer=null;
+    const observer=new MutationObserver(()=>{
+      clearTimeout(timer);
+      timer=setTimeout(addButtons,80);
+    });
+    observer.observe(document.body,{childList:true,subtree:true});
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
