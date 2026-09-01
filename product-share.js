@@ -1,4 +1,4 @@
-/* Duta LED — Share Produk v6 */
+/* Duta LED — Share Produk v7 */
 (function(){
   'use strict';
   const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
@@ -46,36 +46,39 @@
     const name=clean(card.querySelector('.product-name')?.textContent);
     return name?(productIndex.get('name:'+name)||null):null;
   }
-  function addButtons(root){
-    (root||document).querySelectorAll('.product-card').forEach(card=>{
-      /* HAPUS SEMUA share lama, di mana pun berada dalam kartu. */
-      card.querySelectorAll('.product-share-btn,[class*="share"],[id*="share"],button[aria-label*="Bagikan"],button[title*="Bagikan"]').forEach(el=>el.remove());
-      const imageWrap=card.querySelector('.product-image,.product-img');
-      if(!imageWrap)return;
-      const btn=document.createElement('button');
-      btn.type='button';
-      btn.className='product-share-btn';
-      btn.setAttribute('aria-label','Bagikan');
-      btn.setAttribute('title','Bagikan');
-      btn.textContent='↗';
-      imageWrap.appendChild(btn);
-      const p=findProductForCard(card);
-      if(p)btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};
-    });
+  function removeOldShareControls(card){
+    card.querySelectorAll('.product-share-btn,[class*="share"],[id*="share"],a[title*="Bagikan"],button[title*="Bagikan"],a[aria-label*="Bagikan"],button[aria-label*="Bagikan"]').forEach(el=>el.remove());
+  }
+  function addButton(card){
+    removeOldShareControls(card);
+    const imageWrap=card.querySelector('.product-image,.product-img');
+    if(!imageWrap)return;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='product-share-btn';
+    btn.setAttribute('aria-label','Bagikan produk');
+    btn.setAttribute('title','Bagikan produk');
+    btn.textContent='↗';
+    imageWrap.appendChild(btn);
+    const p=findProductForCard(card);
+    if(p)btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};
+  }
+  function refresh(){
+    const grid=document.querySelector('#productGrid');
+    if(!grid)return;
+    buildIndex();
+    grid.querySelectorAll('.product-card').forEach(addButton);
   }
   function init(){
     const grid=document.querySelector('#productGrid');
-    if(!grid){setTimeout(init,500);return;}
-    let timer=null;
-    let observer;
-    const refresh=()=>{
-      observer?.disconnect();
-      buildIndex();
-      addButtons(grid);
-      observer.observe(grid,{childList:true,subtree:true});
-    };
-    observer=new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(refresh,150);});
+    if(!grid){setTimeout(init,300);return;}
     refresh();
+    let timer=0;
+    const observer=new MutationObserver(()=>{
+      clearTimeout(timer);
+      timer=setTimeout(refresh,250);
+    });
+    observer.observe(grid,{childList:true,subtree:true});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
