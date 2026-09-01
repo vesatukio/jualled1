@@ -1,4 +1,4 @@
-const CACHE_NAME = "dutaled-v7";
+const CACHE_NAME = "dutaled-v8";
 
 const APP_FILES = [
   "./",
@@ -6,12 +6,17 @@ const APP_FILES = [
   "./style.css",
   "./dynamic.css",
   "./checkout.css",
+  "./order-status-shopee.css",
   "./product-poster.css",
   "./product-core-fix.css",
   "./universal-tools.css",
+  "./bottom-nav.css?v=6",
+  "./bottom-nav.js?v=3",
+  "./pwa-install.css?v=2",
   "./app.js",
   "./seo.js",
   "./checkout.js",
+  "./order-status-shopee.js",
   "./dynamic-home.js",
   "./product-poster.js",
   "./product-poster-connect.js",
