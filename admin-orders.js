@@ -7,27 +7,37 @@
   const rupiah=v=>"Rp"+(Number(v)||0).toLocaleString("id-ID");
   const num=v=>Number(String(v??"").replace(/[^\d.-]/g,""))||0;
   const statusList=["Menunggu Pembayaran","Diproses","Dikemas","Dikirim","Selesai","Dibatalkan"];
+  const carriers=["J&T Express","JNE","SiCepat","SPX Express","POS Indonesia","AnterAja","Ninja Xpress","Lion Parcel","TIKI","ID Express","Lainnya"];
   const oldOpenOrder=window.openOrder;
   window.openOrder=function(o){
-    if(!o){return oldOpenOrder?.(o)}
+    if(!o)return oldOpenOrder?.(o);
     const details=o.detail_pesanan||[];
     const detail=document.getElementById("orderDetail");
     if(!detail)return oldOpenOrder?.(o);
     detail.innerHTML=`<div class="ao-head"><div><b>${esc(o.order_id)}</b><div class="ao-muted">${esc(o.status||"Menunggu Pembayaran")}</div></div></div>
       <div class="ao-customer"><b>👤 ${esc(o.nama_pembeli)}</b><br>📱 ${esc(o.no_hp)}<br>📍 ${esc(o.alamat||"")}${o.kecamatan?", "+esc(o.kecamatan):""}</div>
-      <div class="ao-info"><b>Pengiriman:</b> ${esc(o.metode_pengiriman||"-')}<br><b>Pembayaran:</b> ${esc(o.metode_pembayaran||"-")}</div>
+      <div class="ao-info"><b>Pengiriman:</b> ${esc(o.metode_pengiriman||"-")}<br><b>Pembayaran:</b> ${esc(o.metode_pembayaran||"-")}</div>
       <div class="items">${details.map(d=>`<div class="item"><span>${esc(d.nama_produk)} × ${num(d.qty)}</span><b>${rupiah(d.subtotal)}</b></div>`).join("")}<div class="item"><strong>TOTAL</strong><strong>${rupiah(o.total_harga)}</strong></div></div>
-      <div class="ao-status-box"><h3>📦 Status Pesanan</h3><label>Status saat ini<select id="aoStatus">${statusList.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("")}</select></label><label>Nomor Resi <span class="ao-help">isi saat pesanan dikirim</span><input id="aoResi" value="${esc(o.nomor_resi||"")}" placeholder="Contoh: JNE123456789"></label><button id="aoSave" class="btn primary" type="button">💾 Simpan Status & Resi</button><div id="aoMsg"></div></div>
+      <div class="ao-status-box"><h3>📦 Status & Pengiriman</h3>
+      <label>Status saat ini<select id="aoStatus">${statusList.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("")}</select></label>
+      <label>Ekspedisi<select id="aoCarrier"><option value="">Pilih ekspedisi</option>${carriers.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("")}</select></label>
+      <label>Nomor Resi <span class="ao-help">isi saat pesanan dikirim</span><input id="aoResi" value="${esc(o.nomor_resi||"")}" placeholder="Contoh: JNE123456789"></label>
+      <button id="aoSave" class="btn primary" type="button">💾 Simpan Status & Resi</button><div id="aoMsg"></div></div>
       <div class="order-actions"><button class="btn light" id="aoPrint" type="button">🖨️ Cetak Nota</button></div>`;
     document.getElementById("aoStatus").value=statusList.includes(o.status)?o.status:"Menunggu Pembayaran";
+    const carrier=document.getElementById("aoCarrier");
+    carrier.value=o.ekspedisi||"";
+    if(o.ekspedisi&&!carriers.includes(o.ekspedisi))carrier.insertAdjacentHTML("beforeend",`<option value="${esc(o.ekspedisi)}">${esc(o.ekspedisi)}</option>`),carrier.value=o.ekspedisi;
     document.getElementById("aoSave").onclick=async()=>{
-      const status=document.getElementById("aoStatus").value,resi=document.getElementById("aoResi").value.trim(),btn=document.getElementById("aoSave"),out=document.getElementById("aoMsg");
+      const status=document.getElementById("aoStatus").value,resi=document.getElementById("aoResi").value.trim(),ekspedisi=document.getElementById("aoCarrier").value.trim(),btn=document.getElementById("aoSave"),out=document.getElementById("aoMsg");
+      if(status==='Dikirim'&&(!resi||!ekspedisi)){out.textContent="Isi ekspedisi dan nomor resi sebelum status Dikirim.";out.className="ao-error";return;}
       btn.disabled=true;btn.textContent="⏳ Menyimpan...";
       try{
-        const {data,error}=await db.rpc("admin_update_pesanan_status",{p_order_id:o.id,p_status:status,p_nomor_resi:resi||null});
+        const {data,error}=await db.rpc("admin_update_pesanan_status",{p_order_id:o.id,p_status:status,p_nomor_resi:resi||null,p_ekspedisi:ekspedisi||null});
         if(error)throw error;
-        o.status=status;o.nomor_resi=resi||o.nomor_resi||null;
-        out.textContent="✓ Status pesanan berhasil diperbarui";out.className="ao-ok";
+        const saved=Array.isArray(data)?data[0]:data;
+        o.status=status;o.nomor_resi=resi||o.nomor_resi||null;o.ekspedisi=ekspedisi||o.ekspedisi||null;
+        out.textContent="✓ Status, ekspedisi & resi berhasil disimpan";out.className="ao-ok";
         window.loadOrders?.();
       }catch(e){out.textContent="Gagal: "+(e.message||e);out.className="ao-error"}
       finally{btn.disabled=false;btn.textContent="💾 Simpan Status & Resi"}
