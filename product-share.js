@@ -1,13 +1,26 @@
-/* Duta LED — Share Produk v4 */
+/* Duta LED — Share Produk v5 */
 (function(){
   'use strict';
   const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
   const clean=s=>String(s??'').replace(/\s+/g,' ').trim();
   const lists=()=>[window.products,window.produk,window.PRODUK,window.allProducts,window.productData].filter(Array.isArray);
+  let productIndex=null;
+  function buildIndex(){
+    const map=new Map();
+    for(const list of lists()){
+      for(const p of list){
+        const id=p?.id??p?.kode??p?.sku;
+        if(id!=null)map.set(String(id),p);
+        const name=clean(p?.nama||p?.namaProduk);
+        if(name)map.set('name:'+name,p);
+      }
+    }
+    productIndex=map;
+  }
   function productUrl(p){
     const id=p?.id ?? p?.kode ?? p?.sku ?? '';
     const url=new URL(window.location.href);
-    if(id) url.searchParams.set('id',String(id));
+    if(id)url.searchParams.set('id',String(id));
     url.hash='produk';
     return url.toString();
   }
@@ -31,36 +44,26 @@
   }
   window.shareProduct=shareProduct;
   function findProduct(id){
-    for(const list of lists()){
-      const p=list.find(x=>String(x.id??x.kode??x.sku)===String(id));
-      if(p)return p;
-    }
-    return null;
+    if(!productIndex)buildIndex();
+    return productIndex.get(String(id))||null;
   }
   function findProductForCard(card){
+    if(!productIndex)buildIndex();
     const id=card.dataset.id||card.dataset.productId||card.getAttribute('data-id');
-    if(id!=null){const p=findProduct(id);if(p)return p;}
+    if(id!=null){const p=productIndex.get(String(id));if(p)return p;}
     const name=clean(card.querySelector('.product-name')?.textContent);
-    if(name){
-      for(const list of lists()){
-        const p=list.find(x=>clean(x?.nama||x?.namaProduk)===name);
-        if(p)return p;
-      }
-    }
-    return null;
+    return name?(productIndex.get('name:'+name)||null):null;
   }
   window.shareProductById=id=>{const p=findProduct(id);if(p)return shareProduct(p);alert('Produk tidak ditemukan.');};
-  function addButtons(){
-    document.querySelectorAll('.product-card').forEach(card=>{
+  function addButtons(root){
+    (root||document).querySelectorAll('.product-card').forEach(card=>{
       const imageWrap=card.querySelector('.product-image,.product-img');
       let btn=imageWrap?.querySelector('.product-share-btn');
       if(imageWrap){
-        /* Hapus hanya tombol share lama yang berada di luar gambar. */
         card.querySelectorAll('.product-share-btn').forEach(old=>{
-          if(old!==btn && old.parentElement!==imageWrap) old.remove();
+          if(old!==btn && old.parentElement!==imageWrap)old.remove();
         });
       }else{
-        /* Jika tidak ada wrapper gambar, jangan hapus tombol lalu membuatnya lagi. */
         btn=card.querySelector('.product-share-btn');
       }
       if(!btn){
@@ -71,17 +74,25 @@
         (imageWrap||card).appendChild(btn);
       }
       const p=findProductForCard(card);
-      if(p) btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};
+      if(p)btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};
     });
   }
   function init(){
-    addButtons();
+    const grid=document.querySelector('#productGrid');
+    if(!grid){setTimeout(init,500);return;}
     let timer=null;
-    const observer=new MutationObserver(()=>{
+    let observer=null;
+    const refresh=()=>{
+      if(observer)observer.disconnect();
+      buildIndex();
+      addButtons(grid);
+      observer.observe(grid,{childList:true,subtree:true});
+    };
+    observer=new MutationObserver(()=>{
       clearTimeout(timer);
-      timer=setTimeout(addButtons,80);
+      timer=setTimeout(refresh,150);
     });
-    observer.observe(document.body,{childList:true,subtree:true});
+    refresh();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
