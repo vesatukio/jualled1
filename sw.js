@@ -1,4 +1,4 @@
-const CACHE_NAME = "dutaled-v6";
+const CACHE_NAME = "dutaled-v7";
 
 const APP_FILES = [
   "./",
@@ -21,6 +21,9 @@ const APP_FILES = [
   "./manifest.json",
   "./config.js",
   "./banner.json",
+  "./wallet.js?v=2",
+  "./wallet.css?v=2",
+  "./mode-switcher.css?v=1",
   "./image/no-image.png",
   "./image/icon-192.png",
   "./image/icon-512.png"
@@ -38,9 +41,7 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
@@ -48,27 +49,18 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-
-  // Hanya GET dari domain website sendiri yang boleh masuk cache.
-  // POST, termasuk penyimpanan produk ke Apps Script, dilewatkan normal.
   if (request.method !== "GET") return;
-
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
   event.respondWith((async () => {
     const cached = await caches.match(request);
-
     try {
       const response = await fetch(request);
-
       if (response && response.ok) {
-        // Clone HARUS dibuat sebelum response body digunakan.
-        const copy = response.clone();
         const cache = await caches.open(CACHE_NAME);
-        await cache.put(request, copy);
+        await cache.put(request, response.clone());
       }
-
       return response;
     } catch (error) {
       if (cached) return cached;
