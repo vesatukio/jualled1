@@ -1,4 +1,4 @@
-/* DUTA LED - Admin Promo Header v4 - Supabase */
+/* DUTA LED - Admin Promo Header v5 - Supabase */
 (function(){
 'use strict';
 const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
@@ -21,4 +21,5 @@ function bind(){const form=$('#promoHeaderForm');if(!form||form.dataset.bound)re
 const style=document.createElement('style');style.textContent='.promo-admin{margin:0 0 16px;padding:14px;background:#fff;border:1px solid #e1e6ed;border-radius:16px}.promo-admin h3{margin:0 0 5px;font-size:18px}.promo-help{margin:0 0 12px;color:#6b7585;font-size:12px}.promo-admin-form{display:grid;gap:9px}.promo-admin-form input{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #d8dee7;border-radius:9px}.promo-admin-form button{padding:11px;border:0;border-radius:9px;background:#1769e0;color:#fff;font-weight:800;cursor:pointer}.promo-admin-form button:disabled{opacity:.6}.promo-admin-preview{width:100%;max-height:160px;object-fit:contain;border-radius:9px;background:#f7f8fa}.promo-admin-item{display:grid;grid-template-columns:58px 1fr auto auto auto auto;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid #edf0f4}.promo-admin-item img{width:58px;height:42px;object-fit:contain;border-radius:6px;background:#f5f7fa}.promo-admin-main{min-width:0}.promo-admin-main b,.promo-admin-main small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.promo-admin-main small{font-size:10px;color:#788395}.promo-admin-item button{min-width:30px;height:30px;border:1px solid #d8dee7;border-radius:7px;background:#fff;cursor:pointer}.promo-note{display:block;margin-top:8px;color:#788395;font-size:11px}.promo-empty{padding:14px;text-align:center;color:#888}@media(max-width:600px){.promo-admin-item{grid-template-columns:48px 1fr auto auto auto}.promo-admin-item button[data-action="down"]{display:none}.promo-admin-item img{width:48px;height:36px}}';document.head.appendChild(style);
 window.renderPromoAdmin=load;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+const watchAuth=()=>{db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED')load()})};watchAuth();
 })();
