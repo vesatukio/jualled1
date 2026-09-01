@@ -1,6 +1,8 @@
 /* DUTA LED - HOMEPAGE DINAMIS */
 (function(){
   'use strict';
+  function loadPromo(){if(window.__promoHeaderLoaded)return;window.__promoHeaderLoaded=true;const s=document.createElement('script');s.src='promo-header-supabase.js?v=20260902-1';s.defer=true;document.head.appendChild(s)}
+  loadPromo();
   let lastSignature='';
   function rupiah(n){return 'Rp'+(Number(n)||0).toLocaleString('id-ID');}
   function price(p){
