@@ -1,4 +1,4 @@
-/* Duta LED — Share Produk v2 */
+/* Duta LED — Share Produk v3 */
 (function(){
   'use strict';
   const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
@@ -53,15 +53,18 @@
   function addButtons(){
     document.querySelectorAll('.product-card').forEach(card=>{
       const imageWrap=card.querySelector('.product-image,.product-img');
-      if(!imageWrap)return;
-      card.querySelectorAll('.product-share-btn').forEach(btn=>{if(btn.parentElement!==imageWrap)btn.remove();});
-      let btn=imageWrap.querySelector('.product-share-btn');
+      /* Semua tombol share yang bukan overlay gambar dihapus. */
+      card.querySelectorAll('.product-share-btn').forEach(btn=>{
+        if(!imageWrap || btn.parentElement!==imageWrap)btn.remove();
+      });
+      let btn=imageWrap?.querySelector('.product-share-btn');
       if(!btn){
         btn=document.createElement('button');
         btn.type='button';
         btn.className='product-share-btn';
         btn.textContent='↗ Bagikan';
-        imageWrap.appendChild(btn);
+        if(imageWrap) imageWrap.appendChild(btn);
+        else card.insertBefore(btn,card.firstChild);
       }
       const p=findProductForCard(card);
       if(!p)return;
