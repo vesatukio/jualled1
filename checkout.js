@@ -10,6 +10,16 @@
   const totalCart=c=>c.reduce((s,i)=>s+getPrice(i)*(Number(i.qty)||1),0);
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 
+  function syncCartUI(){
+    const countEls=[document.getElementById("cartCount"),document.getElementById("bottomCartCount")].filter(Boolean);
+    countEls.forEach(el=>el.textContent="0");
+    const totalEl=document.getElementById("cartTotal");
+    if(totalEl)totalEl.textContent=rupiah(0);
+    const box=document.getElementById("cartBox");
+    if(box)box.innerHTML='<div class="cart-empty">🛒 Keranjang masih kosong</div>';
+    document.dispatchEvent(new CustomEvent("dutaled:cart-updated",{detail:{cart:[]}}));
+  }
+
   async function rpc(name,body){
     const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+name,{method:"POST",headers,body:JSON.stringify(body),cache:"no-store"});
     let j=null;try{j=await r.json()}catch(_){}
@@ -61,7 +71,12 @@
       localStorage.setItem("dutaled_last_order",JSON.stringify(order));
       let old=[];try{old=JSON.parse(localStorage.getItem("dutaled_orders")||"[]")||[]}catch(_){}
       localStorage.setItem("dutaled_orders",JSON.stringify([order,...old].slice(0,50)));
-      closeCheckout();showSuccess(order);localStorage.removeItem(CART_KEY);
+
+      // Order berhasil: kosongkan keranjang dan semua indikatornya.
+      localStorage.removeItem(CART_KEY);
+      syncCartUI();
+      closeCheckout();
+      showSuccess(order);
       document.dispatchEvent(new CustomEvent("dutaled:order-created",{detail:order}));
     }catch(err){console.error("Supabase order RPC error",err);alert("Pesanan gagal disimpan: "+(err.message||err));}
     finally{if(btn){btn.disabled=false;btn.textContent="Buat Pesanan"}}
