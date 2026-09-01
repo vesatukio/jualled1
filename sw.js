@@ -1,4 +1,4 @@
-const CACHE_NAME = "dutaled-v8";
+const CACHE_NAME = "dutaled-v9";
 
 const APP_FILES = [
   "./",
@@ -15,7 +15,7 @@ const APP_FILES = [
   "./pwa-install.css?v=2",
   "./app.js",
   "./seo.js",
-  "./checkout.js",
+  "./checkout.js?v=9",
   "./order-status-shopee.js",
   "./dynamic-home.js",
   "./product-poster.js",
