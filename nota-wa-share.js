@@ -26,7 +26,7 @@ function detailRows(o){
   const q=Number(d.qty)||0;
   const price=Number(d.harga_saat_beli)||0;
   const subtotal=price*q;
-  return `* ${clean(d.nama_produk)}\n  ${q} x ${rp(price)} = ${rp(subtotal)}`;
+  return `* ${clean(d.nama_produk)}\n  ${rp(price)} × ${q} = ${rp(subtotal)}`;
  }).join('\n────────────────────\n');
 }
 function makeText(o){
@@ -43,7 +43,7 @@ function makeText(o){
  let out=`DUTA LED — NOTA PESANAN\n\nNo: ${clean(o.order_id)}\nTanggal: ${new Date(o.created_at).toLocaleString('id-ID')}\nPembeli: ${clean(o.nama_pembeli)} (HP: ${clean(o.no_hp)})\n\n────────────────────\nDETAIL PESANAN\n────────────────────\n${rows||'Tidak ada detail'}\n────────────────────\nTotal Produk: ${rp(produkTotal)}`;
  if(ong) out+=`\nOngkir: ${rp(ong)}`;
  if(cod) out+=`\nBiaya COD: ${rp(cod)}`;
- out+=`\n────────────────────\nTOTAL BAYAR: ${rp(total)}\n────────────────────\nStatus: ${status}\nPembayaran: ${payment}\nPengiriman: ${shipping}`;
+ out+=`\n────────────────────\nTOTAL BAYAR: ${rp(total)}\nPembayaran: ${payment}\n────────────────────\nStatus: ${status}\nPengiriman: ${shipping}`;
  if(resi) out+=`\nResi: ${resi}`;
  out+='\n\nTerima kasih telah berbelanja di DUTA LED.';
  return out;
