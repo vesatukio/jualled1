@@ -4,93 +4,24 @@
   const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
   const clean=s=>String(s??'').replace(/\s+/g,' ').trim();
   const lists=()=>[window.products,window.produk,window.PRODUK,window.allProducts,window.productData].filter(Array.isArray);
-  let productIndex=null;
-  let suppressObserver=false;
-  function buildIndex(){
-    const map=new Map();
-    for(const list of lists()) for(const p of list){
-      const id=p?.id??p?.kode??p?.sku;
-      if(id!=null) map.set(String(id),p);
-      const name=clean(p?.nama||p?.namaProduk);
-      if(name) map.set('name:'+name,p);
-    }
-    productIndex=map;
-  }
-  function productUrl(p){
-    const id=p?.id??p?.kode??p?.sku??'';
-    const url=new URL(window.location.href);
-    if(id) url.searchParams.set('id',String(id));
-    url.hash='produk';
-    return url.toString();
-  }
-  function shareText(p){
-    const nama=clean(p?.nama||p?.namaProduk||'Produk Duta LED');
-    const harga=Number(p?.hargaTampil??p?.hargaDiskon??p?.hargaJual??p?.harga??0)||0;
-    return `🛍️ ${nama}\n💰 ${rupiah(harga)}\n\nLihat produk: ${productUrl(p)}`;
-  }
-  async function shareProduct(p){
-    if(!p)return false;
-    const text=shareText(p),url=productUrl(p),title=clean(p.nama||p.namaProduk||'Produk Duta LED');
-    try{
-      if(navigator.share){await navigator.share({title,text,url});return true;}
-      await navigator.clipboard.writeText(text); alert('Info produk sudah disalin.'); return true;
-    }catch(e){
-      if(e?.name==='AbortError')return false;
-      try{await navigator.clipboard.writeText(text);alert('Info produk sudah disalin.');return true;}catch(_){prompt('Salin info produk ini:',text);return false;}
-    }
-  }
+  let productIndex=null,suppressObserver=false;
+  function buildIndex(){const map=new Map();for(const list of lists())for(const p of list){const id=p?.id??p?.kode??p?.sku;if(id!=null)map.set(String(id),p);const name=clean(p?.nama||p?.namaProduk);if(name)map.set('name:'+name,p);}productIndex=map;}
+  function productUrl(p){const id=p?.id??p?.kode??p?.sku??'';const url=new URL(window.location.href);if(id)url.searchParams.set('id',String(id));url.hash='produk';return url.toString();}
+  function shareText(p){const nama=clean(p?.nama||p?.namaProduk||'Produk Duta LED');const harga=Number(p?.hargaTampil??p?.hargaDiskon??p?.hargaJual??p?.harga??0)||0;return`🛍️ ${nama}\n💰 ${rupiah(harga)}\n\nLihat produk: ${productUrl(p)}`;}
+  async function shareProduct(p){if(!p)return false;const text=shareText(p),url=productUrl(p),title=clean(p.nama||p.namaProduk||'Produk Duta LED');try{if(navigator.share){await navigator.share({title,text,url});return true;}await navigator.clipboard.writeText(text);alert('Info produk sudah disalin.');return true;}catch(e){if(e?.name==='AbortError')return false;try{await navigator.clipboard.writeText(text);alert('Info produk sudah disalin.');return true;}catch(_){prompt('Salin info produk ini:',text);return false;}}}
   window.shareProduct=shareProduct;
-  function findProductForCard(card){
-    if(!productIndex)buildIndex();
-    const id=card.dataset.id||card.dataset.productId||card.getAttribute('data-id');
-    if(id!=null){const p=productIndex.get(String(id));if(p)return p;}
-    const name=clean(card.querySelector('.product-name')?.textContent);
-    return name?(productIndex.get('name:'+name)||null):null;
-  }
-  function removeOldShareControls(card){
-    card.querySelectorAll('.product-share-btn,[class*="share"],[id*="share"],a[title*="Bagikan"],button[title*="Bagikan"],a[aria-label*="Bagikan"],button[aria-label*="Bagikan"]').forEach(el=>el.remove());
-  }
-  function addButton(card){
-    removeOldShareControls(card);
-    const imageWrap=card.querySelector('.product-image,.product-img');
-    if(!imageWrap)return;
-    const btn=document.createElement('button');
-    btn.type='button';
-    btn.className='product-share-btn';
-    btn.setAttribute('aria-label','Bagikan produk');
-    btn.setAttribute('title','Bagikan produk');
-    btn.textContent='↗';
-    imageWrap.appendChild(btn);
-    const p=findProductForCard(card);
-    if(p)btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};
-  }
-  function sortNewestFirst(grid){
-    const cards=[...grid.querySelectorAll(':scope > .product-card')];
-    if(cards.length<2)return;
-    /* Sumber katalog sebelumnya menampilkan produk terbaru di bagian akhir.
-       Balik urutan hasil filter sehingga produk terbaru selalu di atas,
-       termasuk saat memilih kategori. */
-    cards.reverse().forEach(card=>grid.appendChild(card));
-  }
-  function refresh(){
-    const grid=document.querySelector('#productGrid');
-    if(!grid)return;
-    buildIndex();
-    sortNewestFirst(grid);
-    grid.querySelectorAll('.product-card').forEach(addButton);
-    suppressObserver=true;
-  }
-  function init(){
-    const grid=document.querySelector('#productGrid');
-    if(!grid){setTimeout(init,300);return;}
-    refresh();
-    let timer=0;
-    const observer=new MutationObserver(()=>{
-      if(suppressObserver){suppressObserver=false;return;}
-      clearTimeout(timer);
-      timer=setTimeout(refresh,80);
-    });
-    observer.observe(grid,{childList:true,subtree:true});
-  }
+  function findProductForCard(card){if(!productIndex)buildIndex();const id=card.dataset.id||card.dataset.productId||card.getAttribute('data-id');if(id!=null){const p=productIndex.get(String(id));if(p)return p;}const name=clean(card.querySelector('.product-name')?.textContent);return name?(productIndex.get('name:'+name)||null):null;}
+  function removeOldShareControls(card){card.querySelectorAll('.product-share-btn,[class*="share"],[id*="share"],a[title*="Bagikan"],button[title*="Bagikan"],a[aria-label*="Bagikan"],button[aria-label*="Bagikan"]').forEach(el=>el.remove());}
+  function addButton(card){removeOldShareControls(card);const imageWrap=card.querySelector('.product-image,.product-img');if(!imageWrap)return;const btn=document.createElement('button');btn.type='button';btn.className='product-share-btn';btn.setAttribute('aria-label','Bagikan produk');btn.setAttribute('title','Bagikan produk');btn.textContent='↗';imageWrap.appendChild(btn);const p=findProductForCard(card);if(p)btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};}
+  function sortNewestFirst(grid){const cards=[...grid.querySelectorAll(':scope > .product-card')];if(cards.length<2)return;cards.reverse().forEach(card=>grid.appendChild(card));}
+  function refresh(){const grid=document.querySelector('#productGrid');if(!grid)return;buildIndex();sortNewestFirst(grid);grid.querySelectorAll('.product-card').forEach(addButton);suppressObserver=true;}
+  function init(){const grid=document.querySelector('#productGrid');if(!grid){setTimeout(init,300);return;}refresh();let timer=0;const observer=new MutationObserver(()=>{if(suppressObserver){suppressObserver=false;return;}clearTimeout(timer);timer=setTimeout(refresh,80);});observer.observe(grid,{childList:true,subtree:true});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+/* Muat direktori usaha pada halaman utama tanpa mengubah index.html */
+(function(){
+  const css=document.createElement('link');css.rel='stylesheet';css.href='usaha.css?v=2';document.head.appendChild(css);
+  const s=document.createElement('script');s.src='usaha.js?v=2';s.defer=true;document.head.appendChild(s);
+  function addCTA(){if(document.querySelector('.usaha-directory-cta'))return;const a=document.createElement('section');a.className='usaha-directory-cta';a.innerHTML='<h2>🤝 Satu Website, Saling Promosi</h2><p>Promosikan usaha Anda sendiri. Gratis dan langsung mendapatkan halaman usaha.</p><button type="button">➕ Daftarkan Usaha Anda</button>';const target=document.querySelector('.advantages');if(target)target.parentNode.insertBefore(a,target);a.querySelector('button').onclick=()=>window.openUsahaForm?.();}
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(addCTA,1000));
 })();
