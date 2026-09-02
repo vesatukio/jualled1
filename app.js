@@ -1,154 +1,86 @@
 "use strict";
 
-/* =========================================================
-DUTA LED - APP.JS
-========================================================= */
+const API_URL="https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
+const WHATSAPP="6283157925577";
+const FACEBOOK_URL="#",TIKTOK_URL="#",LOCATION_URL="#";
+const SHOPEE_URL="ISI_LINK_SHOPEE",TIKTOK_SHOP_URL="ISI_LINK_TIKTOK",LAZADA_URL="ISI_LINK_LAZADA";
+const CACHE_KEY="dutaled_produk_v5",CART_KEY="dutaled_cart_v4",CACHE_TIME=1000*60*5;
+let products=[],cart=[],currentCategory="Semua",searchText="",specialDiscount=0,specialPromoCode="",selectedProductId="";
+let productGrid,categoryBar,searchInput,loading,empty,status,cartButton,cartOverlay,cartPanel,cartClose,cartBox,cartCount,cartTotal,checkoutButton;
 
-const API_URL = "https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
-const WHATSAPP = "6283157925577";
-const FACEBOOK_URL = "#";
-const TIKTOK_URL = "#";
-const LOCATION_URL = "#";
-const SHOPEE_URL = "ISI_LINK_SHOPEE";
-const TIKTOK_SHOP_URL = "ISI_LINK_TIKTOK";
-const LAZADA_URL = "ISI_LINK_LAZADA";
-
-/* Cache versi baru supaya stok lama tidak dipakai */
-const CACHE_KEY = "dutaled_produk_v5";
-const CART_KEY = "dutaled_cart_v4";
-const CACHE_TIME = 1000 * 60 * 5;
-
-let products = [];
-let cart = [];
-let currentCategory = "Semua";
-let searchText = "";
-let specialDiscount = 0;
-let specialPromoCode = "";
-let selectedProductId = "";
-let productGrid, categoryBar, searchInput, loading, empty, status;
-let cartButton, cartOverlay, cartPanel, cartClose, cartBox, cartCount, cartTotal, checkoutButton;
-
-document.addEventListener("DOMContentLoaded", init);
-
-async function init() {
-  productGrid = document.getElementById("productGrid");
-  categoryBar = document.getElementById("categoryBar");
-  searchInput = document.getElementById("searchInput");
-  loading = document.getElementById("loading");
-  empty = document.getElementById("empty");
-  status = document.getElementById("status");
-  cartButton = document.getElementById("cartButton");
-  cartOverlay = document.getElementById("cartOverlay");
-  cartPanel = document.getElementById("cartPanel");
-  cartClose = document.getElementById("cartClose");
-  cartBox = document.getElementById("cartBox");
-  cartCount = document.getElementById("cartCount");
-  cartTotal = document.getElementById("cartTotal");
-  checkoutButton = document.getElementById("checkoutButton");
-  loadSpecialPromo();
-  loadSelectedProduct();
-  setupLinks();
-  setupMarketplaceLinks();
-  setupSearch();
-  setupPromoButton();
-  setupCartButton();
-  loadCart();
-  renderCart();
-  showLoading(true);
-
-  const cached = loadCache();
-  if (cached.length) {
-    products = cached;
-    renderCategories();
-    renderProducts();
-    showStatus("Memuat stok terbaru...");
-    showSelectedProduct();
-  }
-
-  try {
-    const fresh = await loadFromGoogle();
-    if (fresh.length) {
-      products = fresh;
-      saveCache(products);
-      renderCategories();
-      renderProducts();
-      showStatus("Stok & katalog terbaru");
-      showSelectedProduct();
-    } else if (!products.length) {
-      showStatus("Produk belum tersedia");
-    }
-  } catch (error) {
-    console.warn("Google Sheet tidak tersedia:", error);
-    if (!products.length) showStatus("Mode offline");
-  }
-  showLoading(false);
-  renderCart();
+document.addEventListener("DOMContentLoaded",init);
+async function init(){
+ productGrid=document.getElementById("productGrid");categoryBar=document.getElementById("categoryBar");searchInput=document.getElementById("searchInput");loading=document.getElementById("loading");empty=document.getElementById("empty");status=document.getElementById("status");cartButton=document.getElementById("cartButton");cartOverlay=document.getElementById("cartOverlay");cartPanel=document.getElementById("cartPanel");cartClose=document.getElementById("cartClose");cartBox=document.getElementById("cartBox");cartCount=document.getElementById("cartCount");cartTotal=document.getElementById("cartTotal");checkoutButton=document.getElementById("checkoutButton");
+ loadSpecialPromo();loadSelectedProduct();setupLinks();setupMarketplaceLinks();setupSearch();setupPromoButton();setupCartButton();loadCart();renderCart();showLoading(true);
+ const cached=loadCache();if(cached.length){products=cached.map(normalizeCachedProduct);renderCategories();renderProducts();showStatus("Memuat stok terbaru...");}
+ try{const fresh=await loadFromGoogle();if(fresh.length){products=fresh;saveCache(products);renderCategories();renderProducts();showStatus("Stok & katalog terbaru");showSelectedProduct();}else if(!products.length)showStatus("Produk belum tersedia");}catch(e){console.warn("API tidak tersedia",e);if(!products.length)showStatus("Mode offline");}
+ showLoading(false);renderCart();
 }
-
-function loadSelectedProduct() {
-  const params = new URLSearchParams(window.location.search);
-  selectedProductId = String(params.get("id") || "").trim();
+function loadSelectedProduct(){selectedProductId=String(new URLSearchParams(location.search).get("id")||"").trim();}
+function loadSpecialPromo(){const d=Number(String(new URLSearchParams(location.search).get("promo")||"").replace("%",""));specialDiscount=Number.isFinite(d)&&d>=1&&d<=99?d:0;specialPromoCode=specialDiscount?String(specialDiscount):"";}
+async function loadFromGoogle(){const r=await fetch(API_URL+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw Error("HTTP "+r.status);const j=await r.json();const rows=Array.isArray(j)?j:j.data;if(!Array.isArray(rows))throw Error("Format API tidak valid");return rows.map(normalizeProduct).filter(p=>p.nama);}
+function normalizeProduct(row){
+ const stokRaw=row.stok??row.Stok??row.STOK??row.stock??row.Stock??row.STOCK??row["stok barang"]??row["Stok Barang"]??row["STOK BARANG"]??row["jumlah stok"]??row["Jumlah Stok"]??row["JML STOK"]??row.qty??row.Qty??row.quantity??row.Quantity??row.persediaan??row.Persediaan;
+ return {id:value(row.ID??row.id??row.Id),nama:value(row.nama??row.Nama??row.NAMA),kategori:value(row.kategori??row.Kategori??row.KATEGORI)||"Lainnya",hargaModal:number(row["harga modal"]??row.hargaModal??row.HargaModal),laba:number(row.Laba??row.laba),hargaJual:number(row["harga jual"]??row.hargaJual??row.HargaJual),diskon:number(row.diskon??row.Diskon),hargaDiskon:number(row["harga diskon"]??row.hargaDiskon??row.HargaDiskon),stok:parseStock(stokRaw),deskripsi:value(row.deskripsi??row.Deskripsi??row.diskipsi),gambar1:value(row.gambar1??row.Gambar1),gambar2:value(row.gambar2??row.Gambar2),gambar3:value(row.gambar3??row.Gambar3)};
 }
-
-function loadSpecialPromo() {
-  const params = new URLSearchParams(window.location.search);
-  const promo = String(params.get("promo") || "").trim().replace("%", "");
-  const discount = Number(promo);
-  if (Number.isFinite(discount) && discount >= 1 && discount <= 99) {
-    specialDiscount = discount;
-    specialPromoCode = String(discount);
-  } else {
-    specialDiscount = 0;
-    specialPromoCode = "";
-  }
+function normalizeCachedProduct(p){if(!p||typeof p!=="object")return p;return {...p,stok:parseStock(p.stok??p.Stok??p.stock)};}
+function parseStock(v){if(v===null||v===undefined||v==="")return 0;const n=Number(String(v).replace(/[^\d.-]/g,""));return Number.isFinite(n)?n:0;}
+function value(v){return v===null||v===undefined?"":String(v).trim();}
+function number(v){if(v===null||v===undefined||v==="")return 0;return Number(String(v).replace(/[^\d.-]/g,""))||0;}
+function formatRupiah(v){return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(v)||0);}
+function escapeHTML(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#039;");}
+function getProductPrice(p){const h=Number(p.hargaJual)||0;if(specialDiscount>0&&h)return Math.round(h-h*specialDiscount/100);if(Number(p.hargaDiskon)>0&&Number(p.hargaDiskon)<h)return Number(p.hargaDiskon);return h;}
+function renderCategories(){if(!categoryBar)return;const cats=["Semua",...new Set(products.map(p=>String(p.kategori||"").trim()).filter(Boolean))];categoryBar.innerHTML=cats.map(c=>`<button type="button" class="category-button ${c===currentCategory?"active":""}">${escapeHTML(c)}</button>`).join("");categoryBar.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>{currentCategory=cats[i];renderCategories();renderProducts();});}
+function setupSearch(){searchInput?.addEventListener("input",e=>{searchText=String(e.target.value||"").trim().toLowerCase();renderProducts();});}
+function getFilteredProducts(){return products.filter(p=>{const cat=currentCategory==="Semua"||String(p.kategori||"").toLowerCase()===currentCategory.toLowerCase();const q=!searchText||String(p.nama||"").toLowerCase().includes(searchText)||String(p.kategori||"").toLowerCase().includes(searchText)||String(p.deskripsi||"").toLowerCase().includes(searchText);return cat&&q;});}
+function renderProducts(){if(!productGrid)return;let list=getFilteredProducts();if(selectedProductId){const p=products.find(x=>String(x.id)===String(selectedProductId));list=p?[p]:[];}productGrid.innerHTML="";empty?.classList.toggle("hidden",!!list.length);list.forEach(p=>productGrid.appendChild(createProductCard(p)));}
+function createProductCard(p){
+ const card=document.createElement("article");card.className="product-card";
+ const images=[p.gambar1,p.gambar2,p.gambar3].map(x=>String(x||"").trim()).filter(Boolean);if(!images.length)images.push("image/no-image.png");
+ const h=Number(p.hargaJual)||0,ht=getProductPrice(p);let discount="";if(ht<h){let pct=specialDiscount||Number(p.diskon)||Math.round((1-ht/h)*100);discount=`<span class="discount-badge">-${pct}%</span>`;}
+ const price=ht<h?`<div class="price">${formatRupiah(ht)}</div><div class="old-price">${formatRupiah(h)}</div>`:`<div class="price">${formatRupiah(h)}</div>`;
+ card.innerHTML=`<div class="product-gallery"><div class="gallery-track">${images.map((img,i)=>`<div class="gallery-slide"><img src="${escapeHTML(img)}" alt="${escapeHTML(p.nama)}" loading="lazy" draggable="false"></div>`).join("")}</div>${images.length>1?`<div class="gallery-dots">${images.map((_,i)=>`<span class="gallery-dot ${i===0?"active":""}"></span>`).join("")}</div>`:""}${discount}</div><div class="product-info"><div class="product-name">${escapeHTML(p.nama)}</div>${price}<button type="button" class="buy-button">🛒 + Keranjang</button><div class="product-share"><button type="button" class="share-wa">💬</button><button type="button" class="share-fb">f</button><button type="button" class="share-copy">🔗</button></div></div>`;
+ setupProductGallery(card,images);
+ const buy=card.querySelector(".buy-button");buy.onclick=()=>addToCart(p);
+ card.querySelector(".share-wa")?.addEventListener("click",()=>openWhatsApp(`${p.nama}\n${formatRupiah(ht)}\n${getProductLink(p)}`));
+ card.querySelector(".share-fb")?.addEventListener("click",async()=>{const text=`${p.nama}\n${formatRupiah(ht)}\n${getProductLink(p)}`;if(navigator.share){try{await navigator.share({title:p.nama,text,url:getProductLink(p)});}catch(e){}}else{await copyText(text);alert("Nama, harga dan link produk sudah disalin.");}});
+ card.querySelector(".share-copy")?.addEventListener("click",async()=>{await copyText(getProductLink(p));});
+ return card;
 }
+function setupProductGallery(card,images){const g=card.querySelector(".product-gallery"),t=card.querySelector(".gallery-track"),slides=[...card.querySelectorAll(".gallery-slide")],dots=[...card.querySelectorAll(".gallery-dot")];if(!g||!t)return;let cur=0,start=0;const show=i=>{cur=(i+slides.length)%slides.length;t.style.transform=`translateX(-${cur*100}%)`;dots.forEach((d,j)=>d.classList.toggle("active",j===cur));};g.addEventListener("touchstart",e=>start=e.touches[0]?.clientX||0,{passive:true});g.addEventListener("touchend",e=>{const dx=(e.changedTouches[0]?.clientX||0)-start;if(Math.abs(dx)>40)show(cur+(dx<0?1:-1));},{passive:true});dots.forEach((d,i)=>d.onclick=e=>{e.stopPropagation();show(i);});slides.forEach((s,i)=>s.querySelector("img")?.addEventListener("click",e=>{e.stopPropagation();openImageZoom(images,i);}));}
+function openImageZoom(images,i=0){const o=document.createElement("div");o.className="image-zoom-overlay";o.innerHTML=`<img class="zoom-image" src="${escapeHTML(images[i])}" alt="Zoom produk">`;document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove();};o.querySelector("img")?.addEventListener("click",e=>e.currentTarget.classList.toggle("zoomed"));}
+function getProductLink(p){const u=new URL(location.href);u.search="";u.hash="";if(p.id)u.searchParams.set("id",String(p.id));if(specialDiscount)u.searchParams.set("promo",String(specialDiscount));return u.toString();}
+function showSelectedProduct(){if(!selectedProductId)return;const p=products.find(x=>String(x.id)===String(selectedProductId));if(p){renderProducts();showStatus("Produk: "+p.nama);}}
+function setupCartButton(){cartButton?.addEventListener("click",openCart);cartClose?.addEventListener("click",closeCart);cartOverlay?.addEventListener("click",closeCart);checkoutButton?.addEventListener("click",checkoutWhatsApp);}
+function openCart(){cartPanel?.classList.add("show");cartOverlay?.classList.remove("hidden");document.body.classList.add("cart-open");}
+function closeCart(){cartPanel?.classList.remove("show");cartOverlay?.classList.add("hidden");document.body.classList.remove("cart-open");}
+function addToCart(p){const item=cart.find(x=>String(x.id)===String(p.id));if(item)item.qty++;else cart.push({id:p.id,nama:p.nama,harga:Number(p.hargaJual)||0,hargaDiskon:Number(p.hargaDiskon)||0,diskon:Number(p.diskon)||0,qty:1});saveCart();renderCart();shakeCart();showCartMessage(p.nama);}
+function increaseCart(id){const x=cart.find(i=>String(i.id)===String(id));if(x){x.qty++;saveCart();renderCart();}}
+function decreaseCart(id){const x=cart.find(i=>String(i.id)===String(id));if(!x)return;x.qty--;if(x.qty<=0)cart=cart.filter(i=>String(i.id)!==String(id));saveCart();renderCart();}
+function removeCart(id){cart=cart.filter(i=>String(i.id)!==String(id));saveCart();renderCart();}
+function getCartPrice(i){const h=Number(i.harga)||0;if(specialDiscount)return Math.round(h-h*specialDiscount/100);if(i.hargaDiskon>0&&i.hargaDiskon<h)return i.hargaDiskon;return h;}
+function renderCart(){if(!cartBox)return;if(!cart.length){cartBox.innerHTML=`<div class="cart-empty">🛒 Keranjang masih kosong</div>`;updateCartTotal();return;}cartBox.innerHTML=cart.map(i=>{const h=getCartPrice(i);return `<div class="cart-item"><div class="cart-item-info"><strong>${escapeHTML(i.nama)}</strong><span>${formatRupiah(h)}</span></div><div class="cart-controls"><button data-action="minus" data-id="${escapeHTML(i.id)}">−</button><strong>${i.qty}</strong><button data-action="plus" data-id="${escapeHTML(i.id)}">+</button><button data-action="remove" data-id="${escapeHTML(i.id)}">×</button></div><div class="cart-subtotal">${formatRupiah(h*i.qty)}</div></div>`}).join("");cartBox.querySelectorAll("[data-action]").forEach(b=>b.onclick=()=>{const a=b.dataset.action,id=b.dataset.id;if(a==="plus")increaseCart(id);else if(a==="minus")decreaseCart(id);else removeCart(id);});updateCartTotal();}
+function updateCartTotal(){const total=cart.reduce((s,i)=>s+getCartPrice(i)*i.qty,0),count=cart.reduce((s,i)=>s+i.qty,0);if(cartCount)cartCount.textContent=count;if(cartTotal)cartTotal.textContent=formatRupiah(total);}
+function checkoutWhatsApp(){if(!cart.length){alert("Keranjang masih kosong.");return;}let m="Halo Duta LED, saya ingin pesan:\n\n";cart.forEach((i,n)=>{const h=getCartPrice(i);m+=`${n+1}. ${i.nama}\n   ${i.qty} x ${formatRupiah(h)} = ${formatRupiah(h*i.qty)}\n\n`;});m+=`TOTAL: ${formatRupiah(cart.reduce((s,i)=>s+getCartPrice(i)*i.qty,0))}`;openWhatsApp(m);}
+function saveCart(){try{localStorage.setItem(CART_KEY,JSON.stringify(cart));}catch{}}
+function loadCart(){try{const x=JSON.parse(localStorage.getItem(CART_KEY)||"[]");cart=Array.isArray(x)?x:[];}catch{cart=[];}}
+function showCartMessage(n){const old=document.querySelector(".cart-toast");old?.remove();const t=document.createElement("div");t.className="cart-toast";t.textContent="✓ "+n+" masuk keranjang";document.body.appendChild(t);setTimeout(()=>t.remove(),1800);}
+function whatsappLink(m){return "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(m);}
+function openWhatsApp(m){window.open(whatsappLink(m),"_blank");}
+async function copyText(t){try{await navigator.clipboard.writeText(t);}catch{const x=document.createElement("textarea");x.value=t;document.body.appendChild(x);x.select();document.execCommand("copy");x.remove();}}
+function setupLinks(){const m=whatsappLink("Halo Duta LED, saya ingin bertanya tentang produk.");["heroWA","contactWA","floatingWA"].forEach(id=>{const e=document.getElementById(id);if(e)e.href=m;});const g=document.getElementById("menuGrosir");if(g)g.href=whatsappLink("Halo Duta LED, saya ingin bertanya harga grosir.");}
+function setupMarketplaceLinks(){const a=document.getElementById("shopee"),b=document.getElementById("tiktok"),c=document.getElementById("lazada");if(a)a.href=SHOPEE_URL;if(b)b.href=TIKTOK_SHOP_URL;if(c)c.href=LAZADA_URL;}
+function setupPromoButton(){const b=document.getElementById("menuPromo");if(!b)return;b.onclick=e=>{e.preventDefault();selectedProductId="";searchText="";if(searchInput)searchInput.value="";currentCategory="Semua";renderCategories();const ps=products.filter(p=>p.hargaDiskon>0&&p.hargaDiskon<p.hargaJual);productGrid.innerHTML="";empty?.classList.toggle("hidden",!!ps.length);ps.forEach(p=>productGrid.appendChild(createProductCard(p)));document.getElementById("produk")?.scrollIntoView({behavior:"smooth"});};}
+function showLoading(v){if(loading)loading.style.display=v?"block":"none";}
+function showStatus(t){if(status)status.textContent=t;}
+function saveCache(data){try{localStorage.setItem(CACHE_KEY,JSON.stringify({time:Date.now(),data}));}catch{}}
+function loadCache(){try{const x=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");if(x&&Array.isArray(x.data))return x.data;if(Array.isArray(x))return x;return [];}catch{return [];}}
+function shakeCart(){const b=document.getElementById("cartButton"),c=document.getElementById("cartCount");if(b){b.classList.remove("cart-shake");void b.offsetWidth;b.classList.add("cart-shake");setTimeout(()=>b.classList.remove("cart-shake"),600);}if(c){c.classList.remove("cart-count-pop");void c.offsetWidth;c.classList.add("cart-count-pop");setTimeout(()=>c.classList.remove("cart-count-pop"),300);}}
 
-async function loadFromGoogle() {
-  const response = await fetch(API_URL + "?t=" + Date.now(), {method:"GET", cache:"no-store"});
-  if (!response.ok) throw new Error("HTTP " + response.status);
-  const data = await response.json();
-  const rows = Array.isArray(data) ? data : data.data;
-  if (!Array.isArray(rows)) throw new Error("Format data API tidak valid");
-  return rows.map(normalizeProduct).filter(product => product.nama);
-}
+/* Stok kartu: data API menjadi sumber kebenaran. */
+function applyStock(card,p){if(!card)return card;const s=parseStock(p?.stok);card.dataset.stok=String(s);const info=card.querySelector(".product-info"),price=card.querySelector(".price"),old=card.querySelector(".old-price"),buy=card.querySelector(".buy-button");if(!info||!price)return card;let b=info.querySelector(".stock-status");if(s<=0){if(!b){b=document.createElement("span");info.appendChild(b);}b.className="stock-status stock-empty";b.textContent="HABIS";if(b.parentElement)b.parentElement.classList.add("has-stock-status");if(buy){buy.disabled=true;buy.classList.add("is-sold-out");buy.textContent="Stok Habis";}}else if(s<10){if(!b){b=document.createElement("span");info.appendChild(b);}b.className="stock-status stock-low";b.textContent="Stok tinggal "+s;if(buy){buy.disabled=false;buy.classList.remove("is-sold-out");buy.textContent="🛒 + Keranjang";}}else{b?.remove();if(buy){buy.disabled=false;buy.classList.remove("is-sold-out");buy.textContent="🛒 + Keranjang";}return card;}if(old)old.insertAdjacentElement("afterend",b);else price.insertAdjacentElement("afterend",b);return card;}
+const _createProductCard=createProductCard;createProductCard=function(p){return applyStock(_createProductCard(p),p);};
 
-function normalizeProduct(row) {
-  /* Semua kemungkinan nama kolom stok ditangani di sini. */
-  const stokRaw = row.stok ?? row.Stok ?? row.STOK ?? row.stock ?? row.Stock ?? row.STOCK ??
-    row["stok barang"] ?? row["Stok Barang"] ?? row["STOK BARANG"] ??
-    row["jumlah stok"] ?? row["Jumlah Stok"] ?? row["JML STOK"] ??
-    row.qty ?? row.Qty ?? row.quantity ?? row.Quantity ?? row.persediaan ?? row.Persediaan;
+(function(){const s=document.createElement("style");s.textContent='.product-info{position:relative}.stock-status{display:inline-flex!important;align-items:center;justify-content:center;min-height:20px;margin:2px 4px!important;padding:3px 6px;border-radius:7px;font-size:10px;font-weight:800;line-height:1;white-space:nowrap}.stock-empty{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}.stock-low{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}.buy-button.is-sold-out,.buy-button:disabled{opacity:.55;cursor:not-allowed}@media(max-width:380px){.stock-status{font-size:9.5px!important}}';document.head.appendChild(s);})();
 
-  return {
-    id: value(row.ID ?? row.id ?? row.Id),
-    nama: value(row.nama ?? row.Nama ?? row.NAMA),
-    kategori: value(row.kategori ?? row.Kategori ?? row.KATEGORI) || "Lainnya",
-    hargaModal: number(row["harga modal"] ?? row.hargaModal ?? row.HargaModal),
-    laba: number(row.Laba ?? row.laba),
-    hargaJual: number(row["harga jual"] ?? row.hargaJual ?? row.HargaJual),
-    diskon: number(row.diskon ?? row.Diskon),
-    hargaDiskon: number(row["harga diskon"] ?? row.hargaDiskon ?? row.HargaDiskon),
-    stok: parseStock(stokRaw),
-    deskripsi: value(row.deskripsi ?? row.Deskripsi ?? row.diskipsi),
-    gambar1: value(row.gambar1 ?? row.Gambar1),
-    gambar2: value(row.gambar2 ?? row.Gambar2),
-    gambar3: value(row.gambar3 ?? row.Gambar3)
-  };
-}
-
-function parseStock(v) {
-  if (v === null || v === undefined || v === "") return 0;
-  const n = Number(String(v).replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? n : 0;
-}
-
-function value(v) {
-  if (v === null || v === undefined) return "";
-  return String(v).trim();
-}
-function number(v) {
-  if (v === null || v === undefined || v === "") return 0;
-  return Number(String(v).replace(/[^\d.-]/g, "")) || 0;
-}
-
-/* Sisanya tetap memakai fungsi katalog/keranjang yang sudah ada sebelumnya. */
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
