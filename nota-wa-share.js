@@ -26,8 +26,8 @@ function detailRows(o){
   const q=Number(d.qty)||0;
   const price=Number(d.harga_saat_beli)||0;
   const subtotal=price*q;
-  return `* ${clean(d.nama_produk)}\n  ${rp(price)} × ${q} = ${rp(subtotal)}`;
- }).join('\n────────────────────\n');
+  return `* ${clean(d.nama_produk)} — ${rp(price)} × ${q} = ${rp(subtotal)}`;
+ }).join('\n');
 }
 function makeText(o){
  const rows=detailRows(o);
@@ -43,7 +43,7 @@ function makeText(o){
  let out=`DUTA LED — NOTA PESANAN\n\nNo: ${clean(o.order_id)}\nTanggal: ${new Date(o.created_at).toLocaleString('id-ID')}\nPembeli: ${clean(o.nama_pembeli)} (HP: ${clean(o.no_hp)})\n\n────────────────────\nDETAIL PESANAN\n────────────────────\n${rows||'Tidak ada detail'}\n────────────────────\nTotal Produk: ${rp(produkTotal)}`;
  if(ong) out+=`\nOngkir: ${rp(ong)}`;
  if(cod) out+=`\nBiaya COD: ${rp(cod)}`;
- out+=`\n────────────────────\nTOTAL BAYAR: ${rp(total)}\nPembayaran: ${payment}\n────────────────────\nStatus: ${status}\nPengiriman: ${shipping}`;
+ out+=`\nTOTAL BAYAR: ${rp(total)}\nPembayaran: ${payment}\nStatus: ${status}\nPengiriman: ${shipping}`;
  if(resi) out+=`\nResi: ${resi}`;
  out+='\n\nTerima kasih telah berbelanja di DUTA LED.';
  return out;
@@ -57,4 +57,31 @@ async function share(o){
 window.dutaShareNotaImage=share;
 window.dutaShareNotaWA=share;
 window.dutaNotaText=makeText;
+
+/* Rapikan tampilan Detail Pesanan Admin: harga satuan dulu, subtotal sesudahnya. */
+(function patchAdminDetail(){
+ let tries=0;
+ const timer=setInterval(()=>{
+  const detail=document.getElementById('orderDetail');
+  if(detail && detail.querySelector('.items .item')){
+   clearInterval(timer);
+   detail.querySelectorAll('.items .item').forEach(item=>{
+    const small=item.querySelector('small');
+    const bold=item.querySelector('b');
+    if(!small || !bold) return;
+    const oldName=item.querySelector('span');
+    const wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;gap:2px;min-width:0';
+    if(oldName) wrap.appendChild(oldName);
+    wrap.appendChild(small);
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;gap:10px;width:100%';
+    row.appendChild(wrap);
+    row.appendChild(bold);
+    item.replaceChildren(row);
+   });
+  }
+  if(++tries>100) clearInterval(timer);
+ },100);
+})();
 })();
