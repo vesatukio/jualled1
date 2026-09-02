@@ -1,10 +1,20 @@
-/* DUTA LED - Nota WA image share - large print-like preview */
+/* DUTA LED - WhatsApp nota text langsung */
 (function(){
 'use strict';
-const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
 const rp=v=>'Rp'+Number(v||0).toLocaleString('id-ID');
-function note(o){const rows=(o.detail_pesanan||[]).map(d=>`<tr><td>${esc(d.nama_produk)}<div style="font-size:14px;color:#555;margin-top:3px">${Number(d.qty)||0} × ${rp(d.harga_saat_dibeli||d.harga_saat_beli)}</div></td><td style="text-align:right;vertical-align:top;font-weight:700">${rp(d.subtotal)}</td></tr>`).join('');return `<div id="waNote" style="background:#fff;color:#111;width:520px;box-sizing:border-box;padding:30px;font:18px Arial,sans-serif;line-height:1.45;border:1px solid #ddd"><h1 style="text-align:center;margin:0;font-size:30px;letter-spacing:1px">DUTA LED</h1><div style="text-align:center;font-size:16px;margin-top:2px">Toko LED & Elektronik</div><hr style="border:0;border-top:2px dashed #999;margin:18px 0"><div><b>No:</b> ${esc(o.order_id)}<br><b>Tanggal:</b> ${new Date(o.created_at).toLocaleString('id-ID')}<br><b>Pembeli:</b> ${esc(o.nama_pembeli)}<br><b>HP:</b> ${esc(o.no_hp)}</div><hr style="border:0;border-top:2px dashed #999;margin:18px 0"><table style="width:100%;border-collapse:collapse">${rows}</table><hr style="border:0;border-top:2px dashed #999;margin:18px 0"><div style="display:flex;justify-content:space-between;font-weight:900;font-size:23px"><span>TOTAL</span><span>${rp(o.total_harga)}</span></div><hr style="border:0;border-top:2px dashed #999;margin:18px 0"><div>Status: <b>${esc(o.status||'BARU')}</b><br>Pembayaran: ${esc(o.metode_pembayaran||'-')}<br>Pengiriman: ${esc(o.metode_pengiriman||'-')}</div><p style="text-align:center;margin:22px 0 0;font-size:16px">Terima kasih telah berbelanja di DUTA LED</p></div>`}
-async function canvasFile(o){if(!window.html2canvas){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';document.head.appendChild(s);await new Promise((ok,no)=>{s.onload=ok;s.onerror=no})}const wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-10000px;top:0;background:#fff;padding:0';wrap.innerHTML=note(o);document.body.appendChild(wrap);try{const c=await html2canvas(wrap.firstElementChild,{backgroundColor:'#fff',scale:2,useCORS:true,logging:false});return await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(new File([b],`Nota-${o.order_id||'DUTA-LED'}.png`,{type:'image/png'})):reject(new Error('Gagal membuat gambar nota')),'image/png'))}finally{wrap.remove()}}
-async function share(o){const file=await canvasFile(o),text=`Nota ${o.order_id||''} DUTA LED\nTotal ${rp(o.total_harga)}`;if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({title:`Nota ${o.order_id||'DUTA LED'}`,text,files:[file]});return true}catch(e){if(e.name==='AbortError')return false}}const href=window.URL.createObjectURL(file),a=document.createElement('a');a.href=href;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>window.URL.revokeObjectURL(href),1500);window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');alert('Gambar nota sudah dibuat. Browser ini belum bisa melampirkan gambar otomatis ke WhatsApp; gambar sudah disimpan, lalu pilih gambar tersebut di WhatsApp.');return false}
+const clean=s=>String(s??'').trim();
+function makeText(o){
+ const rows=(o.detail_pesanan||[]).map(d=>`• ${clean(d.nama_produk)} x${Number(d.qty)||0} = ${rp(d.subtotal)}`).join('\n');
+ const ong=Number(o.ongkir)||0,cod=Number(o.biaya_cod)||0,produk=Number(o.total_harga)||0,total=produk+ong+cod;
+ return `*DUTA LED — NOTA PESANAN*\n\nNo: ${clean(o.order_id)}\nTanggal: ${new Date(o.created_at).toLocaleString('id-ID')}\nPembeli: ${clean(o.nama_pembeli)}\nHP: ${clean(o.no_hp)}\n\n*DETAIL PESANAN*\n${rows||'Tidak ada detail'}\n\nTotal Produk: ${rp(produk)}${ong?`\nOngkir: ${rp(ong)}`:''}${cod?`\nBiaya COD: ${rp(cod)}`:''}\n*TOTAL BAYAR: ${rp(total)}*\n\nStatus: ${clean(o.status||'BARU')}\nPembayaran: ${clean(o.metode_pembayaran||'-')}\nPengiriman: ${clean(o.metode_pengiriman||'-')}${o.ekspedisi?`\nEkspedisi: ${clean(o.ekspedisi)}`:''}${o.nomor_resi?`\nResi: ${clean(o.nomor_resi)}`:''}\n\nTerima kasih telah berbelanja di DUTA LED.`;
+}
+async function share(o){
+ const text=makeText(o||{}),url='https://wa.me/?text='+encodeURIComponent(text);
+ const w=window.open(url,'_blank');
+ if(!w) window.location.href=url;
+ return true;
+}
 window.dutaShareNotaImage=share;
+window.dutaShareNotaWA=share;
+window.dutaNotaText=makeText;
 })();
