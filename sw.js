@@ -1,4 +1,4 @@
-const CACHE_NAME = "dutaled-v10";
+const CACHE_NAME = "dutaled-v11";
 
 const APP_FILES = [
   "./",
@@ -13,22 +13,26 @@ const APP_FILES = [
   "./bottom-nav.css?v=6",
   "./bottom-nav.js?v=3",
   "./pwa-install.css?v=2",
+  "./professional-mobile.css?v=1",
+  "./personal-finance-local.css?v=1",
   "./app.js?v=4",
   "./seo.js",
   "./checkout.js?v=10",
+  "./order-flow-fix.js?v=2",
+  "./order-status-sync.js?v=2",
+  "./order-shipping-ui.js?v=1",
   "./order-status-shopee.js?v=1",
+  "./product-share.js?v=8",
   "./dynamic-home.js",
   "./product-poster.js",
   "./product-poster-connect.js",
   "./image-zoom-enhancer.js",
   "./product-core-fix.js",
   "./universal-tools.js",
-  "./manifest.json",
-  "./config.js",
-  "./banner.json",
   "./wallet.js?v=3",
   "./wallet.css?v=3",
   "./mode-switcher.css?v=1",
+  "./product-card-layout.css?v=6",
   "./image/no-image.png",
   "./image/icon-192.png",
   "./image/icon-512.png"
