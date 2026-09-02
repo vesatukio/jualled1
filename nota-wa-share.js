@@ -21,20 +21,29 @@ function shippingLabel(o){
  if(/toko/i.test(v)) return 'Kirim Toko';
  return v || '-';
 }
+function detailRows(o){
+ return (o.detail_pesanan||[]).map(d=>{
+  const q=Number(d.qty)||0;
+  const price=Number(d.harga_saat_beli)||0;
+  const subtotal=price*q;
+  return `* ${clean(d.nama_produk)}\n  ${q} x ${rp(price)} = ${rp(subtotal)}`;
+ }).join('\n────────────────────\n');
+}
 function makeText(o){
- const rows=(o.detail_pesanan||[]).map(d=>`* ${clean(d.nama_produk)} x${Number(d.qty)||0} = ${rp(d.subtotal)}`).join('\n');
+ const rows=detailRows(o);
  const ong=Number(o.ongkir)||0;
  const cod=isCOD(o) ? (Number(o.biaya_cod)||0) : 0;
- const produk=Number(o.total_harga)||0;
- const total=produk+ong+cod;
+ const produk=(o.detail_pesanan||[]).reduce((s,d)=>s+(Number(d.qty)||0)*(Number(d.harga_saat_beli)||0),0);
+ const produkTotal=produk || Number(o.total_harga)||0;
+ const total=produkTotal+ong+cod;
  const payment=paymentLabel(o);
  const shipping=shippingLabel(o);
  const status=clean(o.status||'BARU');
  const resi=clean(o.nomor_resi||o.resi||'');
- let out=`DUTA LED — NOTA PESANAN\n\nNo: ${clean(o.order_id)}\nTanggal: ${new Date(o.created_at).toLocaleString('id-ID')}\nPembeli: ${clean(o.nama_pembeli)} (HP: ${clean(o.no_hp)})\n\nDETAIL PESANAN\n${rows||'Tidak ada detail'}\n\nTotal Produk: ${rp(produk)}`;
+ let out=`DUTA LED — NOTA PESANAN\n\nNo: ${clean(o.order_id)}\nTanggal: ${new Date(o.created_at).toLocaleString('id-ID')}\nPembeli: ${clean(o.nama_pembeli)} (HP: ${clean(o.no_hp)})\n\n────────────────────\nDETAIL PESANAN\n────────────────────\n${rows||'Tidak ada detail'}\n────────────────────\nTotal Produk: ${rp(produkTotal)}`;
  if(ong) out+=`\nOngkir: ${rp(ong)}`;
  if(cod) out+=`\nBiaya COD: ${rp(cod)}`;
- out+=`\nTOTAL BAYAR: ${rp(total)}\n\nStatus: ${status}\nPembayaran: ${payment}\nPengiriman: ${shipping}`;
+ out+=`\n────────────────────\nTOTAL BAYAR: ${rp(total)}\n────────────────────\nStatus: ${status}\nPembayaran: ${payment}\nPengiriman: ${shipping}`;
  if(resi) out+=`\nResi: ${resi}`;
  out+='\n\nTerima kasih telah berbelanja di DUTA LED.';
  return out;
