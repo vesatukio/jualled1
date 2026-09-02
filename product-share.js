@@ -1,10 +1,11 @@
-/* Duta LED — Share Produk v7 */
+/* Duta LED — Share Produk v8 + newest-first catalog */
 (function(){
   'use strict';
   const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
   const clean=s=>String(s??'').replace(/\s+/g,' ').trim();
   const lists=()=>[window.products,window.produk,window.PRODUK,window.allProducts,window.productData].filter(Array.isArray);
   let productIndex=null;
+  let suppressObserver=false;
   function buildIndex(){
     const map=new Map();
     for(const list of lists()) for(const p of list){
@@ -63,11 +64,21 @@
     const p=findProductForCard(card);
     if(p)btn.onclick=e=>{e.preventDefault();e.stopPropagation();shareProduct(p);};
   }
+  function sortNewestFirst(grid){
+    const cards=[...grid.querySelectorAll(':scope > .product-card')];
+    if(cards.length<2)return;
+    /* Sumber katalog sebelumnya menampilkan produk terbaru di bagian akhir.
+       Balik urutan hasil filter sehingga produk terbaru selalu di atas,
+       termasuk saat memilih kategori. */
+    cards.reverse().forEach(card=>grid.appendChild(card));
+  }
   function refresh(){
     const grid=document.querySelector('#productGrid');
     if(!grid)return;
     buildIndex();
+    sortNewestFirst(grid);
     grid.querySelectorAll('.product-card').forEach(addButton);
+    suppressObserver=true;
   }
   function init(){
     const grid=document.querySelector('#productGrid');
@@ -75,8 +86,9 @@
     refresh();
     let timer=0;
     const observer=new MutationObserver(()=>{
+      if(suppressObserver){suppressObserver=false;return;}
       clearTimeout(timer);
-      timer=setTimeout(refresh,250);
+      timer=setTimeout(refresh,80);
     });
     observer.observe(grid,{childList:true,subtree:true});
   }
