@@ -13,10 +13,13 @@
 .product-card .product-info{padding:5px 6px 6px!important;display:flex;flex-direction:column;min-width:0}
 .product-card .product-name{order:1;min-height:29px!important;height:29px;margin:0!important;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;font-size:11px!important;line-height:1.2!important;font-weight:600}
 .product-card .price{order:2;margin-top:2px!important;display:inline-block;width:max-content;max-width:100%;color:#e65100;font-size:13px!important;line-height:1.15;font-weight:800;white-space:nowrap}
-.product-card .old-price{order:3;margin:-14px 0 0 auto!important;display:block;width:max-content;max-width:55%;color:#999!important;font-size:9px!important;line-height:1.15;font-weight:500!important;text-decoration:line-through;white-space:nowrap}
-.product-card .buy-button{order:4;width:100%;margin-top:5px!important;padding:7px 4px!important;border:0;border-radius:6px;background:#16a34a;color:#fff;font-size:10px!important;line-height:1;font-weight:800;cursor:pointer}
+.product-card .old-price{order:4;margin:-14px 0 0 auto!important;display:block;width:max-content;max-width:55%;color:#999!important;font-size:9px!important;line-height:1.15;font-weight:500!important;text-decoration:line-through;white-space:nowrap}
+.product-card .stock-status{order:3;align-self:flex-end;display:inline-flex;align-items:center;justify-content:center;width:max-content;max-width:60%;min-height:20px;margin:-14px 0 0 auto;padding:3px 6px;border-radius:7px;font-size:10px;font-weight:800;line-height:1;white-space:nowrap;z-index:2}
+.product-card .stock-empty{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}
+.product-card .stock-low{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+.product-card .buy-button{order:5;width:100%;margin-top:5px!important;padding:7px 4px!important;border:0;border-radius:6px;background:#16a34a;color:#fff;font-size:10px!important;line-height:1;font-weight:800;cursor:pointer}
 .product-card .buy-button:active{transform:scale(.98)}
-/* KATALOG UTAMA: rapat dan hemat tinggi */
+.product-card .buy-button.is-sold-out,.product-card .buy-button:disabled{opacity:.55;cursor:not-allowed}
 .products{padding:1px 0 20px!important}
 .products .section-title{margin:0 0 5px!important}
 .products .section-title .eyebrow{font-size:8px!important}
@@ -27,31 +30,14 @@
 .products .category-bar{gap:4px!important;padding:0 0 5px!important;margin:0!important}
 .products .category-button{padding:6px 9px!important;border-radius:16px!important;font-size:10px!important}
 .product-grid{gap:5px!important}
-/* BAGIAN PROMO/PRODUK DINAMIS */
 .dynamic-section{padding:2px 0!important;margin:0!important}
 .dynamic-section .section-title{margin:0 0 5px!important}
 .dynamic-section .section-title h2{font-size:16px!important;margin:1px 0!important}
 .dynamic-products{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important}
 .dynamic-products .product-card{min-width:0}
-/* Jarak header -> hero -> katalog dipadatkan */
 .header-inner{min-height:52px!important}
 .hero{padding:4px 0 5px!important}
 .hero-3col{gap:4px!important}
-@media(max-width:380px){
- .product-card .product-share-btn{width:28px!important;height:28px!important;font-size:17px!important}
- .product-card .product-name{font-size:10.5px!important;min-height:27px!important;height:27px}
- .product-card .price{font-size:12px!important}
- .product-card .buy-button{font-size:9.5px!important;padding:7px 3px!important}
- .products .section-title h2,.dynamic-section .section-title h2{font-size:15px!important}
-}
-@media(min-width:600px){
- .product-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}
- .dynamic-products{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}
- .product-card .product-name{font-size:12px!important}
- .product-card .price{font-size:14px!important}
- .product-card .buy-button{font-size:10.5px!important}
-}
-@media(min-width:1000px){
- .product-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}
- .products .container{max-width:1200px}
-}
+@media(max-width:380px){.product-card .product-share-btn{width:28px!important;height:28px!important;font-size:17px!important}.product-card .product-name{font-size:10.5px!important;min-height:27px!important;height:27px}.product-card .price{font-size:12px!important}.product-card .stock-status{font-size:9.5px!important}.product-card .buy-button{font-size:9.5px!important;padding:7px 3px!important}.products .section-title h2,.dynamic-section .section-title h2{font-size:15px!important}}
+@media(min-width:600px){.product-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}.dynamic-products{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}.product-card .product-name{font-size:12px!important}.product-card .price{font-size:14px!important}.product-card .buy-button{font-size:10.5px!important}}
+@media(min-width:1000px){.product-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}.products .container{max-width:1200px}}
