@@ -18,3 +18,5 @@
   function init(){const grid=document.querySelector('#productGrid');if(!grid){setTimeout(init,300);return;}refresh();let timer=0;const observer=new MutationObserver(()=>{if(suppressObserver){suppressObserver=false;return;}clearTimeout(timer);timer=setTimeout(refresh,80);});observer.observe(grid,{childList:true,subtree:true});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+/* Load platform section without touching the main HTML layout */
+(function(){const s=document.createElement('script');s.src='platform-section.js?v=2';s.defer=true;document.head.appendChild(s);})();
