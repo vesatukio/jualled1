@@ -1,4 +1,4 @@
-/* DUTA LED - Admin fixes v7 */
+/* DUTA LED - Admin fixes v8 */
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
@@ -12,7 +12,20 @@ function statusKey(s){const x=norm(s);if(x==='MENUNGGU PEMBAYARAN'||x==='MENUNGG
 function mountOrderTabs(){const host=$('orderStatusTabs'),list=$('orderList');if(!host||!list)return;const cards=[...list.querySelectorAll('.order')],active=window.__dutaFinalStatus||'ALL';host.innerHTML=STATUS.map(([key,label])=>{const n=key==='ALL'?cards.length:cards.filter(c=>statusKey(c.querySelector('.status')?.textContent)===key).length;return `<button type="button" class="order-status-tab ${key===active?'active':''}" data-final-status="${key}">${label}<b>${n}</b></button>`}).join('');host.querySelectorAll('.order-status-tab').forEach(b=>b.onclick=()=>{window.__dutaFinalStatus=b.dataset.finalStatus;mountOrderTabs()});cards.forEach(c=>{const k=statusKey(c.querySelector('.status')?.textContent);c.style.display=active==='ALL'||k===active?'':'none'})}
 function styleStatus(){if($('adminFinalStyle'))return;const s=document.createElement('style');s.id='adminFinalStyle';s.textContent=`.order-status-tabs{display:flex!important;gap:7px!important;overflow-x:auto!important;white-space:nowrap!important;padding:3px 1px 8px!important;margin:0 0 10px!important}.order-status-tabs::-webkit-scrollbar{display:none}.order-status-tab{flex:0 0 auto;border:1px solid #dfe5ec!important;background:#fff!important;color:#344054!important;border-radius:10px!important;padding:8px 11px!important;font-weight:800!important}.order-status-tab.active{background:#1769e0!important;color:#fff!important;border-color:#1769e0!important}.order-status-tab b{margin-left:5px;border-radius:10px;padding:2px 6px;background:#eef1f5;color:#344054}.order-status-tab.active b{background:#fff;color:#1769e0}.order-actions .duta-wa{background:#fff!important;color:#1769e0!important;border:1px solid #cfe0ff!important}`;document.head.appendChild(s)}
 function addWA(print,id){if(!print||!id||print.parentElement.querySelector('[data-wa-order="'+id+'"]'))return;const wa=document.createElement('button');wa.type='button';wa.className='btn light duta-wa';wa.dataset.waOrder=id;wa.textContent='📤 WA';wa.onclick=async e=>{e.preventDefault();e.stopPropagation();const o=getOrders().find(x=>String(x.id)===String(id));if(!o)return alert('Pesanan tidak ditemukan.');if(typeof window.dutaShareNotaImage!=='function')return alert('Fitur WA belum siap. Silakan refresh halaman.');try{await window.dutaShareNotaImage(o)}catch(err){alert('Gagal membuat nota: '+(err?.message||err))}};print.insertAdjacentElement('afterend',wa)}
-function wireWA(){document.querySelectorAll('[data-print-order]').forEach(p=>addWA(p,p.dataset.printOrder));const d=$('printFromDetail');if(d){const detail=$('orderDetail');const no=detail?.querySelector('.order-no')?.textContent?.trim()||detail?.querySelector('b')?.textContent?.trim()||'';const o=getOrders().find(x=>String(x.order_id)===String(no));if(o)addWA(d,o.id)}}
+function wireWA(){
+  document.querySelectorAll('[data-print-order]').forEach(p=>addWA(p,p.dataset.printOrder));
+  const d=$('aoPrint')||$('printFromDetail');
+  if(d&&!d.parentElement.querySelector('[data-wa-detail]')){
+    const detail=$('orderDetail');
+    const no=detail?.querySelector('.ao-head b')?.textContent?.trim()||detail?.querySelector('.order-no')?.textContent?.trim()||detail?.querySelector('b')?.textContent?.trim()||'';
+    const o=getOrders().find(x=>String(x.order_id)===String(no));
+    if(o){
+      const wa=document.createElement('button');wa.type='button';wa.className='btn light duta-wa';wa.dataset.waDetail='1';wa.textContent='📤 WA';
+      wa.onclick=async e=>{e.preventDefault();e.stopPropagation();if(typeof window.dutaShareNotaImage!=='function')return alert('Fitur WA belum siap. Silakan refresh halaman.');try{await window.dutaShareNotaImage(o)}catch(err){alert('Gagal membuat nota: '+(err?.message||err))}};
+      d.insertAdjacentElement('afterend',wa);
+    }
+  }
+}
 function watchDetail(){const detail=$('orderDetail');if(detail&&!window.__dutaDetailObserver){window.__dutaDetailObserver=new MutationObserver(()=>setTimeout(wireWA,30));window.__dutaDetailObserver.observe(detail,{childList:true,subtree:true})}}
 function run(){cleanupTabs();ensureSaran();styleStatus();mountOrderTabs();wireWA();watchDetail();const list=$('orderList');if(list&&!window.__dutaFinalObserver){window.__dutaFinalObserver=new MutationObserver(()=>{clearTimeout(window.__dutaFinalTimer);window.__dutaFinalTimer=setTimeout(()=>{mountOrderTabs();wireWA()},60)});window.__dutaFinalObserver.observe(list,{childList:true,subtree:true)}}}
 function boot(){run();setTimeout(run,400);setTimeout(run,1000);setTimeout(run,2000)}
