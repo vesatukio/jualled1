@@ -65,3 +65,15 @@
     tab.addEventListener("click",activateFeedback,true);
   });
 })();
+
+/* Load the final admin UI modules after the base admin scripts. */
+(function(){
+  function load(src){const s=document.createElement('script');s.src=src;document.head.appendChild(s)}
+  const run=()=>{
+    load('admin-status-tabs.js?v=20260902-3');
+    load('admin-ui-v2.js?v=20260902-4');
+    load('nota-wa-share.js?v=20260902-2');
+    load('admin-fixes-v6.js?v=20260902-2');
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,120));else setTimeout(run,120);
+})();
