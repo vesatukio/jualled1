@@ -18,10 +18,3 @@
   function init(){const grid=document.querySelector('#productGrid');if(!grid){setTimeout(init,300);return;}refresh();let timer=0;const observer=new MutationObserver(()=>{if(suppressObserver){suppressObserver=false;return;}clearTimeout(timer);timer=setTimeout(refresh,80);});observer.observe(grid,{childList:true,subtree:true});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
-/* Muat direktori usaha pada halaman utama tanpa mengubah index.html */
-(function(){
-  const css=document.createElement('link');css.rel='stylesheet';css.href='usaha.css?v=2';document.head.appendChild(css);
-  const s=document.createElement('script');s.src='usaha.js?v=2';s.defer=true;document.head.appendChild(s);
-  function addCTA(){if(document.querySelector('.usaha-directory-cta'))return;const a=document.createElement('section');a.className='usaha-directory-cta';a.innerHTML='<h2>🤝 Satu Website, Saling Promosi</h2><p>Promosikan usaha Anda sendiri. Gratis dan langsung mendapatkan halaman usaha.</p><button type="button">➕ Daftarkan Usaha Anda</button>';const target=document.querySelector('.advantages');if(target)target.parentNode.insertBefore(a,target);a.querySelector('button').onclick=()=>window.openUsahaForm?.();}
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(addCTA,1000));
-})();
