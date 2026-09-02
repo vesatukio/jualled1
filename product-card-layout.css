@@ -1,20 +1,19 @@
-/* DUTA LED - Product Card Layout v6 compact */
+/* DUTA LED - Product Card Layout v7 compact */
 .product-card{position:relative;overflow:hidden;border-radius:9px;box-shadow:0 1px 5px rgba(0,0,0,.06)}
 .product-card .product-image,.product-card .product-img{position:relative;overflow:hidden}
 .product-card .product-image{aspect-ratio:1/0.86!important}
 .product-card .product-image img{object-fit:contain!important}
 .product-card .discount-badge{position:absolute!important;top:5px!important;right:5px!important;z-index:20;padding:4px 6px!important;border-radius:5px!important;font-size:9px!important}
-/* SHARE: hanya simbol ↗ di kiri atas gambar */
 .product-card .product-share-btn{position:absolute!important;top:5px!important;left:5px!important;z-index:999!important;width:30px!important;height:30px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;border:2px solid #fff!important;border-radius:50%!important;background:linear-gradient(145deg,#ff8a00,#ff5a00)!important;color:#fff!important;font-family:Arial,sans-serif!important;font-size:19px!important;line-height:1!important;font-weight:900!important;text-align:center!important;text-decoration:none!important;box-shadow:0 2px 7px rgba(0,0,0,.22)!important;text-shadow:0 1px 2px rgba(0,0,0,.25)!important}
 .product-card .product-share-btn::before,.product-card .product-share-btn::after{content:none!important}
 .product-card .product-info .product-share-btn,.product-card>.product-info>.product-share-btn{display:none!important}
 .product-card .product-share-btn:active{transform:scale(.90)!important}
 .product-card .share-link,.product-card .share-button,.product-card .share-product,.product-card .product-share,.product-card [class*="share-link"],.product-card [class*="share-button"],.product-card [id*="share-link"],.product-card [id*="share-button"]{display:none!important}
-.product-card .product-info{padding:5px 6px 6px!important;display:flex;flex-direction:column;min-width:0}
+.product-card .product-info{position:relative!important;padding:5px 6px 6px!important;display:flex;flex-direction:column;min-width:0}
 .product-card .product-name{order:1;min-height:29px!important;height:29px;margin:0!important;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;font-size:11px!important;line-height:1.2!important;font-weight:600}
-.product-card .price{order:2;margin-top:2px!important;display:inline-block;width:max-content;max-width:100%;color:#e65100;font-size:13px!important;line-height:1.15;font-weight:800;white-space:nowrap}
-.product-card .old-price{order:4;margin:-14px 0 0 auto!important;display:block;width:max-content;max-width:55%;color:#999!important;font-size:9px!important;line-height:1.15;font-weight:500!important;text-decoration:line-through;white-space:nowrap}
-.product-card .stock-status{order:3;align-self:flex-end;display:inline-flex;align-items:center;justify-content:center;width:max-content;max-width:60%;min-height:20px;margin:-14px 0 0 auto;padding:3px 6px;border-radius:7px;font-size:10px;font-weight:800;line-height:1;white-space:nowrap;z-index:2}
+.product-card .price{order:2;margin:2px 0 0!important;display:block;width:calc(100% - 72px)!important;max-width:calc(100% - 72px)!important;color:#e65100;font-size:13px!important;line-height:1.15;font-weight:800;white-space:nowrap}
+.product-card .old-price{order:4;margin:-14px 0 0 auto!important;display:block;width:max-content;max-width:48%;color:#999!important;font-size:9px!important;line-height:1.15;font-weight:500!important;text-decoration:line-through;white-space:nowrap}
+.product-card .stock-status{order:3;position:absolute!important;left:50%!important;top:37px!important;transform:translateX(-2px)!important;align-self:auto!important;display:inline-flex!important;align-items:center;justify-content:center;width:max-content;max-width:48%;min-height:20px;margin:0!important;padding:3px 6px;border-radius:7px;font-size:10px;font-weight:800;line-height:1;white-space:nowrap;z-index:2}
 .product-card .stock-empty{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}
 .product-card .stock-low{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
 .product-card .buy-button{order:5;width:100%;margin-top:5px!important;padding:7px 4px!important;border:0;border-radius:6px;background:#16a34a;color:#fff;font-size:10px!important;line-height:1;font-weight:800;cursor:pointer}
@@ -38,6 +37,6 @@
 .header-inner{min-height:52px!important}
 .hero{padding:4px 0 5px!important}
 .hero-3col{gap:4px!important}
-@media(max-width:380px){.product-card .product-share-btn{width:28px!important;height:28px!important;font-size:17px!important}.product-card .product-name{font-size:10.5px!important;min-height:27px!important;height:27px}.product-card .price{font-size:12px!important}.product-card .stock-status{font-size:9.5px!important}.product-card .buy-button{font-size:9.5px!important;padding:7px 3px!important}.products .section-title h2,.dynamic-section .section-title h2{font-size:15px!important}}
+@media(max-width:380px){.product-card .product-share-btn{width:28px!important;height:28px!important;font-size:17px!important}.product-card .product-name{font-size:10.5px!important;min-height:27px!important;height:27px}.product-card .price{font-size:12px!important}.product-card .stock-status{font-size:9.5px!important;top:36px!important}.product-card .buy-button{font-size:9.5px!important;padding:7px 3px!important}.products .section-title h2,.dynamic-section .section-title h2{font-size:15px!important}}
 @media(min-width:600px){.product-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}.dynamic-products{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}.product-card .product-name{font-size:12px!important}.product-card .price{font-size:14px!important}.product-card .buy-button{font-size:10.5px!important}}
 @media(min-width:1000px){.product-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}.products .container{max-width:1200px}}
