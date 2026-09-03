@@ -2,7 +2,7 @@
 (function(){
 'use strict';
 const URL='https://opgeeqnucxrdqcgwcuge.supabase.co',KEY='sb_publishable_uqah55SK8ZjyugWprFnFMA_QnyVdCLA';
-const db=window.supabase?.createClient(URL,KEY),$=id=>document.getElementById(id);
+const db=window.dutaSupabase,$=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
 const num=v=>Number(String(v??'').replace(/[^\d.-]/g,''))||0;
 const rp=v=>'Rp'+num(v).toLocaleString('id-ID');
