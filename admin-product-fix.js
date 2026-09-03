@@ -2,7 +2,7 @@
   'use strict';
   const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
   const KEY='sb_publishable_uqah55SK8ZjyugWprFnFMA_QnyVdCLA';
-  const client=window.supabase.createClient(URL,KEY);
+  const client=window.dutaSupabase||(window.dutaSupabase=window.supabase.createClient(URL,KEY));
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
   const num=v=>Number(String(v??'').replace(/[^\d.-]/g,''))||0;
