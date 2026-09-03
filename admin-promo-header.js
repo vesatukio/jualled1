@@ -3,7 +3,7 @@
 'use strict';
 const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
 const KEY='sb_publishable_uqah55SK8ZjyugWprFnFMA_QnyVdCLA';
-const db=window.supabase.createClient(URL,KEY);
+const db=window.dutaSupabase||(window.dutaSupabase=window.supabase.createClient(URL,KEY));
 const FN=URL+'/functions/v1/promo-header-admin';
 const $=s=>document.querySelector(s), clean=s=>String(s??'').trim();
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
