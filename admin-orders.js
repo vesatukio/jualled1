@@ -1,8 +1,7 @@
 "use strict";
 (function(){
-  const SUPABASE_URL="https://opgeeqnucxrdqcgwcuge.supabase.co";
-  const SUPABASE_KEY="sb_publishable_uqah55SK8ZjyugWprFnFMA_QnyVdCLA";
-  const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const db=window.dutaSupabase;
+  if(!db){console.error('DUTA LED: Supabase client belum siap.');return;}
   const esc=s=>String(s??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#039;"}[c]));
   const rupiah=v=>"Rp"+(Number(v)||0).toLocaleString("id-ID");
   const num=v=>Number(String(v??"").replace(/[^\d.-]/g,""))||0;
