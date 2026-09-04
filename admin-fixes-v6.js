@@ -1,39 +1,17 @@
-/* DUTA LED - Admin fixes v20260904-11 - preserve all admin tabs */
+/* DUTA LED - Admin fixes v20260904-12 - stable admin navigation */
 (function(){
-  'use strict';
-  const $=id=>document.getElementById(id);
-  const norm=s=>String(s||'').trim().toUpperCase().replace(/\s+/g,' ');
-  const STATUS=[['ALL','Semua'],['MENUNGGU BAYAR','Menunggu Pembayaran'],['BARU','Baru'],['DIPROSES','Diproses'],['DIKIRIM','Dikirim'],['SELESAI','Selesai'],['BATAL','Batal']];
-  function statusKey(s){
-    const x=norm(s);
-    return x==='MENUNGGU PEMBAYARAN'||x==='MENUNGGU BAYAR'||x==='MENUNGGU PEMBAYARAN/COD'||x==='MENUNGGU BAYAR/COD'?'MENUNGGU BAYAR':x;
-  }
-  function mountOrderTabs(){
-    const host=$('orderStatusTabs'),list=$('orderList');
-    if(!host||!list)return;
-    const cards=Array.from(list.querySelectorAll('.order'));
-    const active=window.__dutaFinalStatus||'ALL';
-    host.innerHTML=STATUS.map(function(pair){
-      const key=pair[0],label=pair[1];
-      const n=key==='ALL'?cards.length:cards.filter(function(c){return statusKey(c.querySelector('.status')?.textContent)===key}).length;
-      return '<button type="button" class="order-status-tab '+(key===active?'active':'')+'" data-final-status="'+key+'">'+label+'<b>'+n+'</b></button>';
-    }).join('');
-    host.querySelectorAll('.order-status-tab').forEach(function(b){
-      b.onclick=function(){window.__dutaFinalStatus=b.dataset.finalStatus;mountOrderTabs();};
-    });
-    cards.forEach(function(c){
-      const k=statusKey(c.querySelector('.status')?.textContent);
-      c.style.display=active==='ALL'||k===active?'':'none';
-    });
-  }
-  function styleStatus(){
-    if($('adminFinalStyle'))return;
-    const s=document.createElement('style');
-    s.id='adminFinalStyle';
-    s.textContent='.order-status-tabs{display:flex!important;gap:7px!important;overflow-x:auto!important;white-space:nowrap!important;padding:3px 1px 8px!important;margin:0 0 10px!important}.order-status-tab{flex:0 0 auto;border:1px solid #dfe5ec!important;background:#fff!important;color:#344054!important;border-radius:10px!important;padding:8px 11px!important;font-weight:800!important}.order-status-tab.active{background:#1769e0!important;color:#fff!important;border-color:#1769e0!important}.order-status-tab b{margin-left:5px;border-radius:10px;padding:2px 6px;background:#eef1f5;color:#344054}.order-status-tab.active b{background:#fff;color:#1769e0}';
-    document.head.appendChild(s);
-  }
-  function run(){styleStatus();mountOrderTabs();}
-  function boot(){run();setTimeout(run,500);setTimeout(run,1200);setTimeout(run,2500);}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+'use strict';
+const $=id=>document.getElementById(id);
+const norm=s=>String(s||'').trim().toUpperCase().replace(/\s+/g,' ');
+const STATUS=[['ALL','Semua'],['MENUNGGU BAYAR','Menunggu Pembayaran'],['BARU','Baru'],['DIPROSES','Diproses'],['DIKIRIM','Dikirim'],['SELESAI','Selesai'],['BATAL','Batal']];
+function statusKey(s){const x=norm(s);return x==='MENUNGGU PEMBAYARAN'||x==='MENUNGGU BAYAR'||x==='MENUNGGU PEMBAYARAN/COD'||x==='MENUNGGU BAYAR/COD'?'MENUNGGU BAYAR':x}
+function mountOrderTabs(){const host=$('orderStatusTabs'),list=$('orderList');if(!host||!list)return;const cards=Array.from(list.querySelectorAll('.order')),active=window.__dutaFinalStatus||'ALL';host.innerHTML=STATUS.map(function(p){const k=p[0],label=p[1],n=k==='ALL'?cards.length:cards.filter(c=>statusKey(c.querySelector('.status')?.textContent)===k).length;return '<button type="button" class="order-status-tab '+(k===active?'active':'')+'" data-final-status="'+k+'">'+label+'<b>'+n+'</b></button>'}).join('');host.querySelectorAll('.order-status-tab').forEach(b=>b.onclick=function(){window.__dutaFinalStatus=b.dataset.finalStatus;mountOrderTabs()});cards.forEach(c=>{const k=statusKey(c.querySelector('.status')?.textContent);c.style.display=active==='ALL'||k===active?'':'none'})}
+function styleStatus(){if($('adminFinalStyle'))return;const s=document.createElement('style');s.id='adminFinalStyle';s.textContent='.order-status-tabs{display:flex!important;gap:7px!important;overflow-x:auto!important;white-space:nowrap!important;padding:3px 1px 8px!important;margin:0 0 10px!important}.order-status-tab{flex:0 0 auto;border:1px solid #dfe5ec!important;background:#fff!important;color:#344054!important;border-radius:10px!important;padding:8px 11px!important;font-weight:800!important}.order-status-tab.active{background:#1769e0!important;color:#fff!important;border-color:#1769e0!important}.order-status-tab b{margin-left:5px;border-radius:10px;padding:2px 6px;background:#eef1f5;color:#344054}.order-status-tab.active b{background:#fff;color:#1769e0}.tabs{min-width:0}.tabs .tab{flex:0 0 auto}.ab-name-wrap{min-width:0}';document.head.appendChild(s)}
+function loadAutocomplete(){if(document.querySelector('script[data-ab-autocomplete]')||[...document.scripts].some(s=>(s.src||'').includes('admin-ambil-autocomplete.js')))return;const s=document.createElement('script');s.src='admin-ambil-autocomplete.js?v=20260904-2';s.dataset.abAutocomplete='1';s.async=false;document.head.appendChild(s)}
+function cleanDuplicateTabs(){const seen=new Set;document.querySelectorAll('.tabs .tab').forEach(b=>{if(!b.id)return;if(seen.has(b.id))b.remove();else seen.add(b.id)});const t=document.querySelector('.tabs');if(!t)return;const order=['tabOrders','tabProducts','tabStoreFinance','tabPersonalFinance','tabAmbilBarang','tabPromoV4','tabSaranV4'];order.forEach(id=>{const b=$(id);if(b)t.appendChild(b)})}
+function showView(id){const map={tabOrders:'ordersView',tabProducts:'productsView',tabStoreFinance:'storeFinanceView',tabPersonalFinance:'personalFinanceView',tabAmbilBarang:'ambilBarangView',tabPromoV4:'adminPromoPanel',tabSaranV4:'saranViewV4'};const target=map[id];document.querySelectorAll('main.wrap > section').forEach(v=>v.classList.add('hidden'));if(target&&$(target))$(target).classList.remove('hidden');document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.toggle('active',b.id===id));if(id==='tabAmbilBarang'&&typeof window.__dutaAmbilRender==='function')window.__dutaAmbilRender()}
+function bindStableTabs(){const t=$('.tabs');if(!t||t.dataset.stableBound)return;t.dataset.stableBound='1';t.addEventListener('click',function(e){const b=e.target.closest('.tab');if(!b)return;const id=b.id;if(!['tabOrders','tabProducts','tabStoreFinance','tabPersonalFinance','tabAmbilBarang','tabPromoV4','tabSaranV4'].includes(id))return;e.preventDefault();e.stopPropagation();showView(id)},true)}
+function run(){styleStatus();loadAutocomplete();cleanDuplicateTabs();bindStableTabs();mountOrderTabs()}
+function boot(){run();[400,900,1500,2500].forEach(ms=>setTimeout(run,ms))}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
