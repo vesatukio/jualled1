@@ -1,1 +1,3 @@
-(()=>{'use strict';function removePrivateCredit(){document.querySelectorAll('#walletApp [data-nav="credit"],#walletApp .wallet-credit-nav,#walletCreditSection').forEach(e=>e.remove());if(window.openCreditWallet)try{delete window.openCreditWallet}catch(_){} }if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',removePrivateCredit);else removePrivateCredit();const target=document.getElementById('walletApp');if(target)new MutationObserver(removePrivateCredit).observe(target,{childList:true,subtree:true});})();
+/* Wallet menu compatibility fix.
+   Do not remove the Ambil Barang menu: credit-wallet.js owns that feature. */
+(()=>{'use strict';})();
