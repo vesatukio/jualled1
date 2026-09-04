@@ -1,24 +1,24 @@
-/* DUTA LED - Autocomplete barang + harga Ambil Barang v20260904-4 */
+/* DUTA LED - Autocomplete barang + harga Ambil Barang v20260904-5 */
 (function(){
 'use strict';
 const KEY='DUTA_ADMIN_AMBIL_BARANG_V1';
 const HISTORY='DUTA_ADMIN_AMBIL_BARANG_NAMES_V1';
 const $=id=>document.getElementById(id);
 const money=n=>'Rp'+(Number(n)||0).toLocaleString('id-ID');
-
+const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
 function loadItems(){
   const out=[];
   try{
     const h=JSON.parse(localStorage.getItem(HISTORY)||'[]');
     if(Array.isArray(h)) h.forEach(x=>{
-      if(typeof x==='string') out.push({name:x,price:0,unit:'pcs'});
-      else if(x&&x.name) out.push({name:x.name,price:Number(x.price)||0,unit:x.unit||'pcs'});
+      if(typeof x==='string') out.push({name:x,price:0,discount:0,unit:'pcs'});
+      else if(x&&x.name) out.push({name:x.name,price:Number(x.price)||0,discount:Number(x.discount)||0,unit:x.unit||'pcs'});
     });
   }catch(e){}
   try{
     const a=JSON.parse(localStorage.getItem(KEY)||'[]');
     if(Array.isArray(a)) a.forEach(x=>(x.items||[]).forEach(i=>{
-      if(i&&i.name) out.push({name:i.name,price:Number(i.price)||0,unit:i.unit||'pcs',variant:i.variant||''});
+      if(i&&i.name) out.push({name:i.name,price:Number(i.price)||0,discount:Number(i.discount)||0,unit:i.unit||'pcs'});
     }));
   }catch(e){}
   const map=new Map();
@@ -26,113 +26,76 @@ function loadItems(){
     const k=String(x.name).trim().toLowerCase();
     if(k) map.set(k,{...x,name:String(x.name).trim()});
   });
-  return [...map.values()];
+  return [...map.values()].reverse();
 }
-
 function remember(){
   try{
     const old=loadItems();
-    document.querySelectorAll('#abItemRows input[data-abk="name"]').forEach(input=>{
-      const name=input.value.trim();
+    document.querySelectorAll('#abItemRows .ab-item').forEach(row=>{
+      const name=row.querySelector('.ab-name')?.value.trim();
       if(!name)return;
-      const i=Number(input.dataset.i);
-      const price=Number(document.querySelector(`#abItemRows input[data-abk="price"][data-i="${i}"]`)?.value)||0;
-      const unit=document.querySelector(`#abItemRows input[data-abk="unit"][data-i="${i}"]`)?.value||'pcs';
-      old.unshift({name,price,unit});
+      const price=Number(String(row.querySelector('.ab-price')?.value||'').replace(/[^0-9]/g,''))||0;
+      const discount=Number(String(row.querySelector('.ab-discount')?.value||'').replace(/[^0-9]/g,''))||0;
+      old.unshift({name,price,discount,unit:'pcs'});
     });
     const m=new Map();
-    old.forEach(x=>m.set(x.name.toLowerCase(),x));
+    old.forEach(x=>{const k=String(x.name).trim().toLowerCase();if(k&&!m.has(k))m.set(k,{...x,name:String(x.name).trim()})});
     localStorage.setItem(HISTORY,JSON.stringify([...m.values()].slice(0,300)));
   }catch(e){}
 }
-
-function esc(s){
-  return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function findFields(input){
+  const row=input.closest('.ab-item');
+  return {
+    row,
+    price:row?.querySelector('.ab-price'),
+    discount:row?.querySelector('.ab-discount'),
+    unit:row?.querySelector('.ab-unit')
+  };
 }
-
 function install(){
   const view=$('ambilBarangView');
   if(!view)return;
   if(!document.getElementById('abAutoStyle')){
-    const s=document.createElement('style');
-    s.id='abAutoStyle';
-    s.textContent='.ab-name-wrap{position:relative}.ab-suggest{position:absolute;left:0;right:0;top:calc(100% + 3px);z-index:100000;background:#fff;border:1px solid #d8dee7;border-radius:9px;box-shadow:0 8px 24px #0002;max-height:240px;overflow:auto}.ab-suggest button{display:block;width:100%;text-align:left;padding:10px 12px;border:0;background:#fff;cursor:pointer;font-size:13px}.ab-suggest button:hover{background:#f1f6ff}.ab-suggest small{display:block;color:#778294;margin-top:3px}';
+    const s=document.createElement('style');s.id='abAutoStyle';
+    s.textContent='.ab-name-wrap{position:relative;min-width:0}.ab-suggest{position:absolute;left:0;right:0;top:calc(100% + 3px);z-index:100000;background:#fff;border:1px solid #d8dee7;border-radius:9px;box-shadow:0 8px 24px #0002;max-height:260px;overflow:auto}.ab-suggest button{display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid #f0f2f5;background:#fff;cursor:pointer;font-size:13px}.ab-suggest button:hover{background:#f1f6ff}.ab-suggest small{display:block;color:#778294;margin-top:3px}';
     document.head.appendChild(s);
   }
-  document.querySelectorAll('#abItemRows input[data-abk="name"]').forEach(input=>{
+  document.querySelectorAll('#abItemRows .ab-name').forEach(input=>{
     if(input.dataset.abInstalled)return;
     input.dataset.abInstalled='1';
-    const wrap=document.createElement('div');
-    wrap.className='ab-name-wrap';
-    input.parentNode.insertBefore(wrap,input);
-    wrap.appendChild(input);
-    const box=document.createElement('div');
-    box.className='ab-suggest';
-    box.hidden=true;
-    wrap.appendChild(box);
+    const wrap=document.createElement('div');wrap.className='ab-name-wrap';input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
+    const box=document.createElement('div');box.className='ab-suggest';box.hidden=true;wrap.appendChild(box);
     const show=()=>{
       const q=input.value.trim().toLowerCase();
-      if(q.length<2){box.hidden=true;return;}
-      const arr=loadItems().filter(x=>x.name.toLowerCase().includes(q)).sort((a,b)=>Number(b.name.toLowerCase().startsWith(q))-Number(a.name.toLowerCase().startsWith(q))).slice(0,10);
-      if(!arr.length){box.hidden=true;return;}
-      box.innerHTML=arr.map((x,i)=>`<button type="button" data-pick="${i}"><b>${esc(x.name)}</b><small>${x.price?money(x.price):'Harga belum tersimpan'} · ${esc(x.unit||'pcs')}</small></button>`).join('');
+      let arr=loadItems();
+      if(q)arr=arr.filter(x=>x.name.toLowerCase().includes(q)).sort((a,b)=>Number(b.name.toLowerCase().startsWith(q))-Number(a.name.toLowerCase().startsWith(q)));
+      arr=arr.slice(0,12);
+      if(!arr.length){box.hidden=true;return}
+      box.innerHTML=arr.map((x,i)=>`<button type="button" data-pick="${i}"><b>${esc(x.name)}</b><small>${x.price?money(x.price):'Harga belum tersimpan'}${x.discount?' · Diskon '+x.discount+'%':''}</small></button>`).join('');
       box.hidden=false;
-      box.querySelectorAll('[data-pick]').forEach((b,i)=>{
-        b.onmousedown=e=>{
-          e.preventDefault();
-          const x=arr[i];
-          input.value=x.name;
-          const n=Number(input.dataset.i);
-          const price=document.querySelector(`#abItemRows input[data-abk="price"][data-i="${n}"]`);
-          const unit=document.querySelector(`#abItemRows input[data-abk="unit"][data-i="${n}"]`);
-          if(price&&!Number(price.value)&&x.price)price.value=x.price;
-          if(unit&&!unit.value)unit.value=x.unit||'pcs';
-          input.dispatchEvent(new Event('input',{bubbles:true}));
-          price?.dispatchEvent(new Event('input',{bubbles:true}));
-          unit?.dispatchEvent(new Event('input',{bubbles:true}));
-          box.hidden=true;
-        };
+      box.querySelectorAll('[data-pick]').forEach((b,i)=>b.onmousedown=e=>{
+        e.preventDefault();
+        const x=arr[i], f=findFields(input);
+        input.value=x.name;
+        if(f.price&&x.price)f.price.value=x.price;
+        if(f.discount&&x.discount)f.discount.value=x.discount;
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        f.price?.dispatchEvent(new Event('input',{bubbles:true}));
+        f.discount?.dispatchEvent(new Event('input',{bubbles:true}));
+        box.hidden=true;
       });
     };
     input.addEventListener('input',show);
     input.addEventListener('focus',show);
-    input.addEventListener('blur',()=>setTimeout(()=>{box.hidden=true;},180));
+    input.addEventListener('keydown',e=>{if(e.key==='Escape')box.hidden=true});
+    input.addEventListener('blur',()=>setTimeout(()=>box.hidden=true,180));
   });
 }
-
-/*
-  admin-final-fix.js sebelumnya menggambar ulang seluruh baris setiap kali
-  input berubah. Akibatnya elemen input lama terhapus dan kursor PC meloncat.
-  Simpan posisi kursor sebelum redraw lalu pulihkan ke input pengganti.
-*/
-function installCursorFix(){
-  if(window.__DUTA_AB_CURSOR_FIX__)return;
-  window.__DUTA_AB_CURSOR_FIX__=true;
-  document.addEventListener('input',e=>{
-    const el=e.target;
-    if(!el.matches('#ab11rows input[data-k]'))return;
-    const key=el.dataset.k;
-    const index=el.dataset.i;
-    const start=el.selectionStart;
-    const end=el.selectionEnd;
-    setTimeout(()=>{
-      const next=document.querySelector(`#ab11rows input[data-k="${key}"][data-i="${index}"]`);
-      if(!next)return;
-      next.focus({preventScroll:true});
-      try{next.setSelectionRange(start,end)}catch(err){try{next.setSelectionRange(next.value.length,next.value.length)}catch(e2){}}
-    },0);
-  },true);
-}
-
 const observer=new MutationObserver(install);
 function boot(){
-  installCursorFix();
   install();
   observer.observe(document.body,{childList:true,subtree:true});
-  document.addEventListener('click',e=>{
-    if(e.target.closest('#abSave'))setTimeout(remember,100);
-  });
+  document.addEventListener('click',e=>{if(e.target.closest('#abSave'))setTimeout(remember,100)});
 }
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
-else boot();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
