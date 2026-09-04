@@ -1,3 +1,4 @@
+/* DUTA LED - Product loader fix v20260904-3 */
 (function(){
   'use strict';
   const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
@@ -8,6 +9,7 @@
   const num=v=>Number(String(v??'').replace(/[^\d.-]/g,''))||0;
   const rp=v=>'Rp'+num(v).toLocaleString('id-ID');
   let fixProducts=[];
+  let loading=false;
 
   function imageOf(p){return Array.isArray(p.foto_urls)&&p.foto_urls.length?p.foto_urls[0]:'';}
   function showError(text){
@@ -36,7 +38,8 @@
     });
   }
   async function loadProducts(){
-    const box=$('productList'); if(!box)return;
+    const box=$('productList'); if(!box||loading)return;
+    loading=true;
     box.innerHTML='<div class="empty">⏳ Memuat produk...</div>';
     try{
       const {data:sessionData,error:sessionError}=await client.auth.getSession();
@@ -50,13 +53,17 @@
     }catch(e){
       console.error('ADMIN PRODUCT LOAD ERROR',e);
       showError('Produk gagal dimuat: '+(e?.message||'Kesalahan tidak diketahui'));
-    }
+    }finally{loading=false;}
   }
   function bind(){
     const tab=$('tabProducts');
-    if(tab){tab.addEventListener('click',()=>setTimeout(loadProducts,0));}
+    if(tab)tab.addEventListener('click',()=>setTimeout(loadProducts,50));
     const search=$('adminSearch'); if(search)search.addEventListener('input',renderProducts);
     window.reloadAdminProducts=loadProducts;
+    /* Jangan tampilkan placeholder lama: produk langsung dimuat setelah login. */
+    setTimeout(()=>{
+      client.auth.getSession().then(({data})=>{if(data?.session)loadProducts();});
+    },150);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
 })();
