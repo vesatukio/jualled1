@@ -1,4 +1,4 @@
-/* DUTA LED - Ambil Barang bridge + autocomplete v20260904-8 */
+/* DUTA LED - Ambil Barang bridge + autocomplete v20260904-9 */
 (function(){
 'use strict';
 const KEY='DUTA_ADMIN_AMBIL_BARANG_V1';
@@ -14,6 +14,9 @@ function hide(){if(box)box.style.display='none';active=null}
 function position(){if(!active||!box)return;const r=active.getBoundingClientRect();box.style.left=r.left+'px';box.style.top=(r.bottom+3)+'px';box.style.width=Math.max(r.width,300)+'px'}
 function show(input){active=input;const q=norm(input.value),hits=history().filter(x=>!q||norm(x.name).includes(q)).slice(0,30),b=ensureBox();b.innerHTML='';if(!hits.length){if(!q){hide();return}const e=document.createElement('div');e.textContent='Barang baru: '+input.value;e.style.cssText='padding:10px;color:#777';b.appendChild(e)}hits.forEach(item=>{const row=document.createElement('div');row.style.cssText='padding:9px 10px;cursor:pointer;border-bottom:1px solid #eee';row.innerHTML='<b>'+esc(item.name)+'</b><br><small>Harga terakhir: '+money(item.price)+' · Diskon: '+(item.discount||0)+'% · '+esc(item.unit||'pcs')+'</small>';row.addEventListener('mousedown',e=>{e.preventDefault();select(item,input)});b.appendChild(row)});position();b.style.display='block'}
 function select(item,input){input.value=item.name;const row=input.closest('.ab-item');if(row){const p=row.querySelector('[data-abk="price"]'),d=row.querySelector('[data-abk="discount"]'),u=row.querySelector('[data-abk="unit"]');if(p)p.value=item.price??'';if(d)d.value=item.discount??0;if(u)u.value=item.unit||'pcs';[p,d,u,input].forEach(el=>{if(el)el.dispatchEvent(new Event('input',{bubbles:true}))})}hide();input.focus()}
-function init(){shell();document.addEventListener('focusin',e=>{if(e.target.matches('#abItemRows .ab-name'))show(e.target)});document.addEventListener('input',e=>{if(e.target.matches('#abItemRows .ab-name'))show(e.target)});document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});document.addEventListener('mousedown',e=>{if(box&&box.style.display!=='none'&&!box.contains(e.target)&&e.target!==active)hide()});addEventListener('resize',position);addEventListener('scroll',position,true)}
+function init(){shell();document.addEventListener('focusin',e=>{if(e.target.matches('#abItemRows .ab-name'))show(e.target)});document.addEventListener('input',e=>{if(e.target.matches('#abItemRows .ab-name'))show(e.target)});document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});document.addEventListener('mousedown',e=>{if(box&&box.style.display!=='none'&&!box.contains(e.target)&&e.target!==active)hide()});
+/* bridge: tombol dinamis tetap bisa dipakai walau handler tab/admin lama ikut campur */
+document.addEventListener('click',e=>{const add=e.target.closest&&e.target.closest('#abAddItem');if(add){e.preventDefault();e.stopImmediatePropagation();if(typeof add.onclick==='function')add.onclick();return}const edit=e.target.closest&&e.target.closest('[data-edit]');if(edit){setTimeout(()=>{$('abFormHost')?.scrollIntoView({behavior:'smooth',block:'start'});$('abSupplier')?.focus()},60)}},true);
+addEventListener('resize',position);addEventListener('scroll',position,true)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
