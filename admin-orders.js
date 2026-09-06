@@ -42,3 +42,12 @@
   window.addEventListener("DOMContentLoaded",()=>{const emailInput=document.getElementById("adminEmail"),savedEmail=(()=>{try{return localStorage.getItem("dutaled_customer_email")||localStorage.getItem("email")||localStorage.getItem("customer_email")||""}catch(e){return""}})();if(emailInput&&savedEmail)emailInput.value=savedEmail;const host=document.querySelector(".loginbox");if(host&&!document.getElementById("adminFeedback")){const box=document.createElement("div");box.id="adminFeedback";box.style.cssText="margin-top:18px;padding-top:16px;border-top:1px solid #edf0f4";box.innerHTML=`<h3 style="margin:0 0 5px;font-size:16px">💬 Saran & Masukan Web</h3><p style="margin:0 0 10px;color:#6b7585;font-size:12px">Bantu kami memperbaiki web Duta LED.</p><textarea id="webFeedback" rows="4" maxlength="2000" placeholder="Tulis saran, kritik, atau kendala..." style="width:100%;margin-top:8px;padding:10px;border:1px solid #d8dee7;border-radius:9px;resize:vertical"></textarea><button id="sendWebFeedback" type="button" class="btn primary" style="margin-top:8px;width:100%">Kirim Saran</button><div id="feedbackMsg" style="margin-top:7px;font-size:12px"></div>`;host.appendChild(box);document.getElementById("sendWebFeedback").onclick=async()=>{const text=document.getElementById("webFeedback").value.trim(),msg=document.getElementById("feedbackMsg"),btn=document.getElementById("sendWebFeedback");if(text.length<3){msg.textContent="Tulis minimal 3 karakter.";return}btn.disabled=true;try{const {error}=await db.from("saran_masukan").insert({pesan:text,email:savedEmail||null});if(error)throw error;document.getElementById("webFeedback").value="";msg.textContent="✓ Saran berhasil dikirim."}catch(e){msg.textContent="Gagal mengirim saran: "+(e.message||e)}finally{btn.disabled=false}}}});
   (function(){const files=['admin-status-tabs.js?v=20260902-9','admin-ui-v2.js?v=20260902-9','nota-wa-share.js?v=20260902-10','admin-fixes-v6.js?v=20260902-9'];let i=0;function next(){if(i>=files.length)return;const s=document.createElement('script');s.src=files[i++];s.onload=next;s.onerror=()=>console.error('Gagal memuat',s.src);document.head.appendChild(s)}next()})();
 })();
+
+/* DUTA LED - Product tab loader: admin.html already loads this file. */
+(function(){
+  const s=document.createElement('script');
+  s.src='admin-product-fix.js?v=20260906-1';
+  s.onload=()=>console.log('DUTA LED: product fix loaded');
+  s.onerror=()=>console.error('DUTA LED: gagal memuat admin-product-fix.js');
+  document.head.appendChild(s);
+})();
