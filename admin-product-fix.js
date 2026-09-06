@@ -1,4 +1,4 @@
-/* DUTA LED - Product loader fix v20260904-3 */
+/* DUTA LED - Product loader fix v20260906-1 */
 (function(){
   'use strict';
   const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
@@ -12,15 +12,20 @@
   let loading=false;
 
   function imageOf(p){return Array.isArray(p.foto_urls)&&p.foto_urls.length?p.foto_urls[0]:'';}
+
   function showError(text){
     const box=$('productList');
-    if(box) box.innerHTML='<div class="empty">'+esc(text)+'<br><br><button class="btn primary" type="button" id="retryProducts">↻ Coba Lagi</button></div>';
-    const r=$('retryProducts'); if(r) r.onclick=loadProducts;
+    if(!box)return;
+    box.innerHTML='<div class="empty">'+esc(text)+'<br><br><button class="btn primary" type="button" id="retryProducts">↻ Coba Lagi</button></div>';
+    const r=$('retryProducts');
+    if(r)r.onclick=loadProducts;
   }
+
   function renderProducts(){
     const q=($('adminSearch')?.value||'').trim().toLowerCase();
     const list=fixProducts.filter(p=>!q||String(p.nama||'').toLowerCase().includes(q)||String(p.sku||'').toLowerCase().includes(q));
-    const box=$('productList'); if(!box)return;
+    const box=$('productList');
+    if(!box)return;
     if(!list.length){box.innerHTML='<div class="empty">Belum ada produk.</div>';return;}
     box.innerHTML=list.map(p=>{
       const price=num(p.harga_jual),cost=num(p.harga_pokok),d=num(p.diskon),sale=Math.max(0,Math.round(price*(100-d)/100)),profit=sale-cost;
@@ -34,17 +39,19 @@
     }).join('');
     box.querySelectorAll('[data-fix-product-id]').forEach(b=>b.onclick=()=>{
       const p=fixProducts.find(x=>String(x.id)===String(b.dataset.fixProductId));
-      if(typeof window.openEditor==='function') window.openEditor(p);
+      if(typeof window.openEditor==='function')window.openEditor(p);
     });
   }
+
   async function loadProducts(){
-    const box=$('productList'); if(!box||loading)return;
+    const box=$('productList');
+    if(!box||loading)return;
     loading=true;
     box.innerHTML='<div class="empty">⏳ Memuat produk...</div>';
     try{
       const {data:sessionData,error:sessionError}=await client.auth.getSession();
       if(sessionError)throw sessionError;
-      if(!sessionData.session){showError('Sesi admin belum aktif. Silakan login ulang.');return;}
+      if(!sessionData?.session){showError('Sesi admin belum aktif. Silakan login ulang.');return;}
       const {data,error}=await client.from('produk').select('id,nama,sku,harga_pokok,harga_jual,diskon,stok,berat,deskripsi,foto_urls,is_active,kategori_id,created_at').order('created_at',{ascending:false}).limit(500);
       if(error)throw error;
       fixProducts=data||[];
@@ -55,15 +62,29 @@
       showError('Produk gagal dimuat: '+(e?.message||'Kesalahan tidak diketahui'));
     }finally{loading=false;}
   }
+
+  function activateProductsTab(){
+    $('ordersView')?.classList.add('hidden');
+    $('productsView')?.classList.remove('hidden');
+    $('storeFinanceView')?.classList.add('hidden');
+    $('personalFinanceView')?.classList.add('hidden');
+    $('ambilBarangView')?.classList.add('hidden');
+    document.querySelectorAll('.tabs .tab').forEach(b=>b.classList.remove('active'));
+    $('tabProducts')?.classList.add('active');
+    loadProducts();
+  }
+
   function bind(){
     const tab=$('tabProducts');
-    if(tab)tab.addEventListener('click',()=>setTimeout(loadProducts,50));
-    const search=$('adminSearch'); if(search)search.addEventListener('input',renderProducts);
+    if(tab){
+      tab.addEventListener('click',activateProductsTab,true);
+      tab.onclick=activateProductsTab;
+    }
+    const search=$('adminSearch');
+    if(search)search.addEventListener('input',renderProducts);
     window.reloadAdminProducts=loadProducts;
-    /* Jangan tampilkan placeholder lama: produk langsung dimuat setelah login. */
-    setTimeout(()=>{
-      client.auth.getSession().then(({data})=>{if(data?.session)loadProducts();});
-    },150);
+    window.openAdminProducts=activateProductsTab;
   }
+
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
 })();
