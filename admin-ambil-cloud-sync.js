@@ -22,13 +22,8 @@ async function syncNow(){
   r.forEach(x=>map.set(String(x.id),fromDb(x)));
   local.forEach(x=>{if(!map.has(String(x.id)))map.set(String(x.id),x)});
   const merged=[...map.values()].sort((a,b)=>Number(b.id)-Number(a.id));
-  if(local.length && !r.length){
-   const payload=local.map(toDb);
-   const {error:e}=await db.from(TABLE).upsert(payload,{onConflict:'id'});
-   if(e)throw e;
-  }else if(merged.length){
-   const payload=merged.map(toDb);
-   const {error:e}=await db.from(TABLE).upsert(payload,{onConflict:'id'});
+  if(merged.length){
+   const {error:e}=await db.from(TABLE).upsert(merged.map(toDb),{onConflict:'id'});
    if(e)throw e;
   }
   const {data:latest,error:e2}=await db.from(TABLE).select('id,supplier,taken_at,due,items,total,paid,note,updated_at').order('id',{ascending:false});
@@ -54,5 +49,6 @@ Storage.prototype.setItem=function(k,v){
  return result;
 };
 window.dutaSyncAmbilBarang=syncNow;
+if(db.auth?.onAuthStateChange){db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED')setTimeout(syncNow,250)});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(syncNow,300));else setTimeout(syncNow,300);
 })();
