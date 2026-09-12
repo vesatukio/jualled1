@@ -19,6 +19,20 @@
     if (!el) { el = document.createElement("script"); el.id = "productSchema"; el.type = "application/ld+json"; document.head.appendChild(el); }
     el.textContent = JSON.stringify(data);
   }
+  function setBreadcrumb(id, name) {
+    let el = document.getElementById("breadcrumbSchema");
+    if (!el) { el = document.createElement("script"); el.id = "breadcrumbSchema"; el.type = "application/ld+json"; document.head.appendChild(el); }
+    const url = `${SITE}/produk/${encodeURIComponent(id)}/`;
+    el.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", position: 1, name: "DutaLED", item: SITE + "/" },
+        { "@type": "ListItem", position: 2, name: "Produk", item: SITE + "/#produk" },
+        { "@type": "ListItem", position: 3, name, item: url }
+      ]
+    });
+  }
 
   async function run() {
     const id = new URLSearchParams(location.search).get("id");
@@ -33,13 +47,13 @@
 
       const name = get(row, "nama", "Nama", "NAMA");
       const category = get(row, "kategori", "Kategori", "KATEGORI") || "Sparepart LED";
-      const desc = get(row, "deskripsi", "Deskripsi", "diskipsi") || `${name} kategori ${category}. Tersedia eceran dan grosir di Duta LED.`;
+      const desc = get(row, "deskripsi", "Deskripsi", "diskipsi") || `${name} kategori ${category}. Tersedia eceran dan grosir di DutaLED.`;
       const normal = num(get(row, "harga jual", "hargaJual", "HargaJual"));
       const sale = num(get(row, "harga diskon", "hargaDiskon", "HargaDiskon"));
       const price = sale > 0 && sale < normal ? sale : normal;
       const image = get(row, "gambar1", "Gambar1") || SITE + "/image/no-image.png";
       const url = `${SITE}/produk/${encodeURIComponent(id)}/`;
-      const title = `${name} | Harga ${rupiah(price)} | Duta LED`;
+      const title = `${name} | Harga ${rupiah(price)} | DutaLED`;
 
       document.title = title;
       meta("description", desc.slice(0, 155));
@@ -49,6 +63,7 @@
       meta("og:type", "product", "og:type");
       meta("og:url", url, "og:url");
       meta("og:image", image, "og:image");
+      meta("og:site_name", "DutaLED", "og:site_name");
 
       let canonical = document.head.querySelector("link[rel=canonical]");
       if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
@@ -57,12 +72,15 @@
       setSchema({
         "@context": "https://schema.org",
         "@type": "Product",
+        "@id": url + "#product",
         name,
         description: desc,
         image: [image].filter(Boolean),
         category,
         url,
-        brand: { "@type": "Brand", name: "Duta LED" },
+        sku: text(id),
+        mpn: text(id),
+        brand: { "@type": "Brand", name: "DutaLED" },
         offers: {
           "@type": "Offer",
           url,
@@ -70,11 +88,11 @@
           price,
           availability: "https://schema.org/InStock",
           itemCondition: "https://schema.org/NewCondition",
-          seller: { "@type": "Organization", name: "Duta LED", url: SITE }
+          seller: { "@type": "Organization", name: "Duta Terang LED", url: SITE }
         }
       });
+      setBreadcrumb(id, name);
 
-      // Make product sharing point to the clean SEO URL.
       document.querySelectorAll(".share-copy").forEach(btn => {
         btn.onclick = async () => {
           try { await navigator.clipboard.writeText(url); btn.textContent = "✓"; setTimeout(() => btn.textContent = "🔗", 1200); }
