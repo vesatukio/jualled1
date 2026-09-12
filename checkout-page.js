@@ -1,7 +1,8 @@
 (function(){
   'use strict';
   const CART_KEY='dutaled_cart_v4';
-  const CART_KEYS=['dutaled_cart_v4','dutaled_cart_v3','dutaled_cart_v2','dutaled_cart','cart'];
+  const HANDOFF_KEY='dutaled_checkout_handoff_v1';
+  const CART_KEYS=[CART_KEY,'dutaled_cart_v3','dutaled_cart_v2','dutaled_cart','cart'];
   const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
 
   function normalizeItem(i){
@@ -10,7 +11,21 @@
     return {...i,qty};
   }
 
+  function readHandoff(){
+    try{
+      const raw=sessionStorage.getItem(HANDOFF_KEY);
+      if(!raw) return [];
+      const parsed=JSON.parse(raw);
+      return Array.isArray(parsed)?parsed.map(normalizeItem).filter(Boolean):[];
+    }catch(_){ return []; }
+  }
+
   function readCart(){
+    const handoff=readHandoff();
+    if(handoff.length){
+      try{ localStorage.setItem(CART_KEY,JSON.stringify(handoff)); }catch(_){ }
+      return handoff;
+    }
     for(const key of CART_KEYS){
       try{
         const raw=localStorage.getItem(key);
@@ -73,6 +88,7 @@
   document.addEventListener('dutaled:order-created',e=>{
     document.body.classList.remove('checkout-open');
     const modal=document.getElementById('checkoutModal'); if(modal) modal.style.display='none';
+    try{sessionStorage.removeItem(HANDOFF_KEY);}catch(_){ }
     showPageSuccess(e.detail||{});
   });
 
@@ -92,6 +108,7 @@
       const data=Object.fromEntries(new FormData(form).entries());
       submit.disabled=true; submit.textContent='Menyimpan pesanan...';
       try{
+        localStorage.setItem(CART_KEY,JSON.stringify(cart));
         window.openCheckout();
         const modal=document.getElementById('checkoutModal');
         if(!setModalForm(data)) throw new Error('Form order lama tidak ditemukan.');
