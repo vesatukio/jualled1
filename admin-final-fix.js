@@ -1,41 +1,38 @@
-/* DUTA LED - Ambil Barang FINAL BOOTSTRAP
-   SUPABASE ONLY. Loaded independently so the Ambil Barang tab cannot depend on another fix file. */
+/* DUTA LED - Ambil Barang FINAL
+   Standalone fallback: Supabase only, no localStorage. */
 (()=>{
 'use strict';
-const SRC='admin-ambil-barang.js?v=20260912-4';
-function load(){
-  if(window.__AB_FINAL_BOOT)return;
-  window.__AB_FINAL_BOOT=1;
-  const run=()=>{
-    let s=document.querySelector('script[src*="admin-ambil-barang.js"]');
-    if(!s){
-      s=document.createElement('script');
-      s.src=SRC;
-      s.async=false;
-      s.onload=()=>setTimeout(bind,50);
-      s.onerror=()=>{console.error('[Ambil Barang] gagal memuat module');};
-      document.head.appendChild(s);
-    }else bind();
-  };
-  function bind(){
-    const b=document.getElementById('tabAmbilBarang');
-    if(!b)return false;
-    if(!b.dataset.abFinalBound){
-      b.dataset.abFinalBound='1';
-      b.addEventListener('click',e=>{
-        e.preventDefault();e.stopImmediatePropagation();
-        if(typeof window.dutaShowAmbilBarang==='function')window.dutaShowAmbilBarang();
-      },true);
-      b.addEventListener('touchend',e=>{
-        e.preventDefault();e.stopImmediatePropagation();
-        if(typeof window.dutaShowAmbilBarang==='function')window.dutaShowAmbilBarang();
-      },{capture:true,passive:false});
-    }
-    return true;
-  }
-  run();
-  let n=0,t=setInterval(()=>{if(bind()||++n>60)clearInterval(t)},200);
-  setTimeout(run,500);setTimeout(run,1500);setTimeout(run,3000);
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
+const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
+const KEY='sb_publishable_uqah55SK8ZjyugWprFnFMA_QnyVdCLA';
+const TABLE='ambil_barang';
+let db=null, data=[], channel=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const n=v=>Math.max(0,Number(String(v??'').replace(/[^0-9]/g,''))||0);
+const rp=v=>'Rp'+Number(v||0).toLocaleString('id-ID');
+const pad=v=>String(v).padStart(2,'0');
+const date=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today=()=>date(new Date());
+const plus=x=>{const d=new Date();d.setDate(d.getDate()+x);return date(d)};
+const nextMonth=()=>{const d=new Date();d.setMonth(d.getMonth()+1);return date(d)};
+const now=()=>{const d=new Date();return `${date(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`};
+const calc=a=>a.reduce((s,r)=>s+n(r.qty)*n(r.price)*(1-Math.min(100,n(r.discount))/100),0);
+function getdb(){return window.dutaSupabase||window.supabaseClient||(window.supabase?.createClient?window.supabase.createClient(URL,KEY):null)}
+function css(){if($('abFinalCss'))return;const s=document.createElement('style');s.id='abFinalCss';s.textContent=`#ambilBarangView{display:block!important;background:#fff;border:1px solid #e1e6ed;border-radius:16px;padding:14px;margin-top:10px}.abf-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.abf-head h2{margin:4px 0}.abf-muted{font-size:13px;color:#687486}.abf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.abf-stat{background:#f6f8fb;border-radius:11px;padding:11px}.abf-stat small{color:#687486}.abf-stat b{display:block;margin-top:4px}.abf-form{border:1px solid #e1e6ed;border-radius:12px;background:#f8fafc;padding:12px;margin-bottom:12px}.abf-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.abf-field{display:flex;flex-direction:column;gap:4px}.abf-field label{font-size:12px;font-weight:800}.abf-field input,.abf-field select{width:100%;box-sizing:border-box;padding:11px;border:1px solid #d8dee7;border-radius:9px;background:#fff;font-size:16px}.abf-full{grid-column:1/-1}.abf-item{display:grid;grid-template-columns:minmax(140px,1fr) 65px 105px 75px 38px;gap:6px;margin:7px 0}.abf-item input{min-width:0;padding:10px;border:1px solid #d8dee7;border-radius:8px}.abf-del{border:0;border-radius:8px;background:#fdecec;color:#b42318;font-weight:900;font-size:18px}.abf-total{display:flex;justify-content:space-between;margin:11px 0;font-size:16px}.abf-list{display:grid;gap:9px}.abf-card{border:1px solid #e1e6ed;border-radius:12px;padding:12px}.abf-card.over{background:#fff8f8;border-color:#efb4b4}.abf-top{display:flex;justify-content:space-between;gap:8px}.abf-top small{display:block;color:#687486;margin-top:3px}.abf-status{font-size:10px;font-weight:900;padding:5px 7px;border-radius:8px;background:#fff3cd;color:#8a6200;height:max-content}.abf-status.ok{background:#e7f6ed;color:#167a45}.abf-status.late{background:#fdecec;color:#b42318}.abf-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:9px 0}.abf-meta div{background:#f7f9fc;padding:8px;border-radius:8px}.abf-meta small{display:block;color:#687486;font-size:10px}.abf-row{display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:13px}.abf-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.abf-actions button{border:0;border-radius:8px;padding:10px;color:#fff;font-weight:800}.abf-pay{background:#1769e0}.abf-edit{background:#596579}.abf-empty{text-align:center;color:#687486;border:1px dashed #d8dee7;border-radius:10px;padding:24px}@media(max-width:650px){#ambilBarangView{padding:10px}.abf-head{display:block}.abf-head .btn{width:100%;margin-top:9px}.abf-grid{grid-template-columns:1fr}.abf-full{grid-column:auto}.abf-item{grid-template-columns:1fr 1fr}.abf-item .abf-name{grid-column:1/-1}.abf-meta{grid-template-columns:1fr 1fr 1fr}.abf-actions{grid-template-columns:1fr}}`;document.head.appendChild(s)}
+function ensure(){const main=document.querySelector('main.wrap')||document.querySelector('main')||document.querySelector('.wrap');if(!main)return false;let tab=$('tabAmbilBarang');if(!tab){const nav=document.querySelector('.tabs');if(!nav)return false;tab=document.createElement('button');tab.id='tabAmbilBarang';tab.type='button';tab.className='btn tab';tab.textContent='📦 Ambil Barang';nav.appendChild(tab)}let v=$('ambilBarangView');if(!v){v=document.createElement('section');v.id='ambilBarangView';v.className='hidden';main.appendChild(v)}if(!tab.dataset.abFinal){tab.dataset.abFinal='1';tab.onclick=e=>{e.preventDefault();e.stopPropagation();show()};tab.ontouchend=e=>{e.preventDefault();show()}}return true}
+function base(){const v=$('ambilBarangView');if(!v)return;v.innerHTML=`<div class="abf-head"><div><small style="font-weight:800;color:#1769e0">ADMIN TOKO</small><h2>📦 Ambil Barang · Bayar Belakang</h2><div class="abf-muted">Data langsung Supabase • PC dan HP sama • Realtime</div></div><button id="abfNew" class="btn primary" type="button">＋ Ambil Barang</button></div><div class="abf-stats"><div class="abf-stat"><small>Total Sisa</small><b id="abfSisa">Rp0</b></div><div class="abf-stat"><small>Jatuh Tempo</small><b id="abfLate">Rp0</b></div><div class="abf-stat"><small>Belum Lunas</small><b id="abfCount">0</b></div></div><div id="abfForm"></div><div id="abfList" class="abf-list"><div class="abf-empty">Memuat riwayat...</div></div>`;$('abfNew').onclick=()=>form();}
+function hideOthers(){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));document.querySelectorAll('.tabs .tab').forEach(x=>x.classList.remove('active'))}
+function show(){if(!ensure())return;css();hideOthers();const v=$('ambilBarangView');v.classList.remove('hidden');v.style.display='block';$('tabAmbilBarang')?.classList.add('active');base();load();live();}
+async function load(){db=getdb();const l=$('abfList');if(!l)return;if(!db?.from){l.innerHTML='<div class="abf-empty">Supabase belum siap.</div>';return}try{const r=await db.from(TABLE).select('id,supplier,taken_at,due,items,total,paid,note,created_at,updated_at').order('id',{ascending:false});if(r.error)throw r.error;data=(r.data||[]).map(x=>({...x,items:Array.isArray(x.items)?x.items:(typeof x.items==='string'?(()=>{try{return JSON.parse(x.items)}catch{return[]}})():[]),total:n(x.total),paid:n(x.paid)}));draw()}catch(e){l.innerHTML='<div class="abf-empty">Gagal memuat: '+esc(e.message)+'</div>'}}
+function live(){if(channel||!db?.channel)return;channel=db.channel('abf-final-live').on('postgres_changes',{event:'*',schema:'public',table:TABLE},()=>load()).subscribe()}
+function form(x=null){const h=$('abfForm');let a=(x?.items?.length?x.items:[{name:'',qty:1,price:0,discount:0}]).map(r=>({name:r.name||'',qty:r.qty??'',price:r.price??'',discount:r.discount??''}));h.innerHTML=`<div class="abf-form"><b>${x?'✏️ Edit Pengambilan':'➕ Pengambilan Barang Baru'}</b><div class="abf-grid" style="margin-top:9px"><div class="abf-field"><label>Supplier / Pelanggan *</label><input id="abfSupplier" value="${esc(x?.supplier||'')}" placeholder="Nama"></div><div class="abf-field"><label>Jatuh Tempo</label><select id="abfDue"><option value="4">4 hari</option><option value="19">19 hari</option><option value="month">1 bulan</option><option value="custom">Tanggal tertentu</option></select></div><div id="abfCustomBox" class="abf-field abf-full" hidden><label>Tanggal</label><input id="abfCustom" type="date"></div><div class="abf-field abf-full"><label>Keterangan</label><input id="abfNote" value="${esc(x?.note||'')}" placeholder="Opsional"></div></div><div style="margin-top:11px"><b>Daftar Barang</b><div id="abfRows"></div><button id="abfAdd" class="btn light" type="button">＋ Tambah Barang</button></div><div class="abf-total"><span>Total</span><b id="abfTotal">Rp0</b></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="abfSave" class="btn primary" type="button">💾 Simpan</button><button id="abfCancel" class="btn light" type="button">Batal</button></div></div>`;
+const due=x?.due||plus(4);if(due===plus(19))$('abfDue').value='19';else if(due===nextMonth())$('abfDue').value='month';else if(due!==plus(4)){$('abfDue').value='custom';$('abfCustomBox').hidden=false}$('abfCustom').value=due;
+function render(){const r=$('abfRows');r.innerHTML=a.map((z,i)=>`<div class="abf-item"><input class="abf-name" data-i="${i}" data-k="name" value="${esc(z.name)}" placeholder="Nama barang"><input data-i="${i}" data-k="qty" value="${esc(z.qty)}" inputmode="numeric" placeholder="Qty"><input data-i="${i}" data-k="price" value="${esc(z.price)}" inputmode="numeric" placeholder="Harga"><input data-i="${i}" data-k="discount" value="${esc(z.discount)}" inputmode="numeric" placeholder="Diskon %"><button class="abf-del" data-i="${i}" type="button">×</button></div>`).join('');r.querySelectorAll('input').forEach(el=>el.oninput=()=>{a[+el.dataset.i][el.dataset.k]=el.value;$('abfTotal').textContent=rp(calc(a))});r.querySelectorAll('.abf-del').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(a.length>1)a.splice(i,1);else a[0]={name:'',qty:1,price:0,discount:0};render()});$('abfTotal').textContent=rp(calc(a))}render();
+$('abfAdd').onclick=()=>{a.push({name:'',qty:1,price:0,discount:0});render()};$('abfCancel').onclick=()=>h.innerHTML='';$('abfDue').onchange=()=>{$('abfCustomBox').hidden=$('abfDue').value!=='custom';if($('abfDue').value==='4')$('abfCustom').value=plus(4);if($('abfDue').value==='19')$('abfCustom').value=plus(19);if($('abfDue').value==='month')$('abfCustom').value=nextMonth()};$('abfSave').onclick=async()=>{db=getdb();const supplier=$('abfSupplier').value.trim();a=a.map(z=>({name:String(z.name||'').trim(),qty:n(z.qty),price:n(z.price),discount:Math.min(100,n(z.discount))}));if(!supplier)return alert('Supplier / pelanggan wajib diisi.');if(!a.every(z=>z.name&&z.qty>0))return alert('Isi nama barang dan qty.');const total=calc(a);if(!total)return alert('Total harus lebih dari Rp0.');const d=$('abfDue').value;const due=d==='custom'?$('abfCustom').value:d==='month'?nextMonth():plus(+d);const payload={supplier,taken_at:x?.taken_at||x?.takenAt||now(),due,items:a,total,paid:Math.min(n(x?.paid),total),note:$('abfNote').value.trim(),updated_at:new Date().toISOString()};const r=x?await db.from(TABLE).update(payload).eq('id',x.id):await db.from(TABLE).insert({id:Date.now(),...payload});if(r.error)return alert('Gagal menyimpan: '+r.error.message);h.innerHTML='';load()};}
+function draw(){const l=$('abfList');if(!l)return;const open=data.filter(x=>n(x.paid)<n(x.total)),sisa=open.reduce((s,x)=>s+n(x.total)-n(x.paid),0),late=open.filter(x=>String(x.due||'')<today()).reduce((s,x)=>s+n(x.total)-n(x.paid),0);$('abfSisa').textContent=rp(sisa);$('abfLate').textContent=rp(late);$('abfCount').textContent=open.length;if(!data.length){l.innerHTML='<div class="abf-empty">Belum ada riwayat Ambil Barang di Supabase.</div>';return}l.innerHTML=data.map(x=>{const rem=n(x.total)-n(x.paid),late=rem>0&&String(x.due||'')<today();return `<article class="abf-card ${late?'over':''}"><div class="abf-top"><div><b>Nota #${esc(x.id)}</b><small>${esc(x.supplier)} • ${esc(x.taken_at||'')}</small></div><span class="abf-status ${rem<=0?'ok':late?'late':''}">${rem<=0?'LUNAS':late?'JATUH TEMPO':'BELUM LUNAS'}</span></div><div class="abf-meta"><div><small>Total</small><b>${rp(x.total)}</b></div><div><small>Terbayar</small><b>${rp(x.paid)}</b></div><div><small>Jatuh Tempo</small><b>${esc(x.due||'-')}</b></div></div>${(x.items||[]).map(z=>`<div class="abf-row"><span>${esc(z.name)} × ${n(z.qty)}</span><b>${rp(n(z.qty)*n(z.price)*(1-Math.min(100,n(z.discount))/100))}</b></div>`).join('')}<div class="abf-actions">${rem>0?`<button class="abf-pay" data-pay="${esc(x.id)}" type="button">💰 Bayar</button>`:''}<button class="abf-edit" data-edit="${esc(x.id)}" type="button">✏️ Edit</button></div></article>`}).join('');l.querySelectorAll('[data-pay]').forEach(b=>b.onclick=()=>pay(b.dataset.pay));l.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{const x=data.find(z=>String(z.id)===String(b.dataset.edit));if(x)form(x)})}
+async function pay(id){const x=data.find(z=>String(z.id)===String(id));if(!x)return;const rem=n(x.total)-n(x.paid),v=prompt(`Bayar ${x.supplier}\nSisa ${rp(rem)}\nJumlah:`,String(rem));if(v===null)return;const q=n(v);if(q<=0||q>rem)return alert('Jumlah pembayaran tidak valid.');db=getdb();const r=await db.from(TABLE).update({paid:n(x.paid)+q,updated_at:new Date().toISOString()}).eq('id',x.id);if(r.error)alert('Gagal: '+r.error.message);else load()}
+function boot(){db=getdb();css();ensure();window.dutaShowAmbilBarang=show;const b=$('tabAmbilBarang');if(b&&!b.dataset.abFinal){b.dataset.abFinal='1';b.onclick=e=>{e.preventDefault();show()}}}
+function start(){boot()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+setTimeout(start,500);setTimeout(start,1500);setTimeout(start,3000);
 })();
