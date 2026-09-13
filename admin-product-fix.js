@@ -1,4 +1,4 @@
-/* DUTA LED - Product loader fix v20260913-1 */
+/* DUTA LED - Product loader fix v20260913-2 */
 (function(){
   'use strict';
   const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
@@ -62,7 +62,7 @@
         (img?'<img class="photo" src="'+esc(img)+'" onerror="this.style.opacity=.2">':'<div class="photo"></div>')+
         '<div><div class="name">'+esc(p.nama)+'</div><div class="cat">'+esc(p.kategori_id||'Tanpa Kategori')+' · '+esc(p.sku||'Tanpa SKU')+' · Stok '+num(p.stok)+'</div>'+ 
         '<div class="prices">'+(d?'<span class="normal">'+rp(price)+'</span>':'')+'<span class="sale">'+rp(d?sale:price)+'</span>'+(d?'<span class="disc">-'+d+'%</span>':'')+'</div>'+ 
-        '<div class="profit">Modal '+rp(cost)+' · Untung <b>'+rp(profit)+'</b></div></div>'+ 
+        '<div class="profit"><span>Harga Modal <b>'+rp(cost)+'</b></span> · Untung <b>'+rp(profit)+'</b></div></div>'+ 
         '<button class="edit" type="button" data-fix-product-id="'+esc(p.id)+'">✏️ Edit Produk</button></article>';
     }).join('');
     box.querySelectorAll('[data-fix-product-id]').forEach(b=>b.onclick=()=>{
