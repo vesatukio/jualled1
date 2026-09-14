@@ -1,19 +1,113 @@
-/* DUTA LED - Supabase analytics bridge
- * Katalog tetap menggunakan Google Apps Script sebagai sumber utama.
- * Supabase dipakai untuk analytics/order, bukan mengganti sumber katalog.
+/* DUTA LED - Supabase catalog bridge
+ * Katalog produk UTAMA dari Supabase.
+ * Google Apps Script tidak digunakan untuk katalog.
  */
 (() => {
   "use strict";
+
   const SUPABASE_URL = "https://opgeeqnucxrdqcgwcuge.supabase.co";
   const SUPABASE_KEY = "sb_publishable_uqah55SK8ZjyugWprFnFMA_QnyVdCLA";
+  const OLD_API_PREFIX = "https://script.google.com/macros/s/AKfycbyr4eSauu1RneZIrwwPVBilx21kWNrauE9V40D17dmrntqTu4U3OGi4fafAYHXcd-A/exec";
+  const REQUEST_TIMEOUT = 8000;
   const originalFetch = window.fetch.bind(window);
 
-  // Visitor analytics: anonymous visitor/session IDs, no IP address stored.
+  async function supabaseGet(path) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    try {
+      const response = await originalFetch(SUPABASE_URL + path, {
+        method: "GET",
+        cache: "no-store",
+        signal: controller.signal,
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: "Bearer " + SUPABASE_KEY
+        }
+      });
+      if (!response.ok) throw new Error("Supabase HTTP " + response.status);
+      return response.json();
+    } catch (error) {
+      if (error?.name === "AbortError") throw new Error("Koneksi Supabase terlalu lama");
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function normalizeRows(products, categories) {
+    const categoryMap = new Map(
+      (Array.isArray(categories) ? categories : [])
+        .map(c => [String(c.id), String(c.nama || "Lainnya")])
+    );
+
+    return (Array.isArray(products) ? products : [])
+      .filter(p => p && p.is_active !== false)
+      .map(p => {
+        const fotos = Array.isArray(p.foto_urls) ? p.foto_urls.filter(Boolean) : [];
+        const hargaJual = Number(p.harga_jual) || 0;
+        const hargaModal = Number(p.harga_pokok) || 0;
+        const diskon = Number(p.diskon) || 0;
+        const hargaDiskon = diskon > 0
+          ? Math.round(hargaJual - (hargaJual * diskon / 100))
+          : hargaJual;
+
+        return {
+          id: String(p.id ?? ""),
+          nama: String(p.nama ?? "").trim(),
+          kategori: categoryMap.get(String(p.kategori_id ?? "")) || String(p.kategori_id || "Lainnya"),
+          hargaModal,
+          laba: hargaJual - hargaModal,
+          hargaJual,
+          diskon,
+          hargaDiskon,
+          stok: p.stok === null || p.stok === undefined ? 0 : (Number(p.stok) || 0),
+          deskripsi: String(p.deskripsi ?? ""),
+          gambar1: String(fotos[0] || ""),
+          gambar2: String(fotos[1] || ""),
+          gambar3: String(fotos[2] || "")
+        };
+      })
+      .filter(p => p.nama);
+  }
+
+  async function loadSupabaseCatalog() {
+    const [products, categories] = await Promise.all([
+      supabaseGet("/rest/v1/produk?select=id,nama,deskripsi,harga_jual,harga_pokok,diskon,stok,sku,berat,foto_urls,kategori_id,is_active&is_active=eq.true&order=id.asc"),
+      supabaseGet("/rest/v1/kategori?select=id,nama&order=id.asc")
+    ]);
+    return normalizeRows(products, categories);
+  }
+
+  // app.js masih memanggil URL lama melalui loadFromGoogle().
+  // Di sini request tersebut diarahkan LANGSUNG ke Supabase.
+  window.fetch = async function(input, init) {
+    const url = typeof input === "string" ? input : input?.url;
+
+    if (url && url.startsWith(OLD_API_PREFIX)) {
+      const rows = await loadSupabaseCatalog();
+      return new Response(JSON.stringify(rows), {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" }
+      });
+    }
+
+    return originalFetch(input, init);
+  };
+
+  // Hapus cache katalog lama yang mungkin berasal dari Google Apps Script.
+  try {
+    localStorage.removeItem("dutaled_produk_v5");
+  } catch (_) {}
+
+  // Visitor analytics tetap menggunakan Supabase.
   async function trackVisitor() {
     try {
       if (location.pathname.includes("admin.html")) return;
-      const visitorKey = "DUTA_VISITOR_ID_V1", sessionKey = "DUTA_SESSION_ID_V1";
-      let visitorId = localStorage.getItem(visitorKey), sessionId = sessionStorage.getItem(sessionKey);
+      const visitorKey = "DUTA_VISITOR_ID_V1";
+      const sessionKey = "DUTA_SESSION_ID_V1";
+      let visitorId = localStorage.getItem(visitorKey);
+      let sessionId = sessionStorage.getItem(sessionKey);
+
       if (!visitorId) {
         visitorId = crypto.randomUUID();
         localStorage.setItem(visitorKey, visitorId);
@@ -22,9 +116,11 @@
         sessionId = crypto.randomUUID();
         sessionStorage.setItem(sessionKey, sessionId);
       }
+
       const device = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
         ? "mobile"
         : /Tablet/i.test(navigator.userAgent) ? "tablet" : "desktop";
+
       await originalFetch(SUPABASE_URL + "/rest/v1/visitor_logs", {
         method: "POST",
         headers: {
