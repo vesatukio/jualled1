@@ -1,5 +1,6 @@
 /* DUTA LED - Supabase catalog bridge
  * Katalog produk UTAMA dari Supabase.
+ * Urutan: produk yang terakhir di-update tampil paling depan.
  * Google Apps Script tidak digunakan untuk katalog.
  */
 (() => {
@@ -64,17 +65,27 @@
           deskripsi: String(p.deskripsi ?? ""),
           gambar1: String(fotos[0] || ""),
           gambar2: String(fotos[1] || ""),
-          gambar3: String(fotos[2] || "")
+          gambar3: String(fotos[2] || ""),
+          updatedAt: p.updated_at || p.created_at || null
         };
       })
-      .filter(p => p.nama);
+      .filter(p => p.nama)
+      .sort((a, b) => {
+        const ta = a.updatedAt ? Date.parse(a.updatedAt) : 0;
+        const tb = b.updatedAt ? Date.parse(b.updatedAt) : 0;
+        return (tb - ta) || (Number(b.id) - Number(a.id));
+      });
   }
 
   async function loadSupabaseCatalog() {
-    const [products, categories] = await Promise.all([
-      supabaseGet("/rest/v1/produk?select=id,nama,deskripsi,harga_jual,harga_pokok,diskon,stok,sku,berat,foto_urls,kategori_id,is_active&is_active=eq.true&order=id.asc"),
-      supabaseGet("/rest/v1/kategori?select=id,nama&order=id.asc")
-    ]);
+    let products;
+    try {
+      products = await supabaseGet("/rest/v1/produk?select=id,nama,deskripsi,harga_jual,harga_pokok,diskon,stok,sku,berat,foto_urls,kategori_id,is_active,created_at,updated_at&is_active=eq.true&order=updated_at.desc,id.desc");
+    } catch (_) {
+      // Kompatibel sementara dengan database lama yang belum memiliki updated_at.
+      products = await supabaseGet("/rest/v1/produk?select=id,nama,deskripsi,harga_jual,harga_pokok,diskon,stok,sku,berat,foto_urls,kategori_id,is_active,created_at&is_active=eq.true&order=created_at.desc,id.desc");
+    }
+    const categories = await supabaseGet("/rest/v1/kategori?select=id,nama&order=id.asc");
     return normalizeRows(products, categories);
   }
 
@@ -94,12 +105,10 @@
     return originalFetch(input, init);
   };
 
-  // Hapus cache katalog lama yang mungkin berasal dari Google Apps Script.
   try {
     localStorage.removeItem("dutaled_produk_v5");
   } catch (_) {}
 
-  // Visitor analytics tetap menggunakan Supabase.
   async function trackVisitor() {
     try {
       if (location.pathname.includes("admin.html")) return;
