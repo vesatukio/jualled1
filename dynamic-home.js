@@ -24,10 +24,14 @@
   }
   function render(){
     if(!Array.isArray(window.products)||!window.products.length)return;
-    const sig=window.products.map(p=>p.id+':'+p.hargaJual+':'+p.hargaDiskon).join('|'); if(sig===lastSignature)return; lastSignature=sig;
-    const all=window.products.slice();
+    const sig=window.products.map(p=>p.id+':'+p.updatedAt+':'+p.hargaJual+':'+p.hargaDiskon).join('|'); if(sig===lastSignature)return; lastSignature=sig;
+    const all=window.products.slice().sort((a,b)=>{
+      const ta=a.updatedAt?Date.parse(a.updatedAt):0;
+      const tb=b.updatedAt?Date.parse(b.updatedAt):0;
+      return (tb-ta)||(Number(b.id)-Number(a.id));
+    });
     const promo=all.filter(p=>(Number(p.hargaDiskon)||0)>0&&(Number(p.hargaDiskon)||0)<(Number(p.hargaJual)||0));
-    const latest=all.slice(-4).reverse();
+    const latest=all.slice(0,4);
     const featured=all.filter(p=>Number(p.hargaJual)>0).sort((a,b)=>(Number(b.hargaJual)||0)-(Number(a.hargaJual)||0)).slice(0,4);
     if(promo.length)section('homePromo','🔥 Promo Pilihan',promo); else document.getElementById('homePromo')?.remove();
     section('homeLatest','🆕 Produk Terbaru',latest);
