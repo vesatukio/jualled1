@@ -39,4 +39,16 @@
   style.id = 'duta-led-ambil-diskon-css';
   style.textContent = css;
   document.head.appendChild(style);
+
+  // Saat tombol Edit nota diklik, langsung bawa layar ke form edit.
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-edit]');
+    if (!btn) return;
+    setTimeout(() => {
+      const form = document.getElementById('abSafeForm');
+      if (!form || !form.firstElementChild) return;
+      form.scrollIntoView({behavior:'smooth', block:'start'});
+      setTimeout(() => document.getElementById('absSupplier')?.focus(), 350);
+    }, 50);
+  });
 })();
