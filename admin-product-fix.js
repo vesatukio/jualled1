@@ -1,4 +1,4 @@
-/* DUTA LED - Product loader fix v20260913-2 */
+/* DUTA LED - Product loader fix v20260915-1 */
 (function(){
   'use strict';
   const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
@@ -80,9 +80,13 @@
       const {data:sessionData,error:sessionError}=await client.auth.getSession();
       if(sessionError)throw sessionError;
       if(!sessionData?.session){showError('Sesi admin belum aktif. Silakan login ulang.');return;}
-      const {data,error}=await client.from('produk').select('id,nama,sku,harga_pokok,harga_jual,diskon,stok,berat,deskripsi,foto_urls,is_active,kategori_id,created_at').order('created_at',{ascending:false}).limit(500);
-      if(error)throw error;
-      fixProducts=data||[];
+      let result=await client.from('produk').select('id,nama,sku,harga_pokok,harga_jual,diskon,stok,berat,deskripsi,foto_urls,is_active,kategori_id,created_at,updated_at').order('updated_at',{ascending:false}).order('id',{ascending:false}).limit(500);
+      // Kompatibel sementara jika kolom updated_at belum dibuat di Supabase.
+      if(result.error){
+        result=await client.from('produk').select('id,nama,sku,harga_pokok,harga_jual,diskon,stok,berat,deskripsi,foto_urls,is_active,kategori_id,created_at').order('created_at',{ascending:false}).order('id',{ascending:false}).limit(500);
+      }
+      if(result.error)throw result.error;
+      fixProducts=result.data||[];
       window.adminProducts=fixProducts;
       ensureCategoryFilter();
       renderProducts();
