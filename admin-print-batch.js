@@ -1,4 +1,4 @@
-/* DUTA LED - Cetak nota banyak pesanan v20260915 */
+/* DUTA LED - Cetak nota banyak pesanan v20260915-2 */
 (function(){
 'use strict';
 const URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
@@ -9,6 +9,7 @@ const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 const num=v=>Number(String(v??'').replace(/[^\d.-]/g,''))||0;
 const rp=v=>'Rp'+num(v).toLocaleString('id-ID');
 let paper='A4';
+let perPage=10;
 
 function style(){
  if($('batchPrintStyle'))return;
@@ -21,10 +22,11 @@ function ensureTools(){
  let t=$('batchPrintTools');
  if(!t){
   t=document.createElement('div');t.id='batchPrintTools';t.className='batch-print-tools';
-  t.innerHTML='<span class="bp-count" id="batchPrintCount">0 nota dipilih</span><button type="button" id="batchSelectAll">☑ Pilih semua</button><button type="button" id="batchClear">× Hapus pilihan</button><select id="batchPaper"><option value="A4">A4</option><option value="F4">F4</option></select><span class="batch-paper-label">2 nota/lembar</span><button type="button" class="bp-primary" id="batchPrintBtn">🖨️ Cetak dipilih</button>';
+  t.innerHTML='<span class="bp-count" id="batchPrintCount">0 nota dipilih</span><button type="button" id="batchSelectAll">☑ Pilih semua</button><button type="button" id="batchClear">× Hapus pilihan</button><select id="batchPaper"><option value="A4">A4</option><option value="F4">F4</option></select><select id="batchPerPage" title="Jumlah nota per lembar"><option value="8">8 nota/lembar</option><option value="10" selected>10 nota/lembar</option><option value="12">12 nota/lembar</option></select><button type="button" class="bp-primary" id="batchPrintBtn">🖨️ Cetak dipilih</button>';
   const toolbar=host.querySelector('.toolbar');
   if(toolbar)toolbar.insertAdjacentElement('afterend',t); else host.prepend(t);
   $('batchPaper').onchange=e=>{paper=e.target.value};
+  $('batchPerPage').onchange=e=>{perPage=Math.max(1,Math.min(12,Number(e.target.value)||10))};
   $('batchSelectAll').onclick=()=>{document.querySelectorAll('#orderList .batch-check').forEach(c=>c.checked=true);update()};
   $('batchClear').onclick=()=>{document.querySelectorAll('#orderList .batch-check').forEach(c=>c.checked=false);update()};
   $('batchPrintBtn').onclick=printSelected;
@@ -54,7 +56,6 @@ function update(){
 }
 async function getOrders(ids){
  if(!ids.length)return[];
- const q=ids.map(id=>`'${String(id).replace(/'/g,"''")}'`).join(',');
  const {data,error}=await db.from('pesanan').select('id,order_id,created_at,nama_pembeli,no_hp,alamat,kecamatan,metode_pengiriman,metode_pembayaran,status,total_harga,ongkir,biaya_cod,nomor_resi,detail_pesanan(id,pesanan_id,produk_id,nama_produk,qty,harga_saat_beli)').in('id',ids);
  if(error)throw error;
  const map=new Map((data||[]).map(o=>[String(o.id),o]));
@@ -63,16 +64,18 @@ async function getOrders(ids){
 function note(o){
  const details=o.detail_pesanan||[];
  const total=details.reduce((s,d)=>s+num(d.qty)*num(d.harga_saat_beli),0)||num(o.total_harga);
- const rows=details.map(d=>{const q=num(d.qty),p=num(d.harga_saat_beli);return '<tr><td>'+esc(d.nama_produk)+'<div class="muted">'+q+' × '+rp(p)+'</div></td><td>'+rp(q*p)+'</td></tr>'}).join('');
- return '<section class="nota"><div class="nota-brand">DUTA LED</div><div class="nota-sub">Toko LED & Elektronik</div><div class="line"></div><div class="row"><b>'+esc(o.order_id)+'</b><span>'+new Date(o.created_at).toLocaleDateString('id-ID')+'</span></div><div class="customer"><b>'+esc(o.nama_pembeli||'Pelanggan')+'</b><br>HP: '+esc(o.no_hp||'-')+'<br>'+esc(o.alamat||'-')+(o.kecamatan?', '+esc(o.kecamatan):'')+'</div><table>'+rows+'</table><div class="total"><span>TOTAL</span><b>'+rp(total)+'</b></div><div class="foot">'+esc(o.metode_pembayaran||'-')+' · '+esc(o.metode_pengiriman||'-')+(o.nomor_resi?' · Resi: '+esc(o.nomor_resi):'')+'</div></section>';
+ const rows=details.map(d=>{const q=num(d.qty),p=num(d.harga_saat_beli);return '<tr><td>'+esc(d.nama_produk)+' <span class="qty">×'+q+'</span></td><td>'+rp(q*p)+'</td></tr>'}).join('');
+ return '<section class="nota"><div class="nota-top"><div class="nota-brand">DUTA LED</div><div class="nota-id">'+esc(o.order_id)+' · '+new Date(o.created_at).toLocaleDateString('id-ID')+'</div></div><div class="customer"><b>'+esc(o.nama_pembeli||'Pelanggan')+'</b><br><span>'+esc(o.no_hp||'-')+'</span> · <span>'+esc(o.alamat||'-')+(o.kecamatan?', '+esc(o.kecamatan):'')+'</span></div><table>'+rows+'</table><div class="total"><span>TOTAL</span><b>'+rp(total)+'</b></div><div class="foot">'+esc(o.metode_pembayaran||'-')+' · '+esc(o.metode_pengiriman||'-')+(o.nomor_resi?' · '+esc(o.nomor_resi):'')+'</div></section>';
 }
 function printHtml(list){
- const perPage=2;
+ const pageSize=paper==='F4'?'8.5in 13in':'210mm 297mm';
+ const cols=2;
+ const rows=perPage===8?4:perPage===12?6:5;
+ const gap='3mm';
  let pages='';
- for(let i=0;i<list.length;i+=perPage){pages+='<div class="page">'+list.slice(i,i+perPage).map(note).join('')+'</div>'}
- const pageSize=paper==='F4'?'8.5in 13in':'A4';
+ for(let i=0;i<list.length;i+=perPage){pages+='<div class="page"><div class="grid grid-'+perPage+'">'+list.slice(i,i+perPage).map(note).join('')+'</div></div>'}
  const w=window.open('','_blank','width=900,height=700');if(!w){alert('Popup diblokir. Izinkan popup untuk mencetak nota.');return}
- w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Cetak Nota Duta LED</title><style>@page{size:'+pageSize+' portrait;margin:8mm}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:#111}.page{height:calc('+pageSize.split(' ')[1]+' - 16mm);display:grid;grid-template-rows:1fr 1fr;gap:6mm;page-break-after:always}.page:last-child{page-break-after:auto}.nota{border:1px solid #555;border-radius:4px;padding:6mm;overflow:hidden;display:flex;flex-direction:column;min-height:0}.nota-brand{text-align:center;font-size:19px;font-weight:900;letter-spacing:.5px}.nota-sub{text-align:center;font-size:10px;margin-top:2px}.line{border-top:1px dashed #555;margin:4mm 0}.row{display:flex;justify-content:space-between;font-size:11px;gap:8px}.customer{font-size:10px;line-height:1.45;margin:3mm 0}.nota table{width:100%;border-collapse:collapse;font-size:10px}.nota td{padding:2mm 0;border-bottom:1px dashed #bbb;vertical-align:top}.nota td:last-child{text-align:right;font-weight:700;white-space:nowrap}.muted{font-size:9px;color:#555;margin-top:1mm}.total{display:flex;justify-content:space-between;border-top:2px solid #111;margin-top:3mm;padding-top:3mm;font-size:14px}.foot{text-align:center;font-size:9px;margin-top:auto;padding-top:3mm;border-top:1px dashed #aaa}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.nota{break-inside:avoid}}@media screen{body{background:#ddd}.page{max-width:210mm;margin:8mm auto;background:#fff;padding:0}.nota{background:#fff}}</style></head><body>'+pages+'<script>window.onload=()=>setTimeout(()=>window.print(),250);<\/script></body></html>');w.document.close();
+ w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Cetak Nota Duta LED</title><style>@page{size:'+pageSize+' portrait;margin:5mm}*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:Arial,sans-serif;color:#17202a;background:#ddd}.page{width:100%;height:calc(100vh - 10mm);page-break-after:always;background:#fff}.page:last-child{page-break-after:auto}.grid{height:100%;display:grid;grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:'+gap+'}.nota{border:1px solid #aeb7c2;border-radius:3mm;padding:3mm 3.2mm;overflow:hidden;display:flex;flex-direction:column;min-height:0;background:#fff}.nota-top{display:flex;justify-content:space-between;align-items:flex-start;gap:3mm;border-bottom:1px solid #d6dbe1;padding-bottom:1.8mm}.nota-brand{font-size:11px;font-weight:900;letter-spacing:.5px}.nota-id{font-size:7px;color:#667085;text-align:right;white-space:nowrap}.customer{font-size:7.4px;line-height:1.35;margin:1.7mm 0;color:#303943;max-height:11mm;overflow:hidden}.customer b{font-size:8.2px;color:#111820}.nota table{width:100%;border-collapse:collapse;font-size:7.2px;line-height:1.2;table-layout:fixed}.nota td{padding:1mm 0;border-bottom:1px dashed #d5d9de;vertical-align:top}.nota td:first-child{padding-right:2mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nota td:last-child{text-align:right;font-weight:700;white-space:nowrap;width:30%}.qty{color:#667085;font-size:6.8px}.total{display:flex;justify-content:space-between;border-top:1px solid #222;margin-top:auto;padding-top:1.4mm;font-size:8px}.total b{font-size:9.5px}.foot{text-align:center;font-size:6.4px;color:#667085;margin-top:1.2mm;padding-top:1mm;border-top:1px dashed #c8cdd3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media print{html,body{background:#fff}.page{height:calc(100vh - 10mm)}.nota{break-inside:avoid;box-shadow:none}}@media screen{.page{width:210mm;height:297mm;margin:8mm auto;padding:0;background:#fff;box-shadow:0 1px 8px #999}.grid{height:100%}.nota{background:#fff}}</style></head><body>'+pages+'<script>window.onload=()=>setTimeout(()=>window.print(),300);<\/script></body></html>');w.document.close();
 }
 async function printSelected(){
  const ids=[...document.querySelectorAll('#orderList .batch-check:checked')].map(c=>c.dataset.orderId);
