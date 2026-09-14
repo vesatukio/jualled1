@@ -3,6 +3,9 @@
   const CART_KEY='dutaled_cart_v4';
   const HANDOFF_KEY='dutaled_checkout_handoff_v1';
   const CART_KEYS=[CART_KEY,'dutaled_cart_v3','dutaled_cart_v2','dutaled_cart','cart'];
+  const SUPABASE_URL='https://opgeeqnucxrdqcgwcuge.supabase.co';
+  const SUPABASE_KEY='sb_publishable_uqah55SK8ZjyugWprFnFMA_QnyVdCLA';
+  const HEADERS={apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};
   const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
 
   function normalizeItem(i){
@@ -11,42 +14,38 @@
     return {...i,qty};
   }
 
-  function readHandoff(){
-    try{
-      const raw=sessionStorage.getItem(HANDOFF_KEY);
-      if(!raw) return [];
-      const parsed=JSON.parse(raw);
-      return Array.isArray(parsed)?parsed.map(normalizeItem).filter(Boolean):[];
-    }catch(_){ return []; }
-  }
-
   function readCart(){
-    const handoff=readHandoff();
-    if(handoff.length){
-      try{ localStorage.setItem(CART_KEY,JSON.stringify(handoff)); }catch(_){ }
-      return handoff;
-    }
+    try{
+      const handoff=sessionStorage.getItem(HANDOFF_KEY);
+      if(handoff){
+        const parsed=JSON.parse(handoff);
+        if(Array.isArray(parsed)&&parsed.length){
+          const cart=parsed.map(normalizeItem).filter(Boolean);
+          localStorage.setItem(CART_KEY,JSON.stringify(cart));
+          return cart;
+        }
+      }
+    }catch(_){ }
     for(const key of CART_KEYS){
       try{
-        const raw=localStorage.getItem(key);
-        if(!raw) continue;
-        const parsed=JSON.parse(raw);
+        const parsed=JSON.parse(localStorage.getItem(key)||'[]');
         if(Array.isArray(parsed)&&parsed.length){
           const cart=parsed.map(normalizeItem).filter(Boolean);
           if(cart.length){
-            if(key!==CART_KEY) localStorage.setItem(CART_KEY,JSON.stringify(cart));
+            localStorage.setItem(CART_KEY,JSON.stringify(cart));
             return cart;
           }
         }
-      }catch(_){}
+      }catch(_){ }
     }
     return [];
   }
 
   function price(i){return Number(i.hargaTampil??i.hargaDiskon??i.hargaJual??i.harga??0)||0;}
+  function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
 
   function render(){
-    const cart=readCart(), box=document.getElementById('items'), total=document.getElementById('total');
+    const cart=readCart(),box=document.getElementById('items'),total=document.getElementById('total');
     if(!cart.length){
       if(box) box.innerHTML='<div class="empty-checkout">🛒 Keranjang masih kosong.</div>';
       if(total) total.textContent=rupiah(0);
@@ -55,70 +54,69 @@
     }
     let sum=0;
     if(box) box.innerHTML=cart.map(i=>{
-      const q=Math.max(1,Number(i.qty)||1), sub=price(i)*q; sum+=sub;
+      const q=Math.max(1,Number(i.qty)||1),sub=price(i)*q;sum+=sub;
       return '<div class="checkout-row"><div><strong>'+escapeHtml(i.nama||'Produk')+'</strong><small>'+q+' × '+rupiah(price(i))+'</small></div><b>'+rupiah(sub)+'</b></div>';
     }).join('');
     if(total) total.textContent=rupiah(sum);
   }
 
-  function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
-
-  function setModalForm(data){
-    const form=document.querySelector('#checkoutModal form');
-    if(!form) return false;
-    ['nama','wa','alamat','kota','pengiriman','pembayaran'].forEach(name=>{
-      const value=data[name]; if(value==null) return;
-      const el=form.querySelector('[name="'+name+'"]'); if(!el) return;
-      if(el.type==='radio') form.querySelectorAll('[name="'+name+'"]').forEach(x=>x.checked=x.value===value);
-      else el.value=value;
+  async function createOrder(data,cart){
+    const total=cart.reduce((s,i)=>s+price(i)*(Number(i.qty)||1),0);
+    const orderNo='DL'+new Date().toISOString().replace(/\D/g,'').slice(0,14)+Math.floor(Math.random()*90+10);
+    const payload={
+      order_id:orderNo,
+      nama_pembeli:data.nama,
+      no_hp:data.wa,
+      alamat:data.alamat,
+      kecamatan:data.kota||null,
+      metode_pengiriman:data.pengiriman||null,
+      metode_pembayaran:data.pembayaran||null,
+      total_harga:total,
+      status:'Menunggu Pembayaran'
+    };
+    const items=cart.map(i=>{
+      const pid=Number(i.id);
+      return {
+        produk_id:Number.isFinite(pid)&&pid>0?String(pid):null,
+        nama_produk:i.nama||'Produk',
+        qty:Number(i.qty)||1,
+        harga_saat_beli:price(i)
+      };
     });
-    return true;
+    const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/create_public_order',{
+      method:'POST',headers:HEADERS,body:JSON.stringify({p_order:payload,p_items:items}),cache:'no-store'
+    });
+    let result=null;try{result=await response.json();}catch(_){ }
+    if(!response.ok) throw new Error(result?.message||result?.hint||result?.details||result?.error||('HTTP '+response.status));
+    if(!result?.success||!result?.id) throw new Error('Server tidak mengembalikan ID pesanan.');
+    return {id:result.id,orderNo:result.order_id||orderNo,total,items,customer:data,payment:data.pembayaran,status:'Menunggu Pembayaran',createdAt:new Date().toISOString()};
   }
 
-  function showPageSuccess(order){
-    const el=document.getElementById('success'); if(!el) return;
-    const no=order?.orderNo||order?.order_id||'-';
+  function showSuccess(order){
+    const el=document.getElementById('success');if(!el)return;
     el.classList.remove('hidden');
-    el.innerHTML='<div class="success-card"><div class="success-icon">✓</div><h2>Pesanan berhasil dibuat</h2><p>Nomor pesanan Anda:</p><strong class="order-no">'+escapeHtml(no)+'</strong><p class="success-note">Pesanan sudah tercatat di DutaLED. Simpan nomor pesanan ini untuk melihat status pesanan.</p><div class="success-actions"><a href="index.html">Kembali ke toko</a><button type="button" id="goOrders">Pesanan Saya</button></div></div>';
-    document.getElementById('goOrders')?.addEventListener('click',()=>{
-      if(typeof window.showOrders==='function') window.showOrders(); else location.href='index.html';
-    });
+    el.innerHTML='<div class="success-card"><div class="success-icon">✓</div><h2>Pesanan berhasil dibuat</h2><p>Nomor pesanan Anda:</p><strong class="order-no">'+escapeHtml(order.orderNo)+'</strong><p class="success-note">Pesanan sudah tercatat di DutaLED. Simpan nomor pesanan ini untuk melihat status pesanan.</p><div class="success-actions"><a href="index.html">Kembali ke toko</a><a href="index.html#produk">Belanja lagi</a></div></div>';
+    try{sessionStorage.removeItem(HANDOFF_KEY);localStorage.removeItem(CART_KEY);localStorage.setItem('dutaled_last_order',JSON.stringify(order));}catch(_){ }
   }
-
-  document.addEventListener('dutaled:order-created',e=>{
-    document.body.classList.remove('checkout-open');
-    const modal=document.getElementById('checkoutModal'); if(modal) modal.style.display='none';
-    try{sessionStorage.removeItem(HANDOFF_KEY);}catch(_){ }
-    showPageSuccess(e.detail||{});
-  });
 
   document.addEventListener('DOMContentLoaded',()=>{
     render();
-    const form=document.getElementById('orderForm');
-    const submit=document.getElementById('submit');
-    if(!form||!submit) return;
-    form.addEventListener('submit',e=>{
+    const form=document.getElementById('orderForm'),submit=document.getElementById('submit');
+    if(!form||!submit)return;
+    form.addEventListener('submit',async e=>{
       e.preventDefault();
-      if(!form.reportValidity()) return;
+      if(!form.reportValidity())return;
       const cart=readCart();
       if(!cart.length){alert('Keranjang masih kosong. Silakan kembali ke toko dan tambahkan produk lagi.');return;}
-      if(typeof window.openCheckout!=='function'){
-        alert('Sistem checkout belum siap. Silakan muat ulang halaman.'); return;
-      }
       const data=Object.fromEntries(new FormData(form).entries());
-      submit.disabled=true; submit.textContent='Menyimpan pesanan...';
+      submit.disabled=true;submit.textContent='Menyimpan pesanan...';
       try{
-        localStorage.setItem(CART_KEY,JSON.stringify(cart));
-        window.openCheckout();
-        const modal=document.getElementById('checkoutModal');
-        if(!setModalForm(data)) throw new Error('Form order lama tidak ditemukan.');
-        if(modal) modal.style.display='none';
-        const oldForm=document.querySelector('#checkoutModal form');
-        if(!oldForm) throw new Error('Form order tidak ditemukan.');
-        oldForm.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+        const order=await createOrder(data,cart);
+        showSuccess(order);
       }catch(err){
-        console.error(err); submit.disabled=false; submit.textContent='Buat Pesanan';
-        alert('Checkout gagal dijalankan: '+(err.message||err));
+        console.error('DutaLED checkout error',err);
+        alert('Pesanan gagal disimpan: '+(err.message||err));
+        submit.disabled=false;submit.textContent='Buat Pesanan';
       }
     });
   });
