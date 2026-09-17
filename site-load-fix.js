@@ -11,7 +11,7 @@
   }
   function loadAdminVariantUI(){
     if(!document.querySelector('script[data-manual-variant-admin]')){
-      var s=document.createElement('script');s.src='admin-variant-manager.js?v=2';s.defer=true;s.dataset.manualVariantAdmin='1';document.body.appendChild(s);
+      var s=document.createElement('script');s.src='admin-variant-manager.js?v=3';s.defer=true;s.dataset.manualVariantAdmin='1';document.body.appendChild(s);
     }
   }
   function boot(){
