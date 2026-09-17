@@ -1,4 +1,4 @@
-/* DUTA LED - page load helper + manual variant UI loader */
+/* DutaLED - page load helper + manual variant UI loader */
 (function(){
   'use strict';
   function loadCatalogVariantUI(){
@@ -11,7 +11,7 @@
   }
   function loadAdminVariantUI(){
     if(!document.querySelector('script[data-manual-variant-admin]')){
-      var s=document.createElement('script');s.src='admin-variant-manager.js?v=1';s.defer=true;s.dataset.manualVariantAdmin='1';document.body.appendChild(s);
+      var s=document.createElement('script');s.src='admin-variant-manager.js?v=2';s.defer=true;s.dataset.manualVariantAdmin='1';document.body.appendChild(s);
     }
   }
   function boot(){
