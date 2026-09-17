@@ -1,7 +1,16 @@
-/* DUTA LED - prevent public catalog spinner from blocking the page */
+/* DUTA LED - page load helper + watt variant UI loader */
 (function(){
   'use strict';
+  function loadWattUI(){
+    if(!document.querySelector('link[data-watt-ui]')){
+      var css=document.createElement('link');css.rel='stylesheet';css.href='watt-variant-group.css?v=1';css.dataset.wattUi='1';document.head.appendChild(css);
+    }
+    if(!document.querySelector('script[data-watt-ui]')){
+      var s=document.createElement('script');s.src='watt-variant-group.js?v=1';s.defer=true;s.dataset.wattUi='1';document.body.appendChild(s);
+    }
+  }
   function boot(){
+    loadWattUI();
     setTimeout(function(){
       const loading=document.getElementById('loading');
       const grid=document.getElementById('productGrid');
