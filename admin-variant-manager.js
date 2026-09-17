@@ -1,24 +1,93 @@
 /* DUTA LED - Manual Variant Manager
  * Adds a simple admin panel for variant_group / variant_label.
+ * Also injects the same fields directly into Tambah/Edit Produk.
  */
 (function(){
   'use strict';
   if(!/admin/i.test(location.pathname)) return;
+
   function ready(fn){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fn);else fn();}
   function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  function injectProductFields(){
+    var form=document.getElementById('productForm');
+    if(!form || !form.elements || !form.elements.nama) return false;
+    if(!document.getElementById('variantGroupField')){
+      var wrap=document.createElement('div');
+      wrap.className='field';
+      wrap.id='variantGroupField';
+      wrap.innerHTML='<label>Grup Varian</label><input name="variantGroup" placeholder="Contoh: lampu-led-ac"><small style="color:#6b7585;font-size:11px">Produk dengan grup sama akan tampil sebagai 1 kartu.</small>';
+      var sku=form.elements.sku;
+      if(sku && sku.closest('.field')) sku.closest('.field').insertAdjacentElement('afterend',wrap);
+      else form.querySelector('.grid')?.appendChild(wrap);
+    }
+    if(!document.getElementById('variantLabelField')){
+      var wrap2=document.createElement('div');
+      wrap2.className='field';
+      wrap2.id='variantLabelField';
+      wrap2.innerHTML='<label>Label Varian</label><input name="variantLabel" placeholder="Contoh: 5W"><small style="color:#6b7585;font-size:11px">Teks tombol varian yang dilihat pembeli.</small>';
+      var vf=document.getElementById('variantGroupField');
+      if(vf) vf.insertAdjacentElement('afterend',wrap2);
+      else form.querySelector('.grid')?.appendChild(wrap2);
+    }
+    return true;
+  }
+
+  function hookProductForm(){
+    if(!injectProductFields()) return false;
+    if(window.__dutaVariantFormHooked) return true;
+    if(typeof window.dataForm!=='function' || typeof window.openEditor!=='function') return false;
+
+    var originalDataForm=window.dataForm;
+    var originalOpenEditor=window.openEditor;
+
+    window.dataForm=function(){
+      var d=originalDataForm.apply(this,arguments);
+      var f=document.getElementById('productForm');
+      d.variant_group=f?.elements.variantGroup?.value.trim()||null;
+      d.variant_label=f?.elements.variantLabel?.value.trim()||null;
+      return d;
+    };
+
+    window.openEditor=function(p){
+      injectProductFields();
+      originalOpenEditor.apply(this,arguments);
+      var f=document.getElementById('productForm');
+      if(f){
+        f.elements.variantGroup.value=p?.variant_group??'';
+        f.elements.variantLabel.value=p?.variant_label??'';
+      }
+    };
+
+    window.__dutaVariantFormHooked=true;
+    return true;
+  }
+
+  function watchProductForm(){
+    var tries=0;
+    function go(){
+      if(hookProductForm()) return;
+      if(++tries<60) setTimeout(go,300);
+    }
+    go();
+  }
+
   function init(){
     if(document.getElementById('manualVariantBtn')) return;
     var btn=document.createElement('button');btn.id='manualVariantBtn';btn.type='button';btn.textContent='⚙️ Varian Produk';
     btn.style.cssText='position:fixed;right:16px;bottom:76px;z-index:99999;border:0;border-radius:12px;padding:11px 15px;background:#111;color:#fff;font-weight:700;box-shadow:0 4px 18px #0003;cursor:pointer';
     document.body.appendChild(btn);
     btn.onclick=openPanel;
+    watchProductForm();
   }
+
   async function getClient(){
     if(window.supabaseClient) return window.supabaseClient;
     if(window.supabase && typeof window.supabase.from==='function') return window.supabase;
     if(window.supabase && window.supabase.createClient && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) return window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
     return null;
   }
+
   async function openPanel(){
     if(document.getElementById('manualVariantPanel')) return;
     var sb=await getClient();
@@ -35,5 +104,6 @@
     p.querySelector('#mvList').innerHTML=html;
     p.querySelectorAll('.mv-save').forEach(function(b){b.onclick=async function(){var row=b.parentElement,id=row.dataset.id;b.disabled=true;b.textContent='...';var rr=await sb.from('produk').update({variant_group:row.querySelector('.mv-group').value.trim()||null,variant_label:row.querySelector('.mv-label').value.trim()||null,updated_at:new Date().toISOString()}).eq('id',id);b.disabled=false;b.textContent=rr.error?'Gagal':'Tersimpan';setTimeout(function(){b.textContent='Simpan'},1200);};});
   }
+
   ready(function(){setTimeout(init,800)});
 })();
