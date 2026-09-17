@@ -3,10 +3,10 @@
   'use strict';
   function loadCatalogVariantUI(){
     if(!document.querySelector('link[data-watt-ui]')){
-      var css=document.createElement('link');css.rel='stylesheet';css.href='watt-variant-group.css?v=2';css.dataset.wattUi='1';document.head.appendChild(css);
+      var css=document.createElement('link');css.rel='stylesheet';css.href='watt-variant-group.css?v=3';css.dataset.wattUi='1';document.head.appendChild(css);
     }
     if(!document.querySelector('script[data-watt-ui]')){
-      var s=document.createElement('script');s.src='watt-variant-group.js?v=2';s.defer=true;s.dataset.wattUi='1';document.body.appendChild(s);
+      var s=document.createElement('script');s.src='watt-variant-group.js?v=3';s.defer=true;s.dataset.wattUi='1';document.body.appendChild(s);
     }
   }
   function loadAdminVariantUI(){
