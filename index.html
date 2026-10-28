@@ -3,75 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#173d32">
-  <meta name="description" content="Katalog Duta Terang LED dan kalkulator harga jual untuk toko.">
-  <meta property="og:title" content="Duta Terang LED | Katalog & Cek Harga">
-  <meta property="og:description" content="Katalog lampu LED dan sparepart dengan kalkulator harga toko.">
-  <title>Duta Terang LED — Katalog & Cek Harga</title>
+  <meta name="theme-color" content="#03ac0e">
+  <meta name="description" content="Katalog Duta Terang LED: lampu LED, modul LED, aluminium, casing, dan sparepart untuk rumah, toko, dan teknisi.">
+  <meta property="og:title" content="Duta Terang LED | Katalog Lampu & Sparepart">
+  <meta property="og:description" content="Temukan lampu LED dan sparepart untuk kebutuhan rumah, toko, dan teknisi.">
+  <meta property="og:type" content="website">
+  <title>Duta Terang LED — Katalog Produk</title>
+  <link rel="preconnect" href="https://images.unsplash.com">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="price-checker.css">
   <script src="products.js" defer></script>
   <script src="app.js" defer></script>
-  <script src="price-checker.js" defer></script>
 </head>
 <body>
   <div class="announcement">💡 Katalog Duta Terang LED <span>•</span> Eceran & grosir</div>
   <header class="site-header">
     <a class="brand" href="#" aria-label="Duta Terang LED beranda"><span class="brand-mark">✦</span><span><strong>DUTA<span>LED</span></strong><small>LAMPU & SPAREPART</small></span></a>
-    <nav class="desktop-nav"><a href="#produk">Katalog produk</a><a href="#cek-harga">Cek harga toko</a></nav>
+    <nav class="desktop-nav"><a href="#produk">Semua produk</a><a href="#keunggulan">Keunggulan</a></nav>
     <button class="cart-trigger" id="openCart" aria-label="Buka keranjang">🛒 <span>Keranjang</span><b id="cartCount">0</b></button>
   </header>
   <main>
     <section class="hero">
       <div class="hero-copy">
-        <span class="eyebrow"><i></i> DUTA TERANG LED · CLAPAR, SUBAH</span>
-        <h1>Sparepart tepat.<br><em>Harga jelas.</em></h1>
-        <p>Katalog lampu LED dan sparepart untuk pembeli rumahan, toko listrik, dan teknisi servis. Pilih produk untuk melihat harga katalog.</p>
-        <div class="hero-actions"><a class="btn btn-dark" href="#produk">Lihat katalog <span>↗</span></a><a class="btn btn-light" href="#cek-harga">Cek harga toko</a></div>
-        <div class="hero-proof"><span>✓ Pilihan varian</span><span>✓ Cek harga cepat</span><span>✓ Untuk teknisi & umum</span></div>
-      </div>
-      <div class="hero-art" aria-hidden="true"><div class="glow"></div><div class="orbit"></div><div class="orbit orbit-two"></div><div class="bulb">💡</div><div class="art-tag tag-top"><span>✦</span><div><b>Harga mudah dicek</b><small>Untuk kebutuhan toko</small></div></div><div class="art-tag tag-bottom"><span>✓</span><div><b>LED & sparepart</b><small>Berbagai kebutuhan servis</small></div></div></div>
-    </section>
-    <section class="section-wrap catalog" id="produk">
-      <div class="section-heading"><div><span class="eyebrow">KATALOG TOKO</span><h2>Produk <span>pilihan</span></h2><p>Cari nama produk atau saring berdasarkan kategori.</p></div><span class="product-total" id="productTotal">Memuat produk…</span></div>
-      <div class="catalog-tools"><label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Cari modul LED, driver, casing…" autocomplete="off"><kbd>Ctrl K</kbd></label><select id="sortSelect" aria-label="Urutkan produk"><option value="featured">Urutan pilihan</option><option value="price-asc">Harga terendah</option><option value="price-desc">Harga tertinggi</option><option value="name">Nama A–Z</option></select></div>
-      <div class="category-list" id="categoryList" aria-label="Kategori produk"></div>
-      <div class="product-grid" id="productList"></div>
-      <div class="empty-state hidden" id="emptyState"><h3>Produk tidak ditemukan</h3><p>Coba kata kunci atau kategori lain.</p><button class="btn btn-light" id="resetFilters">Reset pencarian</button></div>
-    </section>
-    <section class="section-wrap price-checker" id="cek-harga">
-      <div class="price-checker-intro"><span class="eyebrow">KHUSUS PEMILIK TOKO</span><h2>Lupa harga jual?<br><em>Cek di sini.</em></h2><p>Pilih kelompok produk dan variannya, masukkan harga supplier serta diskon supplier, lalu hitung harga jual dan perkiraan untung. Perhitungan ini tersimpan di browser ini saja.</p><div class="checker-note">🔒 Harga modal dan keuntungan tidak ditampilkan pada kartu katalog pembeli.</div></div>
-      <div class="checker-panel">
-        <div class="checker-heading"><span class="checker-icon">🧮</span><div><h3>Kalkulator harga jual</h3><p>Harga bisa disesuaikan kapan saja.</p></div></div>
-        <div class="checker-grid">
-          <label>Nama produk<input id="calcProduct" value="Modul LED Aluminium" placeholder="Nama produk"></label>
-          <label>Varian<select id="calcVariant"><option>5W</option><option>7W</option><option>9W</option><option>12W</option><option>15W</option><option>18W</option><option>24W</option><option>30W</option><option>40W</option><option>50W</option></select></label>
-          <label>Harga supplier (Rp)<input id="calcCost" type="number" min="0" step="50" value="4000"></label>
-          <label>Diskon supplier (%)<input id="calcDiscount" type="number" min="0" max="100" step="1" value="12"></label>
-          <label>Target kenaikan dari modal bersih (%)<input id="calcMarkup" type="number" min="0" max="500" step="1" value="30"></label>
-          <label>Pembulatan harga jual<select id="calcRound"><option value="100">Ke atas Rp100</option><option value="500">Ke atas Rp500</option><option value="1000">Ke atas Rp1.000</option><option value="1">Tanpa pembulatan</option></select></label>
-        </div>
-        <div class="checker-results" aria-live="polite">
-          <div><span>Modal bersih setelah diskon</span><strong id="calcNet">Rp3.520</strong></div>
-          <div><span>Harga jual disarankan</span><strong class="checker-sale" id="calcSale">Rp4.600</strong></div>
-          <div><span>Untung per unit</span><strong class="checker-profit" id="calcProfit">Rp1.080</strong></div>
-          <div><span>Kenaikan dari modal</span><strong id="calcActualMarkup">30,7%</strong></div>
-          <div><span>Margin dari harga jual</span><strong id="calcMargin">23,5%</strong></div>
-        </div>
-        <div class="checker-actions"><button class="btn btn-green" id="saveCalc">Simpan varian di browser</button><button class="btn btn-light" id="copyCalc">Salin rincian</button></div>
-        <p class="checker-status" id="calcStatus" role="status">Contoh perhitungan. Ganti sesuai harga supplier sebenarnya.</p>
-        <div class="saved-variants"><div class="saved-heading"><strong>Varian tersimpan di perangkat ini</strong><button id="clearSaved" type="button">Hapus semua</button></div><div id="savedVariantList"><p class="saved-empty">Belum ada varian tersimpan.</p></div></div>
-      </div>
-    </section>
-    <section class="section-wrap benefits" id="keunggulan"><div><span>01</span><b>Katalog ringkas</b><small>Cari produk tanpa membongkar stok satu per satu.</small></div><div><span>02</span><b>Harga lebih terukur</b><small>Hitung modal bersih, kenaikan harga, dan margin.</small></div><div><span>03</span><b>Konfirmasi sebelum transaksi</b><small>Pastikan stok dan harga terbaru saat pembelian.</small></div></section>
-  </main>
-  <footer class="site-footer"><a class="brand" href="#"><span class="brand-mark">✦</span><span><strong>DUTA<span>LED</span></strong><small>LAMPU & SPAREPART</small></span></a><p>© <span id="year"></span> Duta Terang LED · Harga katalog dapat berubah.</p></footer>
-  <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
-  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true" aria-label="Keranjang belanja">
-    <div class="drawer-header"><div><h2>Keranjang</h2><small id="drawerCount">(0)</small></div><button id="closeCart" aria-label="Tutup keranjang">✕</button></div>
-    <div class="cart-items" id="cartItems"></div>
-    <div class="cart-empty" id="cartEmpty"><span>🛒</span><h3>Keranjang masih kosong</h3><p>Tambahkan produk dari katalog.</p><button class="btn btn-dark" id="continueShopping">Lihat produk</button></div>
-    <div class="cart-footer hidden" id="cartFooter"><label>Nama pembeli (opsional)<input id="customerName" placeholder="Nama pembeli"></label><div class="cart-total"><span>Estimasi total</span><strong id="cartTotal">Rp0</strong></div><button class="btn btn-green" id="checkoutBtn">Salin ringkasan pesanan</button><button class="clear-cart" id="clearCart">Kosongkan keranjang</button><small>Harga katalog contoh dan perlu dikonfirmasi.</small></div>
+        <span class="eyebrow"><i></i> SOLUSI PENERANGAN ANDA</span>
+        <h1>Terangi setiap ruang.<br><em>Hemat setiap hari.</em></h1>
+        <p>Temukan lampu LED dan sparepart pilihan untuk rumah, toko listrik, proyek, dan kebutuhan teknisi.</p>
+        <div class="hero-actions"><a class="btg
+        <div class="glow"></div><div class="bulb">💡</div>
+        <div class="art-tag tag-top"><span>✦</span><div><b>Terang maksimal</b><small>Untuk berbagai kebutuhan</small></div></div>
+        <anan</button>
+      <button class="clear-cart" id="clearCart">Kosongkan keranjang</button>
+    </div>
   </aside>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
